@@ -1,6 +1,6 @@
-# muh-design-system
+# baritone
 
-A whitelabel-first React design system. Colours are expressed as **intents** and
+`@saintly-software/baritone` — a whitelabel-first React design system. Colours are expressed as **intents** and
 **saliencies** (not raw palettes), interaction states are derived from tokens
 with **oklch relative-colour math**, and theming is just swapping a CSS class.
 
@@ -62,7 +62,7 @@ hover to the intent's `mid` shade instead.
 ## Install
 
 ```sh
-pnpm add muh-design-system
+pnpm add @saintly-software/baritone
 # peers:
 pnpm add react react-dom @base-ui-components/react
 ```
@@ -71,8 +71,8 @@ Import the pre-compiled stylesheet **once** at your app root, then apply a theme
 class:
 
 ```tsx
-import 'muh-design-system/styles.css';
-import { lightTheme, Chip } from 'muh-design-system';
+import '@saintly-software/baritone/styles.css';
+import { lightTheme, Chip } from '@saintly-software/baritone';
 
 export function App() {
   return (
@@ -99,7 +99,7 @@ plugin.
 
    ```ts
    // brand.css.ts
-   import { createDesignSystemTheme, buildDefaultTokens } from 'muh-design-system';
+   import { createDesignSystemTheme, buildDefaultTokens } from '@saintly-software/baritone';
 
    export const acmeLight = createDesignSystemTheme(
      { ...buildDefaultTokens('light'), /* override any tokens */ },
@@ -115,7 +115,7 @@ plugin.
    skip the compiler and map tokens to inline CSS variables:
 
    ```tsx
-   import { createInlineTheme } from 'muh-design-system';
+   import { createInlineTheme } from '@saintly-software/baritone';
 
    const style = createInlineTheme(tenantTokens, { scheme: 'light' });
    return <div style={style}>...</div>;

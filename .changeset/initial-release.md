@@ -1,5 +1,5 @@
 ---
-"muh-design-system": minor
+"@saintly-software/baritone": minor
 ---
 
 Initial release: intent/saliency colour model with oklch relative-colour

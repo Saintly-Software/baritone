@@ -125,7 +125,7 @@ export function warnOnContrastIssues(
       )
       .join('\n');
     console.warn(
-      `[muh-design-system] ${issues.length} contrast issue(s) in ${label}:\n${lines}`,
+      `[baritone] ${issues.length} contrast issue(s) in ${label}:\n${lines}`,
     );
   }
   return issues;

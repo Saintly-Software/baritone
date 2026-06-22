@@ -1,5 +1,5 @@
 {
-  "name": "muh-design-system",
+  "name": "@saintly-software/baritone",
   "version": "1.0.0",
   "description": "A whitelabel-first React design system built on vanilla-extract + base-ui, using an Intent/Saliency colour model with oklch relative-colour interaction states.",
   "type": "module",
@@ -19,6 +19,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
