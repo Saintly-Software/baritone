@@ -62,6 +62,9 @@ web_modules/
 # Output of 'npm pack'
 *.tgz
 
+# Storybook build output
+storybook-static
+
 # Yarn Integrity file
 .yarn-integrity
 
