@@ -64,7 +64,7 @@ hover to the intent's `mid` shade instead.
 ```sh
 pnpm add @saintly-software/baritone
 # peers:
-pnpm add react react-dom @base-ui-components/react
+pnpm add react react-dom @base-ui/react
 ```
 
 Import the pre-compiled stylesheet **once** at your app root, then apply a theme
@@ -132,8 +132,10 @@ Light/dark is **the consumer's call** — the package never auto-switches on
   (`findContrastIssues` / `warnOnContrastIssues`) warns on failing
   text-on-background pairings rather than silently shipping low contrast. It runs
   automatically (non-production) inside `createDesignSystemTheme`.
-- **Focus:** `:focus-visible` rings from the relevant `focus` token, drawn with
-  `outline` so layout never shifts.
+- **Focus:** a shared `focusRingRecipe` draws the ring with `outline` (so layout
+  never shifts) from the element's `focus` token, exposed as `--focusRingColor`.
+  Its `type` variant picks `:focus-visible` (the element itself) or
+  `:focus-within` (a descendant), so each component opts into one model.
 - **Disabled:** uses `aria-disabled` (not the `disabled` attribute) so the
   element stays keyboard-reachable — e.g. a disabled control can still surface an
   explanatory tooltip.

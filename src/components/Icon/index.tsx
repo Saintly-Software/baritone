@@ -19,6 +19,7 @@ export interface IconProps
   label?: string;
   /** Expected to be an `<svg>` using `fill`/`stroke: currentColor`. */
   children?: React.ReactNode;
+  ref?: React.Ref<HTMLSpanElement>;
 }
 
 /**
@@ -27,10 +28,16 @@ export interface IconProps
  * it sources its colour from the `component` tokens for the given
  * intent/saliency.
  */
-export const Icon = React.forwardRef<HTMLSpanElement, IconProps>(function Icon(
-  { intent, saliency, size, label, className, children, ...rest },
+export function Icon({
+  intent,
+  saliency,
+  size,
+  label,
+  className,
+  children,
   ref,
-) {
+  ...rest
+}: IconProps) {
   return (
     <span
       ref={ref}
@@ -43,4 +50,4 @@ export const Icon = React.forwardRef<HTMLSpanElement, IconProps>(function Icon(
       {children}
     </span>
   );
-});
+}

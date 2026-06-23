@@ -1,3 +1,4 @@
+import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
 import {
   BODY_SIZES,
@@ -6,20 +7,73 @@ import {
   TITLE_SIZES,
 } from '../../theme/constants';
 import { vars } from '../../theme/contract.css';
-import { iconColorVar } from '../vars.css';
+import { iconColorVar, textColorVar } from '../vars.css';
 
 const ALL_SIZES = Array.from(
   new Set<string>([...BODY_SIZES, ...TITLE_SIZES]),
 ) as Array<(typeof BODY_SIZES)[number] | (typeof TITLE_SIZES)[number]>;
 
+// The colour an explicit `intent`/`saliency` resolves to. Only set when a
+// variant is active, so the base style can fall through to the inherited
+// `--textColor` (then the default token) when neither prop is passed.
+const override = createVar();
+
+// Precedence: explicit `intent`/`saliency` > inherited `--textColor` (published
+// by an ancestor surface/component) > the default neutral/mid text token.
+const resolved = fallbackVar(
+  override,
+  fallbackVar(textColorVar, vars.text.color.neutral.mid),
+);
+
 /**
- * Shared recipe for the "text" element type — both `Text` (body variants) and
- * `Heading` (title variants) use it, so the colour/intent/saliency logic lives
- * in one place. `family` + `size` select a typography bundle from the
- * `text.variant` tokens; intent + saliency select the colour (and the icon
- * colour for any `Icon` rendered inside).
+ * "text intent" recipe — resolves the text colour and mirrors it to `--iconColor`
+ * so any `Icon` rendered inside matches the surrounding text. By default the
+ * colour is read from the ambient `--textColor` (set by a surrounding `surface`/
+ * `component`), falling back to the neutral/mid token when standalone; passing
+ * `intent` and/or `saliency` overrides it with the matching `text.color` token.
+ * This is the colour half of the old `textRecipe`; the other element types (e.g.
+ * the `component` recipe) reuse the same colour+icon pattern.
  */
-export const textRecipe = recipe({
+export const textIntentRecipe = recipe({
+  base: {
+    color: resolved,
+    vars: { [iconColorVar]: resolved },
+  },
+  variants: {
+    // Single-variant styles handle "intent and/or saliency": passing only one
+    // resolves against the other's default (neutral / mid). When both are
+    // passed the compound variant below wins (emitted last in the cascade).
+    intent: Object.fromEntries(
+      INTENTS.map((intent) => [
+        intent,
+        { vars: { [override]: vars.text.color[intent].mid } },
+      ]),
+    ) as Record<(typeof INTENTS)[number], { vars: Record<string, string> }>,
+    saliency: Object.fromEntries(
+      SALIENCIES.map((saliency) => [
+        saliency,
+        { vars: { [override]: vars.text.color.neutral[saliency] } },
+      ]),
+    ) as Record<(typeof SALIENCIES)[number], { vars: Record<string, string> }>,
+  },
+  compoundVariants: INTENTS.flatMap((intent) =>
+    SALIENCIES.map((saliency) => ({
+      variants: { intent, saliency },
+      style: { vars: { [override]: vars.text.color[intent][saliency] } },
+    })),
+  ),
+});
+
+export type TextIntentVariants = NonNullable<
+  RecipeVariants<typeof textIntentRecipe>
+>;
+
+/**
+ * "text variant" recipe — selects a typography bundle. `family` + `size` map to
+ * a `text.variant` token (`body` for `Text`, `title` for `Heading`), setting
+ * font-size / line-height / weight. Colour-agnostic; pair with `textIntentRecipe`.
+ */
+export const textVariantRecipe = recipe({
   base: {
     margin: 0,
     fontFamily: vars.font.sans,
@@ -33,24 +87,8 @@ export const textRecipe = recipe({
       (typeof ALL_SIZES)[number],
       Record<string, never>
     >,
-    intent: Object.fromEntries(
-      INTENTS.map((intent) => [intent, {}]),
-    ) as Record<(typeof INTENTS)[number], Record<string, never>>,
-    saliency: Object.fromEntries(
-      SALIENCIES.map((saliency) => [saliency, {}]),
-    ) as Record<(typeof SALIENCIES)[number], Record<string, never>>,
   },
   compoundVariants: [
-    // Colour: intent x saliency -> single text colour, mirrored to --iconColor.
-    ...INTENTS.flatMap((intent) =>
-      SALIENCIES.map((saliency) => {
-        const color = vars.text.color[intent][saliency];
-        return {
-          variants: { intent, saliency },
-          style: { color, vars: { [iconColorVar]: color } },
-        };
-      }),
-    ),
     // Typography: body sizes.
     ...BODY_SIZES.map((size) => {
       const v = vars.text.variant.body[size];
@@ -79,9 +117,9 @@ export const textRecipe = recipe({
   defaultVariants: {
     family: 'body',
     size: 'base',
-    intent: 'neutral',
-    saliency: 'mid',
   },
 });
 
-export type TextVariants = NonNullable<RecipeVariants<typeof textRecipe>>;
+export type TextVariantVariants = NonNullable<
+  RecipeVariants<typeof textVariantRecipe>
+>;

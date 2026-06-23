@@ -75,7 +75,8 @@ export const Z_INDEX_KEYS = [
 ] as const;
 export type ZIndexKey = (typeof Z_INDEX_KEYS)[number];
 
-export const HEADING_LEVELS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
+/** Semantic heading levels — the number maps 1:1 to the `h1`–`h6` tag. */
+export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const;
 export type HeadingLevel = (typeof HEADING_LEVELS)[number];
 
 /**
@@ -92,10 +93,10 @@ export const FORM_STATE_INTENT: Record<FormState, Intent> = {
 
 /** Default semantic heading level -> visual `title` variant. */
 export const HEADING_LEVEL_VARIANT: Record<HeadingLevel, TitleSize> = {
-  h1: '3.5xl',
-  h2: '3xl',
-  h3: '2xl',
-  h4: 'xl',
-  h5: 'lg',
-  h6: 'base',
+  1: '3.5xl',
+  2: '3xl',
+  3: '2xl',
+  4: 'xl',
+  5: 'lg',
+  6: 'base',
 };

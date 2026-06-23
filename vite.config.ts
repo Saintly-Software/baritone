@@ -4,7 +4,8 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
-// Library build. We externalise React + base-ui (peer deps) but BUNDLE the
+// Library build. We externalise React + base-ui (`@base-ui/react`, peer deps)
+// but BUNDLE the
 // vanilla-extract runtime helpers (createRuntimeFn / sprinkles / dynamic) so
 // consumers can use the pre-compiled output without configuring the VE plugin.
 export default defineConfig({
@@ -36,7 +37,7 @@ export default defineConfig({
         'react',
         'react-dom',
         'react/jsx-runtime',
-        /^@base-ui-components\/react/,
+        /^@base-ui\/react/,
         // The VE *compiler* is build-time only (used by createDesignSystemTheme
         // inside consumers' .css.ts). Keep it out of the runtime bundle; it's an
         // optional peer. The small VE *runtime* helpers (recipes/sprinkles/

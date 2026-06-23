@@ -2,12 +2,11 @@ import { createVar } from '@vanilla-extract/css';
 import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
 import { FORM_STATES, FORM_STATE_INTENT } from '../../theme/constants';
 import { vars } from '../../theme/contract.css';
-import { iconColorVar } from '../vars.css';
+import { focusRingColorVar, iconColorVar } from '../vars.css';
 
 const bg = createVar();
 const bd = createVar();
 const placeholder = createVar();
-const focus = createVar();
 
 const sizes = {
   sm: {
@@ -31,8 +30,8 @@ const sizes = {
  * Shared recipe for the "form control" element type (TextInput, and future
  * Select/NumberField/etc.). Form controls don't take intent/saliency — they
  * take a `state` (neutral | warning | invalid | valid) that drives
- * background/border/placeholder and the focus-ring colour (via the state's
- * mapped intent).
+ * background/border/placeholder and publishes the focus-ring colour (via the
+ * state's mapped intent) for the shared `focusRingRecipe`.
  */
 export const formControlRecipe = recipe({
   base: {
@@ -47,15 +46,11 @@ export const formControlRecipe = recipe({
     borderWidth: vars.borderWidth.thin,
     borderColor: bd,
     borderRadius: vars.form.borderRadius,
-    transitionProperty: 'border-color, box-shadow',
+    transitionProperty: 'border-color, outline-color',
     transitionDuration: vars.motion.duration.fast,
     transitionTimingFunction: vars.motion.easing.standard,
     selectors: {
       '&::placeholder': { color: placeholder, opacity: 1 },
-      '&:focus-visible': {
-        outline: `2px solid ${focus}`,
-        outlineOffset: '1px',
-      },
       '&[aria-disabled="true"], &:disabled': {
         opacity: 0.55,
         cursor: 'not-allowed',
@@ -76,7 +71,7 @@ export const formControlRecipe = recipe({
               [bg]: c.background,
               [bd]: c.border,
               [placeholder]: c.placeholder,
-              [focus]: vars.form.focus[FORM_STATE_INTENT[state]],
+              [focusRingColorVar]: vars.form.focus[FORM_STATE_INTENT[state]],
             },
           },
         ];
