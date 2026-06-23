@@ -1,6 +1,6 @@
 {
   "name": "@saintly-software/baritone",
-  "version": "0.1.0",
+  "version": "1.0.0-alpha.0",
   "description": "A whitelabel-first React design system built on vanilla-extract + base-ui, using an Intent/Saliency colour model with oklch relative-colour interaction states.",
   "type": "module",
   "license": "ISC",
@@ -40,13 +40,12 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "changeset": "changeset",
-    "release": "changeset publish",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
     "fmt:check": "pnpm fmt --check",
-    "pub:version": "pnpm exec changeset version"
+    "pub:version": "pnpm exec changeset version",
+    "pub:release": "pnpm exec changeset publish"
   },
   "peerDependencies": {
     "@base-ui/react": "^1.6.0",
