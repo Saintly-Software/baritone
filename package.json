@@ -5,6 +5,7 @@
   "type": "module",
   "license": "ISC",
   "author": "",
+  "packageManager": "pnpm@11.8.0",
   "keywords": [
     "design-system",
     "react",
