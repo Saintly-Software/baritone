@@ -45,7 +45,8 @@
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "fmt": "oxfmt",
-    "fmt:check": "pnpm fmt --check"
+    "fmt:check": "pnpm fmt --check",
+    "pub:version": "pnpm exec changeset version"
   },
   "peerDependencies": {
     "@base-ui/react": "^1.6.0",

@@ -1,5 +1,5 @@
 ---
-"@saintly-software/baritone": minor
+"@saintly-software/baritone": major
 ---
 
 Initial release: intent/saliency colour model with oklch relative-colour
