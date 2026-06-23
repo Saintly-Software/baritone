@@ -17,3 +17,15 @@ minimumReleaseAge: 1440
 # Refuse to install a package whose trust level has decreased compared to
 # previous releases (e.g. lost publisher provenance).
 trustPolicy: no-downgrade
+
+# Packages exempted from the trust-downgrade check. semver 6.x was published in
+# ~2019, years before provenance attestation existed, so it has no trust evidence
+# to "downgrade" from. It's pulled in transitively by @babel/core via
+# @vitejs/plugin-react.
+trustPolicyExclude:
+  - 'semver@6.3.1'
+
+# Force the whole dependency tree (including transitive deps) onto the latest
+# undici-types v6.
+overrides:
+  undici-types: ^6.27.0
