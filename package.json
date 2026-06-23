@@ -45,7 +45,7 @@
     "fmt": "oxfmt",
     "fmt:check": "pnpm fmt --check",
     "pub:version": "pnpm exec changeset version",
-    "pub:release": "pnpm -r publish"
+    "pub:release": "pnpm build && pnpm exec changeset publish"
   },
   "peerDependencies": {
     "@base-ui/react": "^1.6.0",
