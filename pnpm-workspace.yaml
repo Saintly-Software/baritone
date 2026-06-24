@@ -1,2 +1,41 @@
+# Supply-chain security hardening — see https://pnpm.io/supply-chain-security
+
+# Save exact versions (no `^`/`~` range prefix) when adding dependencies, so
+# the manifest pins the precise version that was resolved and installed.
+savePrefix: ''
+
+# Block risky postinstall scripts: only these explicitly-trusted dependencies
+# may run build/postinstall scripts. Everything else is blocked by default.
 allowBuilds:
   esbuild: true
+
+# Prevent transitive dependencies from being resolved from exotic sources
+# (git repos, direct tarball URLs) instead of the registry.
+blockExoticSubdeps: true
+
+# Delay installing newly published versions until they are at least this many
+# minutes old (1 day), giving time for malicious releases to be detected.
+# This is the pnpm v11 default, set explicitly to document intent.
+minimumReleaseAge: 1440
+
+# Refuse to install a package whose trust level has decreased compared to
+# previous releases (e.g. lost publisher provenance).
+trustPolicy: no-downgrade
+
+# Packages exempted from the trust-downgrade check. semver@6.3.1 (pulled in via
+# @vitejs/plugin-react → @babel/core) was re-published without provenance after
+# semver 7.x had it, so it reads as a "downgrade". It's already in the lockfile,
+# so the exclude is honoured during lockfile verification.
+trustPolicyExclude:
+  - 'semver@6.3.1'
+
+overrides:
+  # Force the whole dependency tree (including transitive deps) onto the latest
+  # undici-types v6.
+  undici-types: ^6.27.0
+  # normalize-package-data@2.5.0 (via @changesets/cli → meow) pulls semver@5.7.2,
+  # an old release with no provenance that trips the trust-downgrade policy and
+  # can't be exempted via trustPolicyExclude (it's a fresh transitive resolution,
+  # not a lockfile entry). Pin it to the provenance-bearing semver 7.x line, which
+  # is API-compatible with normalize-package-data's usage (valid/clean).
+  normalize-package-data>semver: ^7.8.0
