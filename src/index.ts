@@ -26,6 +26,26 @@ export {
   type PopoverFooterProps,
 } from "./components/Popover";
 export {
+  Drawer,
+  type DrawerProps,
+  type DrawerSide,
+  type DrawerPadding,
+  type DrawerTriggerProps,
+  type DrawerCloseProps,
+  type DrawerHeaderProps,
+  type DrawerFooterProps,
+} from "./components/Drawer";
+export {
+  Modal,
+  type ModalProps,
+  type ModalSize,
+  type ModalPadding,
+  type ModalTriggerProps,
+  type ModalCloseProps,
+  type ModalHeaderProps,
+  type ModalFooterProps,
+} from "./components/Modal";
+export {
   InaccessibleTooltip,
   type InaccessibleTooltipProps,
 } from "./components/InaccessibleTooltip";
