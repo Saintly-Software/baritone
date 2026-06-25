@@ -1,11 +1,11 @@
-import { createTheme } from '@vanilla-extract/css';
-import { assignInlineVars } from '@vanilla-extract/dynamic';
-import { warnOnContrastIssues } from './contrast';
-import { vars, type DesignTokens, type ThemeTokensInput } from './contract.css';
+import { createTheme } from "@vanilla-extract/css";
+import { assignInlineVars } from "@vanilla-extract/dynamic";
+import { warnOnContrastIssues } from "./contrast";
+import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
 
 export interface CreateThemeOptions {
   /** Colour scheme. Sets `oklchOperator` (-1 light / +1 dark). */
-  scheme: 'light' | 'dark';
+  scheme: "light" | "dark";
   /** Label used in contrast warnings. */
   name?: string;
   /**
@@ -14,18 +14,13 @@ export interface CreateThemeOptions {
   checkContrast?: boolean;
 }
 
-function withOperator(
-  tokens: ThemeTokensInput,
-  scheme: 'light' | 'dark',
-): DesignTokens {
-  return { ...tokens, oklchOperator: scheme === 'dark' ? '1' : '-1' };
+function withOperator(tokens: ThemeTokensInput, scheme: "light" | "dark"): DesignTokens {
+  return { ...tokens, oklchOperator: scheme === "dark" ? "1" : "-1" };
 }
 
 function shouldCheck(options: CreateThemeOptions): boolean {
   if (options.checkContrast !== undefined) return options.checkContrast;
-  return (
-    typeof process === 'undefined' || process.env.NODE_ENV !== 'production'
-  );
+  return typeof process === "undefined" || process.env.NODE_ENV !== "production";
 }
 
 /**
@@ -57,7 +52,7 @@ export function createDesignSystemTheme(
  */
 export function createInlineTheme(
   tokens: ThemeTokensInput,
-  options: Pick<CreateThemeOptions, 'scheme'>,
+  options: Pick<CreateThemeOptions, "scheme">,
 ): Record<string, string> {
   return assignInlineVars(vars, withOperator(tokens, options.scheme));
 }

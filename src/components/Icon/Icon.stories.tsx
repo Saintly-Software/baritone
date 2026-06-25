@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { INTENTS, SALIENCIES, SIZES } from '../../theme/constants';
-import { Text } from '../Text';
-import { Icon } from './index';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { Text } from "../Text";
+import { Icon } from "./index";
 
 const StarSvg = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="100%" height="100%">
@@ -10,13 +10,13 @@ const StarSvg = () => (
 );
 
 const meta: Meta<typeof Icon> = {
-  title: 'Components/Icon',
+  title: "Components/Icon",
   component: Icon,
-  args: { intent: 'neutral', saliency: 'mid', size: 'md' },
+  args: { intent: "neutral", saliency: "mid", size: "md" },
   argTypes: {
-    intent: { control: 'select', options: INTENTS },
-    saliency: { control: 'select', options: SALIENCIES },
-    size: { control: 'select', options: SIZES },
+    intent: { control: "select", options: INTENTS },
+    saliency: { control: "select", options: SALIENCIES },
+    size: { control: "select", options: SIZES },
   },
   render: (args) => (
     <Icon {...args}>
@@ -32,7 +32,7 @@ export const Playground: Story = {};
 
 export const StandaloneIntents: Story = {
   render: () => (
-    <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+    <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
       {INTENTS.map((intent) => (
         <Icon key={intent} intent={intent} saliency="high" size="lg" label={intent}>
           <StarSvg />
@@ -43,14 +43,14 @@ export const StandaloneIntents: Story = {
 };
 
 export const InheritsTextColour: Story = {
-  name: 'Inherits surrounding text colour',
+  name: "Inherits surrounding text colour",
   render: () => (
-    <div style={{ display: 'grid', gap: 8 }}>
+    <div style={{ display: "grid", gap: 8 }}>
       {INTENTS.map((intent) => (
         <Text key={intent} intent={intent} saliency="high" render={<p />}>
           <Icon>
             <StarSvg />
-          </Icon>{' '}
+          </Icon>{" "}
           {intent} text with a matching icon
         </Text>
       ))}

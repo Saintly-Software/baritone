@@ -2,7 +2,7 @@
 
 # Save exact versions (no `^`/`~` range prefix) when adding dependencies, so
 # the manifest pins the precise version that was resolved and installed.
-savePrefix: ''
+savePrefix: ""
 
 # Block risky postinstall scripts: only these explicitly-trusted dependencies
 # may run build/postinstall scripts. Everything else is blocked by default.
@@ -27,7 +27,7 @@ trustPolicy: no-downgrade
 # semver 7.x had it, so it reads as a "downgrade". It's already in the lockfile,
 # so the exclude is honoured during lockfile verification.
 trustPolicyExclude:
-  - 'semver@6.3.1'
+  - "semver@6.3.1"
 
 overrides:
   # Force the whole dependency tree (including transitive deps) onto the latest

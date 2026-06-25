@@ -1,32 +1,28 @@
-'use client';
-import { Field } from '@base-ui/react/field';
-import * as React from 'react';
-import { focusRingRecipe } from '../../styles/recipes/focusRing.css';
-import { formControlRecipe } from '../../styles/recipes/formControl.css';
-import {
-  textIntentRecipe,
-  textVariantRecipe,
-} from '../../styles/recipes/text.css';
-import { atoms } from '../../styles/sprinkles.css';
-import type { FormState, Size } from '../../theme/constants';
-import { cx } from '../../utils/cx';
+"use client";
+import { Field } from "@base-ui/react/field";
+import * as React from "react";
+import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
+import { formControlRecipe } from "../../styles/recipes/formControl.css";
+import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import { atoms } from "../../styles/sprinkles.css";
+import type { FormState, Size } from "../../theme/constants";
+import { cx } from "../../utils/cx";
 
-const wrapperClass = atoms({ display: 'flex', flexDirection: 'column', gap: '1' });
+const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "1" });
 const labelClass = cx(
-  textIntentRecipe({ intent: 'neutral', saliency: 'high' }),
-  textVariantRecipe({ family: 'body', size: 'sm' }),
+  textIntentRecipe({ intent: "neutral", saliency: "high" }),
+  textVariantRecipe({ family: "body", size: "sm" }),
 );
 const descriptionClass = cx(
-  textIntentRecipe({ intent: 'neutral', saliency: 'low' }),
-  textVariantRecipe({ family: 'body', size: 'xs' }),
+  textIntentRecipe({ intent: "neutral", saliency: "low" }),
+  textVariantRecipe({ family: "body", size: "xs" }),
 );
 const errorClass = cx(
-  textIntentRecipe({ intent: 'negative', saliency: 'high' }),
-  textVariantRecipe({ family: 'body', size: 'xs' }),
+  textIntentRecipe({ intent: "negative", saliency: "high" }),
+  textVariantRecipe({ family: "body", size: "xs" }),
 );
 
-export interface TextInputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export interface TextInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   /** Validation state. `invalid` maps to negative, `valid` to positive. */
   state?: FormState;
   /** Control size. Default `md`. */
@@ -47,8 +43,8 @@ export interface TextInputProps
  * explanatory tooltip), consistent with the rest of the system.
  */
 export function TextInput({
-  state = 'neutral',
-  size = 'md',
+  state = "neutral",
+  size = "md",
   label,
   description,
   errorMessage,
@@ -59,15 +55,13 @@ export function TextInput({
   ...rest
 }: TextInputProps) {
   return (
-    <Field.Root className={wrapperClass} invalid={state === 'invalid'}>
-      {label != null && (
-        <Field.Label className={labelClass}>{label}</Field.Label>
-      )}
+    <Field.Root className={wrapperClass} invalid={state === "invalid"}>
+      {label != null && <Field.Label className={labelClass}>{label}</Field.Label>}
       <Field.Control
         ref={ref}
         className={cx(
           formControlRecipe({ state, size }),
-          focusRingRecipe({ type: 'visible', offset: 'sm' }),
+          focusRingRecipe({ type: "visible", offset: "sm" }),
           className,
         )}
         aria-disabled={disabled || undefined}
@@ -75,11 +69,9 @@ export function TextInput({
         {...rest}
       />
       {description != null && (
-        <Field.Description className={descriptionClass}>
-          {description}
-        </Field.Description>
+        <Field.Description className={descriptionClass}>{description}</Field.Description>
       )}
-      {state === 'invalid' && errorMessage != null && (
+      {state === "invalid" && errorMessage != null && (
         <Field.Error className={errorClass} match>
           {errorMessage}
         </Field.Error>

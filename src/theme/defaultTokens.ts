@@ -1,4 +1,4 @@
-import { contrastRatio } from './color-math';
+import { contrastRatio } from "./color-math";
 import {
   BODY_SIZES,
   INTENTS,
@@ -9,8 +9,8 @@ import {
   type Intent,
   type Saliency,
   type TitleSize,
-} from './constants';
-import type { ThemeTokensInput } from './contract.css';
+} from "./constants";
+import type { ThemeTokensInput } from "./contract.css";
 import {
   borderWidth,
   fontFamily,
@@ -21,16 +21,13 @@ import {
   radius,
   space,
   zIndex,
-} from './scales';
+} from "./scales";
 
 // ---------------------------------------------------------------------------
 // Small helpers
 // ---------------------------------------------------------------------------
 
-function record<K extends string, V>(
-  keys: readonly K[],
-  make: (key: K) => V,
-): Record<K, V> {
+function record<K extends string, V>(keys: readonly K[], make: (key: K) => V): Record<K, V> {
   return Object.fromEntries(keys.map((k) => [k, make(k)])) as Record<K, V>;
 }
 
@@ -55,7 +52,7 @@ function pickInk(bg: string): string {
 
 // Hue + base chroma per colourful intent. Neutral is handled separately as a
 // near-greyscale ramp.
-const SEED: Record<Exclude<Intent, 'neutral'>, { h: number; c: number }> = {
+const SEED: Record<Exclude<Intent, "neutral">, { h: number; c: number }> = {
   primary: { h: 258, c: 0.16 },
   secondary: { h: 295, c: 0.17 },
   warning: { h: 75, c: 0.15 },
@@ -67,7 +64,7 @@ const NEUTRAL_H = 260;
 const NEUTRAL_C = 0.005;
 
 /** The bold "high" background lightness per colourful intent. */
-const BOLD_L: Record<Exclude<Intent, 'neutral'>, number> = {
+const BOLD_L: Record<Exclude<Intent, "neutral">, number> = {
   primary: 0.53,
   secondary: 0.55,
   warning: 0.82,
@@ -84,7 +81,7 @@ type Block = { default: Triplet; disabled: Triplet };
 
 function disabledTriplet(isDark: boolean, transparentBg: boolean): Triplet {
   const bgc = transparentBg
-    ? 'transparent'
+    ? "transparent"
     : isDark
       ? ok(0.26, 0, NEUTRAL_H)
       : ok(0.95, 0, NEUTRAL_H);
@@ -97,50 +94,50 @@ function disabledTriplet(isDark: boolean, transparentBg: boolean): Triplet {
 
 function neutralComponentBlock(saliency: Saliency, isDark: boolean): Block {
   let def: Triplet;
-  if (saliency === 'high') {
+  if (saliency === "high") {
     const bgc = isDark ? ok(0.84, 0, NEUTRAL_H) : ok(0.3, 0, NEUTRAL_H);
     def = { bgc, text: pickInk(bgc), border: bgc };
-  } else if (saliency === 'mid') {
+  } else if (saliency === "mid") {
     const bgc = isDark ? ok(0.3, 0, NEUTRAL_H) : ok(0.93, 0, NEUTRAL_H);
     def = { bgc, text: pickInk(bgc), border: bgc };
   } else {
     def = {
-      bgc: 'transparent',
+      bgc: "transparent",
       text: isDark ? ok(0.86, 0, NEUTRAL_H) : ok(0.3, 0, NEUTRAL_H),
       border: isDark ? ok(0.42, 0, NEUTRAL_H) : ok(0.8, 0, NEUTRAL_H),
     };
   }
-  return { default: def, disabled: disabledTriplet(isDark, saliency === 'low') };
+  return { default: def, disabled: disabledTriplet(isDark, saliency === "low") };
 }
 
 function colourComponentBlock(
-  intent: Exclude<Intent, 'neutral'>,
+  intent: Exclude<Intent, "neutral">,
   saliency: Saliency,
   isDark: boolean,
 ): Block {
   const { h, c } = SEED[intent];
   let def: Triplet;
-  if (saliency === 'high') {
+  if (saliency === "high") {
     const bgc = ok(BOLD_L[intent], c, h);
     def = { bgc, text: pickInk(bgc), border: bgc };
-  } else if (saliency === 'mid') {
+  } else if (saliency === "mid") {
     const bgc = isDark ? ok(0.3, c * 0.35, h) : ok(0.93, c * 0.22, h);
     const border = isDark ? ok(0.4, c * 0.5, h) : ok(0.84, c * 0.4, h);
     def = { bgc, text: pickInk(bgc), border };
   } else {
     def = {
-      bgc: 'transparent',
+      bgc: "transparent",
       text: isDark ? ok(0.82, c * 0.9, h) : ok(0.45, c, h),
       border: isDark ? ok(0.5, c * 0.6, h) : ok(0.74, c * 0.55, h),
     };
   }
-  return { default: def, disabled: disabledTriplet(isDark, saliency === 'low') };
+  return { default: def, disabled: disabledTriplet(isDark, saliency === "low") };
 }
 
 function componentColor(isDark: boolean) {
   return record(INTENTS, (intent) =>
     record(SALIENCIES, (saliency) =>
-      intent === 'neutral'
+      intent === "neutral"
         ? neutralComponentBlock(saliency, isDark)
         : colourComponentBlock(intent, saliency, isDark),
     ),
@@ -152,10 +149,10 @@ function componentColor(isDark: boolean) {
 // exist for Notice/Toast.
 // ---------------------------------------------------------------------------
 
-function neutralSurfaceBlock(saliency: 'high' | 'low', isDark: boolean): Block {
+function neutralSurfaceBlock(saliency: "high" | "low", isDark: boolean): Block {
   // low = the base page background; high = a washed/raised surface.
   const bgc =
-    saliency === 'low'
+    saliency === "low"
       ? isDark
         ? ok(0.16, 0, NEUTRAL_H)
         : ok(0.99, 0, NEUTRAL_H)
@@ -163,7 +160,7 @@ function neutralSurfaceBlock(saliency: 'high' | 'low', isDark: boolean): Block {
         ? ok(0.22, 0, NEUTRAL_H)
         : ok(0.965, 0, NEUTRAL_H);
   const border =
-    saliency === 'low'
+    saliency === "low"
       ? isDark
         ? ok(0.3, 0, NEUTRAL_H)
         : ok(0.9, 0, NEUTRAL_H)
@@ -177,13 +174,13 @@ function neutralSurfaceBlock(saliency: 'high' | 'low', isDark: boolean): Block {
 }
 
 function colourSurfaceBlock(
-  intent: Exclude<Intent, 'neutral'>,
-  saliency: 'high' | 'low',
+  intent: Exclude<Intent, "neutral">,
+  saliency: "high" | "low",
   isDark: boolean,
 ): Block {
   const { h, c } = SEED[intent];
   const bgc =
-    saliency === 'low'
+    saliency === "low"
       ? isDark
         ? ok(0.24, c * 0.4, h)
         : ok(0.96, c * 0.3, h)
@@ -191,7 +188,7 @@ function colourSurfaceBlock(
         ? ok(0.3, c * 0.6, h)
         : ok(0.9, c * 0.5, h);
   const border =
-    saliency === 'low'
+    saliency === "low"
       ? isDark
         ? ok(0.4, c * 0.5, h)
         : ok(0.82, c * 0.5, h)
@@ -207,7 +204,7 @@ function colourSurfaceBlock(
 function surfaceColor(isDark: boolean) {
   return record(INTENTS, (intent) =>
     record(SURFACE_SALIENCIES, (saliency) =>
-      intent === 'neutral'
+      intent === "neutral"
         ? neutralSurfaceBlock(saliency, isDark)
         : colourSurfaceBlock(intent, saliency, isDark),
     ),
@@ -221,31 +218,31 @@ function surfaceColor(isDark: boolean) {
 function textColor(isDark: boolean) {
   return record(INTENTS, (intent) =>
     record(SALIENCIES, (saliency): string => {
-      if (intent === 'neutral') {
+      if (intent === "neutral") {
         if (isDark) {
-          return saliency === 'high'
+          return saliency === "high"
             ? ok(0.97, NEUTRAL_C, NEUTRAL_H)
-            : saliency === 'mid'
+            : saliency === "mid"
               ? ok(0.85, NEUTRAL_C, NEUTRAL_H)
               : ok(0.62, NEUTRAL_C, NEUTRAL_H);
         }
-        return saliency === 'high'
+        return saliency === "high"
           ? ok(0.2, NEUTRAL_C, NEUTRAL_H)
-          : saliency === 'mid'
+          : saliency === "mid"
             ? ok(0.32, NEUTRAL_C, NEUTRAL_H)
             : ok(0.6, NEUTRAL_C, NEUTRAL_H);
       }
       const { h, c } = SEED[intent];
       if (isDark) {
-        return saliency === 'high'
+        return saliency === "high"
           ? ok(0.86, c, h)
-          : saliency === 'mid'
+          : saliency === "mid"
             ? ok(0.78, c, h)
             : ok(0.62, c * 0.85, h);
       }
-      return saliency === 'high'
+      return saliency === "high"
         ? ok(0.42, c, h)
-        : saliency === 'mid'
+        : saliency === "mid"
           ? ok(0.47, c, h)
           : ok(0.62, c * 0.8, h);
     }),
@@ -262,7 +259,7 @@ function formColor(isDark: boolean) {
     border: isDark ? ok(0.4, 0, NEUTRAL_H) : ok(0.78, 0, NEUTRAL_H),
     placeholder: isDark ? ok(0.62, 0, NEUTRAL_H) : ok(0.5, 0, NEUTRAL_H),
   };
-  const stateColor = (intent: Exclude<Intent, 'neutral'>) => {
+  const stateColor = (intent: Exclude<Intent, "neutral">) => {
     const { h, c } = SEED[intent];
     return {
       background: isDark ? ok(0.2, c * 0.3, h) : ok(0.98, c * 0.2, h),
@@ -272,9 +269,9 @@ function formColor(isDark: boolean) {
   };
   return {
     neutral,
-    warning: stateColor('warning'),
-    invalid: stateColor('negative'),
-    valid: stateColor('positive'),
+    warning: stateColor("warning"),
+    invalid: stateColor("negative"),
+    valid: stateColor("positive"),
   };
 }
 
@@ -284,7 +281,7 @@ function formColor(isDark: boolean) {
 
 function focusRings(isDark: boolean) {
   return record(INTENTS, (intent): string => {
-    if (intent === 'neutral') {
+    if (intent === "neutral") {
       // Neutral focus borrows primary for visibility.
       const { h, c } = SEED.primary;
       return ok(isDark ? 0.7 : 0.56, c, h);
@@ -301,14 +298,14 @@ function focusRings(isDark: boolean) {
 function bodyVariant(size: BodySize) {
   return {
     fontSize: fontSize[size],
-    lineHeight: size === 'xl' ? lineHeight.relaxed : lineHeight.normal,
+    lineHeight: size === "xl" ? lineHeight.relaxed : lineHeight.normal,
     fontWeight: fontWeight.regular,
   };
 }
 
 function titleVariant(size: TitleSize) {
-  const large = ['2xl', '3xl', '3.5xl', '4xl'].includes(size);
-  const tight = !['sm', 'base'].includes(size);
+  const large = ["2xl", "3xl", "3.5xl", "4xl"].includes(size);
+  const tight = !["sm", "base"].includes(size);
   return {
     fontSize: fontSize[size],
     lineHeight: tight ? lineHeight.tight : lineHeight.normal,
@@ -341,10 +338,8 @@ function shadows(isDark: boolean) {
  * authors. Interaction (hover/active) states are NOT here — they're computed at
  * use-site from `default` via relative-colour math.
  */
-export function buildDefaultTokens(
-  scheme: 'light' | 'dark',
-): ThemeTokensInput {
-  const isDark = scheme === 'dark';
+export function buildDefaultTokens(scheme: "light" | "dark"): ThemeTokensInput {
+  const isDark = scheme === "dark";
   return {
     surface: {
       color: surfaceColor(isDark),

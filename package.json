@@ -2,27 +2,23 @@
   "name": "@saintly-software/baritone",
   "version": "1.0.0-alpha.0",
   "description": "A whitelabel-first React design system built on vanilla-extract + base-ui, using an Intent/Saliency colour model with oklch relative-colour interaction states.",
-  "type": "module",
-  "license": "ISC",
-  "author": "",
-  "packageManager": "pnpm@11.8.0",
   "keywords": [
+    "base-ui",
     "design-system",
+    "oklch",
     "react",
     "vanilla-extract",
-    "base-ui",
-    "oklch",
     "whitelabel"
   ],
-  "sideEffects": [
-    "**/*.css"
-  ],
+  "license": "ISC",
+  "author": "",
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,6 +29,9 @@
     },
     "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "vite build",
@@ -47,16 +46,6 @@
     "fmt:check": "pnpm fmt --check",
     "pub:version": "pnpm exec changeset version",
     "pub:release": "pnpm build && pnpm exec changeset publish"
-  },
-  "peerDependencies": {
-    "@base-ui/react": "^1.6.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@vanilla-extract/css": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "@base-ui/react": "1.6.0",
@@ -84,5 +73,16 @@
     "vite": "8.0.16",
     "vite-plugin-dts": "5.0.2",
     "vitest": "4.1.9"
-  }
+  },
+  "peerDependencies": {
+    "@base-ui/react": "^1.6.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vanilla-extract/css": {
+      "optional": true
+    }
+  },
+  "packageManager": "pnpm@11.8.0"
 }

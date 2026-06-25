@@ -1,9 +1,9 @@
-import { createVar } from '@vanilla-extract/css';
-import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
-import { INTENTS, SALIENCIES } from '../../theme/constants';
-import { vars } from '../../theme/contract.css';
-import { active, hover } from '../../theme/oklch';
-import { focusRingColorVar, iconColorVar, textColorVar } from '../vars.css';
+import { createVar } from "@vanilla-extract/css";
+import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
+import { INTENTS, SALIENCIES } from "../../theme/constants";
+import { vars } from "../../theme/contract.css";
+import { active, hover } from "../../theme/oklch";
+import { focusRingColorVar, iconColorVar, textColorVar } from "../vars.css";
 
 // Resolved colours are funnelled through local vars so the base style can stay
 // flat while compound variants (intent x saliency) just set the values.
@@ -17,9 +17,9 @@ const fgDisabled = createVar();
 const bdDisabled = createVar();
 
 const sizes = {
-  sm: { height: '1.5rem', px: vars.space[2], font: vars.text.variant.body.xs },
-  md: { height: '2rem', px: vars.space[3], font: vars.text.variant.body.sm },
-  lg: { height: '2.5rem', px: vars.space[4], font: vars.text.variant.body.base },
+  sm: { height: "1.5rem", px: vars.space[2], font: vars.text.variant.body.xs },
+  md: { height: "2rem", px: vars.space[3], font: vars.text.variant.body.sm },
+  lg: { height: "2.5rem", px: vars.space[4], font: vars.text.variant.body.base },
 } as const;
 
 /**
@@ -34,7 +34,7 @@ const sizes = {
  */
 export const componentIntentRecipe = recipe({
   base: {
-    borderStyle: 'solid',
+    borderStyle: "solid",
     borderWidth: vars.borderWidth.thin,
     borderColor: bd,
     background: bgc,
@@ -47,7 +47,7 @@ export const componentIntentRecipe = recipe({
         background: bgcDisabled,
         color: fgDisabled,
         borderColor: bdDisabled,
-        cursor: 'not-allowed',
+        cursor: "not-allowed",
         vars: { [iconColorVar]: fgDisabled, [textColorVar]: fgDisabled },
       },
     },
@@ -59,19 +59,18 @@ export const componentIntentRecipe = recipe({
         { vars: { [focusRingColorVar]: vars.component.focus[intent] } },
       ]),
     ) as Record<(typeof INTENTS)[number], { vars: Record<string, string> }>,
-    saliency: Object.fromEntries(
-      SALIENCIES.map((saliency) => [saliency, {}]),
-    ) as Record<(typeof SALIENCIES)[number], Record<string, never>>,
+    saliency: Object.fromEntries(SALIENCIES.map((saliency) => [saliency, {}])) as Record<
+      (typeof SALIENCIES)[number],
+      Record<string, never>
+    >,
   },
   compoundVariants: INTENTS.flatMap((intent) =>
     SALIENCIES.map((saliency) => {
       const block = vars.component.color[intent][saliency];
-      const isLow = saliency === 'low';
+      const isLow = saliency === "low";
       // Low saliency: transparent default -> hover uses the washed `mid` shade,
       // active applies the active delta to that shade.
-      const hoverBaseRef = isLow
-        ? vars.component.color[intent].mid.default.bgc
-        : block.default.bgc;
+      const hoverBaseRef = isLow ? vars.component.color[intent].mid.default.bgc : block.default.bgc;
       return {
         variants: { intent, saliency },
         style: {
@@ -90,14 +89,12 @@ export const componentIntentRecipe = recipe({
     }),
   ),
   defaultVariants: {
-    intent: 'neutral',
-    saliency: 'mid',
+    intent: "neutral",
+    saliency: "mid",
   },
 });
 
-export type ComponentIntentVariants = NonNullable<
-  RecipeVariants<typeof componentIntentRecipe>
->;
+export type ComponentIntentVariants = NonNullable<RecipeVariants<typeof componentIntentRecipe>>;
 
 /**
  * "Component typography" recipe — the non-colour half of the component scheme:
@@ -108,25 +105,25 @@ export type ComponentIntentVariants = NonNullable<
  */
 export const componentTypographyRecipe = recipe({
   base: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
     gap: vars.space[2],
-    boxSizing: 'border-box',
+    boxSizing: "border-box",
     margin: 0,
     fontFamily: vars.font.sans,
-    fontWeight: '500',
+    fontWeight: "500",
     lineHeight: vars.text.variant.body.sm.lineHeight,
-    textDecoration: 'none',
-    whiteSpace: 'nowrap',
-    cursor: 'pointer',
-    userSelect: 'none',
+    textDecoration: "none",
+    whiteSpace: "nowrap",
+    cursor: "pointer",
+    userSelect: "none",
     borderRadius: vars.component.borderRadius,
-    transitionProperty: 'background-color, color, border-color, outline-color',
+    transitionProperty: "background-color, color, border-color, outline-color",
     transitionDuration: vars.motion.duration.fast,
     transitionTimingFunction: vars.motion.easing.standard,
-    '@media': {
-      '(prefers-reduced-motion: reduce)': { transitionDuration: '0ms' },
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
     },
   },
   variants: {
@@ -149,7 +146,7 @@ export const componentTypographyRecipe = recipe({
     },
   },
   defaultVariants: {
-    size: 'md',
+    size: "md",
   },
 });
 

@@ -16,14 +16,14 @@ export interface Oklch {
  */
 export function parseOklch(input: string): Oklch | null {
   const value = input.trim();
-  if (value === 'transparent') return { l: 0, c: 0, h: 0, alpha: 0 };
+  if (value === "transparent") return { l: 0, c: 0, h: 0, alpha: 0 };
 
   const match = /^oklch\(\s*([^)]*)\)$/i.exec(value);
   const body = match?.[1];
   if (body === undefined) return null;
   if (/var\(|calc\(|from /i.test(body)) return null;
 
-  const [coords, alphaPart] = body.split('/');
+  const [coords, alphaPart] = body.split("/");
   if (coords === undefined) return null;
   const parts = coords.trim().split(/\s+/);
   const [lTok, cTok, hTok] = parts;
@@ -34,8 +34,7 @@ export function parseOklch(input: string): Oklch | null {
   const l = parsePercentOrNumber(lTok, 1);
   const c = parseNumber(cTok);
   const h = parseHue(hTok);
-  const alpha =
-    alphaPart === undefined ? 1 : parsePercentOrNumber(alphaPart.trim(), 1);
+  const alpha = alphaPart === undefined ? 1 : parsePercentOrNumber(alphaPart.trim(), 1);
 
   if ([l, c, h, alpha].some((n) => Number.isNaN(n))) return null;
   return { l, c, h, alpha };
@@ -46,14 +45,14 @@ function parseNumber(token: string): number {
 }
 
 function parsePercentOrNumber(token: string, percentBasis: number): number {
-  if (token.endsWith('%')) {
+  if (token.endsWith("%")) {
     return (Number.parseFloat(token) / 100) * percentBasis;
   }
   return Number.parseFloat(token);
 }
 
 function parseHue(token: string): number {
-  return Number.parseFloat(token.replace(/deg$/i, ''));
+  return Number.parseFloat(token.replace(/deg$/i, ""));
 }
 
 interface LinearRgb {
@@ -87,11 +86,7 @@ const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 /** WCAG relative luminance from linear sRGB. */
 export function relativeLuminance(rgb: LinearRgb): number {
-  return (
-    0.2126 * clamp01(rgb.r) +
-    0.7152 * clamp01(rgb.g) +
-    0.0722 * clamp01(rgb.b)
-  );
+  return 0.2126 * clamp01(rgb.r) + 0.7152 * clamp01(rgb.g) + 0.0722 * clamp01(rgb.b);
 }
 
 /**

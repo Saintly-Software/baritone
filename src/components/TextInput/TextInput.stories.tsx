@@ -1,19 +1,19 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { FORM_STATES, SIZES } from '../../theme/constants';
-import { TextInput } from './index';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { FORM_STATES, SIZES } from "../../theme/constants";
+import { TextInput } from "./index";
 
 const meta: Meta<typeof TextInput> = {
-  title: 'Form Controls/TextInput',
+  title: "Form Controls/TextInput",
   component: TextInput,
   args: {
-    label: 'Email',
-    placeholder: 'you@example.com',
-    state: 'neutral',
-    size: 'md',
+    label: "Email",
+    placeholder: "you@example.com",
+    state: "neutral",
+    size: "md",
   },
   argTypes: {
-    state: { control: 'select', options: FORM_STATES },
-    size: { control: 'select', options: SIZES },
+    state: { control: "select", options: FORM_STATES },
+    size: { control: "select", options: SIZES },
   },
   decorators: [
     (Story) => (
@@ -31,16 +31,16 @@ export const Playground: Story = {};
 
 export const States: Story = {
   render: () => (
-    <div style={{ display: 'grid', gap: 16 }}>
+    <div style={{ display: "grid", gap: 16 }}>
       {FORM_STATES.map((state) => (
         <TextInput
           key={state}
           label={`State: ${state}`}
           placeholder="Type here"
           state={state}
-          description={state === 'warning' ? 'This value seems unusual.' : undefined}
-          errorMessage={state === 'invalid' ? 'This field is required.' : undefined}
-          defaultValue={state === 'valid' ? 'looks good' : undefined}
+          description={state === "warning" ? "This value seems unusual." : undefined}
+          errorMessage={state === "invalid" ? "This field is required." : undefined}
+          defaultValue={state === "valid" ? "looks good" : undefined}
         />
       ))}
     </div>
@@ -49,7 +49,7 @@ export const States: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div style={{ display: 'grid', gap: 16 }}>
+    <div style={{ display: "grid", gap: 16 }}>
       {SIZES.map((size) => (
         <TextInput key={size} label={`Size ${size}`} size={size} placeholder={size} />
       ))}
@@ -59,9 +59,9 @@ export const Sizes: Story = {
 
 export const Disabled: Story = {
   args: {
-    label: 'Disabled (still focusable)',
+    label: "Disabled (still focusable)",
     disabled: true,
-    description: 'Uses aria-disabled so it stays keyboard-reachable.',
-    defaultValue: 'cannot edit',
+    description: "Uses aria-disabled so it stays keyboard-reachable.",
+    defaultValue: "cannot edit",
   },
 };

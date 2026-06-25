@@ -1,8 +1,8 @@
-import { createVar } from '@vanilla-extract/css';
-import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
-import { FORM_STATES, FORM_STATE_INTENT } from '../../theme/constants';
-import { vars } from '../../theme/contract.css';
-import { focusRingColorVar, iconColorVar } from '../vars.css';
+import { createVar } from "@vanilla-extract/css";
+import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
+import { FORM_STATES, FORM_STATE_INTENT } from "../../theme/constants";
+import { vars } from "../../theme/contract.css";
+import { focusRingColorVar, iconColorVar } from "../vars.css";
 
 const bg = createVar();
 const bd = createVar();
@@ -10,17 +10,17 @@ const placeholder = createVar();
 
 const sizes = {
   sm: {
-    height: '2rem',
+    height: "2rem",
     px: vars.space[2],
     font: vars.text.variant.body.sm.fontSize,
   },
   md: {
-    height: '2.5rem',
+    height: "2.5rem",
     px: vars.space[3],
     font: vars.text.variant.body.base.fontSize,
   },
   lg: {
-    height: '3rem',
+    height: "3rem",
     px: vars.space[4],
     font: vars.text.variant.body.lg.fontSize,
   },
@@ -35,29 +35,29 @@ const sizes = {
  */
 export const formControlRecipe = recipe({
   base: {
-    boxSizing: 'border-box',
-    width: '100%',
+    boxSizing: "border-box",
+    width: "100%",
     margin: 0,
     fontFamily: vars.font.sans,
     color: vars.text.color.neutral.high,
     vars: { [iconColorVar]: vars.text.color.neutral.high },
     background: bg,
-    borderStyle: 'solid',
+    borderStyle: "solid",
     borderWidth: vars.borderWidth.thin,
     borderColor: bd,
     borderRadius: vars.form.borderRadius,
-    transitionProperty: 'border-color, outline-color',
+    transitionProperty: "border-color, outline-color",
     transitionDuration: vars.motion.duration.fast,
     transitionTimingFunction: vars.motion.easing.standard,
     selectors: {
-      '&::placeholder': { color: placeholder, opacity: 1 },
+      "&::placeholder": { color: placeholder, opacity: 1 },
       '&[aria-disabled="true"], &:disabled': {
         opacity: 0.55,
-        cursor: 'not-allowed',
+        cursor: "not-allowed",
       },
     },
-    '@media': {
-      '(prefers-reduced-motion: reduce)': { transitionDuration: '0ms' },
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
     },
   },
   variants: {
@@ -96,11 +96,9 @@ export const formControlRecipe = recipe({
     },
   },
   defaultVariants: {
-    state: 'neutral',
-    size: 'md',
+    state: "neutral",
+    size: "md",
   },
 });
 
-export type FormControlVariants = NonNullable<
-  RecipeVariants<typeof formControlRecipe>
->;
+export type FormControlVariants = NonNullable<RecipeVariants<typeof formControlRecipe>>;
