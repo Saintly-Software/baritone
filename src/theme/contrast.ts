@@ -1,11 +1,6 @@
-import { contrastRatio } from './color-math';
-import {
-  INTENTS,
-  SALIENCIES,
-  SURFACE_SALIENCIES,
-  FORM_STATES,
-} from './constants';
-import type { ThemeTokensInput } from './contract.css';
+import { contrastRatio } from "./color-math";
+import { INTENTS, SALIENCIES, SURFACE_SALIENCIES, FORM_STATES } from "./constants";
+import type { ThemeTokensInput } from "./contract.css";
 
 export const AA_BODY = 4.5;
 export const AA_LARGE_OR_UI = 3.0;
@@ -57,7 +52,7 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
   for (const intent of INTENTS) {
     for (const saliency of SALIENCIES) {
       const fg = tokens.text.color[intent][saliency];
-      const required = saliency === 'low' ? AA_LARGE_OR_UI : AA_BODY;
+      const required = saliency === "low" ? AA_LARGE_OR_UI : AA_BODY;
       check(issues, `text.color.${intent}.${saliency}`, fg, pageBg, required);
     }
   }
@@ -66,13 +61,7 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
   for (const intent of INTENTS) {
     for (const saliency of SURFACE_SALIENCIES) {
       const block = tokens.surface.color[intent][saliency].default;
-      check(
-        issues,
-        `surface.color.${intent}.${saliency}`,
-        block.text,
-        block.bgc,
-        AA_BODY,
-      );
+      check(issues, `surface.color.${intent}.${saliency}`, block.text, block.bgc, AA_BODY);
     }
   }
 
@@ -81,28 +70,16 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
   for (const intent of INTENTS) {
     for (const saliency of SALIENCIES) {
       const block = tokens.component.color[intent][saliency].default;
-      const bg = saliency === 'low' ? pageBg : block.bgc;
-      const required = saliency === 'low' ? AA_LARGE_OR_UI : AA_BODY;
-      check(
-        issues,
-        `component.color.${intent}.${saliency}`,
-        block.text,
-        bg,
-        required,
-      );
+      const bg = saliency === "low" ? pageBg : block.bgc;
+      const required = saliency === "low" ? AA_LARGE_OR_UI : AA_BODY;
+      check(issues, `component.color.${intent}.${saliency}`, block.text, bg, required);
     }
   }
 
   // Form placeholder over form background.
   for (const state of FORM_STATES) {
     const block = tokens.form.color[state];
-    check(
-      issues,
-      `form.color.${state}.placeholder`,
-      block.placeholder,
-      block.background,
-      AA_BODY,
-    );
+    check(issues, `form.color.${state}.placeholder`, block.placeholder, block.background, AA_BODY);
   }
 
   return issues;
@@ -112,21 +89,16 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
  * Run the contrast check and `console.warn` any failures. Called by the theme
  * factory in non-production builds. Returns the issues for programmatic use.
  */
-export function warnOnContrastIssues(
-  tokens: ThemeTokensInput,
-  label = 'theme',
-): ContrastIssue[] {
+export function warnOnContrastIssues(tokens: ThemeTokensInput, label = "theme"): ContrastIssue[] {
   const issues = findContrastIssues(tokens);
-  if (issues.length > 0 && typeof console !== 'undefined') {
+  if (issues.length > 0 && typeof console !== "undefined") {
     const lines = issues
       .map(
         (i) =>
           `  • ${i.path}: ${i.ratio}:1 (needs ${i.required}:1) — ${i.foreground} on ${i.background}`,
       )
-      .join('\n');
-    console.warn(
-      `[baritone] ${issues.length} contrast issue(s) in ${label}:\n${lines}`,
-    );
+      .join("\n");
+    console.warn(`[baritone] ${issues.length} contrast issue(s) in ${label}:\n${lines}`);
   }
   return issues;
 }

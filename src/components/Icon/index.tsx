@@ -1,11 +1,10 @@
-'use client';
-import * as React from 'react';
-import { iconRecipe } from '../../styles/recipes/icon.css';
-import type { Intent, Saliency, Size } from '../../theme/constants';
-import { cx } from '../../utils/cx';
+"use client";
+import * as React from "react";
+import { iconRecipe } from "../../styles/recipes/icon.css";
+import type { Intent, Saliency, Size } from "../../theme/constants";
+import { cx } from "../../utils/cx";
 
-export interface IconProps
-  extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'color'> {
+export interface IconProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "color"> {
   /** Only used when standalone; ignored inside `Text`/`Chip`. */
   intent?: Intent;
   /** Only used when standalone; ignored inside `Text`/`Chip`. */
@@ -42,7 +41,7 @@ export function Icon({
     <span
       ref={ref}
       className={cx(iconRecipe({ intent, saliency, size }), className)}
-      role={label ? 'img' : undefined}
+      role={label ? "img" : undefined}
       aria-label={label}
       aria-hidden={label ? undefined : true}
       {...rest}

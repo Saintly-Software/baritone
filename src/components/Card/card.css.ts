@@ -1,6 +1,6 @@
-import { style } from '@vanilla-extract/css';
-import { vars } from '../../theme/contract.css';
-import { surfacePaddingVar } from '../../styles/vars.css';
+import { style } from "@vanilla-extract/css";
+import { vars } from "../../theme/contract.css";
+import { surfacePaddingVar } from "../../styles/vars.css";
 
 // Negative inset equal to the card's own padding (published by the surface
 // recipe as `--surfacePadding`). Used to pull full-bleed content / dividers out
@@ -14,31 +14,31 @@ const bleedInline = `calc(${surfacePaddingVar} * -1)`;
  * used by `Card.Bleed` / `Card.Divider`.
  */
 export const cardRoot = style({
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
   gap: vars.space[4],
 });
 
 /** Header row: title/subtitle stack on the start, optional actions on the end. */
 export const cardHeader = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  justifyContent: 'space-between',
+  display: "flex",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
   gap: vars.space[3],
 });
 
 export const cardHeaderText = style({
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
   gap: vars.space[1],
   minWidth: 0,
 });
 
 /** Footer row: actions, end-aligned by default. */
 export const cardFooter = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "flex-end",
   gap: vars.space[2],
 });
 

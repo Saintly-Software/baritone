@@ -1,4 +1,4 @@
-import { vars } from './contract.css';
+import { vars } from "./contract.css";
 
 // Interaction-state deltas applied in oklch space. Hover is a small nudge,
 // active is double. The sign comes from `--oklch-operator` (per theme/scheme).

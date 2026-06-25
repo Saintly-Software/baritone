@@ -1,21 +1,17 @@
-'use client';
-import * as React from 'react';
-import {
-  textIntentRecipe,
-  textVariantRecipe,
-} from '../../styles/recipes/text.css';
+"use client";
+import * as React from "react";
+import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
 import {
   HEADING_LEVEL_VARIANT,
   type HeadingLevel,
   type Intent,
   type Saliency,
   type TitleSize,
-} from '../../theme/constants';
-import { cx } from '../../utils/cx';
-import { useRender, type RenderProp } from '../../utils/render';
+} from "../../theme/constants";
+import { cx } from "../../utils/cx";
+import { useRender, type RenderProp } from "../../utils/render";
 
-export interface HeadingProps
-  extends Omit<React.HTMLAttributes<HTMLHeadingElement>, 'color'> {
+export interface HeadingProps extends Omit<React.HTMLAttributes<HTMLHeadingElement>, "color"> {
   /** Semantic document level `1`–`6` (drives the rendered `h1`–`h6` tag). Required. */
   level: HeadingLevel;
   /**
@@ -41,7 +37,7 @@ export function Heading({
   level,
   variant,
   intent,
-  saliency = 'high',
+  saliency = "high",
   render,
   className,
   children,
@@ -56,7 +52,7 @@ export function Heading({
       ref,
       className: cx(
         textIntentRecipe({ intent, saliency }),
-        textVariantRecipe({ family: 'title', size: visual }),
+        textVariantRecipe({ family: "title", size: visual }),
         className,
       ),
       children,

@@ -1,10 +1,10 @@
-import { fallbackVar } from '@vanilla-extract/css';
-import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
-import { focusRingColorVar } from '../vars.css';
+import { fallbackVar } from "@vanilla-extract/css";
+import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
+import { focusRingColorVar } from "../vars.css";
 
 // The ring colour comes from `--focusRingColor` (set by the element's intent/
 // state recipe); `currentColor` is a safe fallback for standalone use.
-const ring = `2px solid ${fallbackVar(focusRingColorVar, 'currentColor')}`;
+const ring = `2px solid ${fallbackVar(focusRingColorVar, "currentColor")}`;
 
 /**
  * Shared focus-ring recipe. Draws an `outline` ring (so it never shifts layout)
@@ -23,22 +23,20 @@ const ring = `2px solid ${fallbackVar(focusRingColorVar, 'currentColor')}`;
 export const focusRingRecipe = recipe({
   variants: {
     type: {
-      visible: { selectors: { '&:focus-visible': { outline: ring } } },
-      within: { selectors: { '&:focus-within': { outline: ring } } },
+      visible: { selectors: { "&:focus-visible": { outline: ring } } },
+      within: { selectors: { "&:focus-within": { outline: ring } } },
     },
     // `outline-offset` is a no-op without an outline, so it's safe to set at the
     // base level rather than duplicating it inside each focus selector.
     offset: {
-      sm: { outlineOffset: '1px' },
-      md: { outlineOffset: '2px' },
+      sm: { outlineOffset: "1px" },
+      md: { outlineOffset: "2px" },
     },
   },
   defaultVariants: {
-    type: 'visible',
-    offset: 'md',
+    type: "visible",
+    offset: "md",
   },
 });
 
-export type FocusRingVariants = NonNullable<
-  RecipeVariants<typeof focusRingRecipe>
->;
+export type FocusRingVariants = NonNullable<RecipeVariants<typeof focusRingRecipe>>;

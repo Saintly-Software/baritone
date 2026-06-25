@@ -1,15 +1,11 @@
-'use client';
-import * as React from 'react';
-import {
-  textIntentRecipe,
-  textVariantRecipe,
-} from '../../styles/recipes/text.css';
-import type { BodySize, Intent, Saliency } from '../../theme/constants';
-import { cx } from '../../utils/cx';
-import { useRender, type RenderProp } from '../../utils/render';
+"use client";
+import * as React from "react";
+import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import type { BodySize, Intent, Saliency } from "../../theme/constants";
+import { cx } from "../../utils/cx";
+import { useRender, type RenderProp } from "../../utils/render";
 
-export interface TextProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, 'color'> {
+export interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "color"> {
   /** Body typography variant. Default `base`. */
   variant?: BodySize;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */
@@ -31,7 +27,7 @@ export interface TextProps
  * `--iconColor`, so inline icons match the text.
  */
 export function Text({
-  variant = 'base',
+  variant = "base",
   intent,
   saliency,
   render,
@@ -42,12 +38,12 @@ export function Text({
 }: TextProps) {
   return useRender({
     render,
-    defaultElement: 'span',
+    defaultElement: "span",
     props: {
       ref,
       className: cx(
         textIntentRecipe({ intent, saliency }),
-        textVariantRecipe({ family: 'body', size: variant }),
+        textVariantRecipe({ family: "body", size: variant }),
         className,
       ),
       children,

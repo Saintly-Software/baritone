@@ -1,4 +1,4 @@
-import { createThemeContract } from '@vanilla-extract/css';
+import { createThemeContract } from "@vanilla-extract/css";
 import {
   BODY_SIZES,
   BORDER_WIDTH_KEYS,
@@ -11,21 +11,15 @@ import {
   SURFACE_SALIENCIES,
   TITLE_SIZES,
   Z_INDEX_KEYS,
-} from './constants';
+} from "./constants";
 
-function record<K extends string, V>(
-  keys: readonly K[],
-  make: (key: K) => V,
-): Record<K, V> {
-  return Object.fromEntries(keys.map((key) => [key, make(key)])) as Record<
-    K,
-    V
-  >;
+function record<K extends string, V>(keys: readonly K[], make: (key: K) => V): Record<K, V> {
+  return Object.fromEntries(keys.map((key) => [key, make(key)])) as Record<K, V>;
 }
 
 // Leaf placeholder. createThemeContract only cares about the *shape*; it
 // generates a unique CSS variable for every leaf regardless of value.
-const s = (): string => '';
+const s = (): string => "";
 
 const colorTriplet = () => ({ bgc: s(), text: s(), border: s() });
 const stateBlock = () => ({ default: colorTriplet(), disabled: colorTriplet() });
@@ -42,9 +36,7 @@ const fontVariant = () => ({
  */
 export const tokenShape = {
   surface: {
-    color: record(INTENTS, () =>
-      record(SURFACE_SALIENCIES, () => stateBlock()),
-    ),
+    color: record(INTENTS, () => record(SURFACE_SALIENCIES, () => stateBlock())),
     borderRadius: s(),
     focus: record(INTENTS, () => s()),
   },
@@ -100,4 +92,4 @@ export type DesignTokens = typeof tokenShape;
  * Token values supplied to the theme factory. `oklchOperator` is derived from
  * the `scheme` option, so authors don't provide it.
  */
-export type ThemeTokensInput = Omit<DesignTokens, 'oklchOperator'>;
+export type ThemeTokensInput = Omit<DesignTokens, "oklchOperator">;

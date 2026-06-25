@@ -4,8 +4,5 @@
   "initialVersions": {
     "@saintly-software/baritone": "0.1.0"
   },
-  "changesets": [
-    "granular-recipes-card-compound",
-    "initial-release"
-  ]
+  "changesets": ["granular-recipes-card-compound", "initial-release"]
 }

@@ -1,12 +1,12 @@
-'use client';
-import * as React from 'react';
-import { focusRingRecipe } from '../../styles/recipes/focusRing.css';
-import { surfaceRecipe } from '../../styles/recipes/surface.css';
-import type { HeadingLevel, Intent, SurfaceSaliency } from '../../theme/constants';
-import { cx } from '../../utils/cx';
-import { useRender, type RenderProp } from '../../utils/render';
-import { Heading } from '../Heading';
-import { Text } from '../Text';
+"use client";
+import * as React from "react";
+import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
+import { surfaceRecipe } from "../../styles/recipes/surface.css";
+import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
+import { cx } from "../../utils/cx";
+import { useRender, type RenderProp } from "../../utils/render";
+import { Heading } from "../Heading";
+import { Text } from "../Text";
 import {
   cardBleed,
   cardDivider,
@@ -14,12 +14,12 @@ import {
   cardHeader,
   cardHeaderText,
   cardRoot,
-} from './card.css';
+} from "./card.css";
 
-export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+export type CardPadding = "none" | "sm" | "md" | "lg";
 
 /** Semantic root element for a Card. */
-export type CardElement = 'div' | 'section' | 'main' | 'article';
+export type CardElement = "div" | "section" | "main" | "article";
 
 export interface CardProps extends React.HTMLAttributes<HTMLElement> {
   /** Default `neutral` (most surfaces are neutral). */
@@ -54,7 +54,7 @@ function CardRoot({
   intent,
   saliency,
   padding,
-  as = 'div',
+  as = "div",
   header,
   footer,
   disabled,
@@ -71,11 +71,11 @@ function CardRoot({
       ref,
       className: cx(
         surfaceRecipe({ intent, saliency, padding }),
-        focusRingRecipe({ type: 'visible' }),
+        focusRingRecipe({ type: "visible" }),
         cardRoot,
         className,
       ),
-      'aria-disabled': disabled || undefined,
+      "aria-disabled": disabled || undefined,
       children: (
         <>
           {header}
@@ -88,8 +88,7 @@ function CardRoot({
   });
 }
 
-export interface CardHeaderProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+export interface CardHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   /** Title text/content, rendered as a `Heading`. */
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
@@ -160,11 +159,11 @@ function CardDivider({ className, ref, ...rest }: CardDividerProps) {
   return <hr ref={ref} className={cx(cardDivider, className)} {...rest} />;
 }
 
-CardRoot.displayName = 'Card';
-CardHeader.displayName = 'Card.Header';
-CardFooter.displayName = 'Card.Footer';
-CardBleed.displayName = 'Card.Bleed';
-CardDivider.displayName = 'Card.Divider';
+CardRoot.displayName = "Card";
+CardHeader.displayName = "Card.Header";
+CardFooter.displayName = "Card.Footer";
+CardBleed.displayName = "Card.Bleed";
+CardDivider.displayName = "Card.Divider";
 
 /** Card with its compound parts attached. */
 export const Card = Object.assign(CardRoot, {

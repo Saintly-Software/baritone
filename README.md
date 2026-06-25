@@ -21,18 +21,20 @@ Instead of "colours", components take an **intent** (the semantic role) and a
   `low` (transparent background + border). Surfaces only have `high`/`low`.
 
 ```tsx
-<Chip intent="negative" saliency="high">Delete</Chip>
+<Chip intent="negative" saliency="high">
+  Delete
+</Chip>
 // renders the same colour scheme as a Button with the same props
 ```
 
 ### Element types
 
-| Type             | Components (starter)        | Colour API                 |
-| ---------------- | -------------------------- | -------------------------- |
-| Surface          | `Card`                     | `intent` + `saliency` (high/low) |
-| Text             | `Text`, `Heading`          | `intent` + `saliency`      |
-| Form control     | `TextInput`                | `state`                    |
-| "Component"      | `Chip`, `Icon`             | `intent` + `saliency`      |
+| Type         | Components (starter) | Colour API                       |
+| ------------ | -------------------- | -------------------------------- |
+| Surface      | `Card`               | `intent` + `saliency` (high/low) |
+| Text         | `Text`, `Heading`    | `intent` + `saliency`            |
+| Form control | `TextInput`          | `state`                          |
+| "Component"  | `Chip`, `Icon`       | `intent` + `saliency`            |
 
 Form controls take a `state` instead: `neutral | warning | invalid | valid`
 (`invalid` → negative, `valid` → positive).
@@ -43,10 +45,9 @@ Hover/active are **not** tokens. The `default` colour lives in a CSS variable an
 hover/active are computed at use-site with [CSS relative colour syntax]:
 
 ```css
-background: oklch(from var(--c)
-  calc(l + var(--oklch-operator) * 0.02)
-  calc(c + var(--oklch-operator) * 0.01)
-  h);
+background: oklch(
+  from var(--c) calc(l + var(--oklch-operator) * 0.02) calc(c + var(--oklch-operator) * 0.01) h
+);
 ```
 
 `--oklch-operator` is `-1` on light themes (darken on interaction) and `+1` on
@@ -71,13 +72,15 @@ Import the pre-compiled stylesheet **once** at your app root, then apply a theme
 class:
 
 ```tsx
-import '@saintly-software/baritone/styles.css';
-import { lightTheme, Chip } from '@saintly-software/baritone';
+import "@saintly-software/baritone/styles.css";
+import { lightTheme, Chip } from "@saintly-software/baritone";
 
 export function App() {
   return (
     <div className={lightTheme}>
-      <Chip intent="primary" saliency="high">Save</Chip>
+      <Chip intent="primary" saliency="high">
+        Save
+      </Chip>
     </div>
   );
 }
@@ -99,11 +102,11 @@ plugin.
 
    ```ts
    // brand.css.ts
-   import { createDesignSystemTheme, buildDefaultTokens } from '@saintly-software/baritone';
+   import { createDesignSystemTheme, buildDefaultTokens } from "@saintly-software/baritone";
 
    export const acmeLight = createDesignSystemTheme(
-     { ...buildDefaultTokens('light'), /* override any tokens */ },
-     { scheme: 'light', name: 'acme-light' },
+     { ...buildDefaultTokens("light") /* override any tokens */ },
+     { scheme: "light", name: "acme-light" },
    );
    ```
 
@@ -115,9 +118,9 @@ plugin.
    skip the compiler and map tokens to inline CSS variables:
 
    ```tsx
-   import { createInlineTheme } from '@saintly-software/baritone';
+   import { createInlineTheme } from "@saintly-software/baritone";
 
-   const style = createInlineTheme(tenantTokens, { scheme: 'light' });
+   const style = createInlineTheme(tenantTokens, { scheme: "light" });
    return <div style={style}>...</div>;
    ```
 
@@ -151,7 +154,7 @@ Light/dark is **the consumer's call** — the package never auto-switches on
   `state`.
 - `size` (`sm | md | lg`, default `md`) on `Chip`, `Icon`, and `TextInput`.
 - **Polymorphism** via base-ui's `render` prop (no `asChild`): pass an element to
-  render *as* (props/refs/classNames are merged) or a function for full control.
+  render _as_ (props/refs/classNames are merged) or a function for full control.
 - `className` is merged last; there's no token-bypassing `style` escape hatch on
   the colour API.
 - Every variant prop is backed by a vanilla-extract recipe variant, so the

@@ -1,8 +1,8 @@
-import { createVar } from '@vanilla-extract/css';
-import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
-import { INTENTS, SURFACE_SALIENCIES } from '../../theme/constants';
-import { vars } from '../../theme/contract.css';
-import { focusRingColorVar, surfacePaddingVar, textColorVar } from '../vars.css';
+import { createVar } from "@vanilla-extract/css";
+import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
+import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
+import { vars } from "../../theme/contract.css";
+import { focusRingColorVar, surfacePaddingVar, textColorVar } from "../vars.css";
 
 const bgc = createVar();
 const fg = createVar();
@@ -24,8 +24,8 @@ const bdDisabled = createVar();
  */
 export const surfaceRecipe = recipe({
   base: {
-    boxSizing: 'border-box',
-    borderStyle: 'solid',
+    boxSizing: "border-box",
+    borderStyle: "solid",
     borderWidth: vars.borderWidth.thin,
     borderColor: bd,
     borderRadius: vars.surface.borderRadius,
@@ -38,7 +38,7 @@ export const surfaceRecipe = recipe({
         background: bgcDisabled,
         color: fgDisabled,
         borderColor: bdDisabled,
-        cursor: 'not-allowed',
+        cursor: "not-allowed",
         vars: { [textColorVar]: fgDisabled },
       },
     },
@@ -50,9 +50,10 @@ export const surfaceRecipe = recipe({
         { vars: { [focusRingColorVar]: vars.surface.focus[intent] } },
       ]),
     ) as Record<(typeof INTENTS)[number], { vars: Record<string, string> }>,
-    saliency: Object.fromEntries(
-      SURFACE_SALIENCIES.map((saliency) => [saliency, {}]),
-    ) as Record<(typeof SURFACE_SALIENCIES)[number], Record<string, never>>,
+    saliency: Object.fromEntries(SURFACE_SALIENCIES.map((saliency) => [saliency, {}])) as Record<
+      (typeof SURFACE_SALIENCIES)[number],
+      Record<string, never>
+    >,
     padding: {
       none: { vars: { [surfacePaddingVar]: vars.space[0] } },
       sm: { vars: { [surfacePaddingVar]: vars.space[3] } },
@@ -79,9 +80,9 @@ export const surfaceRecipe = recipe({
     }),
   ),
   defaultVariants: {
-    intent: 'neutral',
-    saliency: 'low',
-    padding: 'md',
+    intent: "neutral",
+    saliency: "low",
+    padding: "md",
   },
 });
 

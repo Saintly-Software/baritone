@@ -1,17 +1,12 @@
-import { createVar, fallbackVar } from '@vanilla-extract/css';
-import { recipe, type RecipeVariants } from '@vanilla-extract/recipes';
-import {
-  BODY_SIZES,
-  INTENTS,
-  SALIENCIES,
-  TITLE_SIZES,
-} from '../../theme/constants';
-import { vars } from '../../theme/contract.css';
-import { iconColorVar, textColorVar } from '../vars.css';
+import { createVar, fallbackVar } from "@vanilla-extract/css";
+import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
+import { BODY_SIZES, INTENTS, SALIENCIES, TITLE_SIZES } from "../../theme/constants";
+import { vars } from "../../theme/contract.css";
+import { iconColorVar, textColorVar } from "../vars.css";
 
-const ALL_SIZES = Array.from(
-  new Set<string>([...BODY_SIZES, ...TITLE_SIZES]),
-) as Array<(typeof BODY_SIZES)[number] | (typeof TITLE_SIZES)[number]>;
+const ALL_SIZES = Array.from(new Set<string>([...BODY_SIZES, ...TITLE_SIZES])) as Array<
+  (typeof BODY_SIZES)[number] | (typeof TITLE_SIZES)[number]
+>;
 
 // The colour an explicit `intent`/`saliency` resolves to. Only set when a
 // variant is active, so the base style can fall through to the inherited
@@ -20,10 +15,7 @@ const override = createVar();
 
 // Precedence: explicit `intent`/`saliency` > inherited `--textColor` (published
 // by an ancestor surface/component) > the default neutral/mid text token.
-const resolved = fallbackVar(
-  override,
-  fallbackVar(textColorVar, vars.text.color.neutral.mid),
-);
+const resolved = fallbackVar(override, fallbackVar(textColorVar, vars.text.color.neutral.mid));
 
 /**
  * "text intent" recipe — resolves the text colour and mirrors it to `--iconColor`
@@ -44,10 +36,7 @@ export const textIntentRecipe = recipe({
     // resolves against the other's default (neutral / mid). When both are
     // passed the compound variant below wins (emitted last in the cascade).
     intent: Object.fromEntries(
-      INTENTS.map((intent) => [
-        intent,
-        { vars: { [override]: vars.text.color[intent].mid } },
-      ]),
+      INTENTS.map((intent) => [intent, { vars: { [override]: vars.text.color[intent].mid } }]),
     ) as Record<(typeof INTENTS)[number], { vars: Record<string, string> }>,
     saliency: Object.fromEntries(
       SALIENCIES.map((saliency) => [
@@ -64,9 +53,7 @@ export const textIntentRecipe = recipe({
   ),
 });
 
-export type TextIntentVariants = NonNullable<
-  RecipeVariants<typeof textIntentRecipe>
->;
+export type TextIntentVariants = NonNullable<RecipeVariants<typeof textIntentRecipe>>;
 
 /**
  * "text variant" recipe — selects a typography bundle. `family` + `size` map to
@@ -93,7 +80,7 @@ export const textVariantRecipe = recipe({
     ...BODY_SIZES.map((size) => {
       const v = vars.text.variant.body[size];
       return {
-        variants: { family: 'body' as const, size },
+        variants: { family: "body" as const, size },
         style: {
           fontSize: v.fontSize,
           lineHeight: v.lineHeight,
@@ -105,7 +92,7 @@ export const textVariantRecipe = recipe({
     ...TITLE_SIZES.map((size) => {
       const v = vars.text.variant.title[size];
       return {
-        variants: { family: 'title' as const, size },
+        variants: { family: "title" as const, size },
         style: {
           fontSize: v.fontSize,
           lineHeight: v.lineHeight,
@@ -115,11 +102,9 @@ export const textVariantRecipe = recipe({
     }),
   ],
   defaultVariants: {
-    family: 'body',
-    size: 'base',
+    family: "body",
+    size: "base",
   },
 });
 
-export type TextVariantVariants = NonNullable<
-  RecipeVariants<typeof textVariantRecipe>
->;
+export type TextVariantVariants = NonNullable<RecipeVariants<typeof textVariantRecipe>>;
