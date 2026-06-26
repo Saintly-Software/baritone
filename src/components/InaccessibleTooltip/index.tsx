@@ -1,6 +1,9 @@
 "use client";
 import * as React from "react";
-import { InternalTooltip, type InternalTooltipProps } from "../InternalTooltip";
+import {
+  InternalTooltip,
+  type InternalTooltipProps,
+} from "../../internal/components/InternalTooltip";
 
 export interface InaccessibleTooltipProps extends InternalTooltipProps {
   /**

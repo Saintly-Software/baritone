@@ -1,7 +1,7 @@
 "use client";
 import { Tooltip } from "@base-ui/react/tooltip";
 import * as React from "react";
-import { cx } from "../../utils/cx";
+import { cx } from "../../../utils/cx";
 import { tooltipPopup, tooltipPositioner } from "./internalTooltip.css";
 
 type RootProps = React.ComponentProps<typeof Tooltip.Root>;

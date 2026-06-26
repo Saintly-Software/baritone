@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { vars } from "../../theme/contract.css";
+import { vars } from "../../../theme/contract.css";
 
 /**
  * Styles for the internal tooltip popup. Kept here (rather than inline in a

@@ -15,6 +15,20 @@ export {
   type CardDividerProps,
 } from "./components/Card";
 export { TextInput, type TextInputProps } from "./components/TextInput";
+export {
+  RadioGroup,
+  type RadioGroupProps,
+  type RadioGroupItemProps,
+  type RadioGroupOrientation,
+} from "./components/RadioGroup";
+export { Checkbox, type CheckboxProps } from "./components/Checkbox";
+export {
+  CheckboxGroup,
+  type CheckboxGroupProps,
+  type CheckboxGroupItemProps,
+  type CheckboxGroupOrientation,
+} from "./components/CheckboxGroup";
+export { Switch, type SwitchProps } from "./components/Switch";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Popover,
