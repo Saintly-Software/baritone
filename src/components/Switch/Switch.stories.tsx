@@ -5,9 +5,7 @@ import { Switch } from "./index";
 
 // Switch is controlled, so the stories drive it from local state — the same
 // shape a consumer would use.
-function ControlledSwitch(
-  props: Omit<React.ComponentProps<typeof Switch>, "value" | "onChange">,
-) {
+function ControlledSwitch(props: Omit<React.ComponentProps<typeof Switch>, "value" | "onChange">) {
   const [value, setValue] = React.useState(false);
   return <Switch value={value} onChange={setValue} {...props} />;
 }

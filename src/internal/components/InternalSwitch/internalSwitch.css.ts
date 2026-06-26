@@ -101,7 +101,11 @@ export const switchTrack = recipe({
     ) as Record<(typeof FORM_STATES)[number], { vars: Record<string, string> }>,
     size: {
       sm: { width: "1.75rem", height: "1rem", vars: { [trackW]: "1.75rem", [thumb]: "0.625rem" } },
-      md: { width: "2.25rem", height: "1.25rem", vars: { [trackW]: "2.25rem", [thumb]: "0.8125rem" } },
+      md: {
+        width: "2.25rem",
+        height: "1.25rem",
+        vars: { [trackW]: "2.25rem", [thumb]: "0.8125rem" },
+      },
       lg: { width: "2.75rem", height: "1.5rem", vars: { [trackW]: "2.75rem", [thumb]: "1rem" } },
     },
   },
