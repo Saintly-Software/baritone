@@ -40,9 +40,9 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix",
-    "fmt": "oxfmt",
+    "lint": "pnpm lint:check --fix",
+    "lint:check": "pnpm exec oxlint",
+    "fmt": "pnpm exec oxfmt",
     "fmt:check": "pnpm fmt --check",
     "pub:version": "pnpm exec changeset version",
     "pub:release": "pnpm build && pnpm exec changeset publish"
@@ -84,8 +84,5 @@
       "optional": true
     }
   },
-  "packageManager": "pnpm@11.8.0",
-  "dependencies": {
-    "clsx": "2.1.1"
-  }
+  "packageManager": "pnpm@11.8.0"
 }
