@@ -1,8 +1,8 @@
 "use client";
 import { Tooltip } from "@base-ui/react/tooltip";
 import * as React from "react";
+import { cx } from "../../../utils/cx";
 import { tooltipPopup, tooltipPositioner } from "./internalTooltip.css";
-import clsx from "clsx";
 
 type RootProps = React.ComponentProps<typeof Tooltip.Root>;
 type TriggerProps = React.ComponentProps<typeof Tooltip.Trigger>;
@@ -90,7 +90,7 @@ export function InternalTooltip({
           align={align}
           sideOffset={sideOffset}
         >
-          <Tooltip.Popup className={clsx(tooltipPopup, className)}>{content}</Tooltip.Popup>
+          <Tooltip.Popup className={cx(tooltipPopup, className)}>{content}</Tooltip.Popup>
         </Tooltip.Positioner>
       </Tooltip.Portal>
     </Tooltip.Root>

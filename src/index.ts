@@ -22,6 +22,12 @@ export {
   type RadioGroupOrientation,
 } from "./components/RadioGroup";
 export { Checkbox, type CheckboxProps } from "./components/Checkbox";
+export {
+  CheckboxGroup,
+  type CheckboxGroupProps,
+  type CheckboxGroupItemProps,
+  type CheckboxGroupOrientation,
+} from "./components/CheckboxGroup";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Popover,
