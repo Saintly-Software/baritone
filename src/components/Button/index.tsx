@@ -8,7 +8,7 @@ import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
-import { InternalTooltip } from "../InternalTooltip";
+import { InternalTooltip } from "../../internal/components/InternalTooltip";
 import {
   buttonBase,
   buttonContent,

@@ -15,6 +15,12 @@ export {
   type CardDividerProps,
 } from "./components/Card";
 export { TextInput, type TextInputProps } from "./components/TextInput";
+export {
+  RadioGroup,
+  type RadioGroupProps,
+  type RadioGroupItemProps,
+  type RadioGroupOrientation,
+} from "./components/RadioGroup";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Popover,
