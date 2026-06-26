@@ -28,6 +28,7 @@ export {
   type CheckboxGroupItemProps,
   type CheckboxGroupOrientation,
 } from "./components/CheckboxGroup";
+export { Switch, type SwitchProps } from "./components/Switch";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Popover,
