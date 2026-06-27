@@ -1,5 +1,6 @@
 // Components
 export { Button, type ButtonProps } from "./components/Button";
+export { ToggleButton, type ToggleButtonProps } from "./components/ToggleButton";
 export { Chip, type ChipProps } from "./components/Chip";
 export {
   FileList,
