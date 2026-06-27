@@ -96,6 +96,24 @@ describe("RadioGroup", () => {
     expect(screen.getByRole("radio", { name: "system" })).toBeChecked();
   });
 
+  it("marks a disabled group with aria-disabled and keeps its options tabbable", async () => {
+    const user = userEvent.setup();
+    render(<ThemeSwitcher value="system" disabled />);
+
+    // The group carries the disabled semantics...
+    expect(screen.getByRole("radiogroup", { name: "Theme" })).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    // ...but no radio gets the native attribute that would remove it from focus.
+    const selected = screen.getByRole("radio", { name: "system" });
+    expect(selected).not.toBeDisabled();
+
+    // Tab reaches the group, landing on the selected (roving) option.
+    await user.tab();
+    expect(selected).toHaveFocus();
+  });
+
   it("disables a single item without disabling the group", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -110,7 +128,15 @@ describe("RadioGroup", () => {
       </RadioGroup>,
     );
 
-    await user.click(screen.getByRole("radio", { name: "dark" }));
+    const dark = screen.getByRole("radio", { name: "dark" });
+    // The disabled option uses aria-disabled, so it stays focusable/reachable
+    // (e.g. by arrow keys) rather than being skipped entirely like a native one.
+    expect(dark).toHaveAttribute("aria-disabled", "true");
+    expect(dark).not.toBeDisabled();
+    dark.focus();
+    expect(dark).toHaveFocus();
+
+    await user.click(dark);
     expect(onChange).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("radio", { name: "light" }));

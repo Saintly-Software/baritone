@@ -5,7 +5,8 @@ import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { Button, type ButtonProps } from "../Button";
+import { InternalButton } from "../../internal/components/InternalButton";
+import type { ButtonProps } from "../Button";
 import { Heading } from "../Heading";
 import { Text } from "../Text";
 import {
@@ -186,8 +187,12 @@ function DrawerRoot({
  */
 export type DrawerTriggerProps = ButtonProps;
 
-function DrawerTrigger({ children, ...rest }: DrawerTriggerProps) {
-  return <BaseDrawer.Trigger render={<Button {...rest}>{children}</Button>} />;
+function DrawerTrigger(props: DrawerTriggerProps) {
+  return (
+    <BaseDrawer.Trigger
+      render={(htmlAttrs) => <InternalButton consumerProps={props} htmlAttrs={htmlAttrs} />}
+    />
+  );
 }
 
 /**
@@ -198,19 +203,12 @@ function DrawerTrigger({ children, ...rest }: DrawerTriggerProps) {
  */
 export type DrawerCloseProps = ButtonProps;
 
-function DrawerClose({
-  children,
-  intent = "neutral",
-  saliency = "low",
-  ...rest
-}: DrawerCloseProps) {
+function DrawerClose({ intent = "neutral", saliency = "low", ...rest }: DrawerCloseProps) {
   return (
     <BaseDrawer.Close
-      render={
-        <Button intent={intent} saliency={saliency} {...rest}>
-          {children}
-        </Button>
-      }
+      render={(htmlAttrs) => (
+        <InternalButton consumerProps={{ intent, saliency, ...rest }} htmlAttrs={htmlAttrs} />
+      )}
     />
   );
 }

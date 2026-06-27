@@ -139,9 +139,14 @@ Light/dark is **the consumer's call** — the package never auto-switches on
   never shifts) from the element's `focus` token, exposed as `--focusRingColor`.
   Its `type` variant picks `:focus-visible` (the element itself) or
   `:focus-within` (a descendant), so each component opts into one model.
-- **Disabled:** uses `aria-disabled` (not the `disabled` attribute) so the
-  element stays keyboard-reachable — e.g. a disabled control can still surface an
-  explanatory tooltip.
+- **Disabled:** every interactive component models disabled with `aria-disabled`
+  (not the native `disabled` attribute) so the element stays in the tab order and
+  keyboard-reachable — e.g. a disabled control can still be focused to surface an
+  explanatory tooltip/reason. Form controls (`Checkbox`, `Switch`, `RadioGroup`,
+  `CheckboxGroup`, `TextInput`) pair it with `readOnly`, which vetoes the
+  change/toggle while keeping focus. This is a hard rule, enforced by a test
+  (`src/test/aria-disabled-convention.test.ts`) and documented for contributors in
+  [`AGENTS.md`](./AGENTS.md).
 - **Motion:** all transitions are gated behind
   `@media (prefers-reduced-motion: reduce)`.
 

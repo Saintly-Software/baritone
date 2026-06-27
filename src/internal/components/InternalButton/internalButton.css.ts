@@ -1,5 +1,5 @@
 import { keyframes, style } from "@vanilla-extract/css";
-import { vars } from "../../theme/contract.css";
+import { vars } from "../../../theme/contract.css";
 
 /**
  * Button-specific layout that sits on top of the shared `component` recipe

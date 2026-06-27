@@ -5,7 +5,8 @@ import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { Button, type ButtonProps } from "../Button";
+import { InternalButton } from "../../internal/components/InternalButton";
+import type { ButtonProps } from "../Button";
 import { Heading } from "../Heading";
 import { Text } from "../Text";
 import {
@@ -146,8 +147,12 @@ function PopoverRoot({
  */
 export type PopoverTriggerProps = ButtonProps;
 
-function PopoverTrigger({ children, ...rest }: PopoverTriggerProps) {
-  return <BasePopover.Trigger render={<Button {...rest}>{children}</Button>} />;
+function PopoverTrigger(props: PopoverTriggerProps) {
+  return (
+    <BasePopover.Trigger
+      render={(htmlAttrs) => <InternalButton consumerProps={props} htmlAttrs={htmlAttrs} />}
+    />
+  );
 }
 
 /**
@@ -157,19 +162,12 @@ function PopoverTrigger({ children, ...rest }: PopoverTriggerProps) {
  */
 export type PopoverCloseProps = ButtonProps;
 
-function PopoverClose({
-  children,
-  intent = "neutral",
-  saliency = "low",
-  ...rest
-}: PopoverCloseProps) {
+function PopoverClose({ intent = "neutral", saliency = "low", ...rest }: PopoverCloseProps) {
   return (
     <BasePopover.Close
-      render={
-        <Button intent={intent} saliency={saliency} {...rest}>
-          {children}
-        </Button>
-      }
+      render={(htmlAttrs) => (
+        <InternalButton consumerProps={{ intent, saliency, ...rest }} htmlAttrs={htmlAttrs} />
+      )}
     />
   );
 }

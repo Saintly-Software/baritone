@@ -4,7 +4,7 @@
 
 Add a `CheckboxGroup` component.
 
-A "form control" element type for picking *any number* of values from a small
+A "form control" element type for picking _any number_ of values from a small
 set — the multi-select sibling of `RadioGroup`: same `Field`-wrapped label /
 description / error layout, same type-safe compound API, but the selection is
 an array and each option is an independent checkbox (no roving focus — every

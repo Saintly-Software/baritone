@@ -77,4 +77,4 @@ export function useRender({ render, defaultElement, props }: UseRenderParams): R
   return React.createElement(defaultElement, props);
 }
 
-export { composeRefs };
+export { composeRefs, mergeProps };

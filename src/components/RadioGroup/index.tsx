@@ -60,7 +60,10 @@ export interface RadioGroupItemProps<T> {
    * enums); pass children for anything richer or for non-string values.
    */
   children?: React.ReactNode;
-  /** Disable just this option (the group can also be disabled as a whole). */
+  /**
+   * Disable just this option (the group can also be disabled as a whole).
+   * Modelled with `aria-disabled` + `readOnly` so the radio stays focusable.
+   */
   disabled?: boolean;
   /** Extra className merged onto the item's `<label>`. */
   className?: string;
@@ -93,7 +96,10 @@ function RadioGroupItem<T>({
     <label className={cx(radioItem({ size }), disabled && radioItemDisabled, className)}>
       <Radio.Root
         value={value}
-        disabled={disabled}
+        // `readOnly` + `aria-disabled` (not `disabled`) so a disabled option stays
+        // in the roving tab order and reachable, while base-ui vetoes selecting it.
+        readOnly={disabled}
+        aria-disabled={disabled || undefined}
         aria-labelledby={content != null ? labelId : undefined}
         className={cx(radioControl({ size, state }), focusRingRecipe({ type: "visible" }))}
       >
@@ -180,13 +186,18 @@ export function RadioGroup<T>({
   );
 
   return (
-    <Field.Root className={wrapperClass} invalid={state === "invalid"} disabled={disabled}>
+    // No `disabled` on `Field.Root`: base-ui would propagate it down as the native
+    // `disabled` attribute on every radio, dropping the group from the tab order.
+    <Field.Root className={wrapperClass} invalid={state === "invalid"}>
       {label != null && <Field.Label className={labelClass}>{label}</Field.Label>}
       <RadioGroupItemContext.Provider value={itemContext}>
         <BaseRadioGroup
           value={value}
           onValueChange={(next) => onChange(next)}
-          disabled={disabled}
+          // Group-level disable also goes through `readOnly` (base-ui forwards it to
+          // every radio) + `aria-disabled`, so the options stay keyboard-reachable.
+          readOnly={disabled}
+          aria-disabled={disabled || undefined}
           name={name}
           className={cx(radioGroupRoot({ orientation }), disabled && radioGroupDisabled, className)}
         >

@@ -1,21 +1,8 @@
 "use client";
 import * as React from "react";
-import {
-  componentIntentRecipe,
-  componentTypographyRecipe,
-} from "../../styles/recipes/component.css";
-import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
+import { InternalButton } from "../../internal/components/InternalButton";
 import type { Intent, Saliency, Size } from "../../theme/constants";
-import { cx } from "../../utils/cx";
-import { useRender, type RenderProp } from "../../utils/render";
-import { InternalTooltip } from "../../internal/components/InternalTooltip";
-import {
-  buttonBase,
-  buttonContent,
-  buttonContentLoading,
-  buttonSpinner,
-  buttonSpinnerIcon,
-} from "./button.css";
+import type { RenderProp } from "../../utils/render";
 
 export interface ButtonProps extends Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -73,91 +60,12 @@ export interface ButtonProps extends Omit<
  *
  * Disabled uses `aria-disabled` (keyboard-reachable) so a disabled button can
  * explain itself via `disabledReason`; loading overlays a spinner on the label.
+ *
+ * The rendering lives in `InternalButton`; `Button` just forwards its props as
+ * `consumerProps`. That split lets the overlay components (`Drawer`, `Modal`,
+ * `Popover`) reuse the same button as their trigger/close by feeding base-ui's
+ * `render` props in through `InternalButton`'s `htmlAttrs` seam.
  */
-export function Button({
-  intent,
-  saliency,
-  size,
-  children,
-  disabled = false,
-  loading = false,
-  startIcon,
-  endIcon,
-  disabledReason,
-  type,
-  onClick,
-  render,
-  className,
-  ref,
-  // Dropped, never forwarded: the accessible name must be the visible label, so
-  // an `aria-label` (which would override it) is intentionally unsupported. The
-  // interface types it as `never`, but strip it here so a cast/JS caller can't
-  // sneak it onto the DOM.
-  "aria-label": _unsupportedAriaLabel,
-  ...rest
-}: ButtonProps) {
-  const isDisabled = disabled || loading;
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isDisabled) {
-      // No `disabled` attribute means the click (incl. Enter/Space and form
-      // submit) still fires — swallow it ourselves.
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-    onClick?.(event);
-  };
-
-  const button = useRender({
-    render,
-    defaultElement: "button",
-    props: {
-      ref,
-      // Default to a non-submitting button; let consumers opt into submit/reset.
-      type: type ?? "button",
-      className: cx(
-        buttonBase,
-        componentTypographyRecipe({ size }),
-        componentIntentRecipe({ intent, saliency }),
-        focusRingRecipe({ type: "visible" }),
-        className,
-      ),
-      "aria-disabled": isDisabled || undefined,
-      "aria-busy": loading || undefined,
-      onClick: handleClick,
-      children: (
-        <>
-          <span className={cx(buttonContent, loading && buttonContentLoading)}>
-            {startIcon}
-            {children}
-            {endIcon}
-          </span>
-          {loading && (
-            <span className={buttonSpinner} aria-hidden>
-              <span className={buttonSpinnerIcon} />
-            </span>
-          )}
-        </>
-      ),
-      ...rest,
-    },
-  });
-
-  // The tooltip only exists to explain a disabled button; skip the machinery
-  // entirely when there's nothing to explain.
-  if (disabledReason == null) {
-    return button;
-  }
-
-  return (
-    <InternalTooltip
-      content={disabledReason}
-      // Only openable while disabled-but-not-loading; keeps the tree stable as
-      // the button toggles between states.
-      disabled={!(disabled && !loading)}
-    >
-      {button as React.ReactElement}
-    </InternalTooltip>
-  );
+export function Button(props: ButtonProps) {
+  return <InternalButton consumerProps={props} />;
 }

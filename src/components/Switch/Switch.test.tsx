@@ -85,6 +85,31 @@ describe("Switch", () => {
     expect(screen.getByRole("switch", { name: "Notifications" })).not.toBeChecked();
   });
 
+  it("uses aria-disabled (not the disabled attribute) so it can still be tabbed to", async () => {
+    const user = userEvent.setup();
+    render(<Notifications disabled />);
+    const toggle = screen.getByRole("switch", { name: "Notifications" });
+
+    expect(toggle).toHaveAttribute("aria-disabled", "true");
+    // The native attribute would yank it out of the tab order.
+    expect(toggle).not.toBeDisabled();
+
+    await user.tab();
+    expect(toggle).toHaveFocus();
+  });
+
+  it("does not toggle via the keyboard when disabled, even though it's focused", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Notifications disabled onChange={onChange} />);
+
+    await user.tab();
+    expect(screen.getByRole("switch", { name: "Notifications" })).toHaveFocus();
+
+    await user.keyboard(" ");
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("marks itself required", () => {
     render(<Notifications required />);
     expect(screen.getByRole("switch", { name: "Notifications" })).toHaveAttribute(
