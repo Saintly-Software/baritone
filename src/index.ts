@@ -1,6 +1,12 @@
 // Components
 export { Button, type ButtonProps } from "./components/Button";
 export { Chip, type ChipProps } from "./components/Chip";
+export {
+  FileList,
+  type FileListProps,
+  type FileInfo,
+  type FileListOrientation,
+} from "./components/FileList";
 export { Link, type LinkProps } from "./components/Link";
 export { Text, type TextProps } from "./components/Text";
 export { Heading, type HeadingProps } from "./components/Heading";
