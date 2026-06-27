@@ -48,6 +48,12 @@ export {
   type ToggleGroupProps,
   type ToggleGroupItemProps,
 } from "./components/ToggleGroup";
+export {
+  Accordion,
+  type AccordionProps,
+  type AccordionItemProps,
+  type AccordionItemHeaderProps,
+} from "./components/Accordion";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Popover,
