@@ -7,6 +7,12 @@ export {
   type FileInfo,
   type FileListOrientation,
 } from "./components/FileList";
+export {
+  FileUpload,
+  type FileUploadProps,
+  type SingleFileUploadProps,
+  type MultipleFileUploadProps,
+} from "./components/FileUpload";
 export { Link, type LinkProps } from "./components/Link";
 export { Text, type TextProps } from "./components/Text";
 export { Heading, type HeadingProps } from "./components/Heading";
@@ -35,6 +41,7 @@ export {
   type CheckboxGroupOrientation,
 } from "./components/CheckboxGroup";
 export { Switch, type SwitchProps } from "./components/Switch";
+export { Tabs, type TabsProps, type TabsItemProps } from "./components/Tabs";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Popover,

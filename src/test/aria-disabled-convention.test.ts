@@ -32,9 +32,13 @@ const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  *   `InternalButton`) forward it on correctly.
  * - `Tooltip.Root` — base-ui's tooltip `disabled` toggles whether the tooltip
  *   shows; it's not an interactive-control disable.
+ * - `FileList` — a system component whose `disabled` is modelled the focusable
+ *   way internally (dims the chips, sets the remove buttons' `aria-disabled` and
+ *   swallows their clicks, never the native attribute — see its tests). Composing
+ *   components (e.g. `FileUpload`) forward their own disabled state to it.
  */
 function mayReceiveDisabled(tag: string): boolean {
-  return tag.startsWith("Internal") || tag === "Tooltip.Root";
+  return tag.startsWith("Internal") || tag === "Tooltip.Root" || tag === "FileList";
 }
 
 function tsxSourceFiles(dir: string): string[] {
