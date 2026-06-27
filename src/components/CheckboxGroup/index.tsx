@@ -67,7 +67,10 @@ export interface CheckboxGroupItemProps<T> {
    * enums); pass children for anything richer or for non-string values.
    */
   children?: React.ReactNode;
-  /** Disable just this option (the group can also be disabled as a whole). */
+  /**
+   * Disable just this option (the group can also be disabled as a whole).
+   * Modelled with `aria-disabled` + `readOnly` so the box stays focusable.
+   */
   disabled?: boolean;
   /** Extra className merged onto the item's `<label>`. */
   className?: string;
@@ -116,9 +119,16 @@ function CheckboxGroupItem<T>({
       <BaseCheckbox.Root
         checked={checked}
         onCheckedChange={(next) => toggle(value, next)}
-        disabled={itemDisabled}
+        // `readOnly` + `aria-disabled` (not `disabled`) so a disabled box stays in
+        // the tab order and reachable, while base-ui vetoes the toggle.
+        readOnly={itemDisabled}
+        aria-disabled={itemDisabled || undefined}
         aria-labelledby={content != null ? labelId : undefined}
-        render={<InternalCheckbox checked={checked} state={state} size={size} />}
+        // base-ui now reports `data-readonly`, not `data-disabled`, so the box's
+        // dim is driven explicitly from the prop.
+        render={
+          <InternalCheckbox checked={checked} disabled={itemDisabled} state={state} size={size} />
+        }
       />
       {content != null && (
         <span id={labelId} className={cx(itemDisabled && checkboxLabelDisabled)}>
@@ -224,7 +234,11 @@ export function CheckboxGroup<T>({
   );
 
   return (
-    <Field.Root className={wrapperClass} invalid={state === "invalid"} disabled={disabled}>
+    // No `disabled` on `Field.Root`: base-ui propagates it through the field
+    // context as the native `disabled` attribute on every box, dropping them from
+    // the tab order. Each item handles disable via `aria-disabled` + `readOnly`
+    // (group disable flows to items through `CheckboxGroupItemContext`).
+    <Field.Root className={wrapperClass} invalid={state === "invalid"}>
       {label != null && (
         <Field.Label id={labelId} className={labelClass}>
           {label}

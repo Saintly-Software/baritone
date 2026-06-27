@@ -19,7 +19,11 @@ export interface CheckboxProps {
   onChange: (value: boolean) => void;
   /** Visible label beside the box; also becomes the control's accessible name. */
   label?: React.ReactNode;
-  /** Dim + lock the control so it can't be toggled or focused. */
+  /**
+   * Dim + lock the control. Modelled with `aria-disabled` + `readOnly` (not the
+   * `disabled` attribute), so the box stays keyboard-focusable — e.g. it can
+   * still be tabbed to and explain itself — while toggling is vetoed.
+   */
   disabled?: boolean;
   /** Mark the field as required (sets `aria-required`). */
   required?: boolean;
@@ -68,18 +72,28 @@ export function Checkbox({
   const labelId = React.useId();
 
   return (
-    <Field.Root className={wrapperClass} invalid={invalid} disabled={disabled}>
+    // No `disabled` on `Field.Root`: base-ui propagates it down as the native
+    // `disabled` attribute on the control, which would drop it from the tab
+    // order. Disabled is modelled per-control with `aria-disabled` + `readOnly`.
+    <Field.Root className={wrapperClass} invalid={invalid}>
       <label className={cx(checkboxRow({ size }), disabled && checkboxRowDisabled)}>
         <BaseCheckbox.Root
           checked={value}
           onCheckedChange={(checked) => onChange(checked)}
-          disabled={disabled}
+          // `readOnly` (not `disabled`) keeps the box keyboard-focusable: base-ui
+          // leaves it in the tab order but vetoes the toggle (click / Space). The
+          // `aria-disabled` carries the disabled semantics to assistive tech.
+          readOnly={disabled}
+          aria-disabled={disabled || undefined}
           required={required}
           name={name}
           aria-labelledby={label != null ? labelId : undefined}
           render={
             <InternalCheckbox
               checked={value}
+              // base-ui now reports `data-readonly`, not `data-disabled`, so the
+              // box's dim is driven explicitly from the prop.
+              disabled={disabled}
               state={invalid ? "invalid" : "neutral"}
               size={size}
               className={className}

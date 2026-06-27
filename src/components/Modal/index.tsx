@@ -5,7 +5,8 @@ import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { Button, type ButtonProps } from "../Button";
+import { InternalButton } from "../../internal/components/InternalButton";
+import type { ButtonProps } from "../Button";
 import { Heading } from "../Heading";
 import { Text } from "../Text";
 import {
@@ -184,8 +185,12 @@ function ModalRoot({
  */
 export type ModalTriggerProps = ButtonProps;
 
-function ModalTrigger({ children, ...rest }: ModalTriggerProps) {
-  return <BaseDialog.Trigger render={<Button {...rest}>{children}</Button>} />;
+function ModalTrigger(props: ModalTriggerProps) {
+  return (
+    <BaseDialog.Trigger
+      render={(htmlAttrs) => <InternalButton consumerProps={props} htmlAttrs={htmlAttrs} />}
+    />
+  );
 }
 
 /**
@@ -196,14 +201,12 @@ function ModalTrigger({ children, ...rest }: ModalTriggerProps) {
  */
 export type ModalCloseProps = ButtonProps;
 
-function ModalClose({ children, intent = "neutral", saliency = "low", ...rest }: ModalCloseProps) {
+function ModalClose({ intent = "neutral", saliency = "low", ...rest }: ModalCloseProps) {
   return (
     <BaseDialog.Close
-      render={
-        <Button intent={intent} saliency={saliency} {...rest}>
-          {children}
-        </Button>
-      }
+      render={(htmlAttrs) => (
+        <InternalButton consumerProps={{ intent, saliency, ...rest }} htmlAttrs={htmlAttrs} />
+      )}
     />
   );
 }

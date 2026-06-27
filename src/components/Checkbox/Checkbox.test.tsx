@@ -85,6 +85,31 @@ describe("Checkbox", () => {
     expect(screen.getByRole("checkbox", { name: "Subscribe" })).not.toBeChecked();
   });
 
+  it("uses aria-disabled (not the disabled attribute) so it can still be tabbed to", async () => {
+    const user = userEvent.setup();
+    render(<Subscribe disabled />);
+    const box = screen.getByRole("checkbox", { name: "Subscribe" });
+
+    expect(box).toHaveAttribute("aria-disabled", "true");
+    // The native attribute would yank it out of the tab order.
+    expect(box).not.toBeDisabled();
+
+    await user.tab();
+    expect(box).toHaveFocus();
+  });
+
+  it("does not toggle via the keyboard when disabled, even though it's focused", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Subscribe disabled onChange={onChange} />);
+
+    await user.tab();
+    expect(screen.getByRole("checkbox", { name: "Subscribe" })).toHaveFocus();
+
+    await user.keyboard(" ");
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("marks itself required", () => {
     render(<Subscribe required />);
     expect(screen.getByRole("checkbox", { name: "Subscribe" })).toHaveAttribute(

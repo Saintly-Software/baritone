@@ -121,6 +121,19 @@ describe("CheckboxGroup", () => {
     expect(screen.getByRole("checkbox", { name: "billing" })).not.toBeChecked();
   });
 
+  it("keeps every box tabbable when the group is disabled (aria-disabled, not the attribute)", async () => {
+    const user = userEvent.setup();
+    render(<Subscriptions value={["product"]} disabled />);
+    const product = screen.getByRole("checkbox", { name: "product" });
+
+    expect(product).toHaveAttribute("aria-disabled", "true");
+    expect(product).not.toBeDisabled();
+
+    // No roving focus here — each box is its own tab stop, even disabled.
+    await user.tab();
+    expect(product).toHaveFocus();
+  });
+
   it("disables a single item without disabling the group", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -135,7 +148,14 @@ describe("CheckboxGroup", () => {
       </CheckboxGroup>,
     );
 
-    await user.click(screen.getByRole("checkbox", { name: "product" }));
+    const product = screen.getByRole("checkbox", { name: "product" });
+    // The disabled item stays focusable so it can be tabbed to and inspected.
+    expect(product).toHaveAttribute("aria-disabled", "true");
+    expect(product).not.toBeDisabled();
+    await user.tab();
+    expect(product).toHaveFocus();
+
+    await user.click(product);
     expect(onChange).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("checkbox", { name: "billing" }));
