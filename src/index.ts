@@ -43,6 +43,11 @@ export {
 } from "./components/CheckboxGroup";
 export { Switch, type SwitchProps } from "./components/Switch";
 export { Tabs, type TabsProps, type TabsItemProps } from "./components/Tabs";
+export {
+  ToggleGroup,
+  type ToggleGroupProps,
+  type ToggleGroupItemProps,
+} from "./components/ToggleGroup";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Popover,
