@@ -104,7 +104,12 @@ export const HeaderIconAndChip: Story = {
   ),
 };
 
-/** Clickable: the whole card is a `<button>`. Keep its content non-interactive. */
+/**
+ * Clickable: the whole surface activates, but only the header title is the real
+ * `<button>` (stretched over the card with an `::after` overlay) — so the
+ * accessible name is just the title, not the whole card. Following
+ * https://inclusive-components.design/cards/.
+ */
 export const Clickable: Story = {
   render: (args) => {
     function ClickableCard() {
@@ -114,14 +119,12 @@ export const Clickable: Story = {
           intent={args.intent}
           saliency={args.saliency}
           padding={args.padding}
-          style={{ maxWidth: 320, textAlign: "left" }}
+          style={{ maxWidth: 320 }}
           onClick={() => setCount((c) => c + 1)}
+          header={<Card.Header title="Activate this card" />}
         >
-          {/* A clickable card is a <button>, so its content must be phrasing-level
-              (no <p>/<div>/headings) — the cardRoot flex column still stacks these
-              spans. */}
-          <Text variant="base">Activate this card</Text>
-          <Text variant="sm" saliency="low">
+          {/* The card is a container now, so block content is fine. */}
+          <Text render={<p />} variant="sm" saliency="low">
             Pressed {count} {count === 1 ? "time" : "times"}.
           </Text>
         </Card>
@@ -131,7 +134,11 @@ export const Clickable: Story = {
   },
 };
 
-/** Linkable: the whole card is an `<a>`. Anchors may wrap headings/content. */
+/**
+ * Linkable: the header title is the one real `<a>`, stretched over the whole
+ * surface — so the entire card navigates on click while only the title names the
+ * link.
+ */
 export const Linkable: Story = {
   render: (args) => (
     <Card
@@ -149,7 +156,49 @@ export const Linkable: Story = {
   ),
 };
 
-/** Collapsible: only the header shows when closed; the body + footer collapse away. */
+/**
+ * Because the card is a container (not itself a button/anchor), it can hold
+ * *other* controls: here the whole card links to the project while a footer
+ * button stays an independent click target. The old whole-card-is-a-control model
+ * couldn't nest these.
+ */
+export const LinkableWithNestedActions: Story = {
+  render: (args) => (
+    <Card
+      intent={args.intent}
+      saliency={args.saliency}
+      padding={args.padding}
+      style={{ maxWidth: 360 }}
+      href="https://example.com"
+      header={<Card.Header title="Acme Design System" subtitle="example.com" />}
+      footer={
+        <Card.Footer
+          actions={
+            <Card.Actions
+              actions={[
+                <Button intent="secondary" saliency="low" size="sm" onClick={() => {}}>
+                  Star
+                </Button>,
+              ]}
+            />
+          }
+        />
+      }
+    >
+      <Text render={<p />}>
+        Opening the card follows the link; the Star button is a separate action that doesn't
+        navigate.
+      </Text>
+    </Card>
+  ),
+};
+
+/**
+ * Collapsible: a disclosure **button** in the header (the chevron) toggles it —
+ * only the header shows when closed, and the body + footer collapse away. Because
+ * only the button toggles (not the whole header), the header can carry its own
+ * content like the status chip.
+ */
 export const Collapsible: Story = {
   render: (args) => (
     <Card

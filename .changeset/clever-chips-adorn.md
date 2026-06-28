@@ -22,7 +22,7 @@ Expand `Chip` with adornments, a clickable label, shapes, and a loading state.
   prop for router links). Adornments inherit the chip's colour through
   `--iconColor`, or take their own `intent` to tint just that adornment.
 - **`handleRemove`:** a shortcut for the common removable chip — appends a
-  built-in clickable remove "×" as the *last* trailing adornment, after any
+  built-in clickable remove "×" as the _last_ trailing adornment, after any
   `trailAdornments` you supply.
 - **Clickable label:** pass `onClick` to render the text label as a real
   `<button>` (keyboard-focusable, Enter/Space-activated). The label and any

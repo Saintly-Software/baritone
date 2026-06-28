@@ -12,11 +12,12 @@ import {
   cardActionsRecipe,
   cardBleed,
   cardChevron,
+  cardCollapsibleHeader,
   cardCollapsiblePaddingRecipe,
   cardCollapsiblePanel,
   cardCollapsiblePanelContent,
   cardCollapsibleRoot,
-  cardCollapsibleTrigger,
+  cardCollapsibleTriggerButton,
   cardDivider,
   cardFooter,
   cardHeader,
@@ -24,10 +25,12 @@ import {
   cardHeaderLeading,
   cardHeaderText,
   cardHeaderTrailing,
+  cardInteractive,
+  cardOverlayLink,
   cardRoot,
-  cardRow,
   cardRowActions,
   cardRowDesc,
+  cardRowRecipe,
   cardRows,
   cardRowTerm,
   cardRowText,
@@ -35,11 +38,35 @@ import {
 
 export type CardPadding = "none" | "sm" | "md" | "lg";
 
-/** Semantic root element for a (static) Card. */
+/** Semantic root element for a Card. */
 export type CardElement = "div" | "section" | "main" | "article";
+
+/**
+ * How a `Card` tells its `Card.Header` to host a card-level control. The header is
+ * the single place these live: an interactive (clickable/linkable) card turns the
+ * header *title* into the one real link/button — stretched over the whole surface
+ * with an `::after` overlay (https://inclusive-components.design/cards/) — and a
+ * collapsible card puts the disclosure trigger in the header. Either way the rest
+ * of the card can carry its own interactive content.
+ */
+type CardHeaderControl =
+  | {
+      kind: "link";
+      href?: string;
+      target?: string;
+      rel?: string;
+      onClick?: React.MouseEventHandler<HTMLElement>;
+      render?: RenderProp;
+      disabled?: boolean;
+    }
+  | { kind: "collapsible"; disabled?: boolean };
+
+const CardHeaderContext = React.createContext<CardHeaderControl | null>(null);
 
 /** Props shared by every Card mode (static / clickable / linkable). */
 interface CardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick"> {
+  /** Semantic root element. Default `div`. (Ignored for a `collapsible` card.) */
+  as?: CardElement;
   /** Default `neutral` (most surfaces are neutral). */
   intent?: Intent;
   /** `low` (default neutral surface) or `high` (washed). Default `low`. */
@@ -63,13 +90,12 @@ interface CardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick
  * `as`, or make it a single collapsible disclosure with `collapsible`.
  */
 export interface CardStaticProps extends CardBaseProps {
-  /** Semantic root element. Default `div`. */
-  as?: CardElement;
   /**
-   * Make the card a single collapsible disclosure: the `header` becomes the
-   * trigger (always visible) and the content + `footer` collapse away, so only
-   * the header shows when closed. Built on base-ui's `Collapsible`. The header
-   * lives inside the trigger `<button>`, so keep its content non-interactive.
+   * Make the card a single collapsible disclosure: the content + `footer`
+   * collapse away, leaving the `header` visible. The header's `Card.Header` grows
+   * a disclosure **button** (beside any chip/actions) that toggles it — so,
+   * unlike a whole-header trigger, the rest of the header can hold its own
+   * interactive elements. Built on base-ui's `Collapsible`.
    */
   collapsible?: boolean;
   /** Controlled open state (collapsible only). */
@@ -83,15 +109,18 @@ export interface CardStaticProps extends CardBaseProps {
 }
 
 /**
- * A clickable Card — the whole surface is a `<button>`. Because the card *is* a
- * single control, don't nest other interactive elements (footer buttons, links)
- * inside it.
+ * A clickable Card. The card stays a plain container; its `Card.Header` *title*
+ * becomes the one real `<button>`, stretched across the whole surface (via an
+ * `::after` overlay) so the entire card activates — the accessible pattern from
+ * Inclusive Components (https://inclusive-components.design/cards/). Because the
+ * card is no longer itself a button, you *can* nest other controls (footer
+ * buttons, row actions); they stay independently clickable. Give the card a
+ * `header={<Card.Header title=… />}` so the control has an accessible name.
  */
 export interface CardClickableProps extends CardBaseProps {
-  /** Activation handler. Makes the whole card a `<button>`. Swallowed while disabled. */
+  /** Activation handler. Turns the header title into the card's `<button>`. Swallowed while disabled. */
   onClick: React.MouseEventHandler<HTMLElement>;
   href?: never;
-  as?: never;
   collapsible?: never;
   open?: never;
   defaultOpen?: never;
@@ -99,19 +128,20 @@ export interface CardClickableProps extends CardBaseProps {
 }
 
 /**
- * A linkable Card — the whole surface is an `<a>` (or your router's link via
- * `render`). As with the clickable card, don't nest other interactive elements
- * inside it.
+ * A linkable Card. Like the clickable card, the card stays a container and its
+ * `Card.Header` *title* becomes the one real `<a>` (or your router's link via
+ * `render`), stretched across the whole surface. Other links/buttons may live
+ * inside it. Give the card a `header={<Card.Header title=… />}` for the link's
+ * accessible name.
  */
 export interface CardLinkableProps extends CardBaseProps {
-  /** Destination. Makes the whole card an `<a>`. */
+  /** Destination. Turns the header title into the card's `<a>`. */
   href: string;
   /** Anchor target (e.g. `_blank`). */
   target?: string;
   /** Anchor rel (e.g. `noreferrer`). */
   rel?: string;
   onClick?: never;
-  as?: never;
   collapsible?: never;
   open?: never;
   defaultOpen?: never;
@@ -149,10 +179,13 @@ type InternalCardProps = CardBaseProps & {
  * `<Card.Divider>` (edge-to-edge rule), and `<Card.Rows>` (a `dl` of key/value
  * `<Card.Row>`s). Use `as` to pick the semantic element.
  *
- * It can also *be* a control: pass `onClick` to render the whole card as a
- * `<button>`, or `href` to render it as an `<a>` (with hover/active states and
- * the focusable `aria-disabled` model). Or set `collapsible` to make the header
- * a disclosure trigger that collapses the content + footer away.
+ * It can also *be* a control: pass `onClick` or `href` to make it clickable /
+ * linkable. The card stays a container and its `Card.Header` title becomes the
+ * one real `<button>`/`<a>`, stretched over the whole surface so the entire card
+ * activates while only the title names it and nested controls keep working — the
+ * accessible pattern from https://inclusive-components.design/cards/. Or set
+ * `collapsible` to give the header a disclosure button that collapses the content
+ * + footer away.
  */
 function CardRoot(props: CardProps) {
   const {
@@ -178,8 +211,10 @@ function CardRoot(props: CardProps) {
     ...rest
   }: InternalCardProps = props;
 
-  // A collapsible card is a self-contained disclosure (header trigger + collapsing
-  // panel), structurally unlike the flat surface, so it gets its own branch.
+  // A collapsible card is a self-contained disclosure (header + collapsing
+  // panel), structurally unlike the flat surface, so it gets its own branch. The
+  // disclosure trigger lives *inside* the header (added by Card.Header from
+  // context), so only that button toggles — the rest of the header is free.
   if (collapsible) {
     return (
       <Collapsible.Root
@@ -204,19 +239,11 @@ function CardRoot(props: CardProps) {
         )}
         {...rest}
       >
-        <Collapsible.Trigger
-          // `aria-disabled` (never the native attribute) keeps the trigger
-          // tabbable; the veto above stops it toggling. See AGENTS.md.
-          aria-disabled={disabled || undefined}
-          className={cx(
-            cardCollapsiblePaddingRecipe({ padding }),
-            cardCollapsibleTrigger,
-            focusRingRecipe({ type: "visible" }),
-          )}
-        >
-          {header}
-          <ChevronGlyph className={cardChevron} />
-        </Collapsible.Trigger>
+        <div className={cx(cardCollapsiblePaddingRecipe({ padding }), cardCollapsibleHeader)}>
+          <CardHeaderContext.Provider value={{ kind: "collapsible", disabled }}>
+            {header}
+          </CardHeaderContext.Provider>
+        </div>
         <Collapsible.Panel className={cardCollapsiblePanel}>
           <div
             className={cx(cardCollapsiblePaddingRecipe({ padding }), cardCollapsiblePanelContent)}
@@ -231,9 +258,66 @@ function CardRoot(props: CardProps) {
 
   const interactive = href != null || onClick != null;
 
-  // A clickable/linkable card has no native `disabled`, so swallow the activation
-  // ourselves (preventing an `<a>`'s navigation too) while it stays focusable —
-  // mirrors Chip / ToggleButton.
+  // The card is never itself the control: an interactive card is a container, and
+  // its header title becomes the one real link/button (stretched over the whole
+  // surface). Hand the activation down to that control via context. `render` (a
+  // router link) belongs to the link too, so it's forwarded — never applied to
+  // the container.
+  const linkControl: CardHeaderControl | null = interactive
+    ? { kind: "link", href, target, rel, onClick, render, disabled }
+    : null;
+
+  const body =
+    linkControl != null ? (
+      <CardHeaderContext.Provider value={linkControl}>
+        {header}
+        {children}
+        {footer}
+      </CardHeaderContext.Provider>
+    ) : (
+      <>
+        {header}
+        {children}
+        {footer}
+      </>
+    );
+
+  return useRender({
+    render: interactive ? undefined : render,
+    defaultElement: as,
+    props: {
+      ref,
+      className: cx(
+        surfaceRecipe({ intent, saliency, padding, interactive }),
+        cardRoot,
+        // Interactive cards position their overlay link; static cards keep the
+        // focus ring in case a consumer makes the surface itself focusable.
+        interactive ? cardInteractive : focusRingRecipe({ type: "visible" }),
+        className,
+      ),
+      "aria-disabled": disabled || undefined,
+      children: body,
+      ...rest,
+    },
+  });
+}
+
+/**
+ * The card's single primary control — the header title rendered as the one real
+ * link/button, stretched over the whole card via `cardOverlayLink`'s `::after`.
+ * Disabled is modelled the focusable way (per AGENTS.md): `aria-disabled` plus
+ * swallowing the activation — and an `<a>`'s navigation — never the native
+ * attribute. An optional `render` carries a router link.
+ */
+function CardPrimaryLink({
+  link,
+  children,
+}: {
+  link: Extract<CardHeaderControl, { kind: "link" }>;
+  children: React.ReactNode;
+}) {
+  const { href, target, rel, onClick, render, disabled } = link;
+
   const handleActivate = (event: React.MouseEvent<HTMLElement>) => {
     if (disabled) {
       event.preventDefault();
@@ -244,38 +328,23 @@ function CardRoot(props: CardProps) {
   };
 
   const elementProps: Record<string, unknown> = {
-    ref,
-    className: cx(
-      surfaceRecipe({ intent, saliency, padding, interactive }),
-      focusRingRecipe({ type: "visible" }),
-      cardRoot,
-      className,
-    ),
+    className: cardOverlayLink,
     "aria-disabled": disabled || undefined,
-    children: (
-      <>
-        {header}
-        {children}
-        {footer}
-      </>
-    ),
-    ...rest,
+    onClick: handleActivate,
+    children,
   };
-
   if (href != null) {
     elementProps.href = href;
     if (target != null) elementProps.target = target;
     if (rel != null) elementProps.rel = rel;
-    elementProps.onClick = handleActivate;
-  } else if (onClick != null) {
-    // Default `type` to `button` so a card in a form doesn't submit it.
+  } else {
+    // Default `type` to `button` so a clickable card in a form doesn't submit it.
     elementProps.type = "button";
-    elementProps.onClick = handleActivate;
   }
 
   return useRender({
     render,
-    defaultElement: href != null ? "a" : onClick != null ? "button" : as,
+    defaultElement: href != null ? "a" : "button",
     props: elementProps,
   });
 }
@@ -304,8 +373,23 @@ function CardHeader({
   ref,
   ...rest
 }: CardHeaderProps) {
+  // A Card supplies one of these when it needs the header to host a card-level
+  // control: a `link` (the title becomes the stretched overlay link/button) or a
+  // `collapsible` disclosure trigger. Outside an interactive/collapsible card the
+  // context is null and the header is plain text.
+  const control = React.useContext(CardHeaderContext);
+  const link = control?.kind === "link" ? control : null;
+  const collapsibleControl = control?.kind === "collapsible" ? control : null;
+
+  // The disclosure trigger is labelled by the title (so it announces e.g.
+  // "Shipping details, button, collapsed"); fall back to a generic label.
+  const titleId = React.useId();
+  const labelledByTitle = collapsibleControl != null && title != null;
+
   const hasText = title != null || subtitle != null;
-  const hasTrailing = chip != null || children != null;
+  // The collapsible trigger always needs a home in the trailing group, so render
+  // it even without a chip / children.
+  const hasTrailing = chip != null || children != null || collapsibleControl != null;
   return (
     <div ref={ref} className={cx(cardHeader, className)} {...rest}>
       {/* Leading group (icon + text) also acts as the flex spacer that pushes the
@@ -315,8 +399,10 @@ function CardHeader({
         {hasText && (
           <div className={cardHeaderText}>
             {title != null && (
-              <Heading level={level} variant="lg">
-                {title}
+              <Heading level={level} variant="lg" id={labelledByTitle ? titleId : undefined}>
+                {/* An interactive card turns the title into its one real control,
+                    stretched over the whole surface (see the article). */}
+                {link != null ? <CardPrimaryLink link={link}>{title}</CardPrimaryLink> : title}
               </Heading>
             )}
             {subtitle != null && (
@@ -331,6 +417,18 @@ function CardHeader({
         <div className={cardHeaderTrailing}>
           {chip}
           {children}
+          {collapsibleControl != null && (
+            <Collapsible.Trigger
+              // `aria-disabled` (never the native attribute) keeps the trigger
+              // tabbable; the root's veto stops it toggling. See AGENTS.md.
+              aria-disabled={collapsibleControl.disabled || undefined}
+              aria-label={labelledByTitle ? undefined : "Toggle"}
+              aria-labelledby={labelledByTitle ? titleId : undefined}
+              className={cx(cardCollapsibleTriggerButton, focusRingRecipe({ type: "visible" }))}
+            >
+              <ChevronGlyph className={cardChevron} />
+            </Collapsible.Trigger>
+          )}
         </div>
       )}
     </div>
@@ -441,8 +539,10 @@ function CardRow(props: CardRowProps) {
   };
 
   if (title !== undefined || actions !== undefined) {
+    // A rich row carries its own action, so it doesn't get the row hover wash —
+    // the action's own hover is the affordance that matters.
     return (
-      <div className={cardRow}>
+      <div className={cardRowRecipe({ hoverable: false })}>
         <dt className={cardRowText}>
           <Text variant="base">{title}</Text>
           {subtitle != null && (
@@ -456,8 +556,9 @@ function CardRow(props: CardRowProps) {
     );
   }
 
+  // A plain term/value row has no action of its own, so it highlights on hover.
   return (
-    <div className={cardRow}>
+    <div className={cardRowRecipe({ hoverable: true })}>
       <Text render={<dt className={cardRowTerm} />} variant="sm" saliency="low">
         {term}
       </Text>

@@ -81,10 +81,14 @@ describe("Card", () => {
   });
 
   describe("clickable", () => {
-    it("renders a <button type=button> and fires onClick", async () => {
+    it("turns the header title into a <button type=button> and fires onClick", async () => {
       const user = userEvent.setup();
       const onClick = vi.fn();
-      render(<Card onClick={onClick}>Press</Card>);
+      render(
+        <Card onClick={onClick} header={<Card.Header title="Press" />}>
+          Body
+        </Card>,
+      );
       const button = screen.getByRole("button", { name: "Press" });
       expect(button).toHaveAttribute("type", "button");
       await user.click(button);
@@ -95,8 +99,8 @@ describe("Card", () => {
       const user = userEvent.setup();
       const onClick = vi.fn();
       render(
-        <Card onClick={onClick} disabled>
-          Press
+        <Card onClick={onClick} disabled header={<Card.Header title="Press" />}>
+          Body
         </Card>,
       );
       const button = screen.getByRole("button", { name: "Press" });
@@ -110,13 +114,36 @@ describe("Card", () => {
       await user.click(button);
       expect(onClick).not.toHaveBeenCalled();
     });
+
+    it("is a plain container (not a button), so nested controls stay separate", () => {
+      const onClick = vi.fn();
+      render(
+        <Card
+          onClick={onClick}
+          header={<Card.Header title="Open" />}
+          footer={<Card.Footer actions={<button>Dismiss</button>} />}
+        >
+          Body
+        </Card>,
+      );
+      const primary = screen.getByRole("button", { name: "Open" });
+      const dismiss = screen.getByRole("button", { name: "Dismiss" });
+      // The card itself isn't the control, so the footer button isn't nested in it.
+      expect(primary).not.toContainElement(dismiss);
+      expect(screen.getByText("Body").closest("button")).toBeNull();
+    });
   });
 
   describe("linkable", () => {
-    it("renders an <a> with href/target/rel", () => {
+    it("turns the header title into an <a> with href/target/rel", () => {
       render(
-        <Card href="https://example.com" target="_blank" rel="noreferrer">
-          Visit
+        <Card
+          href="https://example.com"
+          target="_blank"
+          rel="noreferrer"
+          header={<Card.Header title="Visit" />}
+        >
+          Body
         </Card>,
       );
       const link = screen.getByRole("link", { name: "Visit" });
@@ -125,10 +152,25 @@ describe("Card", () => {
       expect(link).toHaveAttribute("rel", "noreferrer");
     });
 
+    it("nests the link inside the heading, naming the card by the title alone", () => {
+      render(
+        <Card href="https://example.com" header={<Card.Header title="Read the docs" />}>
+          A long supporting description that should not be part of the link name.
+        </Card>,
+      );
+      const link = screen.getByRole("link", { name: "Read the docs" });
+      // The article's pattern: the link lives in the heading.
+      expect(link.closest("h3")).not.toBeNull();
+    });
+
     it("can render a router link via the render prop", () => {
       render(
-        <Card href="/about" render={<a className="router" />}>
-          About
+        <Card
+          href="/about"
+          render={<a className="router" />}
+          header={<Card.Header title="About" />}
+        >
+          Body
         </Card>,
       );
       const link = screen.getByRole("link", { name: "About" });
@@ -170,6 +212,32 @@ describe("Card", () => {
       expect(onOpenChange).toHaveBeenCalledWith(true);
       // Still controlled-closed, so the body stays hidden.
       expect(screen.queryByText("Body")).not.toBeInTheDocument();
+    });
+
+    it("toggles only via the dedicated trigger, leaving the rest of the header interactive", async () => {
+      const user = userEvent.setup();
+      const onHeaderAction = vi.fn();
+      render(
+        <Card
+          collapsible
+          header={
+            <Card.Header title="Shipping">
+              <button onClick={onHeaderAction}>Header action</button>
+            </Card.Header>
+          }
+        >
+          Ship worldwide
+        </Card>,
+      );
+      // The header action is its own control (not part of a whole-header button):
+      // using it runs its handler and does not expand the card.
+      await user.click(screen.getByRole("button", { name: "Header action" }));
+      expect(onHeaderAction).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText("Ship worldwide")).not.toBeInTheDocument();
+
+      // Only the disclosure trigger (labelled by the title) toggles.
+      await user.click(screen.getByRole("button", { name: /Shipping/ }));
+      expect(screen.getByText("Ship worldwide")).toBeInTheDocument();
     });
 
     it("vetoes toggling when disabled but keeps the trigger tabbable", async () => {
@@ -237,6 +305,20 @@ describe("Card", () => {
       expect(descriptions).toHaveLength(2);
       expect(terms[0]).toHaveTextContent("Plan");
       expect(descriptions[0]).toHaveTextContent("Pro");
+    });
+
+    it("makes a plain term/value row hoverable but not a row with an action", () => {
+      const { container } = render(
+        <Card.Rows
+          rows={[
+            <Card.Row term="Plan" description="Pro" />,
+            <Card.Row title="Payment method" subtitle="Visa" actions={<button>Update</button>} />,
+          ]}
+        />,
+      );
+      const rows = container.querySelectorAll("dl > div");
+      // The plain row highlights on hover; the action row opts out — different recipe.
+      expect((rows[0] as HTMLElement).className).not.toEqual((rows[1] as HTMLElement).className);
     });
 
     it("renders a rich row with a title/subtitle and actions", () => {

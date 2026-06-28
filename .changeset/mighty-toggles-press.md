@@ -10,11 +10,11 @@ toggles (bold, mute, pin, …). It's a thin wrapper over the very same
 `aria-pressed` flag and the click, and the `icon` is the button's only content.
 
 - **Pressed state expressed through saliency:** `intent` / `saliency` describe
-  the *on* look, and the *off* look drops to `low` (ghost) saliency, so the two
+  the _on_ look, and the _off_ look drops to `low` (ghost) saliency, so the two
   states are visibly distinct while reusing the shared `component` colour recipe
   (no toggle-specific colours). `saliency` defaults to `high` (filled).
 - **Required `aria-label`:** the button is icon-only and has no visible text, so
-  its accessible name is required — the mirror image of `Button`, which *forbids*
+  its accessible name is required — the mirror image of `Button`, which _forbids_
   `aria-label` precisely because its visible label is already the name.
 - **`intent` / `saliency` / `size`:** the pressed look, shared with `Button` /
   `Chip`; square at every size.
