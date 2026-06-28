@@ -1,17 +1,9 @@
 "use client";
 import * as React from "react";
-import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { Chip } from "../Chip";
-import {
-  fileListChip,
-  fileListIcon,
-  fileListItem,
-  fileListLabel,
-  fileListRemove,
-  fileListRoot,
-} from "./fileList.css";
+import { fileListChip, fileListItem, fileListRoot } from "./fileList.css";
 import { FileTypeIcon } from "./fileTypeIcon";
 
 /**
@@ -54,7 +46,7 @@ export interface FileListProps extends Omit<React.HTMLAttributes<HTMLUListElemen
   ref?: React.Ref<HTMLUListElement>;
 }
 
-/** A small "×" glyph; decorative — the button carries the accessible name. */
+/** A small "×" glyph; decorative — the remove adornment carries the accessible name. */
 function CloseGlyph() {
   return (
     <svg
@@ -70,43 +62,6 @@ function CloseGlyph() {
     >
       <path d="M6 6l12 12M18 6L6 18" />
     </svg>
-  );
-}
-
-interface RemoveButtonProps {
-  /** Filename, used to build the accessible name ("Remove …"). */
-  fileName: string;
-  /** List is disabled — keep the button focusable but inert. */
-  inert: boolean;
-  onRemove: () => void;
-}
-
-/**
- * The per-chip remove control. A real `<button>` (so it's focusable and in the
- * tab order) that follows the system's disabled convention: `aria-disabled`
- * plus a swallowed click, never the native `disabled` attribute.
- */
-function RemoveButton({ fileName, inert, onRemove }: RemoveButtonProps) {
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (inert) {
-      // No native `disabled`, so the click still fires — swallow it ourselves.
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-    onRemove();
-  };
-
-  return (
-    <button
-      type="button"
-      aria-label={`Remove ${fileName}`}
-      aria-disabled={inert || undefined}
-      onClick={handleClick}
-      className={cx(fileListRemove, focusRingRecipe({ type: "visible", offset: "sm" }))}
-    >
-      <CloseGlyph />
-    </button>
   );
 }
 
@@ -152,17 +107,25 @@ export function FileList({
             intent={intent}
             saliency={saliency}
             size={size}
-            // Dim via `aria-disabled` directly (the Chip is a non-interactive
-            // span); passing Chip's `disabled` prop would be a `disabled` JSX
-            // attribute, which the convention guard forbids outside `Internal*`.
-            aria-disabled={disabled || undefined}
+            // `disabled` dims the chip (modelled as `aria-disabled`, never the
+            // native attribute) and, through the Chip's adornment context, makes
+            // the remove button inert while keeping it keyboard-focusable.
+            disabled={disabled}
             className={fileListChip}
+            leadAdornments={[<Chip.Adornment icon={<FileTypeIcon file={file} />} />]}
+            trailAdornments={
+              onRemove != null
+                ? [
+                    <Chip.Adornment
+                      icon={<CloseGlyph />}
+                      label={`Remove ${file.name}`}
+                      onClick={() => onRemove(id)}
+                    />,
+                  ]
+                : undefined
+            }
           >
-            <FileTypeIcon file={file} className={fileListIcon} />
-            <span className={fileListLabel}>{file.name}</span>
-            {onRemove != null && (
-              <RemoveButton fileName={file.name} inert={disabled} onRemove={() => onRemove(id)} />
-            )}
+            {file.name}
           </Chip>
         </li>
       ))}
