@@ -286,9 +286,7 @@ describe("Chip", () => {
     it("appends a clickable remove button when handleRemove is supplied and fires it", async () => {
       const handleRemove = vi.fn();
       const user = userEvent.setup();
-      render(
-        <Chip handleRemove={handleRemove}>Tag</Chip>,
-      );
+      render(<Chip handleRemove={handleRemove}>Tag</Chip>);
       const button = screen.getByRole("button", { name: "Remove" });
       expect(button.tagName).toBe("BUTTON");
       await user.click(button);
@@ -314,9 +312,7 @@ describe("Chip", () => {
       const link = screen.getByRole("link", { name: "Open docs" });
       const remove = screen.getByRole("button", { name: "Remove" });
       // The built-in remove "×" follows the supplied trailing link in the DOM.
-      expect(
-        link.compareDocumentPosition(remove) & Node.DOCUMENT_POSITION_FOLLOWING,
-      ).toBeTruthy();
+      expect(link.compareDocumentPosition(remove) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
     it("makes the handleRemove button inert (but focusable) when the chip is disabled", async () => {

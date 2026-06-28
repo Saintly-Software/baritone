@@ -269,12 +269,7 @@ export const Removable: Story = {
       </Chip>
 
       {/* Disabled: the remove "×" goes inert but stays focusable. */}
-      <Chip
-        intent="primary"
-        saliency="high"
-        disabled
-        handleRemove={() => alert("nope")}
-      >
+      <Chip intent="primary" saliency="high" disabled handleRemove={() => alert("nope")}>
         Disabled
       </Chip>
     </div>
