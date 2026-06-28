@@ -1,12 +1,26 @@
 // Components
 export { Button, type ButtonProps } from "./components/Button";
-export { Chip, type ChipProps } from "./components/Chip";
+export { ToggleButton, type ToggleButtonProps } from "./components/ToggleButton";
+export {
+  Chip,
+  type ChipProps,
+  type ChipAdornmentProps,
+  type ChipRegularAdornmentProps,
+  type ChipButtonAdornmentProps,
+  type ChipLinkAdornmentProps,
+} from "./components/Chip";
 export {
   FileList,
   type FileListProps,
   type FileInfo,
   type FileListOrientation,
 } from "./components/FileList";
+export {
+  FileUpload,
+  type FileUploadProps,
+  type SingleFileUploadProps,
+  type MultipleFileUploadProps,
+} from "./components/FileUpload";
 export { Link, type LinkProps } from "./components/Link";
 export { Text, type TextProps } from "./components/Text";
 export { Heading, type HeadingProps } from "./components/Heading";
@@ -35,6 +49,18 @@ export {
   type CheckboxGroupOrientation,
 } from "./components/CheckboxGroup";
 export { Switch, type SwitchProps } from "./components/Switch";
+export { Tabs, type TabsProps, type TabsItemProps } from "./components/Tabs";
+export {
+  ToggleGroup,
+  type ToggleGroupProps,
+  type ToggleGroupItemProps,
+} from "./components/ToggleGroup";
+export {
+  Accordion,
+  type AccordionProps,
+  type AccordionItemProps,
+  type AccordionItemHeaderProps,
+} from "./components/Accordion";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Popover,

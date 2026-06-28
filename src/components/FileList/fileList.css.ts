@@ -41,59 +41,15 @@ export const fileListItem = style({
   maxWidth: "100%",
 });
 
-/** Allow the chip itself to shrink within its cell so the label can truncate. */
+/**
+ * Allow the chip itself to shrink within its cell so its label can truncate.
+ * The icon and remove button are now `Chip.Adornment`s, and the chip wraps the
+ * filename in its own ellipsizing label — so the only thing FileList still needs
+ * is to let the chip get narrow enough for that to engage.
+ */
 export const fileListChip = style({
   minWidth: 0,
   maxWidth: "100%",
-});
-
-/** The leading file-type icon; fixed at `1em`, never shrinks during truncation. */
-export const fileListIcon = style({
-  flexShrink: 0,
-});
-
-/** The filename — truncates with an ellipsis when the chip is width-constrained. */
-export const fileListLabel = style({
-  minWidth: 0,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-});
-
-/**
- * The remove "×" button: an icon-only control that inherits the chip's
- * foreground (`currentColor`) and sits flush after the label. Disabled state is
- * modelled with `aria-disabled` (never the native attribute, see AGENTS.md), so
- * it stays keyboard-focusable; the click is swallowed in the handler.
- */
-export const fileListRemove = style({
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexShrink: 0,
-  boxSizing: "border-box",
-  width: "1.25em",
-  height: "1.25em",
-  margin: 0,
-  padding: 0,
-  border: "none",
-  borderRadius: vars.radius.full,
-  background: "transparent",
-  color: "inherit",
-  fontSize: "0.9em",
-  lineHeight: 0,
-  cursor: "pointer",
-  opacity: 0.8,
-  transitionProperty: "opacity",
-  transitionDuration: vars.motion.duration.fast,
-  transitionTimingFunction: vars.motion.easing.standard,
-  selectors: {
-    "&:hover": { opacity: 1 },
-    '&[aria-disabled="true"]': { cursor: "not-allowed", opacity: 0.5 },
-  },
-  "@media": {
-    "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
-  },
 });
 
 export type FileListRootVariants = NonNullable<RecipeVariants<typeof fileListRoot>>;
