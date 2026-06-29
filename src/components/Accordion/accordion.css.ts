@@ -70,12 +70,47 @@ export const accordionTrigger = style({
   },
 });
 
+/**
+ * The `Accordion.ItemHeader`'s own layout inside the trigger: the leading group
+ * (optional `icon` + the title/subtitle stack) on the start, the optional `chip`
+ * on the end. Grows to fill the trigger (the chevron is the trigger's own
+ * trailing element), so the chip sits just inside it.
+ */
+export const accordionHeaderContent = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: vars.space[3],
+  flex: "1 1 auto",
+  minWidth: 0,
+});
+
+/** Leading group — the optional `icon` beside the title/subtitle stack. */
+export const accordionHeaderLeading = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space[3],
+  minWidth: 0,
+});
+
+/** The optional leading icon; never shrinks, sits beside the title. */
+export const accordionHeaderIcon = style({
+  display: "inline-flex",
+  flexShrink: 0,
+});
+
 /** The title/subtitle stack inside the trigger. */
 export const accordionHeaderText = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[1],
   minWidth: 0,
+});
+
+/** The optional trailing chip; never shrinks, kept clear of the title. */
+export const accordionHeaderChip = style({
+  display: "inline-flex",
+  flexShrink: 0,
 });
 
 /**

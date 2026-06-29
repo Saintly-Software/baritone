@@ -58,6 +58,26 @@ describe("Card", () => {
     expect(screen.getByRole("heading", { name: "Production" })).toBeInTheDocument();
   });
 
+  it("renders Card.Header as a real <header>, scoped inside a sectioning card", () => {
+    render(
+      <Card as="article" header={<Card.Header title="Post" />}>
+        Body
+      </Card>,
+    );
+    // The header is a real <header> nested inside the <article>, so in a browser it
+    // scopes to the section rather than becoming the page `banner` landmark.
+    const header = screen.getByRole("heading", { name: "Post" }).closest("header");
+    expect(header).not.toBeNull();
+    expect(header?.closest("article")).not.toBeNull();
+  });
+
+  it("keeps Card.Header a <div> for a plain div card (so it can't be a banner)", () => {
+    const { container } = render(<Card header={<Card.Header title="Plain" />}>Body</Card>);
+    // No <header> element at all — a top-level <header> would map to `banner`.
+    expect(container.querySelector("header")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Plain" })).toBeInTheDocument();
+  });
+
   it("renders Card.Divider as a separator", () => {
     render(<Card.Divider />);
     const divider = screen.getByRole("separator");
@@ -263,6 +283,47 @@ describe("Card", () => {
       await user.click(trigger);
       expect(onOpenChange).not.toHaveBeenCalled();
       expect(screen.queryByText("Body")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Card.Layout", () => {
+    it("renders a title heading, subtitle, and trailing action without a <dl>", () => {
+      const { container } = render(
+        <Card as="article">
+          <Card.Layout
+            title="Two-factor authentication"
+            subtitle="Add an extra layer of security."
+            action={<button>Enable</button>}
+          />
+        </Card>,
+      );
+      expect(
+        screen.getByRole("heading", { level: 3, name: "Two-factor authentication" }),
+      ).toBeInTheDocument();
+      expect(screen.getByText("Add an extra layer of security.")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Enable" })).toBeInTheDocument();
+      // Unlike a rich Card.Row, this isn't a description list.
+      expect(container.querySelector("dl")).toBeNull();
+    });
+
+    it("supports a description-only layout — no title means no heading", () => {
+      render(
+        <Card>
+          <Card.Layout subtitle="You're using 8.2 GB of 10 GB." action={<button>Upgrade</button>} />
+        </Card>,
+      );
+      expect(screen.queryByRole("heading")).toBeNull();
+      expect(screen.getByText("You're using 8.2 GB of 10 GB.")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Upgrade" })).toBeInTheDocument();
+    });
+
+    it("honors a custom heading level", () => {
+      render(
+        <Card>
+          <Card.Layout title="Section" level={2} />
+        </Card>,
+      );
+      expect(screen.getByRole("heading", { level: 2, name: "Section" })).toBeInTheDocument();
     });
   });
 

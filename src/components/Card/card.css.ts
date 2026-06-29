@@ -223,6 +223,40 @@ export const cardRowRecipe = recipe({
 
 export type CardRowVariants = NonNullable<RecipeVariants<typeof cardRowRecipe>>;
 
+/**
+ * `Card.Layout` — a split content row: a leading title/subtitle text stack on the
+ * start and a trailing action on the end, vertically centred. It's the standalone
+ * body-content sibling of a rich `Card.Row` (same split), but a plain `<div>` with
+ * no `<dl>` / landmark / overlay-link machinery — so a card can simply *be* one.
+ */
+export const cardLayout = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: vars.space[4],
+});
+
+/** The leading title/subtitle stack of a `Card.Layout`. */
+export const cardLayoutText = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.space[1],
+  minWidth: 0,
+});
+
+/**
+ * The trailing action of a `Card.Layout`; never shrinks. `position: relative`
+ * lifts it above an interactive card's stretched overlay link so it stays
+ * independently clickable.
+ */
+export const cardLayoutAction = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space[2],
+  flexShrink: 0,
+  position: "relative",
+});
+
 /** The `<dt>` of a term/description row. */
 export const cardRowTerm = style({
   margin: 0,

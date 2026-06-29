@@ -274,6 +274,89 @@ export const Rows: Story = {
   ),
 };
 
+/**
+ * `Card.Layout` — the card's *content* is one split row: a title/subtitle stack on
+ * the start and an action on the end. It's the rich `Card.Row` shape without the
+ * `<dl>` (and without borrowing the `header` slot for content that isn't a
+ * header), so a card can simply *be* this row. The three common shapes: title +
+ * subtitle + action, a bare title + action, and (drop the `title`) a
+ * description + action.
+ */
+export const Layout: Story = {
+  render: (args) => (
+    <div style={{ display: "grid", gap: 12, maxWidth: 420 }}>
+      <Card intent={args.intent} saliency={args.saliency} padding={args.padding}>
+        <Card.Layout
+          title="Two-factor authentication"
+          subtitle="Add an extra layer of security to your account."
+          action={
+            <Button intent="primary" saliency="high" size="sm">
+              Enable
+            </Button>
+          }
+        />
+      </Card>
+      <Card intent={args.intent} saliency={args.saliency} padding={args.padding}>
+        <Card.Layout
+          title="Slack"
+          action={
+            <Button intent="secondary" saliency="low" size="sm">
+              Disconnect
+            </Button>
+          }
+        />
+      </Card>
+      <Card intent={args.intent} saliency={args.saliency} padding={args.padding}>
+        <Card.Layout
+          subtitle="You're using 8.2 GB of your 10 GB of storage."
+          action={
+            <Button intent="primary" saliency="high" size="sm">
+              Upgrade
+            </Button>
+          }
+        />
+      </Card>
+    </div>
+  ),
+};
+
+/**
+ * Because `Card.Layout` is content (not a header), it composes cleanly with
+ * `as="article"`: each card is a self-contained article whose `title` is its
+ * heading and whose action is its content — the natural shape for a list of
+ * teasers. (When a card root is sectioning like this, a `Card.Header` also now
+ * renders a real, scoped `<header>` element rather than a plain `<div>`.)
+ */
+export const ArticleList: Story = {
+  render: (args) => (
+    <div style={{ display: "grid", gap: 12, maxWidth: 460 }}>
+      {[
+        { title: "Designing accessible cards", meta: "8 min read" },
+        { title: "Tokens, themes, and you", meta: "5 min read" },
+        { title: "Shipping a component library", meta: "12 min read" },
+      ].map((post) => (
+        <Card
+          key={post.title}
+          as="article"
+          intent={args.intent}
+          saliency={args.saliency}
+          padding={args.padding}
+        >
+          <Card.Layout
+            title={post.title}
+            subtitle={post.meta}
+            action={
+              <Button intent="secondary" saliency="low" size="sm">
+                Read
+              </Button>
+            }
+          />
+        </Card>
+      ))}
+    </div>
+  ),
+};
+
 export const BleedAndDivider: Story = {
   render: (args) => (
     <Card

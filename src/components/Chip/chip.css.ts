@@ -1,4 +1,3 @@
-import { keyframes, style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
@@ -42,38 +41,6 @@ export const chipShapeRecipe = recipe({
 });
 
 export type ChipShapeRecipeVariants = NonNullable<RecipeVariants<typeof chipShapeRecipe>>;
-
-/**
- * Chip loading state. Unlike Button — which overlays its spinner on the label to
- * preserve width and the accessible name — a loading Chip swaps its content out
- * entirely, so the spinner is the chip's only child and the shared
- * `componentTypographyRecipe` flex-centring positions it (no absolute wrapper).
- */
-
-const spin = keyframes({
-  to: { transform: "rotate(360deg)" },
-});
-
-/**
- * Pure-CSS ring spinner. Sized in `em` so it tracks the chip's font-size, and
- * `currentColor` so it matches the resolved foreground (dimmed, since a loading
- * chip is `aria-disabled`). The spin is an essential progress indicator, so it
- * is *not* gated behind `prefers-reduced-motion`; only the duration is eased
- * back there. Mirrors Button's spinner so a loading Chip and Button match.
- */
-export const chipSpinner = style({
-  width: "1.25em",
-  height: "1.25em",
-  borderRadius: "50%",
-  borderStyle: "solid",
-  borderWidth: "0.125em",
-  borderColor: "currentColor",
-  borderRightColor: "transparent",
-  animation: `${spin} 0.6s linear infinite`,
-  "@media": {
-    "(prefers-reduced-motion: reduce)": { animationDuration: "1.4s" },
-  },
-});
 
 /**
  * The chip's text label — the single flex item that wraps the (string) children

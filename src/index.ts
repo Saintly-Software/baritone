@@ -10,6 +10,12 @@ export {
   type ChipLinkAdornmentProps,
 } from "./components/Chip";
 export {
+  ChipList,
+  type ChipListProps,
+  type ChipListItem,
+  type ChipListOrientation,
+} from "./components/ChipList";
+export {
   FileList,
   type FileListProps,
   type FileInfo,

@@ -1,7 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
+import { Chip } from "../Chip";
+import { Icon } from "../Icon";
 import { Text } from "../Text";
 import { Accordion } from "./index";
+
+/** A small decorative glyph for the icon demo. */
+function ServerGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <rect x="3" y="4" width="18" height="6" rx="1" />
+      <rect x="3" y="14" width="18" height="6" rx="1" />
+      <path d="M7 7h.01M7 17h.01" />
+    </svg>
+  );
+}
 
 const ITEMS = [
   {
@@ -84,6 +97,58 @@ export const Multiple: Story = {
 export const Uncontrolled: Story = {
   render: () => (
     <Accordion aria-label="Frequently asked questions" initialValue="returns" items={ITEMS} />
+  ),
+};
+
+/** Headers with a leading `icon` and a trailing status `chip`. */
+export const WithIconAndChip: Story = {
+  render: () => (
+    <Accordion
+      aria-label="Environments"
+      initialValue="production"
+      items={[
+        {
+          value: "production",
+          header: (
+            <Accordion.ItemHeader
+              title="Production"
+              subtitle="api.example.com"
+              icon={
+                <Icon>
+                  <ServerGlyph />
+                </Icon>
+              }
+              chip={
+                <Chip intent="positive" saliency="low" size="sm">
+                  Healthy
+                </Chip>
+              }
+            />
+          ),
+          children: <Text variant="sm">All systems operational.</Text>,
+        },
+        {
+          value: "staging",
+          header: (
+            <Accordion.ItemHeader
+              title="Staging"
+              subtitle="staging.example.com"
+              icon={
+                <Icon>
+                  <ServerGlyph />
+                </Icon>
+              }
+              chip={
+                <Chip intent="warning" saliency="low" size="sm">
+                  Degraded
+                </Chip>
+              }
+            />
+          ),
+          children: <Text variant="sm">Elevated error rate in the last hour.</Text>,
+        },
+      ]}
+    />
   ),
 };
 

@@ -6,6 +6,7 @@ import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { InternalButton } from "../../internal/components/InternalButton";
+import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import type { ButtonProps } from "../Button";
 import { Heading } from "../Heading";
 import { Text } from "../Text";
@@ -18,7 +19,6 @@ import {
   modalHeaderText,
   modalPopup,
   modalSpinner,
-  modalSpinnerIcon,
   modalViewport,
 } from "./modal.css";
 
@@ -164,7 +164,7 @@ function ModalRoot({
               <div className={cx(loading && modalBodyContentLoading)}>{children}</div>
               {loading && (
                 <span className={modalSpinner} aria-hidden>
-                  <span className={modalSpinnerIcon} />
+                  <InternalSpinner size="lg" />
                 </span>
               )}
             </div>

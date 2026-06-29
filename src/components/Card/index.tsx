@@ -26,6 +26,9 @@ import {
   cardHeaderText,
   cardHeaderTrailing,
   cardInteractive,
+  cardLayout,
+  cardLayoutAction,
+  cardLayoutText,
   cardOverlayLink,
   cardRoot,
   cardRowActions,
@@ -61,7 +64,31 @@ type CardHeaderControl =
     }
   | { kind: "collapsible"; disabled?: boolean };
 
-const CardHeaderContext = React.createContext<CardHeaderControl | null>(null);
+/** What `Card.Header` renders as, plus the card-level control it should host. */
+interface CardHeaderContextValue {
+  /**
+   * The card-level control the header hosts — the interactive title (link /
+   * button) or the collapsible disclosure trigger — or `null` for a static card.
+   */
+  control: CardHeaderControl | null;
+  /**
+   * The element `Card.Header` renders. It's a real `<header>` only when the card
+   * root is sectioning content (`article` / `section`) or `main`: there a child
+   * `<header>` scopes to that section. Inside a plain `div` card a `<header>`
+   * would instead be promoted to the page's `banner` landmark, so a `div` card
+   * (and a collapsible card, whose root isn't sectioning) keeps a `<div>`.
+   */
+  element: "header" | "div";
+}
+
+const CardHeaderContext = React.createContext<CardHeaderContextValue | null>(null);
+
+/**
+ * Card roots whose box scopes a descendant `<header>` to the section, so
+ * `Card.Header` can be a real `<header>` without being exposed as the page
+ * `banner` landmark. Everything else (notably a plain `div` card) keeps a `div`.
+ */
+const SECTIONING_CARD_ELEMENTS = new Set<CardElement>(["article", "section", "main"]);
 
 /** Props shared by every Card mode (static / clickable / linkable). */
 interface CardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick"> {
@@ -240,7 +267,9 @@ function CardRoot(props: CardProps) {
         {...rest}
       >
         <div className={cx(cardCollapsiblePaddingRecipe({ padding }), cardCollapsibleHeader)}>
-          <CardHeaderContext.Provider value={{ kind: "collapsible", disabled }}>
+          <CardHeaderContext.Provider
+            value={{ control: { kind: "collapsible", disabled }, element: "div" }}
+          >
             {header}
           </CardHeaderContext.Provider>
         </div>
@@ -267,20 +296,18 @@ function CardRoot(props: CardProps) {
     ? { kind: "link", href, target, rel, onClick, render, disabled }
     : null;
 
-  const body =
-    linkControl != null ? (
-      <CardHeaderContext.Provider value={linkControl}>
-        {header}
-        {children}
-        {footer}
-      </CardHeaderContext.Provider>
-    ) : (
-      <>
-        {header}
-        {children}
-        {footer}
-      </>
-    );
+  // `Card.Header` becomes a real `<header>` when this root scopes it (a sectioning
+  // `article` / `section`, or `main`); a plain `div` card keeps a `<div>` header so
+  // it can't be mistaken for the page `banner`. See SECTIONING_CARD_ELEMENTS.
+  const headerElement: "header" | "div" = SECTIONING_CARD_ELEMENTS.has(as) ? "header" : "div";
+
+  const body = (
+    <CardHeaderContext.Provider value={{ control: linkControl, element: headerElement }}>
+      {header}
+      {children}
+      {footer}
+    </CardHeaderContext.Provider>
+  );
 
   return useRender({
     render: interactive ? undefined : render,
@@ -377,7 +404,8 @@ function CardHeader({
   // control: a `link` (the title becomes the stretched overlay link/button) or a
   // `collapsible` disclosure trigger. Outside an interactive/collapsible card the
   // context is null and the header is plain text.
-  const control = React.useContext(CardHeaderContext);
+  const ctx = React.useContext(CardHeaderContext);
+  const control = ctx?.control ?? null;
   const link = control?.kind === "link" ? control : null;
   const collapsibleControl = control?.kind === "collapsible" ? control : null;
 
@@ -390,8 +418,8 @@ function CardHeader({
   // The collapsible trigger always needs a home in the trailing group, so render
   // it even without a chip / children.
   const hasTrailing = chip != null || children != null || collapsibleControl != null;
-  return (
-    <div ref={ref} className={cx(cardHeader, className)} {...rest}>
+  const content = (
+    <>
       {/* Leading group (icon + text) also acts as the flex spacer that pushes the
           trailing group to the end, so it's always rendered. */}
       <div className={cardHeaderLeading}>
@@ -431,8 +459,17 @@ function CardHeader({
           )}
         </div>
       )}
-    </div>
+    </>
   );
+
+  // A sectioning card (`article` / `section` / `main`) scopes this header, so it's
+  // a real `<header>`; a plain `div` card keeps a `<div>` (see
+  // CardHeaderContextValue.element). Default to `div` when used outside a Card.
+  return useRender({
+    render: undefined,
+    defaultElement: ctx?.element ?? "div",
+    props: { ref, className: cx(cardHeader, className), children: content, ...rest },
+  });
 }
 
 export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -571,6 +608,66 @@ function CardRow(props: CardRowProps) {
 
 export type CardRowProps = CardRowTermProps | CardRowRichProps;
 
+export interface CardLayoutProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  /**
+   * Primary line, rendered as a `Heading` for the document outline. Omit it for a
+   * description-only layout — then the `subtitle` is the row's text.
+   */
+  title?: React.ReactNode;
+  /** Document-outline level for the `title` heading. Default `3`. */
+  level?: HeadingLevel;
+  /**
+   * Supporting line — a subtitle beneath the `title`, or (with no `title`) the
+   * layout's own description text.
+   */
+  subtitle?: React.ReactNode;
+  /** Trailing control — typically a `<Button>` or a `<Card.Actions>`. */
+  action?: React.ReactNode;
+  ref?: React.Ref<HTMLDivElement>;
+}
+
+/**
+ * Card.Layout — a split content row for the common "some text + a trailing
+ * action" shapes: `title` + `subtitle` + `action`, `title` + `action`, or
+ * `description` + `action` (drop the `title`). Passed as a child of `Card`.
+ *
+ * It's the standalone, body-content sibling of a rich `Card.Row` — the same
+ * leading-text / trailing-action split, but a plain `<div>` rather than a
+ * `<dt>`/`<dd>` inside a `<dl>`. So a whole `<Card as="article">` (e.g. a teaser
+ * in a list of posts) can simply *be* one of these: the `title` is the article's
+ * heading and the action is its content, with no `Card.Header` standing in for a
+ * header the card doesn't have.
+ */
+function CardLayout({
+  title,
+  level = 3,
+  subtitle,
+  action,
+  className,
+  children,
+  ref,
+  ...rest
+}: CardLayoutProps) {
+  return (
+    <div ref={ref} className={cx(cardLayout, className)} {...rest}>
+      <div className={cardLayoutText}>
+        {title != null && (
+          <Heading level={level} variant="lg">
+            {title}
+          </Heading>
+        )}
+        {subtitle != null && (
+          <Text variant="sm" saliency="low">
+            {subtitle}
+          </Text>
+        )}
+        {children}
+      </div>
+      {action != null && <div className={cardLayoutAction}>{action}</div>}
+    </div>
+  );
+}
+
 export type CardBleedProps = React.HTMLAttributes<HTMLDivElement> & {
   ref?: React.Ref<HTMLDivElement>;
 };
@@ -618,6 +715,7 @@ CardFooter.displayName = "Card.Footer";
 CardActions.displayName = "Card.Actions";
 CardRows.displayName = "Card.Rows";
 CardRow.displayName = "Card.Row";
+CardLayout.displayName = "Card.Layout";
 CardBleed.displayName = "Card.Bleed";
 CardDivider.displayName = "Card.Divider";
 
@@ -628,6 +726,7 @@ export const Card = Object.assign(CardRoot, {
   Actions: CardActions,
   Rows: CardRows,
   Row: CardRow,
+  Layout: CardLayout,
   Bleed: CardBleed,
   Divider: CardDivider,
 });

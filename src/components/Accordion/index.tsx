@@ -8,6 +8,10 @@ import { Text } from "../Text";
 import {
   accordionChevron,
   accordionHeader,
+  accordionHeaderChip,
+  accordionHeaderContent,
+  accordionHeaderIcon,
+  accordionHeaderLeading,
   accordionHeaderText,
   accordionItem,
   accordionItemDisabled,
@@ -23,29 +27,65 @@ export interface AccordionItemHeaderProps {
   title: React.ReactNode;
   /** Optional supporting line beneath the title. */
   subtitle?: React.ReactNode;
-  /** Extra className merged onto the title/subtitle stack. */
+  /** Leading glyph before the title — typically an `<Icon>`. */
+  icon?: React.ReactNode;
+  /**
+   * Trailing element after the title, before the chevron — typically a status
+   * `<Chip>`. It sits inside the trigger button, so keep it decorative.
+   */
+  chip?: React.ReactNode;
+  /** Extra className merged onto the header content. */
   className?: string;
   ref?: React.Ref<HTMLSpanElement>;
 }
 
 /**
  * The header content for an `Accordion` item: a `title` with an optional
- * `subtitle`. Pass it to an item's `header`. It renders only the text stack — the
- * surrounding `<h3>`, the `<button>` trigger and the disclosure chevron are
- * supplied by `Accordion` itself.
+ * `subtitle`, plus an optional leading `icon` and trailing `chip`. Pass it to an
+ * item's `header`. It renders only the header content — the surrounding `<h3>`,
+ * the `<button>` trigger and the disclosure chevron are supplied by `Accordion`
+ * itself. The whole header lives inside the trigger button, so the `icon` /
+ * `chip` should be decorative (the title is the trigger's accessible name).
  *
  * @example
  * { header: <Accordion.ItemHeader title="Shipping" subtitle="2–4 business days" />, ... }
+ *
+ * @example
+ * {
+ *   header: (
+ *     <Accordion.ItemHeader
+ *       title="Production"
+ *       icon={<Icon><ServerGlyph /></Icon>}
+ *       chip={<Chip intent="positive" saliency="low" size="sm">Healthy</Chip>}
+ *     />
+ *   ),
+ *   ...
+ * }
  */
-function AccordionItemHeader({ title, subtitle, className, ref }: AccordionItemHeaderProps) {
+function AccordionItemHeader({
+  title,
+  subtitle,
+  icon,
+  chip,
+  className,
+  ref,
+}: AccordionItemHeaderProps) {
   return (
-    <span ref={ref} className={cx(accordionHeaderText, className)}>
-      <Text variant="base">{title}</Text>
-      {subtitle != null && (
-        <Text variant="sm" saliency="low">
-          {subtitle}
-        </Text>
-      )}
+    <span ref={ref} className={cx(accordionHeaderContent, className)}>
+      {/* Leading group (icon + text), and the flex spacer that pushes the chip to
+          the end, so it's always rendered. */}
+      <span className={accordionHeaderLeading}>
+        {icon != null && <span className={accordionHeaderIcon}>{icon}</span>}
+        <span className={accordionHeaderText}>
+          <Text variant="base">{title}</Text>
+          {subtitle != null && (
+            <Text variant="sm" saliency="low">
+              {subtitle}
+            </Text>
+          )}
+        </span>
+      </span>
+      {chip != null && <span className={accordionHeaderChip}>{chip}</span>}
     </span>
   );
 }

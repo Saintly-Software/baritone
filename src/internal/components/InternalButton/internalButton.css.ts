@@ -1,4 +1,4 @@
-import { keyframes, style } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { vars } from "../../../theme/contract.css";
 
 /**
@@ -34,11 +34,10 @@ export const buttonContentLoading = style({
   opacity: 0,
 });
 
-const spin = keyframes({
-  to: { transform: "rotate(360deg)" },
-});
-
-/** Centres the spinner over the (hidden) label without affecting layout. */
+/**
+ * Centres the spinner over the (hidden) label without affecting layout. The ring
+ * glyph itself is the shared `InternalSpinner`.
+ */
 export const buttonSpinner = style({
   position: "absolute",
   inset: 0,
@@ -46,24 +45,4 @@ export const buttonSpinner = style({
   alignItems: "center",
   justifyContent: "center",
   pointerEvents: "none",
-});
-
-/**
- * Pure-CSS ring spinner. Sized in `em` so it tracks the button's font-size, and
- * `currentColor` so it matches the resolved (disabled) foreground. The spin is
- * an essential progress indicator, so it is *not* gated behind
- * `prefers-reduced-motion`; only the duration is eased back there.
- */
-export const buttonSpinnerIcon = style({
-  width: "1.25em",
-  height: "1.25em",
-  borderRadius: "50%",
-  borderStyle: "solid",
-  borderWidth: "0.125em",
-  borderColor: "currentColor",
-  borderRightColor: "transparent",
-  animation: `${spin} 0.6s linear infinite`,
-  "@media": {
-    "(prefers-reduced-motion: reduce)": { animationDuration: "1.4s" },
-  },
 });
