@@ -1,5 +1,7 @@
 "use client";
+import { Popover as BasePopover } from "@base-ui/react/popover";
 import * as React from "react";
+import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import {
   componentIntentRecipe,
   componentTypographyRecipe,
@@ -7,8 +9,9 @@ import {
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { useRender, type RenderProp } from "../../utils/render";
-import { chipLabelRecipe, chipShapeRecipe, chipSizeRecipe, chipSpinner } from "./chip.css";
+import { mergeProps, useRender, type RenderProp } from "../../utils/render";
+import type { PopoverProps } from "../Popover";
+import { chipLabelRecipe, chipShapeRecipe, chipSizeRecipe } from "./chip.css";
 import { chipAdornmentRecipe } from "./chipAdornment.css";
 
 /**
@@ -184,7 +187,7 @@ function ChipAdornment(props: ChipAdornmentProps) {
   });
 }
 
-export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "color"> {
+export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "color" | "popover"> {
   intent?: Intent;
   saliency?: Saliency;
   size?: Size;
@@ -205,6 +208,19 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
    * effect without text `children`.
    */
   onClick?: React.MouseEventHandler<HTMLElement>;
+  /**
+   * Attaches a `<Popover>` opened by clicking the chip's text label. Pass a fully
+   * configured `<Popover>` element (its `header` / `footer` / content / placement
+   * — the whole Popover API): the chip slots itself in as that popover's
+   * `trigger`, rendering the label as a real `<button>` that base-ui wires up, so
+   * it carries `aria-haspopup` / `aria-expanded` / `aria-controls` and toggles the
+   * surface. Only the label is the trigger — adornments keep their own actions. A
+   * disabled chip's label stays keyboard-focusable (`aria-disabled`) but swallows
+   * the click, so the popover won't open. Composes with `onClick` (which still
+   * fires before the popover opens). Has no effect without text `children`, or
+   * while `loading`.
+   */
+  popover?: React.ReactElement<PopoverProps>;
   /**
    * Loading state: replaces the chip's entire content — both adornment lists and
    * the label — with a centred spinner, and marks the chip `aria-busy` and inert
@@ -256,6 +272,7 @@ function ChipRoot({
   leadAdornments,
   trailAdornments,
   handleRemove,
+  popover,
   render,
   className,
   children,
@@ -281,7 +298,73 @@ function ChipRoot({
     onClick?.(event);
   };
 
-  return useRender({
+  // Shared styling for the label when it's a `<button>` (clickable or a popover
+  // trigger): strip the native button chrome back to plain text and add the
+  // focus ring.
+  const interactiveLabelClassName = cx(
+    chipLabelRecipe({ interactive: true }),
+    focusRingRecipe({ type: "visible", offset: "sm" }),
+  );
+
+  // Children are text-only, so the chip owns the label element — one flex item it
+  // can truncate, sat between the adornment lists. It takes one of three shapes:
+  // a popover trigger (`popover`), a plain clickable `<button>` (`onClick`), or a
+  // non-interactive span.
+  let label: React.ReactNode = null;
+  if (children != null) {
+    if (popover != null) {
+      // The label is the popover's trigger. base-ui hands us the toggle handler
+      // plus the `aria-haspopup` / `aria-expanded` / `aria-controls` wiring (and a
+      // ref to anchor against) through `htmlAttrs`; we merge them onto our own
+      // label `<button>` the way base-ui itself merges — mirroring InternalButton,
+      // which is how Drawer/Modal/Popover use a real button as their trigger. A
+      // disabled chip swallows the click before base-ui's toggle runs, so the
+      // label stays focusable but the popover stays shut.
+      label = (
+        <BasePopover.Trigger
+          render={(htmlAttrs) => {
+            const { onClick: hostOnClick, ...hostAttrs } = htmlAttrs;
+            const handleTriggerClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+              if (disabled) {
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+              }
+              onClick?.(event);
+              hostOnClick?.(event as React.MouseEvent<Element>);
+            };
+            const labelProps = mergeProps(hostAttrs as Record<string, unknown>, {
+              type: "button",
+              className: interactiveLabelClassName,
+              "aria-disabled": disabled || undefined,
+              onClick: handleTriggerClick,
+              children,
+            }) as React.ButtonHTMLAttributes<HTMLButtonElement> & {
+              ref?: React.Ref<HTMLButtonElement>;
+            };
+            return <button {...labelProps} />;
+          }}
+        />
+      );
+    } else if (onClick != null) {
+      // With an `onClick` the label is a real `<button>` so it's the
+      // keyboard-focusable hit target; otherwise it's a plain span.
+      label = (
+        <button
+          type="button"
+          className={interactiveLabelClassName}
+          aria-disabled={disabled || undefined}
+          onClick={handleLabelClick}
+        >
+          {children}
+        </button>
+      );
+    } else {
+      label = <span className={chipLabelRecipe()}>{children}</span>;
+    }
+  }
+
+  const chip = useRender({
     render,
     defaultElement: "span",
     props: {
@@ -299,31 +382,12 @@ function ChipRoot({
       // Loading swaps the whole content out for a decorative spinner; the
       // recipe's flex-centring places it and `aria-busy` announces the state.
       children: loading ? (
-        <span className={chipSpinner} aria-hidden />
+        <InternalSpinner />
       ) : (
         <ChipAdornmentContext.Provider value={adornmentContext}>
           {/* `Children.toArray` assigns stable keys to the positional lists. */}
           {React.Children.toArray(leadAdornments)}
-          {/* Children are text-only, so the chip owns the label element — one
-              flex item it can truncate, sat between the adornment lists. With an
-              `onClick` it becomes a real `<button>` so the label is the
-              keyboard-focusable hit target; otherwise it's a plain span. */}
-          {children != null &&
-            (onClick != null ? (
-              <button
-                type="button"
-                className={cx(
-                  chipLabelRecipe({ interactive: true }),
-                  focusRingRecipe({ type: "visible", offset: "sm" }),
-                )}
-                aria-disabled={disabled || undefined}
-                onClick={handleLabelClick}
-              >
-                {children}
-              </button>
-            ) : (
-              <span className={chipLabelRecipe()}>{children}</span>
-            ))}
+          {label}
           {React.Children.toArray(trailAdornments)}
           {/* The built-in remove "×" always sits last, after any supplied
               trailing adornments. It's a clickable adornment, so it inherits the
@@ -336,6 +400,15 @@ function ChipRoot({
       ...rest,
     },
   });
+
+  // With a `popover`, the chip *is* the popover's trigger: clone the supplied
+  // <Popover> and slot the whole chip in as its `trigger`, so base-ui's Root wraps
+  // the chip (and the label Trigger inside it) and renders the floating surface
+  // alongside. Skipped while loading, since no label — hence no trigger — exists.
+  if (popover != null && children != null && !loading) {
+    return React.cloneElement(popover, { trigger: chip });
+  }
+  return chip;
 }
 
 ChipRoot.displayName = "Chip";

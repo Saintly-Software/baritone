@@ -81,6 +81,35 @@ describe("Accordion", () => {
     expect(screen.getByText("2–4 business days")).toBeInTheDocument();
   });
 
+  it("renders a header's leading icon and trailing chip inside the trigger", () => {
+    render(
+      <Accordion
+        aria-label="Environments"
+        initialValue="production"
+        items={[
+          {
+            value: "production",
+            header: (
+              <Accordion.ItemHeader
+                title="Production"
+                icon={<span data-testid="icon">★</span>}
+                chip={<span data-testid="chip">Healthy</span>}
+              />
+            ),
+            children: <p>All systems operational.</p>,
+          },
+        ]}
+      />,
+    );
+
+    const trigger = screen.getByRole("button", { name: /Production/ });
+    // Both adornments live inside the trigger button alongside the title.
+    expect(trigger).toContainElement(screen.getByTestId("icon"));
+    expect(trigger).toContainElement(screen.getByTestId("chip"));
+    // The chip text folds into the trigger's accessible name.
+    expect(trigger).toHaveAccessibleName(/Production.*Healthy/s);
+  });
+
   it("starts collapsed and opens the clicked item, calling onChange with its value", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

@@ -1,4 +1,4 @@
-import { keyframes, style } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
@@ -164,34 +164,14 @@ export const drawerFooter = style({
   flexShrink: 0,
 });
 
-const spin = keyframes({
-  to: { transform: "rotate(360deg)" },
-});
-
-/** Centres the spinner over the (hidden) body content without affecting layout. */
+/**
+ * Centres the spinner over the (hidden) body content without affecting layout.
+ * The ring glyph itself is the shared `InternalSpinner`.
+ */
 export const drawerSpinner = style({
   position: "absolute",
   inset: 0,
   display: "grid",
   placeItems: "center",
   pointerEvents: "none",
-});
-
-/**
- * Pure-CSS ring spinner, mirroring `Button`'s. `currentColor` so it matches the
- * surface foreground. The spin is an essential progress indicator, so it isn't
- * gated behind `prefers-reduced-motion`; only the duration is eased back there.
- */
-export const drawerSpinnerIcon = style({
-  width: "1.75em",
-  height: "1.75em",
-  borderRadius: "50%",
-  borderStyle: "solid",
-  borderWidth: "0.15em",
-  borderColor: "currentColor",
-  borderRightColor: "transparent",
-  animation: `${spin} 0.6s linear infinite`,
-  "@media": {
-    "(prefers-reduced-motion: reduce)": { animationDuration: "1.4s" },
-  },
 });

@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { Popover } from "../Popover";
 import { Chip } from "./index";
 
 describe("Chip", () => {
@@ -123,6 +124,100 @@ describe("Chip", () => {
 
       await user.click(button);
       expect(onClick).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("popover", () => {
+    it("renders the label as a button trigger carrying the popup a11y wiring", async () => {
+      const user = userEvent.setup();
+      render(<Chip popover={<Popover>Popover body</Popover>}>Status</Chip>);
+
+      const trigger = screen.getByRole("button", { name: "Status" });
+      expect(trigger.tagName).toBe("BUTTON");
+      // base-ui marks the trigger as controlling a dialog popup, collapsed to start.
+      expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+
+      // The popover is closed until the label is clicked.
+      expect(screen.queryByText("Popover body")).not.toBeInTheDocument();
+
+      await user.click(trigger);
+
+      const popup = await screen.findByRole("dialog");
+      expect(popup).toHaveTextContent("Popover body");
+      // Once open, the trigger is expanded and `aria-controls` points at the popup.
+      expect(trigger).toHaveAttribute("aria-expanded", "true");
+      expect(trigger).toHaveAttribute("aria-controls", popup.id);
+      expect(popup.id).toBeTruthy();
+    });
+
+    it("keeps the label a plain span (no trigger) when popover is omitted", () => {
+      render(<Chip>Status</Chip>);
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      expect(screen.getByText("Status").tagName).toBe("SPAN");
+    });
+
+    it("closes the popover via a Popover.Close in the content", async () => {
+      const user = userEvent.setup();
+      render(
+        <Chip
+          popover={
+            <Popover
+              footer={<Popover.Footer>{<Popover.Close>Done</Popover.Close>}</Popover.Footer>}
+            >
+              Popover body
+            </Popover>
+          }
+        >
+          Status
+        </Chip>,
+      );
+
+      await user.click(screen.getByRole("button", { name: "Status" }));
+      expect(await screen.findByText("Popover body")).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: "Done" }));
+      await waitFor(() => expect(screen.queryByText("Popover body")).not.toBeInTheDocument());
+    });
+
+    it("still fires the chip's own onClick when the label trigger is pressed", async () => {
+      const onClick = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <Chip popover={<Popover>Popover body</Popover>} onClick={onClick}>
+          Status
+        </Chip>,
+      );
+
+      await user.click(screen.getByRole("button", { name: "Status" }));
+      expect(onClick).toHaveBeenCalledOnce();
+      expect(await screen.findByText("Popover body")).toBeInTheDocument();
+    });
+
+    it("uses aria-disabled (not the native attribute) on a disabled trigger, keeps it focusable, and won't open the popover", async () => {
+      const user = userEvent.setup();
+      render(
+        <Chip disabled popover={<Popover>Popover body</Popover>}>
+          Status
+        </Chip>,
+      );
+
+      const trigger = screen.getByRole("button", { name: "Status" });
+      expect(trigger).toHaveAttribute("aria-disabled", "true");
+      expect(trigger).not.toHaveAttribute("disabled");
+
+      trigger.focus();
+      expect(trigger).toHaveFocus();
+
+      await user.click(trigger);
+      expect(screen.queryByText("Popover body")).not.toBeInTheDocument();
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+    });
+
+    it("does not mount the popover when there is no text label to trigger it", () => {
+      render(<Chip popover={<Popover>Popover body</Popover>} />);
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+      expect(screen.queryByText("Popover body")).not.toBeInTheDocument();
     });
   });
 

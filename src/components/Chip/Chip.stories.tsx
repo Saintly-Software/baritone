@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { Icon } from "../Icon";
+import { Popover } from "../Popover";
+import { Text } from "../Text";
 import { Chip } from "./index";
 
 // Throwaway glyphs so the adornment stories have something to render.
@@ -181,6 +183,61 @@ export const ClickableLabel: Story = {
 
       {/* Disabled: label inert but still focusable. */}
       <Chip intent="primary" saliency="high" disabled onClick={() => alert("nope")}>
+        Disabled
+      </Chip>
+    </div>
+  ),
+};
+
+/**
+ * Pass a configured `<Popover>` to `popover` to open it from the chip's text
+ * label. The label renders as a real `<button>` that base-ui wires as the
+ * popover's trigger (`aria-haspopup` / `aria-expanded` / `aria-controls`), so it's
+ * keyboard-operable. Adornments keep their own actions, and a disabled chip's
+ * label stays focusable but won't open the popover.
+ */
+export const WithPopover: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      <Chip
+        intent="primary"
+        saliency="mid"
+        popover={
+          <Popover header={<Popover.Header title="Build #1429" subtitle="Passed in 2m 14s" />}>
+            <Text variant="sm">All 312 checks green. Deployed to staging.</Text>
+          </Popover>
+        }
+      >
+        Passing
+      </Chip>
+
+      {/* Popover-triggering label alongside an independent remove button. */}
+      <Chip
+        intent="neutral"
+        saliency="mid"
+        popover={
+          <Popover>
+            <Text variant="sm">Tagged by 4 people.</Text>
+          </Popover>
+        }
+        trailAdornments={[
+          <Chip.Adornment icon={<CloseGlyph />} label="Remove" onClick={() => alert("removed")} />,
+        ]}
+      >
+        Details
+      </Chip>
+
+      {/* Disabled: the label trigger is inert but still focusable. */}
+      <Chip
+        intent="primary"
+        saliency="high"
+        disabled
+        popover={
+          <Popover>
+            <Text variant="sm">You won't see me.</Text>
+          </Popover>
+        }
+      >
         Disabled
       </Chip>
     </div>

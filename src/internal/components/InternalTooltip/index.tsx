@@ -2,7 +2,7 @@
 import { Tooltip } from "@base-ui/react/tooltip";
 import * as React from "react";
 import { cx } from "../../../utils/cx";
-import { tooltipPopup, tooltipPositioner } from "./internalTooltip.css";
+import { tooltipArrow, tooltipPopup, tooltipPositioner } from "./internalTooltip.css";
 
 type RootProps = React.ComponentProps<typeof Tooltip.Root>;
 type TriggerProps = React.ComponentProps<typeof Tooltip.Trigger>;
@@ -90,7 +90,10 @@ export function InternalTooltip({
           align={align}
           sideOffset={sideOffset}
         >
-          <Tooltip.Popup className={cx(tooltipPopup, className)}>{content}</Tooltip.Popup>
+          <Tooltip.Popup className={cx(tooltipPopup, className)}>
+            <Tooltip.Arrow className={tooltipArrow} />
+            {content}
+          </Tooltip.Popup>
         </Tooltip.Positioner>
       </Tooltip.Portal>
     </Tooltip.Root>

@@ -6,6 +6,7 @@ import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { InternalButton } from "../../internal/components/InternalButton";
+import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import type { ButtonProps } from "../Button";
 import { Heading } from "../Heading";
 import { Text } from "../Text";
@@ -18,7 +19,6 @@ import {
   drawerHeaderText,
   drawerPopup,
   drawerSpinner,
-  drawerSpinnerIcon,
   drawerViewport,
 } from "./drawer.css";
 
@@ -166,7 +166,7 @@ function DrawerRoot({
               <div className={cx(loading && drawerBodyContentLoading)}>{children}</div>
               {loading && (
                 <span className={drawerSpinner} aria-hidden>
-                  <span className={drawerSpinnerIcon} />
+                  <InternalSpinner size="lg" />
                 </span>
               )}
             </BaseDrawer.Content>

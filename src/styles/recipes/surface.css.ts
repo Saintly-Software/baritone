@@ -2,9 +2,12 @@ import { createVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
+import { active, hover } from "../../theme/oklch";
 import { focusRingColorVar, surfacePaddingVar, textColorVar } from "../vars.css";
 
 const bgc = createVar();
+const bgcHover = createVar();
+const bgcActive = createVar();
 const fg = createVar();
 const bd = createVar();
 const bgcDisabled = createVar();
@@ -17,7 +20,10 @@ const bdDisabled = createVar();
  * border) and `high` (a washed shade). Most surfaces use the neutral intent;
  * colourful intents exist mainly for Notice/Toast. Surfaces are static (no
  * hover); pair with the shared `focusRingRecipe` (the `intent` variant publishes
- * the ring colour) for when they're made interactive. The resolved foreground is
+ * the ring colour) for when they're made interactive — or set the `interactive`
+ * variant to add hover/active washes (computed in oklch from the `default`
+ * background, like the component recipe) for a surface that *is* the control,
+ * e.g. a clickable/linkable `Card`. The resolved foreground is
  * published as `--textColor` so a nested `Text` matches the surface without
  * knowing its intent, and the applied `padding` is exposed via `--surfacePadding`
  * so descendants (e.g. `Card.Bleed`) can negate it.
@@ -60,6 +66,27 @@ export const surfaceRecipe = recipe({
       md: { vars: { [surfacePaddingVar]: vars.space[4] } },
       lg: { vars: { [surfacePaddingVar]: vars.space[6] } },
     },
+    // When the surface itself is the control (a clickable/linkable Card), add the
+    // hover/active washes + pointer cursor. The hover/active backgrounds are
+    // computed in oklch from `default` (set in the compound variants below); the
+    // `:not([aria-disabled])` guards keep a disabled surface inert. Static
+    // surfaces (the default) are unaffected.
+    interactive: {
+      false: {},
+      true: {
+        cursor: "pointer",
+        transitionProperty: "background-color, border-color, outline-color",
+        transitionDuration: vars.motion.duration.fast,
+        transitionTimingFunction: vars.motion.easing.standard,
+        selectors: {
+          '&:hover:not([aria-disabled="true"])': { background: bgcHover },
+          '&:active:not([aria-disabled="true"])': { background: bgcActive },
+        },
+        "@media": {
+          "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
+        },
+      },
+    },
   },
   compoundVariants: INTENTS.flatMap((intent) =>
     SURFACE_SALIENCIES.map((saliency) => {
@@ -69,6 +96,8 @@ export const surfaceRecipe = recipe({
         style: {
           vars: {
             [bgc]: block.default.bgc,
+            [bgcHover]: hover(block.default.bgc),
+            [bgcActive]: active(block.default.bgc),
             [fg]: block.default.text,
             [bd]: block.default.border,
             [bgcDisabled]: block.disabled.bgc,
@@ -83,6 +112,7 @@ export const surfaceRecipe = recipe({
     intent: "neutral",
     saliency: "low",
     padding: "md",
+    interactive: false,
   },
 });
 

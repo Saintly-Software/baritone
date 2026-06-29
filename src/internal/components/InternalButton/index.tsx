@@ -8,13 +8,13 @@ import {
 import { focusRingRecipe } from "../../../styles/recipes/focusRing.css";
 import { cx } from "../../../utils/cx";
 import { mergeProps, useRender } from "../../../utils/render";
+import { InternalSpinner } from "../InternalSpinner";
 import { InternalTooltip } from "../InternalTooltip";
 import {
   buttonBase,
   buttonContent,
   buttonContentLoading,
   buttonSpinner,
-  buttonSpinnerIcon,
 } from "./internalButton.css";
 
 /**
@@ -125,7 +125,7 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
         </span>
         {loading && (
           <span className={buttonSpinner} aria-hidden>
-            <span className={buttonSpinnerIcon} />
+            <InternalSpinner />
           </span>
         )}
       </>

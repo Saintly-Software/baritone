@@ -10,6 +10,12 @@ export {
   type ChipLinkAdornmentProps,
 } from "./components/Chip";
 export {
+  ChipList,
+  type ChipListProps,
+  type ChipListItem,
+  type ChipListOrientation,
+} from "./components/ChipList";
+export {
   FileList,
   type FileListProps,
   type FileInfo,
@@ -27,10 +33,16 @@ export { Heading, type HeadingProps } from "./components/Heading";
 export {
   Card,
   type CardProps,
+  type CardStaticProps,
+  type CardClickableProps,
+  type CardLinkableProps,
   type CardPadding,
   type CardElement,
   type CardHeaderProps,
   type CardFooterProps,
+  type CardActionsProps,
+  type CardRowsProps,
+  type CardRowProps,
   type CardBleedProps,
   type CardDividerProps,
 } from "./components/Card";
