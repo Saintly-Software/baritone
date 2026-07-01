@@ -2,7 +2,7 @@ export { vars } from "./contract.css";
 export type { DesignTokens, ThemeTokensInput } from "./contract.css";
 
 export { createDesignSystemTheme, createInlineTheme, type CreateThemeOptions } from "./createTheme";
-export { buildDefaultTokens } from "./defaultTokens";
+export { buildDefaultTokens, type BrandSeed } from "./defaultTokens";
 export { lightTheme, darkTheme } from "./defaultTheme.css";
 
 export {

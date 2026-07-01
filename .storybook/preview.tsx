@@ -25,6 +25,11 @@ const preview: Preview = {
   parameters: {
     controls: { matchers: { color: /(background|color)$/i } },
     layout: "fullscreen",
+    options: {
+      storySort: {
+        order: ["Theming", "Surfaces", "Text", "Form Controls", "Components"],
+      },
+    },
   },
   globalTypes: {
     scheme: {
