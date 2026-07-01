@@ -1,4 +1,5 @@
 // Components
+export { BaritoneTheme, type BaritoneThemeProps } from "./components/BaritoneTheme";
 export { Button, type ButtonProps } from "./components/Button";
 export { ToggleButton, type ToggleButtonProps } from "./components/ToggleButton";
 export {

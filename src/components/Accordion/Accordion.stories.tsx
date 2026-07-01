@@ -49,7 +49,7 @@ function FAQ({ disabled }: { disabled?: boolean }) {
 }
 
 const meta: Meta<typeof FAQ> = {
-  title: "Components/Accordion",
+  title: "Surfaces/Accordion",
   component: FAQ,
   args: { disabled: false },
   argTypes: { disabled: { control: "boolean" } },

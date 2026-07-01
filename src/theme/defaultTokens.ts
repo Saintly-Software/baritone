@@ -6,8 +6,11 @@ import {
   SURFACE_SALIENCIES,
   TITLE_SIZES,
   type BodySize,
+  type BorderWidthKey,
   type Intent,
+  type RadiusKey,
   type Saliency,
+  type SpaceKey,
   type TitleSize,
 } from "./constants";
 import type { ThemeTokensInput } from "./contract.css";
@@ -50,9 +53,16 @@ function pickInk(bg: string): string {
   return onPaper >= onInk ? PAPER : INK;
 }
 
+type ColourfulIntent = Exclude<Intent, "neutral">;
+
+// The colourful intents only (neutral is a separate near-greyscale ramp). Used
+// to build the per-intent maps a brand seed can override.
+const COLOURFUL_INTENTS = INTENTS.filter((i): i is ColourfulIntent => i !== "neutral");
+
 // Hue + base chroma per colourful intent. Neutral is handled separately as a
-// near-greyscale ramp.
-const SEED: Record<Exclude<Intent, "neutral">, { h: number; c: number }> = {
+// near-greyscale ramp. These are the built-in defaults; a `BrandSeed` can
+// override any of them (see `buildDefaultTokens`).
+const DEFAULT_SEED: Record<ColourfulIntent, { h: number; c: number }> = {
   primary: { h: 258, c: 0.16 },
   secondary: { h: 295, c: 0.17 },
   warning: { h: 75, c: 0.15 },
@@ -63,8 +73,8 @@ const SEED: Record<Exclude<Intent, "neutral">, { h: number; c: number }> = {
 const NEUTRAL_H = 260;
 const NEUTRAL_C = 0.005;
 
-/** The bold "high" background lightness per colourful intent. */
-const BOLD_L: Record<Exclude<Intent, "neutral">, number> = {
+/** The bold "high" background lightness per colourful intent (built-in default). */
+const DEFAULT_BOLD_L: Record<ColourfulIntent, number> = {
   primary: 0.53,
   secondary: 0.55,
   warning: 0.82,
@@ -74,6 +84,50 @@ const BOLD_L: Record<Exclude<Intent, "neutral">, number> = {
 
 type Triplet = { bgc: string; text: string; border: string };
 type Block = { default: Triplet; disabled: Triplet };
+
+/**
+ * A small "brand seed": the handful of knobs most brands actually customise.
+ * Everything is optional and merged over the built-in defaults, so a consumer
+ * can supply just a brand hue for `primary` (or new fonts) and inherit the rest
+ * — including the derived interaction states and the build-time contrast check.
+ */
+export interface BrandSeed {
+  /**
+   * Hue + base chroma per colourful intent, merged over the built-in seeds.
+   * Override just `primary` and leave the rest; the `neutral` intent is a
+   * near-greyscale ramp and isn't seeded here.
+   */
+  intents?: Partial<Record<ColourfulIntent, Partial<{ h: number; c: number }>>>;
+  /** The bold "high" background lightness (0–1) per colourful intent. */
+  boldL?: Partial<Record<ColourfulIntent, number>>;
+  /** Font families. */
+  fonts?: Partial<{ sans: string; mono: string }>;
+  /**
+   * Radius-scale overrides. Also drive the `borderRadius` of surfaces (`lg`),
+   * components and form controls (`md`).
+   */
+  radius?: Partial<Record<RadiusKey, string>>;
+  /** Spacing-scale overrides. */
+  space?: Partial<Record<SpaceKey, string>>;
+  /** Border-width-scale overrides. */
+  borderWidth?: Partial<Record<BorderWidthKey, string>>;
+}
+
+/** Fully-resolved seed (defaults filled in) threaded through the colour math. */
+interface ResolvedSeed {
+  intents: Record<ColourfulIntent, { h: number; c: number }>;
+  boldL: Record<ColourfulIntent, number>;
+}
+
+function resolveSeed(brand: BrandSeed): ResolvedSeed {
+  return {
+    intents: record(COLOURFUL_INTENTS, (i) => ({
+      h: brand.intents?.[i]?.h ?? DEFAULT_SEED[i].h,
+      c: brand.intents?.[i]?.c ?? DEFAULT_SEED[i].c,
+    })),
+    boldL: record(COLOURFUL_INTENTS, (i) => brand.boldL?.[i] ?? DEFAULT_BOLD_L[i]),
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Component colours
@@ -111,14 +165,15 @@ function neutralComponentBlock(saliency: Saliency, isDark: boolean): Block {
 }
 
 function colourComponentBlock(
-  intent: Exclude<Intent, "neutral">,
+  seed: ResolvedSeed,
+  intent: ColourfulIntent,
   saliency: Saliency,
   isDark: boolean,
 ): Block {
-  const { h, c } = SEED[intent];
+  const { h, c } = seed.intents[intent];
   let def: Triplet;
   if (saliency === "high") {
-    const bgc = ok(BOLD_L[intent], c, h);
+    const bgc = ok(seed.boldL[intent], c, h);
     def = { bgc, text: pickInk(bgc), border: bgc };
   } else if (saliency === "mid") {
     const bgc = isDark ? ok(0.3, c * 0.35, h) : ok(0.93, c * 0.22, h);
@@ -134,12 +189,12 @@ function colourComponentBlock(
   return { default: def, disabled: disabledTriplet(isDark, saliency === "low") };
 }
 
-function componentColor(isDark: boolean) {
+function componentColor(seed: ResolvedSeed, isDark: boolean) {
   return record(INTENTS, (intent) =>
     record(SALIENCIES, (saliency) =>
       intent === "neutral"
         ? neutralComponentBlock(saliency, isDark)
-        : colourComponentBlock(intent, saliency, isDark),
+        : colourComponentBlock(seed, intent, saliency, isDark),
     ),
   );
 }
@@ -174,11 +229,12 @@ function neutralSurfaceBlock(saliency: "high" | "low", isDark: boolean): Block {
 }
 
 function colourSurfaceBlock(
-  intent: Exclude<Intent, "neutral">,
+  seed: ResolvedSeed,
+  intent: ColourfulIntent,
   saliency: "high" | "low",
   isDark: boolean,
 ): Block {
-  const { h, c } = SEED[intent];
+  const { h, c } = seed.intents[intent];
   const bgc =
     saliency === "low"
       ? isDark
@@ -201,12 +257,12 @@ function colourSurfaceBlock(
   };
 }
 
-function surfaceColor(isDark: boolean) {
+function surfaceColor(seed: ResolvedSeed, isDark: boolean) {
   return record(INTENTS, (intent) =>
     record(SURFACE_SALIENCIES, (saliency) =>
       intent === "neutral"
         ? neutralSurfaceBlock(saliency, isDark)
-        : colourSurfaceBlock(intent, saliency, isDark),
+        : colourSurfaceBlock(seed, intent, saliency, isDark),
     ),
   );
 }
@@ -215,7 +271,7 @@ function surfaceColor(isDark: boolean) {
 // Text colours
 // ---------------------------------------------------------------------------
 
-function textColor(isDark: boolean) {
+function textColor(seed: ResolvedSeed, isDark: boolean) {
   return record(INTENTS, (intent) =>
     record(SALIENCIES, (saliency): string => {
       if (intent === "neutral") {
@@ -232,7 +288,7 @@ function textColor(isDark: boolean) {
             ? ok(0.32, NEUTRAL_C, NEUTRAL_H)
             : ok(0.6, NEUTRAL_C, NEUTRAL_H);
       }
-      const { h, c } = SEED[intent];
+      const { h, c } = seed.intents[intent];
       if (isDark) {
         return saliency === "high"
           ? ok(0.86, c, h)
@@ -253,14 +309,14 @@ function textColor(isDark: boolean) {
 // Form colours
 // ---------------------------------------------------------------------------
 
-function formColor(isDark: boolean) {
+function formColor(seed: ResolvedSeed, isDark: boolean) {
   const neutral = {
     background: isDark ? ok(0.18, 0, NEUTRAL_H) : ok(0.99, 0, NEUTRAL_H),
     border: isDark ? ok(0.4, 0, NEUTRAL_H) : ok(0.78, 0, NEUTRAL_H),
     placeholder: isDark ? ok(0.62, 0, NEUTRAL_H) : ok(0.5, 0, NEUTRAL_H),
   };
-  const stateColor = (intent: Exclude<Intent, "neutral">) => {
-    const { h, c } = SEED[intent];
+  const stateColor = (intent: ColourfulIntent) => {
+    const { h, c } = seed.intents[intent];
     return {
       background: isDark ? ok(0.2, c * 0.3, h) : ok(0.98, c * 0.2, h),
       border: isDark ? ok(0.6, c, h) : ok(0.52, c, h),
@@ -279,15 +335,15 @@ function formColor(isDark: boolean) {
 // Focus rings
 // ---------------------------------------------------------------------------
 
-function focusRings(isDark: boolean) {
+function focusRings(seed: ResolvedSeed, isDark: boolean) {
   return record(INTENTS, (intent): string => {
     if (intent === "neutral") {
       // Neutral focus borrows primary for visibility.
-      const { h, c } = SEED.primary;
+      const { h, c } = seed.intents.primary;
       return ok(isDark ? 0.7 : 0.56, c, h);
     }
-    const { h, c } = SEED[intent];
-    return ok(isDark ? 0.7 : BOLD_L[intent], c, h);
+    const { h, c } = seed.intents[intent];
+    return ok(isDark ? 0.7 : seed.boldL[intent], c, h);
   });
 }
 
@@ -333,40 +389,58 @@ function shadows(isDark: boolean) {
 // ---------------------------------------------------------------------------
 
 /**
- * Produce a complete, accessible set of default token *values* for a scheme.
- * This doubles as the reference theme and a copy-paste starting point for theme
- * authors. Interaction (hover/active) states are NOT here — they're computed at
- * use-site from `default` via relative-colour math.
+ * Produce a complete, accessible set of default token *values* for a scheme,
+ * optionally seeded with a brand's intent hues/chroma, fonts, and scale
+ * overrides. This doubles as the reference theme and a copy-paste starting point
+ * for theme authors: supply a small {@link BrandSeed} and inherit the full,
+ * contrast-checked token set. Interaction (hover/active) states are NOT here —
+ * they're computed at use-site from `default` via relative-colour math.
+ *
+ * @example
+ * buildDefaultTokens("light", {
+ *   intents: { primary: { h: 292, c: 0.17 } }, // brand purple
+ *   fonts: { sans: '"Inter", system-ui, sans-serif' },
+ * });
  */
-export function buildDefaultTokens(scheme: "light" | "dark"): ThemeTokensInput {
+export function buildDefaultTokens(
+  scheme: "light" | "dark",
+  brand: BrandSeed = {},
+): ThemeTokensInput {
   const isDark = scheme === "dark";
+  const seed = resolveSeed(brand);
+  const radiusScale = { ...radius, ...brand.radius };
+  const spaceScale = { ...space, ...brand.space };
+  const borderWidthScale = { ...borderWidth, ...brand.borderWidth };
   return {
     surface: {
-      color: surfaceColor(isDark),
-      borderRadius: radius.lg,
-      focus: focusRings(isDark),
+      color: surfaceColor(seed, isDark),
+      borderRadius: radiusScale.lg,
+      focus: focusRings(seed, isDark),
     },
     component: {
-      color: componentColor(isDark),
-      borderRadius: radius.md,
-      focus: focusRings(isDark),
+      color: componentColor(seed, isDark),
+      borderRadius: radiusScale.md,
+      focus: focusRings(seed, isDark),
     },
     form: {
-      color: formColor(isDark),
-      borderRadius: radius.md,
-      focus: focusRings(isDark),
+      color: formColor(seed, isDark),
+      borderRadius: radiusScale.md,
+      focus: focusRings(seed, isDark),
     },
     text: {
-      color: textColor(isDark),
+      color: textColor(seed, isDark),
       variant: {
         body: record(BODY_SIZES, (size) => bodyVariant(size)),
         title: record(TITLE_SIZES, (size) => titleVariant(size)),
       },
     },
-    font: { sans: fontFamily.sans, mono: fontFamily.mono },
-    space: { ...space },
-    radius: { ...radius },
-    borderWidth: { ...borderWidth },
+    font: {
+      sans: brand.fonts?.sans ?? fontFamily.sans,
+      mono: brand.fonts?.mono ?? fontFamily.mono,
+    },
+    space: spaceScale,
+    radius: radiusScale,
+    borderWidth: borderWidthScale,
     shadow: shadows(isDark),
     zIndex: { ...zIndex },
     motion: {
