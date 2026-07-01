@@ -34,15 +34,15 @@
     "access": "public"
   },
   "scripts": {
-    "build": "vite build",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "build": "vite build --config .config/vite.config.ts",
+    "typecheck": "tsc --noEmit -p .config/tsconfig.json",
+    "test": "vitest run --config .config/vitest.config.ts",
+    "test:watch": "vitest --config .config/vitest.config.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "lint": "pnpm lint:check --fix",
-    "lint:check": "pnpm exec oxlint",
-    "fmt": "pnpm exec oxfmt",
+    "lint:check": "pnpm exec oxlint -c .config/.oxlintrc.json",
+    "fmt": "pnpm exec oxfmt -c .config/.oxfmtrc.json",
     "fmt:check": "pnpm fmt --check",
     "pub:version": "pnpm exec changeset version",
     "pub:release": "pnpm build && pnpm exec changeset publish"
