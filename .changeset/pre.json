@@ -4,5 +4,31 @@
   "initialVersions": {
     "@saintly-software/baritone": "0.1.0"
   },
-  "changesets": ["granular-recipes-card-compound", "initial-release"]
+  "changesets": [
+    "accordion-header-icon-chip",
+    "calm-otters-listen",
+    "card-layout-semantic-header",
+    "chip-list",
+    "chip-popover-trigger",
+    "clever-chips-adorn",
+    "eager-accordions-unfold",
+    "eight-pandas-march",
+    "focusable-disabled-controls",
+    "fuzzy-files-stack",
+    "granular-recipes-card-compound",
+    "honest-tooltips-confess",
+    "initial-release",
+    "large-pillows-grow",
+    "lucky-links-arrive",
+    "mighty-toggles-press",
+    "proud-popovers-appear",
+    "seven-otters-jump",
+    "shiny-cards-unfold",
+    "sturdy-buttons-arrive",
+    "swift-drawers-slide",
+    "tabs-quietly-arrive",
+    "tame-rivers-fly",
+    "toggle-groups-gather",
+    "wide-files-arrive"
+  ]
 }
