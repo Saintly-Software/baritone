@@ -21,9 +21,9 @@
     "noUncheckedIndexedAccess": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "rootDir": "src",
-    "outDir": "dist",
+    "rootDir": "../src",
+    "outDir": "../dist",
     "types": ["node", "vitest/globals", "@testing-library/jest-dom"]
   },
-  "include": ["src"]
+  "include": ["../src"]
 }
