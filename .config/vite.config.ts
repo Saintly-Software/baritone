@@ -13,6 +13,9 @@ export default defineConfig({
     react(),
     vanillaExtractPlugin(),
     dts({
+      // Config now lives in .config/, so point dts at the relocated tsconfig
+      // (it otherwise auto-resolves tsconfig.json from the vite root).
+      tsconfigPath: resolve(__dirname, "tsconfig.json"),
       include: ["src"],
       exclude: ["src/**/*.stories.tsx", "src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**"],
       // Type-only files (contract / theme) re-export fine as separate .d.ts.
@@ -20,7 +23,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, "src/index.ts"),
+      entry: resolve(__dirname, "../src/index.ts"),
       formats: ["es"],
       fileName: () => "index.js",
       cssFileName: "styles",
