@@ -32,6 +32,7 @@ export { Link, type LinkProps } from "./components/Link";
 export { Text, type TextProps } from "./components/Text";
 export { Heading, type HeadingProps } from "./components/Heading";
 export { Lockup, type LockupProps, type LockupSlotProps } from "./components/Lockup";
+export { Meter, type MeterProps } from "./components/Meter";
 export {
   Card,
   type CardProps,
@@ -76,6 +77,14 @@ export {
   type AccordionItemHeaderProps,
 } from "./components/Accordion";
 export { Icon, type IconProps } from "./components/Icon";
+export {
+  Badge,
+  type BadgeProps,
+  type BadgeIconProps,
+  type BadgeCountProps,
+  type BadgeTextProps,
+  type BadgeDotProps,
+} from "./components/Badge";
 export {
   Popover,
   type PopoverProps,
