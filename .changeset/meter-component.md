@@ -13,5 +13,5 @@ as the accessible name) or `aria-label` / `aria-labelledby`, plus
 `aria-valuetext` as either a fixed string or a function of the formatted and raw
 value.
 
-It is *not* a progress bar: use it for a measurement, not the completion of a
+It is _not_ a progress bar: use it for a measurement, not the completion of a
 task.
