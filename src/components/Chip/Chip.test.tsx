@@ -272,6 +272,23 @@ describe("Chip", () => {
       expect(screen.getByTestId("chip").textContent).toBe("LTagR");
     });
 
+    it("renders the `icon` shorthand as the first lead adornment, before any leadAdornments", () => {
+      render(
+        <Chip
+          data-testid="chip"
+          icon={<span>I</span>}
+          leadAdornments={[<Chip.Adornment icon={<span>L</span>} />]}
+          trailAdornments={[
+            <Chip.Adornment icon={<span>R</span>} label="Remove" onClick={() => {}} />,
+          ]}
+        >
+          Tag
+        </Chip>,
+      );
+      // icon → leadAdornments → label → trailAdornments.
+      expect(screen.getByTestId("chip").textContent).toBe("ILTagR");
+    });
+
     it("names a regular adornment via `label` (role img) and leaves a label-less one unnamed", () => {
       render(
         <Chip

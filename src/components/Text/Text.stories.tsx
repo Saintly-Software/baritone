@@ -22,10 +22,21 @@ export const Variants: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 8 }}>
       {BODY_SIZES.map((variant) => (
-        <Text key={variant} variant={variant} render={<p />}>
+        <Text key={variant} as="p" variant={variant}>
           body/{variant} — The quick brown fox jumps over the lazy dog
         </Text>
       ))}
+    </div>
+  ),
+};
+
+export const Elements: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 8 }}>
+      <Text>as="div" (default) — a block-level container</Text>
+      <Text as="p">as="p" — a paragraph</Text>
+      <Text as="label">as="label" — an inline label</Text>
+      <Text as="span">as="span" — inline text</Text>
     </div>
   ),
 };
