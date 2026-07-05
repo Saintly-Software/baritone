@@ -38,6 +38,7 @@ export {
   type FlexJustify,
   type FlexDirection,
 } from "./components/Flex";
+export { Box, type BoxProps, type BoxElement } from "./components/Box";
 export { Lockup, type LockupProps, type LockupSlotProps } from "./components/Lockup";
 export { Meter, type MeterProps } from "./components/Meter";
 export {
