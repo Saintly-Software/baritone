@@ -56,6 +56,15 @@ export {
   type CardDividerProps,
 } from "./components/Card";
 export { CardList, type CardListProps } from "./components/CardList";
+export {
+  MetricCard,
+  type MetricCardProps,
+  type MetricCardStaticProps,
+  type MetricCardClickableProps,
+  type MetricCardLinkableProps,
+  type MetricTrend,
+  type MetricTrendDirection,
+} from "./components/MetricCard";
 export { TextInput, type TextInputProps } from "./components/TextInput";
 export {
   RadioGroup,
