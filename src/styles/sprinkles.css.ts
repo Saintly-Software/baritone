@@ -22,7 +22,16 @@ const responsiveProperties = defineProperties({
   },
   defaultCondition: "mobile",
   properties: {
-    display: ["none", "block", "inline", "inline-block", "flex", "inline-flex", "grid"],
+    display: [
+      "none",
+      "block",
+      "inline",
+      "inline-block",
+      "flex",
+      "inline-flex",
+      "grid",
+      "inline-grid",
+    ],
     flexDirection: ["row", "row-reverse", "column", "column-reverse"],
     flexWrap: ["wrap", "nowrap"],
     alignItems: ["stretch", "flex-start", "center", "flex-end", "baseline"],
