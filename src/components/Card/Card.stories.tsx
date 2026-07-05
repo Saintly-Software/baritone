@@ -10,7 +10,7 @@ import { Card } from "./index";
 const meta: Meta<typeof Card> = {
   title: "Surfaces/Card",
   component: Card,
-  args: { intent: "neutral", saliency: "low" },
+  args: { intent: "neutral", saliency: "high" },
   argTypes: {
     intent: { control: "select", options: INTENTS },
     saliency: { control: "select", options: SURFACE_SALIENCIES },
