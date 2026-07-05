@@ -95,7 +95,7 @@ interface CardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick
   as?: CardElement;
   /** Default `neutral` (most surfaces are neutral). */
   intent?: Intent;
-  /** `low` (default neutral surface) or `high` (washed). Default `low`. */
+  /** `low` (neutral surface) or `high` (washed). Default `high`. */
   saliency?: SurfaceSaliency;
   /**
    * The card's header. Pass a `<Card.Header />` for full control, or — as a
@@ -245,7 +245,7 @@ type InternalCardProps = CardBaseProps & {
 function CardRoot(props: CardProps) {
   const {
     intent,
-    saliency,
+    saliency = "high",
     header,
     subheader,
     description,
