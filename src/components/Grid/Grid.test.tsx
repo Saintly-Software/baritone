@@ -41,9 +41,7 @@ describe("Grid", () => {
         x
       </Grid>,
     );
-    expect(screen.getByTestId("grid").style.gridTemplateColumns).toBe(
-      "repeat(3, minmax(0, 1fr))",
-    );
+    expect(screen.getByTestId("grid").style.gridTemplateColumns).toBe("repeat(3, minmax(0, 1fr))");
   });
 
   it("passes a string `columns`/`rows` through verbatim", () => {
@@ -63,9 +61,7 @@ describe("Grid", () => {
         x
       </Grid>,
     );
-    expect(screen.getByTestId("grid").style.gridTemplateAreas).toBe(
-      '"header header" "nav main"',
-    );
+    expect(screen.getByTestId("grid").style.gridTemplateAreas).toBe('"header header" "nav main"');
   });
 
   it("joins and quotes `areas` rows from a 2D array of cells", () => {
