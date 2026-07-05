@@ -12,7 +12,7 @@ import { switchLabelDisabled, switchRow, switchRowDisabled } from "./switch.css"
 // is just the track + label, not the full line.
 const wrapperClass = atoms({ display: "inline-flex" });
 
-export interface SwitchProps {
+interface SwitchBaseProps {
   /** Whether the switch is on (controlled). */
   value: boolean;
   /** Called with the next checked state when the user toggles the switch. */
@@ -38,6 +38,27 @@ export interface SwitchProps {
 }
 
 /**
+ * Optional glyph(s) shown inside the sliding thumb — a discriminated union so the
+ * two spellings can't be mixed:
+ *
+ * - **no icon props** — a plain thumb (the default).
+ * - **`icon`** — one glyph reused for *both* states; it rides the thumb whether
+ *   the switch is on or off.
+ * - **`activeIcon` + `inactiveIcon`** — a *different* glyph for each state (e.g. a
+ *   check when on, a cross when off); both are required together.
+ *
+ * A glyph is decorative — the switch's accessible name still comes from `label`.
+ * Pass a bare `currentColor` `<svg>` or an `<Icon>`; it's sized to the thumb and
+ * recoloured to contrast with the fill.
+ */
+type SwitchIconProps =
+  | { icon?: undefined; activeIcon?: undefined; inactiveIcon?: undefined }
+  | { icon: React.ReactNode; activeIcon?: undefined; inactiveIcon?: undefined }
+  | { icon?: undefined; activeIcon: React.ReactNode; inactiveIcon: React.ReactNode };
+
+export type SwitchProps = SwitchBaseProps & SwitchIconProps;
+
+/**
  * Switch — a single boolean "form control", built on base-ui's `Switch` for
  * behaviour (role, keyboard, form wiring) and wrapped in a `Field` for ARIA, the
  * same way `Checkbox`, `TextInput`, and `RadioGroup` are.
@@ -54,9 +75,23 @@ export interface SwitchProps {
  * API is deliberately identical: `value` is a `boolean` and validation is a
  * plain `invalid` flag rather than the full `FormState`.
  *
+ * An optional glyph can ride inside the thumb: `icon` reuses one glyph for both
+ * states, or `activeIcon` + `inactiveIcon` show a different glyph per state (the
+ * two spellings are a discriminated union, so they can't be mixed).
+ *
  * @example
  * const [enabled, setEnabled] = React.useState(false);
  * <Switch label="Enable notifications" value={enabled} onChange={setEnabled} />
+ *
+ * @example
+ * // A check when on, a cross when off.
+ * <Switch
+ *   label="Wi-Fi"
+ *   value={on}
+ *   onChange={setOn}
+ *   activeIcon={<CheckSvg />}
+ *   inactiveIcon={<CrossSvg />}
+ * />
  */
 export function Switch({
   value,
@@ -68,8 +103,16 @@ export function Switch({
   size = "md",
   name,
   className,
+  icon,
+  activeIcon,
+  inactiveIcon,
 }: SwitchProps) {
   const labelId = React.useId();
+
+  // `icon` is the single-glyph shorthand — reuse it for both states; otherwise
+  // fall through to the per-state pair (both present or both absent).
+  const onIcon = icon ?? activeIcon;
+  const offIcon = icon ?? inactiveIcon;
 
   return (
     // No `disabled` on `Field.Root`: base-ui propagates it down as the native
@@ -96,6 +139,8 @@ export function Switch({
               disabled={disabled}
               state={invalid ? "invalid" : "neutral"}
               size={size}
+              activeIcon={onIcon}
+              inactiveIcon={offIcon}
               className={className}
             />
           }

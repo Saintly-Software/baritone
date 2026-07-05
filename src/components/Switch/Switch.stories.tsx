@@ -3,9 +3,16 @@ import * as React from "react";
 import { SIZES } from "../../theme/constants";
 import { Switch } from "./index";
 
+// Distribute the omit across each member of `SwitchProps`' icon union so the
+// discriminant survives (a plain `Omit<Union, …>` would collapse the three
+// branches into one where every icon prop is loosely optional).
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
 // Switch is controlled, so the stories drive it from local state — the same
 // shape a consumer would use.
-function ControlledSwitch(props: Omit<React.ComponentProps<typeof Switch>, "value" | "onChange">) {
+function ControlledSwitch(
+  props: DistributiveOmit<React.ComponentProps<typeof Switch>, "value" | "onChange">,
+) {
   const [value, setValue] = React.useState(false);
   return <Switch value={value} onChange={setValue} {...props} />;
 }
@@ -70,4 +77,45 @@ export const Invalid: Story = {
     required: true,
     invalid: true,
   },
+};
+
+// Bare `currentColor` glyphs — the switch sizes and recolours them inside the
+// thumb, so they only need a `viewBox` and paths.
+function CheckGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.25} aria-hidden>
+      <path d="M3.5 8.5 6.75 11.75 12.5 4.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function CrossGlyph() {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.25} aria-hidden>
+      <path d="M4.75 4.75 11.25 11.25M11.25 4.75 4.75 11.25" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/**
+ * A glyph can ride inside the thumb. `icon` reuses one glyph for both states;
+ * `activeIcon` + `inactiveIcon` show a different glyph per state (a check when
+ * on, a cross when off here). The glyph is decorative — the `label` is still the
+ * accessible name.
+ */
+export const WithIcons: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16 }}>
+      {SIZES.map((size) => (
+        <ControlledSwitch
+          key={size}
+          label={`Wi-Fi (${size})`}
+          size={size}
+          activeIcon={<CheckGlyph />}
+          inactiveIcon={<CrossGlyph />}
+        />
+      ))}
+      <ControlledSwitch label="Same glyph both states" icon={<CheckGlyph />} />
+    </div>
+  ),
 };

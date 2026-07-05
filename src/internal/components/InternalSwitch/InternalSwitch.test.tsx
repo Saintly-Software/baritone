@@ -57,6 +57,34 @@ describe("InternalSwitch", () => {
     expect(track).toHaveAttribute("aria-hidden", "true");
   });
 
+  it("shows the active glyph in the thumb when checked", () => {
+    render(
+      <InternalSwitch
+        checked
+        activeIcon={<svg data-testid="on" />}
+        inactiveIcon={<svg data-testid="off" />}
+      />,
+    );
+    expect(screen.getByTestId("on")).toBeInTheDocument();
+    expect(screen.queryByTestId("off")).toBeNull();
+  });
+
+  it("shows the inactive glyph in the thumb when unchecked", () => {
+    render(
+      <InternalSwitch
+        activeIcon={<svg data-testid="on" />}
+        inactiveIcon={<svg data-testid="off" />}
+      />,
+    );
+    expect(screen.getByTestId("off")).toBeInTheDocument();
+    expect(screen.queryByTestId("on")).toBeNull();
+  });
+
+  it("renders no glyph slot when neither icon is given", () => {
+    const { container } = render(<InternalSwitch checked />);
+    expect(container.querySelector("svg")).toBeNull();
+  });
+
   it("forwards a ref to the track element", () => {
     let node: HTMLSpanElement | null = null;
     render(
