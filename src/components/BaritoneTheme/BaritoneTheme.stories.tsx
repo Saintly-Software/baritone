@@ -31,7 +31,7 @@ const BRANDS = {
 function DemoPanel() {
   const [notify, setNotify] = React.useState(true);
   return (
-    <Card saliency="high" padding="lg" style={{ display: "grid", gap: 16, width: 320 }}>
+    <Card saliency="high" style={{ display: "grid", gap: 16, width: 320 }}>
       <div style={{ display: "grid", gap: 4 }}>
         <Heading level={3}>Account</Heading>
         <Text saliency="mid">Everything here is themed by the wrapping provider.</Text>

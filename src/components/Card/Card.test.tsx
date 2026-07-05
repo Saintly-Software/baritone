@@ -400,4 +400,55 @@ describe("Card", () => {
       expect(screen.getByRole("button", { name: "Update" })).toBeInTheDocument();
     });
   });
+
+  describe("string header shorthand", () => {
+    it("renders a string header as a styled heading (level 3 by default)", () => {
+      render(<Card header="Two-factor authentication" />);
+      expect(
+        screen.getByRole("heading", { level: 3, name: "Two-factor authentication" }),
+      ).toBeInTheDocument();
+    });
+
+    it("uses the `level` prop for the string header's title", () => {
+      render(<Card header="Section" level={2} />);
+      expect(screen.getByRole("heading", { level: 2, name: "Section" })).toBeInTheDocument();
+    });
+
+    it("renders subheader (caption), description (body), and action for a string header", () => {
+      render(
+        <Card
+          header="Connected apps"
+          subheader="3 apps have access"
+          description="Manage which apps can see your data."
+          action={<button>Review</button>}
+        />,
+      );
+      expect(screen.getByRole("heading", { name: "Connected apps" })).toBeInTheDocument();
+      expect(screen.getByText("3 apps have access")).toBeInTheDocument();
+      expect(screen.getByText("Manage which apps can see your data.")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Review" })).toBeInTheDocument();
+    });
+
+    it("needs no children — header + description alone render a complete card", () => {
+      render(<Card header="Storage" description="8.2 GB of 10 GB used." />);
+      expect(screen.getByRole("heading", { name: "Storage" })).toBeInTheDocument();
+      expect(screen.getByText("8.2 GB of 10 GB used.")).toBeInTheDocument();
+    });
+
+    it("turns a clickable card's string header title into the overlay button", async () => {
+      const onClick = vi.fn();
+      const user = userEvent.setup();
+      render(<Card onClick={onClick} header="Press me" />);
+      const button = screen.getByRole("button", { name: "Press me" });
+      expect(button.tagName).toBe("BUTTON");
+      await user.click(button);
+      expect(onClick).toHaveBeenCalledOnce();
+    });
+
+    it("still renders a description alongside a Card.Header element", () => {
+      render(<Card header={<Card.Header title="Element header" />} description="Body copy." />);
+      expect(screen.getByRole("heading", { name: "Element header" })).toBeInTheDocument();
+      expect(screen.getByText("Body copy.")).toBeInTheDocument();
+    });
+  });
 });

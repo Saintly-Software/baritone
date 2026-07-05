@@ -29,8 +29,15 @@ export {
   type MultipleFileUploadProps,
 } from "./components/FileUpload";
 export { Link, type LinkProps } from "./components/Link";
-export { Text, type TextProps } from "./components/Text";
+export { Text, type TextProps, type TextElement } from "./components/Text";
 export { Heading, type HeadingProps } from "./components/Heading";
+export {
+  Flex,
+  type FlexProps,
+  type FlexAlign,
+  type FlexJustify,
+  type FlexDirection,
+} from "./components/Flex";
 export { Lockup, type LockupProps, type LockupSlotProps } from "./components/Lockup";
 export { Meter, type MeterProps } from "./components/Meter";
 export {
@@ -39,7 +46,6 @@ export {
   type CardStaticProps,
   type CardClickableProps,
   type CardLinkableProps,
-  type CardPadding,
   type CardElement,
   type CardHeaderProps,
   type CardFooterProps,
@@ -49,6 +55,7 @@ export {
   type CardBleedProps,
   type CardDividerProps,
 } from "./components/Card";
+export { CardList, type CardListProps } from "./components/CardList";
 export { TextInput, type TextInputProps } from "./components/TextInput";
 export {
   RadioGroup,

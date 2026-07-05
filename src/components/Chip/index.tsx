@@ -228,6 +228,12 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
    * collapses to fit the spinner.
    */
   loading?: boolean;
+  /**
+   * Shorthand for a leading icon — prepends a decorative `<Chip.Adornment>` as the
+   * *first* lead adornment, before any `leadAdornments`. Typically an `<Icon>`; it
+   * inherits the chip's colour like any adornment.
+   */
+  icon?: React.ReactNode;
   /** Adornments rendered before the label — each a `<Chip.Adornment>`. */
   leadAdornments?: Array<React.ReactElement<ChipAdornmentProps>>;
   /** Adornments rendered after the label — each a `<Chip.Adornment>`. */
@@ -269,6 +275,7 @@ function ChipRoot({
   shape,
   disabled,
   loading = false,
+  icon,
   leadAdornments,
   trailAdornments,
   handleRemove,
@@ -385,7 +392,10 @@ function ChipRoot({
         <InternalSpinner />
       ) : (
         <ChipAdornmentContext.Provider value={adornmentContext}>
-          {/* `Children.toArray` assigns stable keys to the positional lists. */}
+          {/* `icon` is the shorthand first lead adornment — it always sits ahead of
+              any supplied `leadAdornments`. `Children.toArray` assigns stable keys
+              to the positional lists. */}
+          {icon != null && <ChipAdornment icon={icon} />}
           {React.Children.toArray(leadAdornments)}
           {label}
           {React.Children.toArray(trailAdornments)}

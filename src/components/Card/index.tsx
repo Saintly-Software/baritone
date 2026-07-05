@@ -13,7 +13,7 @@ import {
   cardBleed,
   cardChevron,
   cardCollapsibleHeader,
-  cardCollapsiblePaddingRecipe,
+  cardCollapsibleResponsivePadding,
   cardCollapsiblePanel,
   cardCollapsiblePanelContent,
   cardCollapsibleRoot,
@@ -30,6 +30,7 @@ import {
   cardLayoutAction,
   cardLayoutText,
   cardOverlayLink,
+  cardResponsivePadding,
   cardRoot,
   cardRowActions,
   cardRowDesc,
@@ -38,8 +39,6 @@ import {
   cardRowTerm,
   cardRowText,
 } from "./card.css";
-
-export type CardPadding = "none" | "sm" | "md" | "lg";
 
 /** Semantic root element for a Card. */
 export type CardElement = "div" | "section" | "main" | "article";
@@ -98,10 +97,34 @@ interface CardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick
   intent?: Intent;
   /** `low` (default neutral surface) or `high` (washed). Default `low`. */
   saliency?: SurfaceSaliency;
-  /** Internal padding from the spacing scale. Default `md`. */
-  padding?: CardPadding;
-  /** Rendered above the content — typically a `<Card.Header />`. */
+  /**
+   * The card's header. Pass a `<Card.Header />` for full control, or — as a
+   * shorthand — a plain **string**, which is rendered as a styled header title
+   * (a `Heading`) and gains the `subheader` / `action` / `level` props below. An
+   * interactive (`onClick` / `href`) or `collapsible` card still wires its
+   * control into a string header.
+   */
   header?: React.ReactNode;
+  /**
+   * Subtitle shown directly beneath a **string** `header`, inside the header
+   * block (a tight, low-saliency line). Ignored when `header` is a `Card.Header`
+   * element (put the subtitle on that instead).
+   */
+  subheader?: React.ReactNode;
+  /**
+   * A supporting paragraph rendered in the card body, beneath the header and
+   * above any `children`. Unlike `subheader` (a caption in the header), this is
+   * body copy. Works with any header.
+   */
+  description?: React.ReactNode;
+  /**
+   * A trailing control (e.g. a `<Button>`) placed at the end of a **string**
+   * `header`'s row. Ignored when `header` is a `Card.Header` element (pass the
+   * control as that header's children instead).
+   */
+  action?: React.ReactNode;
+  /** Document-outline level for a **string** `header`'s title. Default `3`. */
+  level?: HeadingLevel;
   /** Rendered below the content — typically a `<Card.Footer />`. */
   footer?: React.ReactNode;
   /** Uses `aria-disabled` rather than `disabled`. */
@@ -206,6 +229,11 @@ type InternalCardProps = CardBaseProps & {
  * `<Card.Divider>` (edge-to-edge rule), and `<Card.Rows>` (a `dl` of key/value
  * `<Card.Row>`s). Use `as` to pick the semantic element.
  *
+ * For the common "title + supporting text + action" card, skip `Card.Header` /
+ * `Card.Layout` entirely: pass a **string** `header` plus `subheader` (a caption
+ * in the header), `description` (a body paragraph) and/or `action` (a trailing
+ * control). `children` is optional, so those props alone make a complete card.
+ *
  * It can also *be* a control: pass `onClick` or `href` to make it clickable /
  * linkable. The card stays a container and its `Card.Header` title becomes the
  * one real `<button>`/`<a>`, stretched over the whole surface so the entire card
@@ -218,8 +246,11 @@ function CardRoot(props: CardProps) {
   const {
     intent,
     saliency,
-    padding = "md",
     header,
+    subheader,
+    description,
+    action,
+    level = 3,
     footer,
     disabled,
     render,
@@ -237,6 +268,25 @@ function CardRoot(props: CardProps) {
     onOpenChange,
     ...rest
   }: InternalCardProps = props;
+
+  // A string `header` is the shorthand: render it as a styled `Card.Header` (title
+  // + optional `subheader` subtitle, with `action` in the trailing slot). A card
+  // that supplies only `subheader` / `action` (no `header`) still gets a header row
+  // for them. A `Card.Header` element passed as `header` is used verbatim — the
+  // shorthand-only props don't apply to it.
+  const headerIsString = typeof header === "string";
+  const headerNode =
+    headerIsString || (header == null && (subheader != null || action != null)) ? (
+      <CardHeader title={headerIsString ? header : undefined} subtitle={subheader} level={level}>
+        {action}
+      </CardHeader>
+    ) : (
+      header
+    );
+
+  // Body-level supporting copy, distinct from the header's `subheader`. Rendered
+  // as its own paragraph beneath the header.
+  const descriptionNode = description != null ? <Text variant="base">{description}</Text> : null;
 
   // A collapsible card is a self-contained disclosure (header + collapsing
   // panel), structurally unlike the flat surface, so it gets its own branch. The
@@ -266,17 +316,16 @@ function CardRoot(props: CardProps) {
         )}
         {...rest}
       >
-        <div className={cx(cardCollapsiblePaddingRecipe({ padding }), cardCollapsibleHeader)}>
+        <div className={cx(cardCollapsibleResponsivePadding, cardCollapsibleHeader)}>
           <CardHeaderContext.Provider
             value={{ control: { kind: "collapsible", disabled }, element: "div" }}
           >
-            {header}
+            {headerNode}
           </CardHeaderContext.Provider>
         </div>
         <Collapsible.Panel className={cardCollapsiblePanel}>
-          <div
-            className={cx(cardCollapsiblePaddingRecipe({ padding }), cardCollapsiblePanelContent)}
-          >
+          <div className={cx(cardCollapsibleResponsivePadding, cardCollapsiblePanelContent)}>
+            {descriptionNode}
             {children}
             {footer}
           </div>
@@ -303,7 +352,8 @@ function CardRoot(props: CardProps) {
 
   const body = (
     <CardHeaderContext.Provider value={{ control: linkControl, element: headerElement }}>
-      {header}
+      {headerNode}
+      {descriptionNode}
       {children}
       {footer}
     </CardHeaderContext.Provider>
@@ -315,7 +365,8 @@ function CardRoot(props: CardProps) {
     props: {
       ref,
       className: cx(
-        surfaceRecipe({ intent, saliency, padding, interactive }),
+        surfaceRecipe({ intent, saliency, interactive }),
+        cardResponsivePadding,
         cardRoot,
         // Interactive cards position their overlay link; static cards keep the
         // focus ring in case a consumer makes the surface itself focusable.
@@ -637,6 +688,11 @@ export interface CardLayoutProps extends Omit<React.HTMLAttributes<HTMLDivElemen
  * in a list of posts) can simply *be* one of these: the `title` is the article's
  * heading and the action is its content, with no `Card.Header` standing in for a
  * header the card doesn't have.
+ *
+ * @deprecated Prefer the string-`header` shorthand on `Card` itself — pass
+ * `header` (string) + `subheader` / `description` / `action` — which covers the
+ * same shapes without a wrapping element and also wires up an interactive card's
+ * overlay link. `Card.Layout` remains for backward compatibility.
  */
 function CardLayout({
   title,

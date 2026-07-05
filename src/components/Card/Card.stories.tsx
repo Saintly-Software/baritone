@@ -10,11 +10,10 @@ import { Card } from "./index";
 const meta: Meta<typeof Card> = {
   title: "Surfaces/Card",
   component: Card,
-  args: { intent: "neutral", saliency: "low", padding: "md" },
+  args: { intent: "neutral", saliency: "low" },
   argTypes: {
     intent: { control: "select", options: INTENTS },
     saliency: { control: "select", options: SURFACE_SALIENCIES },
-    padding: { control: "select", options: ["none", "sm", "md", "lg"] },
   },
 };
 export default meta;
@@ -45,7 +44,6 @@ export const WithHeaderAndFooter: Story = {
     <Card
       intent={args.intent}
       saliency={args.saliency}
-      padding={args.padding}
       as="section"
       style={{ maxWidth: 360 }}
       header={<Card.Header title="Card title" subtitle="A short supporting subtitle" />}
@@ -80,7 +78,6 @@ export const HeaderIconAndChip: Story = {
     <Card
       intent={args.intent}
       saliency={args.saliency}
-      padding={args.padding}
       style={{ maxWidth: 360 }}
       header={
         <Card.Header
@@ -118,7 +115,6 @@ export const Clickable: Story = {
         <Card
           intent={args.intent}
           saliency={args.saliency}
-          padding={args.padding}
           style={{ maxWidth: 320 }}
           onClick={() => setCount((c) => c + 1)}
           header={<Card.Header title="Activate this card" />}
@@ -144,7 +140,6 @@ export const Linkable: Story = {
     <Card
       intent={args.intent}
       saliency={args.saliency}
-      padding={args.padding}
       style={{ maxWidth: 320 }}
       href="https://example.com"
       target="_blank"
@@ -167,7 +162,6 @@ export const LinkableWithNestedActions: Story = {
     <Card
       intent={args.intent}
       saliency={args.saliency}
-      padding={args.padding}
       style={{ maxWidth: 360 }}
       href="https://example.com"
       header={<Card.Header title="Acme Design System" subtitle="example.com" />}
@@ -204,7 +198,6 @@ export const Collapsible: Story = {
     <Card
       intent={args.intent}
       saliency={args.saliency}
-      padding={args.padding}
       style={{ maxWidth: 360 }}
       collapsible
       defaultOpen
@@ -246,7 +239,6 @@ export const Rows: Story = {
     <Card
       intent={args.intent}
       saliency={args.saliency}
-      padding={args.padding}
       style={{ maxWidth: 360 }}
       header={<Card.Header title="Subscription" />}
     >
@@ -275,6 +267,55 @@ export const Rows: Story = {
 };
 
 /**
+ * The string-`header` shorthand — the recommended replacement for `Card.Layout`.
+ * Pass a plain string `header` (rendered as a styled title) plus any of
+ * `subheader` (a caption in the header), `description` (a body paragraph) and
+ * `action` (a trailing control). `children` is optional, so these props alone make
+ * a complete card.
+ */
+export const HeaderShorthand: Story = {
+  render: (args) => (
+    <div style={{ display: "grid", gap: 12, maxWidth: 420 }}>
+      {/* header + description + action (the before/after example). */}
+      <Card
+        intent={args.intent}
+        saliency={args.saliency}
+        header="Two-factor authentication"
+        description="Add an extra layer of security to your account."
+        action={
+          <Button intent="primary" saliency="high" size="sm">
+            Enable
+          </Button>
+        }
+      />
+      {/* header + subheader (a tight caption) + action. */}
+      <Card
+        intent={args.intent}
+        saliency={args.saliency}
+        header="Connected apps"
+        subheader="3 apps have access"
+        action={
+          <Button intent="neutral" saliency="mid" size="sm">
+            Review
+          </Button>
+        }
+      />
+      {/* header + action only. */}
+      <Card
+        intent={args.intent}
+        saliency={args.saliency}
+        header="Slack"
+        action={
+          <Button intent="secondary" saliency="low" size="sm">
+            Disconnect
+          </Button>
+        }
+      />
+    </div>
+  ),
+};
+
+/**
  * `Card.Layout` — the card's *content* is one split row: a title/subtitle stack on
  * the start and an action on the end. It's the rich `Card.Row` shape without the
  * `<dl>` (and without borrowing the `header` slot for content that isn't a
@@ -285,7 +326,7 @@ export const Rows: Story = {
 export const Layout: Story = {
   render: (args) => (
     <div style={{ display: "grid", gap: 12, maxWidth: 420 }}>
-      <Card intent={args.intent} saliency={args.saliency} padding={args.padding}>
+      <Card intent={args.intent} saliency={args.saliency}>
         <Card.Layout
           title="Two-factor authentication"
           subtitle="Add an extra layer of security to your account."
@@ -296,7 +337,7 @@ export const Layout: Story = {
           }
         />
       </Card>
-      <Card intent={args.intent} saliency={args.saliency} padding={args.padding}>
+      <Card intent={args.intent} saliency={args.saliency}>
         <Card.Layout
           title="Slack"
           action={
@@ -306,7 +347,7 @@ export const Layout: Story = {
           }
         />
       </Card>
-      <Card intent={args.intent} saliency={args.saliency} padding={args.padding}>
+      <Card intent={args.intent} saliency={args.saliency}>
         <Card.Layout
           subtitle="You're using 8.2 GB of your 10 GB of storage."
           action={
@@ -335,13 +376,7 @@ export const ArticleList: Story = {
         { title: "Tokens, themes, and you", meta: "5 min read" },
         { title: "Shipping a component library", meta: "12 min read" },
       ].map((post) => (
-        <Card
-          key={post.title}
-          as="article"
-          intent={args.intent}
-          saliency={args.saliency}
-          padding={args.padding}
-        >
+        <Card key={post.title} as="article" intent={args.intent} saliency={args.saliency}>
           <Card.Layout
             title={post.title}
             subtitle={post.meta}
@@ -359,12 +394,7 @@ export const ArticleList: Story = {
 
 export const BleedAndDivider: Story = {
   render: (args) => (
-    <Card
-      intent={args.intent}
-      saliency={args.saliency}
-      padding={args.padding}
-      style={{ maxWidth: 360 }}
-    >
+    <Card intent={args.intent} saliency={args.saliency} style={{ maxWidth: 360 }}>
       <Card.Header title="Edge-to-edge content" />
       <Card.Bleed>
         <div

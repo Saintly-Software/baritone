@@ -299,6 +299,32 @@ export const Adornments: Story = {
 };
 
 /**
+ * `icon` is a shorthand for a single leading `Chip.Adornment`: it always renders
+ * as the *first* lead adornment, ahead of anything in `leadAdornments`.
+ */
+export const IconShorthand: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      {/* Just the shorthand icon. */}
+      <Chip intent="primary" saliency="mid" icon={<TagGlyph />}>
+        Tagged
+      </Chip>
+
+      {/* The shorthand icon sits ahead of an explicit leading adornment. */}
+      <Chip
+        intent="neutral"
+        saliency="mid"
+        icon={<TagGlyph />}
+        leadAdornments={[<Chip.Adornment icon={<ExternalGlyph />} label="External" />]}
+        handleRemove={() => alert("removed")}
+      >
+        Icon first
+      </Chip>
+    </div>
+  ),
+};
+
+/**
  * `handleRemove` is a shortcut for the common "removable chip": supply it and the
  * chip appends a built-in clickable remove "×" as the *last* trailing adornment —
  * after any `trailAdornments` you pass — so you don't have to wire up the close

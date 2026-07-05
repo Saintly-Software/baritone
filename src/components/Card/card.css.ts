@@ -1,7 +1,11 @@
 import { fallbackVar, style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { focusRingColorVar, surfacePaddingVar } from "../../styles/vars.css";
+import { breakpoints } from "../../theme/breakpoints";
 import { vars } from "../../theme/contract.css";
+
+/** Bumps the card's internal padding a step up from the `md` breakpoint. */
+const cardPaddingBreakpoint = `screen and (min-width: ${breakpoints.md})`;
 
 // Negative inset equal to the card's own padding (published by the surface
 // recipe as `--surfacePadding`). Used to pull full-bleed content / dividers out
@@ -18,6 +22,19 @@ export const cardRoot = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[4],
+});
+
+/**
+ * The card's internal padding, made responsive (and no longer a prop): the
+ * surface's own default padding covers small screens, and this bumps
+ * `--surfacePadding` up a step from the `md` breakpoint. Driving it through the
+ * same `--surfacePadding` the surface reads keeps `Card.Bleed` / `Card.Divider`
+ * in sync at every width.
+ */
+export const cardResponsivePadding = style({
+  "@media": {
+    [cardPaddingBreakpoint]: { vars: { [surfacePaddingVar]: vars.space[6] } },
+  },
 });
 
 /**
@@ -299,22 +316,16 @@ export const cardCollapsibleRoot = style({
 });
 
 /**
- * Republishes `--surfacePadding` so the trigger and panel content can pad
- * themselves with the card's chosen `padding` (the surface itself is `none`).
- * Setting the var on these elements — rather than the root — also keeps
- * `Card.Bleed` / `Card.Divider` working inside the collapsing body.
+ * Republishes `--surfacePadding` on the trigger and panel content so they pad
+ * themselves (the surface root itself is `padding: none`). Responsive like the
+ * flat card — `space[4]` up to the `md` breakpoint, `space[6]` beyond. Setting the
+ * var on these elements — rather than the root — also keeps `Card.Bleed` /
+ * `Card.Divider` working inside the collapsing body.
  */
-export const cardCollapsiblePaddingRecipe = recipe({
-  variants: {
-    padding: {
-      none: { vars: { [surfacePaddingVar]: vars.space[0] } },
-      sm: { vars: { [surfacePaddingVar]: vars.space[3] } },
-      md: { vars: { [surfacePaddingVar]: vars.space[4] } },
-      lg: { vars: { [surfacePaddingVar]: vars.space[6] } },
-    },
-  },
-  defaultVariants: {
-    padding: "md",
+export const cardCollapsibleResponsivePadding = style({
+  vars: { [surfacePaddingVar]: vars.space[4] },
+  "@media": {
+    [cardPaddingBreakpoint]: { vars: { [surfacePaddingVar]: vars.space[6] } },
   },
 });
 
