@@ -11,11 +11,12 @@ friendly props onto the grid/spacing tokens:
 - **`columns` / `rows`:** a number expands to that many equal tracks
   (`repeat(n, minmax(0, 1fr))`), or pass any `grid-template-*` string
   (`"200px 1fr"`, `"repeat(auto-fill, minmax(8rem, 1fr))"`) verbatim.
-- **`areas`:** `grid-template-areas` without the footguns. Pass an array of rows
-  (`["header header", "nav main"]`) or a multi-line string — you write the cell
-  names and Grid adds the required per-row quotes (leaving already-quoted rows
-  alone and ignoring blank/indented lines). Exposed standalone as
-  `toGridTemplateAreas` too.
+- **`areas`:** `grid-template-areas` without the footguns. Pass a 2D array of
+  cells (`[["header", "header"], ["nav", "main"]]`), an array of rows
+  (`["header header", "nav main"]`), or a multi-line string — you write the cell
+  names and Grid adds the required per-row quotes (and inter-cell spacing for the
+  2D form), leaving already-quoted rows alone and ignoring blank/indented lines.
+  Exposed standalone as `toGridTemplateAreas` too.
 - **`align` / `justify`:** friendly values (`start` / `center` / `end` /
   `between` / `around` / `evenly`, plus `stretch` / `baseline` for `align`)
   mapped to the `align-items` / `justify-content` keywords.

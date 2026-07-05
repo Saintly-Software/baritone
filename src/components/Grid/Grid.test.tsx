@@ -68,6 +68,21 @@ describe("Grid", () => {
     );
   });
 
+  it("joins and quotes `areas` rows from a 2D array of cells", () => {
+    render(
+      <Grid
+        areas={[
+          ["header", "header"],
+          ["nav", "main"],
+        ]}
+        data-testid="grid"
+      >
+        x
+      </Grid>,
+    );
+    expect(screen.getByTestId("grid").style.gridTemplateAreas).toBe('"header header" "nav main"');
+  });
+
   it("quotes `areas` rows from a multi-line string, ignoring blank/indented lines", () => {
     render(
       <Grid
@@ -122,5 +137,14 @@ describe("toGridTemplateAreas", () => {
 
   it("wraps bare rows", () => {
     expect(toGridTemplateAreas(["a a", "b c"])).toBe('"a a" "b c"');
+  });
+
+  it("joins cell arrays with spaces", () => {
+    expect(
+      toGridTemplateAreas([
+        ["a", "a"],
+        ["b", "c"],
+      ]),
+    ).toBe('"a a" "b c"');
   });
 });

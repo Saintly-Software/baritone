@@ -18,13 +18,15 @@ export type GridJustify = "start" | "center" | "end" | "between" | "around" | "e
 export type GridTracks = number | string;
 /**
  * The named-areas map. Accepts whichever form is least error-prone for you:
+ *   - an array of cells per row — `[["header", "header"], ["nav", "main"]]`
  *   - an array of rows — `["header header", "nav main"]`
  *   - a single (usually multi-line) string — `` `header header\n nav main` ``
  * Either way you write the cell names and Grid handles the fiddly per-row
- * quoting that `grid-template-areas` actually requires. Rows you've already
- * quoted are left alone, and blank lines are ignored so you can indent freely.
+ * quoting (and, for the cell-array form, the inter-cell spacing) that
+ * `grid-template-areas` actually requires. Rows you've already quoted are left
+ * alone, and blank lines are ignored so you can indent freely.
  */
-export type GridAreas = string | readonly string[];
+export type GridAreas = string | readonly string[] | readonly (readonly string[])[];
 
 const ALIGN: Record<GridAlign, NonNullable<Atoms["alignItems"]>> = {
   start: "flex-start",
@@ -50,17 +52,19 @@ function toTrackList(value: GridTracks): string {
 
 /**
  * Turn the friendly `areas` prop into a valid `grid-template-areas` value.
- * Splits a string on newlines (or takes the array as-is), trims each row, drops
- * blank rows, and wraps every row in quotes (unless it already is). So both
+ * Normalizes to one string per row — a top-level string is split on newlines,
+ * and a row that is itself an array of cells is joined with spaces — then trims
+ * each row, drops blank rows, and wraps every row in quotes (unless it already
+ * is). So all of
+ *   `[["header", "header"], ["nav", "main"]]`
  *   `["header header", "nav main"]`
- * and
  *   `` `header header\n nav main` ``
  * become `'"header header" "nav main"'`.
  */
 export function toGridTemplateAreas(areas: GridAreas): string {
   const rows = Array.isArray(areas) ? areas : (areas as string).split("\n");
   return rows
-    .map((row) => row.trim())
+    .map((row) => (Array.isArray(row) ? row.join(" ") : (row as string)).trim())
     .filter((row) => row.length > 0)
     .map((row) => (row.startsWith('"') && row.endsWith('"') ? row : `"${row}"`))
     .join(" ");
