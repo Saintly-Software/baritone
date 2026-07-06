@@ -97,6 +97,84 @@ describe("Button", () => {
     expect(screen.getByTestId("forced")).not.toHaveAttribute("aria-label");
   });
 
+  describe('appearance="text"', () => {
+    it("renders a real <button> with the label as its accessible name", () => {
+      render(<Button appearance="text">Learn more</Button>);
+      const button = screen.getByRole("button", { name: "Learn more" });
+      expect(button.tagName).toBe("BUTTON");
+      expect(button).toHaveAttribute("type", "button");
+    });
+
+    it("supports start/end icons, intent, saliency, and variant", () => {
+      render(
+        <Button
+          appearance="text"
+          intent="negative"
+          saliency="high"
+          variant="sm"
+          startIcon={<span data-testid="start" />}
+          endIcon={<span data-testid="end" />}
+        >
+          Remove
+        </Button>,
+      );
+      expect(screen.getByRole("button", { name: "Remove" })).toBeInTheDocument();
+      expect(screen.getByTestId("start")).toBeInTheDocument();
+      expect(screen.getByTestId("end")).toBeInTheDocument();
+    });
+
+    it("still disables via aria-disabled and suppresses onClick", async () => {
+      const onClick = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <Button appearance="text" disabled onClick={onClick}>
+          Off
+        </Button>,
+      );
+      const button = screen.getByRole("button", { name: "Off" });
+      expect(button).toHaveAttribute("aria-disabled", "true");
+      expect(button).not.toHaveAttribute("disabled");
+      await user.click(button);
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it("fires onClick when enabled", async () => {
+      const onClick = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <Button appearance="text" onClick={onClick}>
+          Go
+        </Button>,
+      );
+      await user.click(screen.getByRole("button", { name: "Go" }));
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it("does not render a spinner even if `loading` is forced through", () => {
+      // `loading` is typed away on the text appearance; a forced JS caller must
+      // not get a spinner or an aria-busy control.
+      const forced = { loading: true } as Record<string, unknown>;
+      render(
+        <Button appearance="text" {...forced}>
+          Saving
+        </Button>,
+      );
+      const button = screen.getByRole("button", { name: "Saving" });
+      expect(button).not.toHaveAttribute("aria-busy");
+      expect(button).not.toHaveAttribute("aria-disabled");
+    });
+
+    it("rejects size, loading, and variant that don't belong to the appearance", () => {
+      // @ts-expect-error `size` is unsupported on the text appearance.
+      render(<Button appearance="text" size="lg">A</Button>);
+      // @ts-expect-error `loading` is unsupported on the text appearance.
+      render(<Button appearance="text" loading>B</Button>);
+      // @ts-expect-error `variant` is unsupported on the default appearance.
+      render(<Button variant="sm">C</Button>);
+      expect(screen.getByRole("button", { name: "A" })).toBeInTheDocument();
+    });
+  });
+
   describe("disabled tooltip", () => {
     it("shows the disabledReason when a disabled button is focused", async () => {
       const user = userEvent.setup();

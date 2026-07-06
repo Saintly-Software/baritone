@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { BODY_SIZES, INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { Icon } from "../Icon";
 import { Button } from "./index";
 
@@ -92,5 +92,77 @@ export const DisabledWithReason: Story = {
           "Tab to or hover the button to see why it is disabled. The button keeps focus (aria-disabled), so the explanation is reachable by keyboard.",
       },
     },
+  },
+};
+
+export const TextAppearance: Story = {
+  args: { appearance: "text", intent: "primary", children: "Learn more" },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`appearance=\"text\"` renders a hyperlink-style button — underlined text driven by `intent`/`saliency`, with no background or fixed height. `size` and `loading` are replaced by `variant` (a body typography size).",
+      },
+    },
+  },
+};
+
+export const TextIntentsAndSaliencies: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {INTENTS.map((intent) => (
+        <div key={intent} style={{ display: "flex", gap: 20, alignItems: "center" }}>
+          {SALIENCIES.map((saliency) => (
+            <Button key={saliency} appearance="text" intent={intent} saliency={saliency}>
+              {intent}/{saliency}
+            </Button>
+          ))}
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const TextVariants: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 20, alignItems: "baseline" }}>
+      {BODY_SIZES.map((variant) => (
+        <Button key={variant} appearance="text" intent="primary" variant={variant}>
+          {variant}
+        </Button>
+      ))}
+    </div>
+  ),
+};
+
+export const TextWithIcons: Story = {
+  args: {
+    appearance: "text",
+    intent: "primary",
+    startIcon: <Sparkle />,
+    endIcon: <Sparkle />,
+    children: "With icons",
+  },
+};
+
+export const TextInline: Story = {
+  render: () => (
+    <p style={{ maxWidth: 420 }}>
+      Text-appearance buttons sit inline with copy, so you can drop one{" "}
+      <Button appearance="text" intent="primary" variant="base">
+        right into a sentence
+      </Button>{" "}
+      when the action is a script-driven navigation rather than an anchor.
+    </p>
+  ),
+};
+
+export const TextDisabled: Story = {
+  args: {
+    appearance: "text",
+    intent: "primary",
+    disabled: true,
+    children: "Learn more",
+    disabledReason: "You need an account to read this.",
   },
 };
