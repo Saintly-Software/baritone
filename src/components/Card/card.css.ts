@@ -86,6 +86,46 @@ export const cardOverlayLink = style({
 });
 
 /**
+ * The `selected` state — a card that reads as chosen (e.g. it holds a checked
+ * checkbox, or is one of several picked in a multi-select grid). It accents the
+ * surface edge: the hairline border is recoloured to the primary focus colour and
+ * an inset ring thickens it to a deliberate ~2px outline, so selection isn't a
+ * barely-there recolour. Crucially it's *not* the only signal — the pattern pairs
+ * this with a real selected control inside the card (a checked `Checkbox`, an
+ * `aria-pressed` overlay button), which is what assistive tech and colour-blind
+ * users rely on; the accent is sighted reinforcement. See `Card`'s `selected`.
+ */
+export const cardSelectedRecipe = recipe({
+  variants: {
+    selected: {
+      false: {},
+      true: {
+        // The inset ring never fights the surface (it sets no box-shadow), so it
+        // can live at the top level.
+        boxShadow: `inset 0 0 0 ${vars.borderWidth.thin} ${vars.surface.focus.primary}`,
+        selectors: {
+          // `&&` doubles specificity so the accent wins over the surface recipe's
+          // base `border-color` (equal single-class specificity) regardless of
+          // stylesheet insertion order.
+          "&&": { borderColor: vars.surface.focus.primary },
+        },
+        "@media": {
+          // Authored colours are dropped in forced-colors mode (and box-shadows
+          // stripped), so map the accent to the system `Highlight` on the border,
+          // which forced-colors preserves.
+          "(forced-colors: active)": {
+            selectors: { "&&": { borderColor: "Highlight" } },
+          },
+        },
+      },
+    },
+  },
+  defaultVariants: { selected: false },
+});
+
+export type CardSelectedVariants = NonNullable<RecipeVariants<typeof cardSelectedRecipe>>;
+
+/**
  * Header row: a leading group (`icon` + title/subtitle stack) on the start and a
  * trailing group (`chip` + any `children` actions) on the end.
  */

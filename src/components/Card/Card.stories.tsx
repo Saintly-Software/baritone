@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
 import { Button } from "../Button";
+import { Checkbox } from "../Checkbox";
 import { Chip } from "../Chip";
 import { Icon } from "../Icon";
 import { Text } from "../Text";
@@ -231,6 +232,79 @@ export const Collapsible: Story = {
       </Text>
     </Card>
   ),
+};
+
+/**
+ * `selected` — the accented "chosen" state. The intended pattern is a real
+ * control inside the card (here a `Checkbox`) that owns the state for assistive
+ * tech; `selected` accents the surface edge to reinforce it for sighted users, so
+ * selection is never conveyed by colour alone. Toggle a box to see the accent
+ * follow it.
+ */
+export const Selected: Story = {
+  render: (args) => {
+    function SelectableCards() {
+      const [picked, setPicked] = React.useState<Record<string, boolean>>({ pro: true });
+      const plans = [
+        { id: "starter", name: "Starter", meta: "For individuals" },
+        { id: "pro", name: "Pro", meta: "For growing teams" },
+        { id: "enterprise", name: "Enterprise", meta: "For large orgs" },
+      ];
+      return (
+        <div style={{ display: "grid", gap: 12, maxWidth: 360 }}>
+          {plans.map((plan) => (
+            <Card
+              key={plan.id}
+              intent={args.intent}
+              saliency={args.saliency}
+              selected={picked[plan.id] ?? false}
+              header={<Card.Header title={plan.name} subtitle={plan.meta} />}
+            >
+              <Checkbox
+                label={`Select ${plan.name}`}
+                value={picked[plan.id] ?? false}
+                onChange={(next) => setPicked((prev) => ({ ...prev, [plan.id]: next }))}
+              />
+            </Card>
+          ))}
+        </div>
+      );
+    }
+    return <SelectableCards />;
+  },
+};
+
+/**
+ * When the card itself is the control, `selected` is announced *on* it: a
+ * clickable card becomes a toggle button (`aria-pressed`), so the whole surface
+ * is the selection target. Useful for a grid of options where each card toggles.
+ */
+export const SelectableToggle: Story = {
+  render: (args) => {
+    function ToggleCards() {
+      const [picked, setPicked] = React.useState<string | null>("weekly");
+      const options = [
+        { id: "daily", name: "Daily digest" },
+        { id: "weekly", name: "Weekly summary" },
+        { id: "off", name: "No emails" },
+      ];
+      return (
+        <div style={{ display: "grid", gap: 12, maxWidth: 360 }}>
+          {options.map((option) => (
+            <Card
+              key={option.id}
+              intent={args.intent}
+              saliency={args.saliency}
+              selected={picked === option.id}
+              onClick={() => setPicked(option.id)}
+              header={<Card.Header title={option.name} />}
+            />
+          ))}
+        </div>
+      );
+    }
+    return <ToggleCards />;
+  },
 };
 
 /** `Card.Rows` — a `dl` of key/value rows, with a rich title/actions row. */
