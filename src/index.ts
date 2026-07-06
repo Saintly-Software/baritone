@@ -149,6 +149,7 @@ export * from "./theme";
 
 // Layout atoms (Sprinkles)
 export { atoms, type Atoms } from "./styles/sprinkles.css";
+export type { MarginProps, PaddingProps } from "./styles/spacingProps";
 
 // Shared CSS variables (for advanced composition)
 export {

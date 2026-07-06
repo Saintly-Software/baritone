@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { atoms, type Atoms } from "../../styles/sprinkles.css";
+import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 
@@ -33,7 +34,10 @@ const JUSTIFY: Record<FlexJustify, NonNullable<Atoms["justifyContent"]>> = {
   evenly: "space-evenly",
 };
 
-export interface FlexProps extends Omit<React.HTMLAttributes<HTMLElement>, "color"> {
+export interface FlexProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, "color">,
+    MarginProps,
+    PaddingProps {
   /** `align-items`. Omit to leave it at the flexbox default (`stretch`). */
   align?: FlexAlign;
   /** `justify-content`. Omit to leave it at the flexbox default (`flex-start`). */
@@ -46,28 +50,6 @@ export interface FlexProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
   direction?: FlexDirection;
   /** Allow children to wrap onto multiple lines. */
   wrap?: boolean;
-
-  /** Margin (all sides), from the spacing scale (or `auto`). */
-  m?: Atoms["m"];
-  /** Inline margin (left + right). */
-  mx?: Atoms["mx"];
-  /** Block margin (top + bottom). */
-  my?: Atoms["my"];
-  mt?: Atoms["mt"];
-  mr?: Atoms["mr"];
-  mb?: Atoms["mb"];
-  ml?: Atoms["ml"];
-
-  /** Padding (all sides), from the spacing scale. */
-  p?: Atoms["p"];
-  /** Inline padding (left + right). */
-  px?: Atoms["px"];
-  /** Block padding (top + bottom). */
-  py?: Atoms["py"];
-  pt?: Atoms["pt"];
-  pr?: Atoms["pr"];
-  pb?: Atoms["pb"];
-  pl?: Atoms["pl"];
 
   /** Render as a different element/component (base-ui `render` pattern). */
   render?: RenderProp;

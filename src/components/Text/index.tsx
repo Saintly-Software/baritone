@@ -1,6 +1,8 @@
 "use client";
 import * as React from "react";
 import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import { atoms } from "../../styles/sprinkles.css";
+import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import type { BodySize, Intent, Saliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
@@ -8,7 +10,10 @@ import { useRender, type RenderProp } from "../../utils/render";
 /** Element tags a `Text` can render as via the `as` shorthand. */
 export type TextElement = "div" | "p" | "label" | "span";
 
-interface TextOwnProps extends Omit<React.HTMLAttributes<HTMLElement>, "color"> {
+interface TextOwnProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, "color">,
+    MarginProps,
+    PaddingProps {
   /** Body typography variant. Default `base`. */
   variant?: BodySize;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */
@@ -60,6 +65,20 @@ export function Text(props: TextProps) {
     className,
     children,
     ref,
+    m,
+    mx,
+    my,
+    mt,
+    mr,
+    mb,
+    ml,
+    p,
+    px,
+    py,
+    pt,
+    pr,
+    pb,
+    pl,
     ...rest
   } = props as TextOwnProps & { as?: TextElement; render?: RenderProp };
 
@@ -71,6 +90,7 @@ export function Text(props: TextProps) {
       className: cx(
         textIntentRecipe({ intent, saliency }),
         textVariantRecipe({ family: "body", size: variant }),
+        atoms({ m, mx, my, mt, mr, mb, ml, p, px, py, pt, pr, pb, pl }),
         className,
       ),
       children,
