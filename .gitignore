@@ -147,3 +147,5 @@ vite.config.ts.timestamp-*
 
 .dummy/*
 !.dummy/.gitkeep
+
+.DS_Store/

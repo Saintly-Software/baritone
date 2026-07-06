@@ -38,6 +38,15 @@ export {
   type FlexJustify,
   type FlexDirection,
 } from "./components/Flex";
+export {
+  Grid,
+  type GridProps,
+  type GridAlign,
+  type GridJustify,
+  type GridTracks,
+  type GridAreas,
+} from "./components/Grid";
+export { Box, type BoxProps, type BoxElement } from "./components/Box";
 export { Lockup, type LockupProps, type LockupSlotProps } from "./components/Lockup";
 export { Meter, type MeterProps } from "./components/Meter";
 export {

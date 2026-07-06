@@ -1,9 +1,9 @@
-import { createVar, style } from "@vanilla-extract/css";
+import { createVar, globalStyle, style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { FORM_STATES, FORM_STATE_INTENT } from "../../../theme/constants";
 import { vars } from "../../../theme/contract.css";
 import { active, hover } from "../../../theme/oklch";
-import { focusRingColorVar } from "../../../styles/vars.css";
+import { focusRingColorVar, iconColorVar } from "../../../styles/vars.css";
 
 // Per-state colour wiring, published as CSS vars so the one recipe `base` stays
 // flat and the `state` variant just swaps values. Mirrors `checkboxControl`.
@@ -121,6 +121,9 @@ export const switchTrack = recipe({
 export const switchThumb = style({
   position: "absolute",
   left: pad,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   width: thumb,
   height: thumb,
   borderRadius: vars.radius.full,
@@ -139,6 +142,33 @@ export const switchThumb = style({
   "@media": {
     "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
   },
+});
+
+/**
+ * A glyph riding inside the thumb (e.g. a check / cross that swaps with state).
+ * Sized to a fraction of the thumb so it keeps breathing room from the edge, and
+ * coloured with the track's *background* so it reads as a cut-out against the
+ * solid thumb fill (accent when checked, neutral when off). `--iconColor` is set
+ * to the same value so a slotted `<Icon>` inherits the contrast colour too, and
+ * a bare `currentColor` `<svg>` picks it up via `color`.
+ */
+export const switchThumbIcon = style({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "68%",
+  height: "68%",
+  color: bg,
+  vars: { [iconColorVar]: bg },
+  pointerEvents: "none",
+});
+
+// Fill the wrapper with whatever glyph is slotted in — a bare `<svg>` or the
+// `<svg>` an `<Icon>` renders — so its intrinsic size doesn't matter.
+globalStyle(`${switchThumbIcon} svg`, {
+  display: "block",
+  width: "100%",
+  height: "100%",
 });
 
 export type SwitchTrackVariants = NonNullable<RecipeVariants<typeof switchTrack>>;

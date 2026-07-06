@@ -6,6 +6,7 @@ import {
   componentTypographyRecipe,
 } from "../../../styles/recipes/component.css";
 import { focusRingRecipe } from "../../../styles/recipes/focusRing.css";
+import { textVariantRecipe } from "../../../styles/recipes/text.css";
 import { cx } from "../../../utils/cx";
 import { mergeProps, useRender } from "../../../utils/render";
 import { InternalSpinner } from "../InternalSpinner";
@@ -15,6 +16,7 @@ import {
   buttonContent,
   buttonContentLoading,
   buttonSpinner,
+  textButtonRecipe,
 } from "./internalButton.css";
 
 /**
@@ -58,9 +60,11 @@ export interface InternalButtonProps {
  */
 export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps) {
   const {
+    appearance,
     intent,
     saliency,
     size,
+    variant,
     children,
     disabled = false,
     loading = false,
@@ -80,12 +84,20 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     ...rest
   } = consumerProps;
 
+  // The hyperlink look: underlined text coloured by intent/saliency, no chrome.
+  // `size`/`loading` are typed away on this appearance, so there's no spinner
+  // overlay — just the icons around the label.
+  const isText = appearance === "text";
+
   // The host's click (e.g. a Trigger's open/close toggle) rides in on `htmlAttrs`.
   // Pull it out so the disabled guard below gates it alongside the consumer's
   // onClick — everything else from the host is merged structurally further down.
   const { onClick: hostOnClick, ...hostAttrs } = htmlAttrs ?? {};
 
-  const isDisabled = disabled || loading;
+  // `loading` is a solid-only feature (no chrome to overlay a spinner on the
+  // text look). Ignore it on the text appearance even if a JS caller forces it.
+  const isLoading = loading && !isText;
+  const isDisabled = disabled || isLoading;
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (isDisabled) {
@@ -100,30 +112,38 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     hostOnClick?.(event);
   };
 
+  // The text appearance drops the component chrome for a link-like recipe and
+  // takes its typography from `variant` (a body size) instead of `size`; the
+  // default appearance keeps the shared component recipe + `size`.
+  const appearanceClassName = isText
+    ? cx(
+        textButtonRecipe({ intent, saliency }),
+        textVariantRecipe({ family: "body", size: variant }),
+      )
+    : cx(
+        buttonBase,
+        componentTypographyRecipe({ size }),
+        componentIntentRecipe({ intent, saliency }),
+      );
+
   // The button's own props; `hostAttrs` is merged underneath these below so the
   // consumer's intent always wins on conflict.
   const ownProps = {
     ref,
     // Default to a non-submitting button; let consumers opt into submit/reset.
     type: type ?? "button",
-    className: cx(
-      buttonBase,
-      componentTypographyRecipe({ size }),
-      componentIntentRecipe({ intent, saliency }),
-      focusRingRecipe({ type: "visible" }),
-      className,
-    ),
+    className: cx(appearanceClassName, focusRingRecipe({ type: "visible" }), className),
     "aria-disabled": isDisabled || undefined,
-    "aria-busy": loading || undefined,
+    "aria-busy": isLoading || undefined,
     onClick: handleClick,
     children: (
       <>
-        <span className={cx(buttonContent, loading && buttonContentLoading)}>
+        <span className={cx(buttonContent, isLoading && buttonContentLoading)}>
           {startIcon}
           {children}
           {endIcon}
         </span>
-        {loading && (
+        {isLoading && (
           <span className={buttonSpinner} aria-hidden>
             <InternalSpinner />
           </span>
@@ -154,7 +174,7 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
       content={disabledReason}
       // Only openable while disabled-but-not-loading; keeps the tree stable as
       // the button toggles between states.
-      disabled={!(disabled && !loading)}
+      disabled={!(disabled && !isLoading)}
     >
       {button as React.ReactElement}
     </InternalTooltip>
