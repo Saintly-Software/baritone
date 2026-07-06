@@ -1,6 +1,8 @@
 "use client";
 import * as React from "react";
 import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import { atoms } from "../../styles/sprinkles.css";
+import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import {
   HEADING_LEVEL_VARIANT,
   type HeadingLevel,
@@ -11,7 +13,8 @@ import {
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 
-export interface HeadingProps extends Omit<React.HTMLAttributes<HTMLHeadingElement>, "color"> {
+export interface HeadingProps
+  extends Omit<React.HTMLAttributes<HTMLHeadingElement>, "color">, MarginProps, PaddingProps {
   /** Semantic document level `1`–`6` (drives the rendered `h1`–`h6` tag). Required. */
   level: HeadingLevel;
   /**
@@ -42,6 +45,20 @@ export function Heading({
   className,
   children,
   ref,
+  m,
+  mx,
+  my,
+  mt,
+  mr,
+  mb,
+  ml,
+  p,
+  px,
+  py,
+  pt,
+  pr,
+  pb,
+  pl,
   ...rest
 }: HeadingProps) {
   const visual = variant ?? HEADING_LEVEL_VARIANT[level];
@@ -53,6 +70,7 @@ export function Heading({
       className: cx(
         textIntentRecipe({ intent, saliency }),
         textVariantRecipe({ family: "title", size: visual }),
+        atoms({ m, mx, my, mt, mr, mb, ml, p, px, py, pt, pr, pb, pl }),
         className,
       ),
       children,

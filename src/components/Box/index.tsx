@@ -1,37 +1,17 @@
 "use client";
 import * as React from "react";
-import { atoms, type Atoms } from "../../styles/sprinkles.css";
+import { atoms } from "../../styles/sprinkles.css";
+import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import { cx } from "../../utils/cx";
 import { useRender } from "../../utils/render";
 
 /** Element tags a `Box` can render as via the `as` shorthand. */
 export type BoxElement = "div" | "span" | "section" | "article";
 
-export interface BoxProps extends Omit<React.HTMLAttributes<HTMLElement>, "color"> {
+export interface BoxProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
   /** Render as a different element tag. Default `div`. */
   as?: BoxElement;
-
-  /** Margin (all sides), from the spacing scale (or `auto`). */
-  m?: Atoms["m"];
-  /** Inline margin (left + right). */
-  mx?: Atoms["mx"];
-  /** Block margin (top + bottom). */
-  my?: Atoms["my"];
-  mt?: Atoms["mt"];
-  mr?: Atoms["mr"];
-  mb?: Atoms["mb"];
-  ml?: Atoms["ml"];
-
-  /** Padding (all sides), from the spacing scale. */
-  p?: Atoms["p"];
-  /** Inline padding (left + right). */
-  px?: Atoms["px"];
-  /** Block padding (top + bottom). */
-  py?: Atoms["py"];
-  pt?: Atoms["pt"];
-  pr?: Atoms["pr"];
-  pb?: Atoms["pb"];
-  pl?: Atoms["pl"];
 
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
