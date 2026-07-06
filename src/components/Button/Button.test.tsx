@@ -166,9 +166,17 @@ describe("Button", () => {
 
     it("rejects size, loading, and variant that don't belong to the appearance", () => {
       // @ts-expect-error `size` is unsupported on the text appearance.
-      render(<Button appearance="text" size="lg">A</Button>);
+      render(
+        <Button appearance="text" size="lg">
+          A
+        </Button>,
+      );
       // @ts-expect-error `loading` is unsupported on the text appearance.
-      render(<Button appearance="text" loading>B</Button>);
+      render(
+        <Button appearance="text" loading>
+          B
+        </Button>,
+      );
       // @ts-expect-error `variant` is unsupported on the default appearance.
       render(<Button variant="sm">C</Button>);
       expect(screen.getByRole("button", { name: "A" })).toBeInTheDocument();

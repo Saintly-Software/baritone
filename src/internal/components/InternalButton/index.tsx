@@ -116,8 +116,15 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
   // takes its typography from `variant` (a body size) instead of `size`; the
   // default appearance keeps the shared component recipe + `size`.
   const appearanceClassName = isText
-    ? cx(textButtonRecipe({ intent, saliency }), textVariantRecipe({ family: "body", size: variant }))
-    : cx(buttonBase, componentTypographyRecipe({ size }), componentIntentRecipe({ intent, saliency }));
+    ? cx(
+        textButtonRecipe({ intent, saliency }),
+        textVariantRecipe({ family: "body", size: variant }),
+      )
+    : cx(
+        buttonBase,
+        componentTypographyRecipe({ size }),
+        componentIntentRecipe({ intent, saliency }),
+      );
 
   // The button's own props; `hostAttrs` is merged underneath these below so the
   // consumer's intent always wins on conflict.
@@ -125,11 +132,7 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     ref,
     // Default to a non-submitting button; let consumers opt into submit/reset.
     type: type ?? "button",
-    className: cx(
-      appearanceClassName,
-      focusRingRecipe({ type: "visible" }),
-      className,
-    ),
+    className: cx(appearanceClassName, focusRingRecipe({ type: "visible" }), className),
     "aria-disabled": isDisabled || undefined,
     "aria-busy": isLoading || undefined,
     onClick: handleClick,

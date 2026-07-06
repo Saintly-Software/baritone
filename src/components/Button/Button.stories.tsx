@@ -101,7 +101,7 @@ export const TextAppearance: Story = {
     docs: {
       description: {
         story:
-          "`appearance=\"text\"` renders a hyperlink-style button — underlined text driven by `intent`/`saliency`, with no background or fixed height. `size` and `loading` are replaced by `variant` (a body typography size).",
+          '`appearance="text"` renders a hyperlink-style button — underlined text driven by `intent`/`saliency`, with no background or fixed height. `size` and `loading` are replaced by `variant` (a body typography size).',
       },
     },
   },
