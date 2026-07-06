@@ -38,6 +38,7 @@ import {
   cardRows,
   cardRowTerm,
   cardRowText,
+  cardSelectedRecipe,
 } from "./card.css";
 
 /** Semantic root element for a Card. */
@@ -60,6 +61,12 @@ type CardHeaderControl =
       onClick?: React.MouseEventHandler<HTMLElement>;
       render?: RenderProp;
       disabled?: boolean;
+      /**
+       * Selected state for the overlay control. A clickable card's title button
+       * becomes a toggle (`aria-pressed`); a linkable card's title link marks
+       * itself the current choice (`aria-current`). `undefined` leaves both off.
+       */
+      selected?: boolean;
     }
   | { kind: "collapsible"; disabled?: boolean };
 
@@ -127,6 +134,18 @@ interface CardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick
   level?: HeadingLevel;
   /** Rendered below the content — typically a `<Card.Footer />`. */
   footer?: React.ReactNode;
+  /**
+   * Marks the card as chosen — an accented edge for a card that's been selected,
+   * e.g. one holding a checked `Checkbox` or picked in a multi-select grid.
+   *
+   * The accent is *visual*: on a static card it reinforces the real selected
+   * control inside (the checkbox), which is what conveys state to assistive tech —
+   * a plain container can't carry `aria-selected`. When the card *is* the control,
+   * the state is announced on it: a clickable card's overlay button becomes a
+   * toggle (`aria-pressed`) and a linkable card's overlay link marks itself the
+   * current choice (`aria-current`).
+   */
+  selected?: boolean;
   /** Uses `aria-disabled` rather than `disabled`. */
   disabled?: boolean;
   /** Render as a different element/component (base-ui `render` pattern). */
@@ -252,6 +271,7 @@ function CardRoot(props: CardProps) {
     action,
     level = 3,
     footer,
+    selected,
     disabled,
     render,
     className,
@@ -312,6 +332,7 @@ function CardRoot(props: CardProps) {
         className={cx(
           surfaceRecipe({ intent, saliency, padding: "none" }),
           cardCollapsibleRoot,
+          cardSelectedRecipe({ selected }),
           className,
         )}
         {...rest}
@@ -342,7 +363,7 @@ function CardRoot(props: CardProps) {
   // router link) belongs to the link too, so it's forwarded — never applied to
   // the container.
   const linkControl: CardHeaderControl | null = interactive
-    ? { kind: "link", href, target, rel, onClick, render, disabled }
+    ? { kind: "link", href, target, rel, onClick, render, disabled, selected }
     : null;
 
   // `Card.Header` becomes a real `<header>` when this root scopes it (a sectioning
@@ -371,6 +392,7 @@ function CardRoot(props: CardProps) {
         // Interactive cards position their overlay link; static cards keep the
         // focus ring in case a consumer makes the surface itself focusable.
         interactive ? cardInteractive : focusRingRecipe({ type: "visible" }),
+        cardSelectedRecipe({ selected }),
         className,
       ),
       "aria-disabled": disabled || undefined,
@@ -394,7 +416,7 @@ function CardPrimaryLink({
   link: Extract<CardHeaderControl, { kind: "link" }>;
   children: React.ReactNode;
 }) {
-  const { href, target, rel, onClick, render, disabled } = link;
+  const { href, target, rel, onClick, render, disabled, selected } = link;
 
   const handleActivate = (event: React.MouseEvent<HTMLElement>) => {
     if (disabled) {
@@ -415,9 +437,17 @@ function CardPrimaryLink({
     elementProps.href = href;
     if (target != null) elementProps.target = target;
     if (rel != null) elementProps.rel = rel;
+    // A selected link is the current choice among the cards. Only emit the
+    // attribute when selected — `aria-current="false"` is still announced by some
+    // screen readers, so an unselected link should carry nothing.
+    if (selected != null) elementProps["aria-current"] = selected || undefined;
   } else {
     // Default `type` to `button` so a clickable card in a form doesn't submit it.
     elementProps.type = "button";
+    // A selected clickable card is a toggle button; announce its pressed state.
+    // Left `undefined` when the card isn't selectable so plain click cards stay
+    // ordinary buttons (no toggle semantics).
+    if (selected != null) elementProps["aria-pressed"] = selected;
   }
 
   return useRender({

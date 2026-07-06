@@ -100,6 +100,65 @@ describe("Card", () => {
     expect(section).toContainElement(screen.getByText("Inner"));
   });
 
+  describe("selected", () => {
+    it("is a visual state on a static card — no invalid ARIA on the container", () => {
+      const { rerender } = render(<Card>Pick me</Card>);
+      const card = screen.getByText("Pick me");
+      // Selection is conveyed by the control inside (a checkbox); a plain
+      // container can't validly carry aria-selected/aria-pressed, so it doesn't.
+      expect(card).not.toHaveAttribute("aria-selected");
+      expect(card).not.toHaveAttribute("aria-pressed");
+
+      rerender(<Card selected>Pick me</Card>);
+      expect(card).not.toHaveAttribute("aria-selected");
+      expect(card).not.toHaveAttribute("aria-pressed");
+    });
+
+    it("announces a clickable card as a pressed toggle button when selected", () => {
+      const { rerender } = render(
+        <Card selected onClick={() => {}} header={<Card.Header title="Filter" />}>
+          Body
+        </Card>,
+      );
+      const button = screen.getByRole("button", { name: "Filter" });
+      expect(button).toHaveAttribute("aria-pressed", "true");
+
+      rerender(
+        <Card selected={false} onClick={() => {}} header={<Card.Header title="Filter" />}>
+          Body
+        </Card>,
+      );
+      expect(button).toHaveAttribute("aria-pressed", "false");
+    });
+
+    it("leaves a plain clickable card an ordinary button (no toggle semantics)", () => {
+      render(
+        <Card onClick={() => {}} header={<Card.Header title="Open" />}>
+          Body
+        </Card>,
+      );
+      expect(screen.getByRole("button", { name: "Open" })).not.toHaveAttribute("aria-pressed");
+    });
+
+    it("marks a selected linkable card as the current choice", () => {
+      const { rerender } = render(
+        <Card selected href="/a" header={<Card.Header title="Tab A" />}>
+          Body
+        </Card>,
+      );
+      const link = screen.getByRole("link", { name: "Tab A" });
+      expect(link).toHaveAttribute("aria-current", "true");
+
+      // Unselected emits nothing (aria-current="false" is announced by some AT).
+      rerender(
+        <Card selected={false} href="/a" header={<Card.Header title="Tab A" />}>
+          Body
+        </Card>,
+      );
+      expect(link).not.toHaveAttribute("aria-current");
+    });
+  });
+
   describe("clickable", () => {
     it("turns the header title into a <button type=button> and fires onClick", async () => {
       const user = userEvent.setup();
