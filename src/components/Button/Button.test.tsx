@@ -165,14 +165,14 @@ describe("Button", () => {
     });
 
     it("rejects size, loading, and variant that don't belong to the appearance", () => {
-      // @ts-expect-error `size` is unsupported on the text appearance.
       render(
+        // @ts-expect-error `size` is unsupported on the text appearance.
         <Button appearance="text" size="lg">
           A
         </Button>,
       );
-      // @ts-expect-error `loading` is unsupported on the text appearance.
       render(
+        // @ts-expect-error `loading` is unsupported on the text appearance.
         <Button appearance="text" loading>
           B
         </Button>,
