@@ -3,7 +3,7 @@ import * as React from "react";
 import { focusRingRecipe } from "../../../styles/recipes/focusRing.css";
 import type { FormState, Size } from "../../../theme/constants";
 import { cx } from "../../../utils/cx";
-import { switchThumb, switchTrack } from "./internalSwitch.css";
+import { switchThumb, switchThumbIcon, switchTrack } from "./internalSwitch.css";
 
 export interface InternalSwitchProps extends Omit<
   React.HTMLAttributes<HTMLSpanElement>,
@@ -17,6 +17,14 @@ export interface InternalSwitchProps extends Omit<
   size?: Size;
   /** Form state, drives the accent + focus-ring colour. Default `neutral`. */
   state?: FormState;
+  /**
+   * Glyph shown inside the thumb while checked. Typically a bare `currentColor`
+   * `<svg>` (or an `<Icon>`); it's sized to the thumb and coloured to contrast
+   * with the fill. Omit for a plain thumb.
+   */
+  activeIcon?: React.ReactNode;
+  /** Glyph shown inside the thumb while unchecked. See {@link activeIcon}. */
+  inactiveIcon?: React.ReactNode;
   /**
    * Optional focusable control to slot inside the track (e.g. a visually-hidden
    * `<input type="checkbox" role="switch">`). Because the ring is drawn with
@@ -65,6 +73,8 @@ export function InternalSwitch({
   disabled = false,
   size = "md",
   state = "neutral",
+  activeIcon,
+  inactiveIcon,
   className,
   children,
   ref,
@@ -76,6 +86,9 @@ export function InternalSwitch({
     "data-checked": checked ? "" : undefined,
     "data-unchecked": !checked ? "" : undefined,
   };
+
+  // A single glyph slot in the thumb whose contents swap with the state.
+  const thumbIcon = checked ? activeIcon : inactiveIcon;
 
   return (
     <span
@@ -89,7 +102,9 @@ export function InternalSwitch({
       data-disabled={disabled ? "" : undefined}
       {...rest}
     >
-      <span className={switchThumb} aria-hidden {...valueAttrs} />
+      <span className={switchThumb} aria-hidden {...valueAttrs}>
+        {thumbIcon != null && <span className={switchThumbIcon}>{thumbIcon}</span>}
+      </span>
       {children}
     </span>
   );

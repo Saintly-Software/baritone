@@ -91,6 +91,33 @@ export const FormStates: Story = {
   ),
 };
 
+/** A glyph rides inside the thumb; `activeIcon` shows when checked, `inactiveIcon` when off. */
+export const WithThumbIcon: Story = {
+  render: () => {
+    const check = (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.25} aria-hidden>
+        <path d="M3.5 8.5 6.75 11.75 12.5 4.75" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+    const cross = (
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.25} aria-hidden>
+        <path d="M4.75 4.75 11.25 11.25M11.25 4.75 4.75 11.25" strokeLinecap="round" />
+      </svg>
+    );
+    return (
+      <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
+        {SIZES.map((size) => (
+          <div key={size} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <InternalSwitch size={size} activeIcon={check} inactiveIcon={cross} />
+            <InternalSwitch size={size} checked activeIcon={check} inactiveIcon={cross} />
+            <span>{size}</span>
+          </div>
+        ))}
+      </div>
+    );
+  },
+};
+
 const visuallyHidden: React.CSSProperties = {
   position: "absolute",
   width: 1,

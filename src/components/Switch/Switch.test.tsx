@@ -4,16 +4,20 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Switch } from "./index";
 
+// Distribute the omit across each member of `SwitchProps`' icon union so the
+// discriminant survives — see the note in Switch.stories.tsx.
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
 // A tiny controlled host mirroring the documented usage, so the tests exercise
 // the component exactly as a consumer would wire it.
 function Notifications({
   value: initial = false,
   onChange,
   ...rest
-}: {
+}: DistributiveOmit<React.ComponentProps<typeof Switch>, "value" | "onChange" | "label"> & {
   value?: boolean;
   onChange?: (value: boolean) => void;
-} & Partial<React.ComponentProps<typeof Switch>>) {
+}) {
   const [value, setValue] = React.useState(initial);
   return (
     <Switch
@@ -126,5 +130,43 @@ describe("Switch", () => {
   it("renders without a label", () => {
     render(<Switch value={false} onChange={() => {}} />);
     expect(screen.getByRole("switch")).toBeInTheDocument();
+  });
+
+  it("reuses the `icon` shorthand for both states", async () => {
+    const user = userEvent.setup();
+    render(<Notifications icon={<svg data-testid="glyph" />} />);
+
+    // Off: the single glyph is present…
+    expect(screen.getByTestId("glyph")).toBeInTheDocument();
+
+    // …and still present after toggling on.
+    await user.click(screen.getByRole("switch", { name: "Notifications" }));
+    expect(screen.getByTestId("glyph")).toBeInTheDocument();
+  });
+
+  it("swaps activeIcon / inactiveIcon with the state", async () => {
+    const user = userEvent.setup();
+    render(
+      <Notifications
+        activeIcon={<svg data-testid="on" />}
+        inactiveIcon={<svg data-testid="off" />}
+      />,
+    );
+
+    // Off shows only the inactive glyph.
+    expect(screen.getByTestId("off")).toBeInTheDocument();
+    expect(screen.queryByTestId("on")).toBeNull();
+
+    await user.click(screen.getByRole("switch", { name: "Notifications" }));
+
+    // On shows only the active glyph.
+    expect(screen.getByTestId("on")).toBeInTheDocument();
+    expect(screen.queryByTestId("off")).toBeNull();
+  });
+
+  it("keeps the label as the accessible name — the glyph is decorative", () => {
+    render(<Notifications value icon={<svg data-testid="glyph" />} />);
+    // The switch is still named by its label, not by anything in the thumb.
+    expect(screen.getByRole("switch", { name: "Notifications" })).toBeInTheDocument();
   });
 });
