@@ -9,9 +9,7 @@ import { useRender } from "../../utils/render";
 export type BoxElement = "div" | "span" | "section" | "article";
 
 export interface BoxProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color">,
-    MarginProps,
-    PaddingProps {
+  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
   /** Render as a different element tag. Default `div`. */
   as?: BoxElement;
 

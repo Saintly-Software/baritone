@@ -14,9 +14,7 @@ import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 
 export interface HeadingProps
-  extends Omit<React.HTMLAttributes<HTMLHeadingElement>, "color">,
-    MarginProps,
-    PaddingProps {
+  extends Omit<React.HTMLAttributes<HTMLHeadingElement>, "color">, MarginProps, PaddingProps {
   /** Semantic document level `1`–`6` (drives the rendered `h1`–`h6` tag). Required. */
   level: HeadingLevel;
   /**

@@ -11,9 +11,7 @@ import { useRender, type RenderProp } from "../../utils/render";
 export type TextElement = "div" | "p" | "label" | "span";
 
 interface TextOwnProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color">,
-    MarginProps,
-    PaddingProps {
+  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
   /** Body typography variant. Default `base`. */
   variant?: BodySize;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */

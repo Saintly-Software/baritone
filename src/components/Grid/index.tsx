@@ -72,9 +72,7 @@ export function toGridTemplateAreas(areas: GridAreas): string {
 }
 
 export interface GridProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color">,
-    MarginProps,
-    PaddingProps {
+  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
   /** `grid-template-columns`. A number becomes that many equal columns. */
   columns?: GridTracks;
   /** `grid-template-rows`. A number becomes that many equal rows. */

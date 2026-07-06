@@ -35,9 +35,7 @@ const JUSTIFY: Record<FlexJustify, NonNullable<Atoms["justifyContent"]>> = {
 };
 
 export interface FlexProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color">,
-    MarginProps,
-    PaddingProps {
+  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
   /** `align-items`. Omit to leave it at the flexbox default (`stretch`). */
   align?: FlexAlign;
   /** `justify-content`. Omit to leave it at the flexbox default (`flex-start`). */
