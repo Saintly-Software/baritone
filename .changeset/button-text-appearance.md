@@ -18,7 +18,7 @@ renders as underlined text coloured by the `text.color` tokens — reading like 
   button, so `icon` + `aria-label` stay unavailable (`aria-label` is already
   `never`).
 - **Unchanged behaviour:** `disabled` (via `aria-disabled`, keyboard-reachable),
-  `disabledReason` tooltips, `onClick`, `startIcon`/`endIcon`, and `render`
-  polymorphism all work as they do on the default appearance. Hover/active derive
-  from the resolved colour with the same oklch relative-colour math; disabled dims
-  to the shared control opacity since `text.color` has no disabled shade.
+  `disabledReason` tooltips, `onClick`, and `startIcon`/`endIcon` all work as they
+  do on the default appearance. Hover/active derive from the resolved colour with
+  the same oklch relative-colour math; disabled dims to the shared control opacity
+  since `text.color` has no disabled shade.

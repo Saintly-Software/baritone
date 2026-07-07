@@ -52,9 +52,9 @@ export interface InternalButtonProps {
  * button-specific chrome: the shared colour/typography recipe, the focus ring,
  * the loading-spinner overlay, and the disabled-explanation tooltip. The element
  * itself is rendered by `InternalGenericButtonAnchor`, which owns the element
- * choice (a `<button>`, or the `render` override as a link), the `type` default,
- * and the shared disabled model (`aria-disabled` + swallowed activation). `Button`
- * is a thin wrapper that just forwards its props as `consumerProps`.
+ * rendering (a `<button>`), the `type` default, and the shared disabled model
+ * (`aria-disabled` + swallowed activation). `Button` is a thin wrapper that just
+ * forwards its props as `consumerProps`.
  *
  * The extra `htmlAttrs` seam is what lets the overlay components (`Drawer`,
  * `Modal`, `Popover`) use a real button as their trigger/close: each base-ui
@@ -80,7 +80,6 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     disabledReason,
     type,
     onClick,
-    render,
     className,
     ref,
     // Dropped, never forwarded: the accessible name must be the visible label, so
@@ -131,14 +130,12 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
 
   // The button's own props; `hostAttrs` is merged underneath these below so the
   // consumer's intent always wins on conflict. `InternalGenericButtonAnchor` owns
-  // the element choice (a `<button>`, or the `render` override as a link), the
-  // `type` default, and the disabled model (`aria-disabled` + swallowed click, and
-  // — for a `render` link — degrading to an inert `<div>`); this layer adds the
+  // the element rendering (a `<button>`), the `type` default, and the disabled
+  // model (`aria-disabled` + swallowed activation); this layer adds the
   // recipe/focus-ring classes, the loading `aria-busy`, and the icon/spinner label.
   const ownProps = {
     ref,
     type,
-    render,
     disabled: isDisabled,
     className: cx(appearanceClassName, focusRingRecipe({ type: "visible" }), className),
     "aria-busy": isLoading || undefined,

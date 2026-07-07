@@ -73,35 +73,6 @@ describe("Button", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it("supports the render prop for polymorphism and merges className", () => {
-    render(
-      <Button render={<a href="/x" className="mine" />} intent="primary">
-        Link button
-      </Button>,
-    );
-    const link = screen.getByRole("link", { name: "Link button" });
-    expect(link).toHaveAttribute("href", "/x");
-    expect(link.className).toContain("mine");
-  });
-
-  it("collapses a disabled render-as-link to an inert <div> (via InternalGenericButtonAnchor)", async () => {
-    // A `render` link is treated as a link, and a disabled link has no honest HTML
-    // form, so it degrades to a plain div rather than a still-navigable <a>.
-    const onClick = vi.fn();
-    const user = userEvent.setup();
-    render(
-      <Button render={<a href="/x" />} disabled onClick={onClick}>
-        Link button
-      </Button>,
-    );
-    expect(screen.queryByRole("link")).toBeNull();
-    const div = screen.getByText("Link button").closest("div");
-    expect(div).not.toBeNull();
-    expect(div).toHaveAttribute("aria-disabled", "true");
-    await user.click(screen.getByText("Link button"));
-    expect(onClick).not.toHaveBeenCalled();
-  });
-
   it("does not support aria-label (rejected by types, stripped at runtime)", () => {
     const props = { "aria-label": "nope" } as Record<string, unknown>;
     // @ts-expect-error aria-label is typed as `never` on ButtonProps.
