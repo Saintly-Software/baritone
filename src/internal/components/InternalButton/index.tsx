@@ -8,7 +8,11 @@ import {
 import { focusRingRecipe } from "../../../styles/recipes/focusRing.css";
 import { textVariantRecipe } from "../../../styles/recipes/text.css";
 import { cx } from "../../../utils/cx";
-import { mergeProps, useRender } from "../../../utils/render";
+import { mergeProps } from "../../../utils/render";
+import {
+  InternalGenericButtonAnchor,
+  type InternalGenericButtonAnchorProps,
+} from "../InternalGenericButtonAnchor";
 import { InternalSpinner } from "../InternalSpinner";
 import { InternalTooltip } from "../InternalTooltip";
 import {
@@ -45,9 +49,12 @@ export interface InternalButtonProps {
 
 /**
  * InternalButton — the implementation behind the public `Button`. It owns the
- * rendering: the shared colour/typography recipe, the focus ring, the
- * loading-spinner overlay, and the disabled-explanation tooltip. `Button` is a
- * thin wrapper that just forwards its props as `consumerProps`.
+ * button-specific chrome: the shared colour/typography recipe, the focus ring,
+ * the loading-spinner overlay, and the disabled-explanation tooltip. The element
+ * itself is rendered by `InternalGenericButtonAnchor`, which owns the element
+ * choice (a `<button>`, or the `render` override as a link), the `type` default,
+ * and the shared disabled model (`aria-disabled` + swallowed activation). `Button`
+ * is a thin wrapper that just forwards its props as `consumerProps`.
  *
  * The extra `htmlAttrs` seam is what lets the overlay components (`Drawer`,
  * `Modal`, `Popover`) use a real button as their trigger/close: each base-ui
@@ -90,8 +97,9 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
   const isText = appearance === "text";
 
   // The host's click (e.g. a Trigger's open/close toggle) rides in on `htmlAttrs`.
-  // Pull it out so the disabled guard below gates it alongside the consumer's
-  // onClick — everything else from the host is merged structurally further down.
+  // Pull it out so it's chained into `handleClick` (and thus gated by the
+  // primitive's disabled guard) — everything else from the host is merged
+  // structurally further down.
   const { onClick: hostOnClick, ...hostAttrs } = htmlAttrs ?? {};
 
   // `loading` is a solid-only feature (no chrome to overlay a spinner on the
@@ -99,15 +107,10 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
   const isLoading = loading && !isText;
   const isDisabled = disabled || isLoading;
 
+  // Chain the consumer's and the host's onClick. The disabled *guard* now lives in
+  // `InternalGenericButtonAnchor` (it swallows the activation before this runs), so
+  // a disabled trigger still can't toggle its drawer/modal/popover.
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isDisabled) {
-      // No `disabled` attribute means the click (incl. Enter/Space and form
-      // submit) still fires — swallow it ourselves before the host's handler, so
-      // a disabled trigger can't still toggle its drawer/modal/popover.
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
     onClick?.(event);
     hostOnClick?.(event);
   };
@@ -127,13 +130,17 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
       );
 
   // The button's own props; `hostAttrs` is merged underneath these below so the
-  // consumer's intent always wins on conflict.
+  // consumer's intent always wins on conflict. `InternalGenericButtonAnchor` owns
+  // the element choice (a `<button>`, or the `render` override as a link), the
+  // `type` default, and the disabled model (`aria-disabled` + swallowed click, and
+  // — for a `render` link — degrading to an inert `<div>`); this layer adds the
+  // recipe/focus-ring classes, the loading `aria-busy`, and the icon/spinner label.
   const ownProps = {
     ref,
-    // Default to a non-submitting button; let consumers opt into submit/reset.
-    type: type ?? "button",
+    type,
+    render,
+    disabled: isDisabled,
     className: cx(appearanceClassName, focusRingRecipe({ type: "visible" }), className),
-    "aria-disabled": isDisabled || undefined,
     "aria-busy": isLoading || undefined,
     onClick: handleClick,
     children: (
@@ -153,15 +160,15 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     ...rest,
   };
 
-  const button = useRender({
-    render,
-    defaultElement: "button",
-    // When the button is a host's trigger/close, merge the host attributes the
-    // way base-ui would (className/style joined, refs composed, handlers chained)
-    // with the consumer's props winning. `onClick` was pulled out above and is
-    // already folded into `handleClick`, so it isn't double-applied here.
-    props: htmlAttrs ? mergeProps(hostAttrs as Record<string, unknown>, ownProps) : ownProps,
-  });
+  // When the button is a host's trigger/close, merge the host attributes the way
+  // base-ui would (className/style joined, refs composed, handlers chained) with
+  // the consumer's props winning. `onClick` was pulled out above and is already
+  // folded into `handleClick`, so it isn't double-applied here.
+  const finalProps = (
+    htmlAttrs ? mergeProps(hostAttrs as Record<string, unknown>, ownProps) : ownProps
+  ) as InternalGenericButtonAnchorProps;
+
+  const button = <InternalGenericButtonAnchor {...finalProps} />;
 
   // The tooltip only exists to explain a disabled button; skip the machinery
   // entirely when there's nothing to explain.
@@ -176,7 +183,7 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
       // the button toggles between states.
       disabled={!(disabled && !isLoading)}
     >
-      {button as React.ReactElement}
+      {button}
     </InternalTooltip>
   );
 }
