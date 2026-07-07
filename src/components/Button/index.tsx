@@ -2,7 +2,6 @@
 import * as React from "react";
 import { InternalButton } from "../../internal/components/InternalButton";
 import type { BodySize, Intent, Saliency, Size } from "../../theme/constants";
-import type { RenderProp } from "../../utils/render";
 
 /**
  * Props shared by every `Button`, regardless of `appearance`. The
@@ -45,8 +44,6 @@ export interface ButtonBaseProps extends Omit<
    * tabs to or hovers it. Not shown in the `loading` state.
    */
   disabledReason?: React.ReactNode;
-  /** Render as a different element/component (base-ui `render` pattern). */
-  render?: RenderProp;
   ref?: React.Ref<HTMLButtonElement>;
 }
 

@@ -73,17 +73,6 @@ describe("Button", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it("supports the render prop for polymorphism and merges className", () => {
-    render(
-      <Button render={<a href="/x" className="mine" />} intent="primary">
-        Link button
-      </Button>,
-    );
-    const link = screen.getByRole("link", { name: "Link button" });
-    expect(link).toHaveAttribute("href", "/x");
-    expect(link.className).toContain("mine");
-  });
-
   it("does not support aria-label (rejected by types, stripped at runtime)", () => {
     const props = { "aria-label": "nope" } as Record<string, unknown>;
     // @ts-expect-error aria-label is typed as `never` on ButtonProps.
