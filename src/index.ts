@@ -139,6 +139,13 @@ export {
   type ModalFooterProps,
 } from "./components/Modal";
 export {
+  Menu,
+  type MenuProps,
+  type MenuItemProps,
+  type MenuItemIntent,
+  type MenuTriggerProps,
+} from "./components/Menu";
+export {
   InaccessibleTooltip,
   type InaccessibleTooltipProps,
 } from "./components/InaccessibleTooltip";
