@@ -67,6 +67,13 @@ export {
 export { CardList, type CardListProps } from "./components/CardList";
 export { TextInput, type TextInputProps } from "./components/TextInput";
 export {
+  Combobox,
+  type ComboboxProps,
+  type ComboboxOption,
+  type ComboboxSearch,
+  type ComboboxSearchCopy,
+} from "./components/Combobox";
+export {
   RadioGroup,
   type RadioGroupProps,
   type RadioGroupItemProps,
