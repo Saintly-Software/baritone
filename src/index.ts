@@ -117,6 +117,7 @@ export {
   type PopoverHeaderProps,
   type PopoverFooterProps,
 } from "./components/Popover";
+export { InfoButton, type InfoButtonProps, type InfoButtonIntent } from "./components/InfoButton";
 export {
   Drawer,
   type DrawerProps,
