@@ -101,6 +101,7 @@ export {
   type BadgeTextProps,
   type BadgeDotProps,
 } from "./components/Badge";
+export { Notice, type NoticeProps, type NoticeIconProps } from "./components/Notice";
 export {
   Popover,
   type PopoverProps,
