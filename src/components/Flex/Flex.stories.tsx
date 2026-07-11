@@ -73,3 +73,52 @@ export const Wrapping: Story = {
     </Flex>
   ),
 };
+
+/** `Flex.Item` with `grow` — the middle child expands to fill the spare space. */
+export const ItemGrow: Story = {
+  render: () => (
+    <Flex gap="3" p="4" style={{ border: "1px dashed #ccc" }}>
+      <Box>Fixed</Box>
+      <Flex.Item grow>
+        <Box>grow — fills the space</Box>
+      </Flex.Item>
+      <Box>Fixed</Box>
+    </Flex>
+  ),
+};
+
+/**
+ * `Flex.Item` with `shrink={false}` — the first child keeps its width while the
+ * others give way in the constrained row.
+ */
+export const ItemShrink: Story = {
+  render: () => (
+    <Flex gap="3" p="4" style={{ maxWidth: 320, border: "1px dashed #ccc" }}>
+      <Flex.Item shrink={false} width="12">
+        <Box>won't shrink</Box>
+      </Flex.Item>
+      <Box>shrinks to fit shrinks to fit</Box>
+      <Box>shrinks to fit shrinks to fit</Box>
+    </Flex>
+  ),
+};
+
+/** `Flex.Item` with `alignSelf` — each child overrides the container `align`. */
+export const ItemSelfAlign: Story = {
+  render: () => (
+    <Flex gap="3" p="4" align="center" style={{ height: 140, border: "1px dashed #ccc" }}>
+      <Flex.Item alignSelf="start">
+        <Box>start</Box>
+      </Flex.Item>
+      <Flex.Item alignSelf="center">
+        <Box>center</Box>
+      </Flex.Item>
+      <Flex.Item alignSelf="end">
+        <Box>end</Box>
+      </Flex.Item>
+      <Flex.Item alignSelf="stretch">
+        <Box>stretch</Box>
+      </Flex.Item>
+    </Flex>
+  ),
+};

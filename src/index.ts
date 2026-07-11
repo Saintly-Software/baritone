@@ -38,6 +38,8 @@ export {
   type FlexAlign,
   type FlexJustify,
   type FlexDirection,
+  type FlexItemProps,
+  type FlexItemAlign,
 } from "./components/Flex";
 export {
   Grid,

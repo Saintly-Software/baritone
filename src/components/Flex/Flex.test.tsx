@@ -72,3 +72,96 @@ describe("Flex", () => {
     }
   });
 });
+
+describe("Flex.Item", () => {
+  it("renders a div by default with its children", () => {
+    render(<Flex.Item data-testid="item">child</Flex.Item>);
+    const el = screen.getByTestId("item");
+    expect(el.tagName).toBe("DIV");
+    expect(screen.getByText("child")).toBeInTheDocument();
+  });
+
+  it("can render as a different element via the render prop", () => {
+    render(
+      <Flex.Item render={<li />} data-testid="item">
+        item
+      </Flex.Item>,
+    );
+    expect(screen.getByTestId("item").tagName).toBe("LI");
+  });
+
+  it("merges a consumer className with the atoms classes", () => {
+    render(
+      <Flex.Item grow className="extra" data-testid="item">
+        x
+      </Flex.Item>,
+    );
+    expect(screen.getByTestId("item").className).toContain("extra");
+  });
+
+  it("maps alignSelf (and the align alias) to the same class", () => {
+    const { rerender } = render(
+      <Flex.Item alignSelf="center" data-testid="item">
+        x
+      </Flex.Item>,
+    );
+    const viaSelf = screen.getByTestId("item").className;
+    rerender(
+      <Flex.Item align="center" data-testid="item">
+        x
+      </Flex.Item>,
+    );
+    expect(screen.getByTestId("item").className).toBe(viaSelf);
+  });
+
+  it("lets alignSelf win over the align alias", () => {
+    const { rerender } = render(
+      <Flex.Item align="start" data-testid="item">
+        x
+      </Flex.Item>,
+    );
+    const startOnly = screen.getByTestId("item").className;
+    rerender(
+      <Flex.Item align="start" alignSelf="end" data-testid="item">
+        x
+      </Flex.Item>,
+    );
+    expect(screen.getByTestId("item").className).not.toBe(startOnly);
+  });
+
+  it("distinguishes grow/shrink true and false", () => {
+    const { rerender } = render(
+      <Flex.Item grow data-testid="item">
+        x
+      </Flex.Item>,
+    );
+    const growTrue = screen.getByTestId("item").className;
+    rerender(
+      <Flex.Item grow={false} data-testid="item">
+        x
+      </Flex.Item>,
+    );
+    expect(screen.getByTestId("item").className).not.toBe(growTrue);
+  });
+
+  it("applies a class for each layout knob", () => {
+    const { rerender } = render(<Flex.Item data-testid="item">x</Flex.Item>);
+    const base = screen.getByTestId("item").className;
+    for (const props of [
+      { grow: true },
+      { shrink: false },
+      { width: "full" as const },
+      { height: "8" as const },
+      { minWidth: "0" as const },
+      { minHeight: "fit-content" as const },
+      { p: "2" as const },
+    ]) {
+      rerender(
+        <Flex.Item data-testid="item" {...props}>
+          x
+        </Flex.Item>,
+      );
+      expect(screen.getByTestId("item").className).not.toBe(base);
+    }
+  });
+});
