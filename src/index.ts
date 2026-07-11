@@ -19,6 +19,7 @@ export {
 export {
   FileList,
   type FileListProps,
+  type FileListItemProps,
   type FileInfo,
   type FileListOrientation,
 } from "./components/FileList";
