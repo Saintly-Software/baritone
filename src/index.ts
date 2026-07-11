@@ -31,6 +31,7 @@ export {
 } from "./components/FileUpload";
 export { Link, type LinkProps } from "./components/Link";
 export { Text, type TextProps, type TextElement } from "./components/Text";
+export { HelpText, type HelpTextProps, type HelpTextVariant } from "./components/HelpText";
 export { Heading, type HeadingProps } from "./components/Heading";
 export {
   Flex,
