@@ -161,4 +161,89 @@ describe("ToggleGroup", () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "true");
   });
+
+  describe("form-control mode", () => {
+    it("names the group from the visible label (taking precedence over aria-label)", () => {
+      render(
+        <ToggleGroup<View>
+          aria-label="ignored"
+          label="Default view"
+          value="list"
+          onChange={() => {}}
+        >
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem value="list">List</ToggleGroupItem>
+              <ToggleGroupItem value="board">Board</ToggleGroupItem>
+            </>
+          )}
+        </ToggleGroup>,
+      );
+      const group = screen.getByRole("group", { name: "Default view" });
+      expect(group).toBeInTheDocument();
+      expect(group).not.toHaveAttribute("aria-label");
+    });
+
+    it("wires inline help to the group via aria-describedby", () => {
+      render(
+        <ToggleGroup<View>
+          label="Default view"
+          description="Applies to new boards."
+          value="list"
+          onChange={() => {}}
+        >
+          {({ ToggleGroupItem }) => <ToggleGroupItem value="list">List</ToggleGroupItem>}
+        </ToggleGroup>,
+      );
+      const group = screen.getByRole("group", { name: "Default view" });
+      const describedBy = group.getAttribute("aria-describedby");
+      expect(describedBy).toBeTruthy();
+      expect(screen.getByText("Applies to new boards.")).toHaveAttribute("id", describedBy);
+    });
+
+    it("flags the group invalid and reveals the error message when state is invalid", () => {
+      render(
+        <ToggleGroup<View>
+          label="Default view"
+          state="invalid"
+          errorMessage="Pick a view."
+          value="list"
+          onChange={() => {}}
+        >
+          {({ ToggleGroupItem }) => <ToggleGroupItem value="list">List</ToggleGroupItem>}
+        </ToggleGroup>,
+      );
+      const group = screen.getByRole("group", { name: "Default view" });
+      expect(group).toHaveAttribute("aria-invalid", "true");
+      const error = screen.getByText("Pick a view.");
+      expect(group.getAttribute("aria-describedby")).toBe(error.getAttribute("id"));
+    });
+
+    it("hides the error message until the state is invalid", () => {
+      render(
+        <ToggleGroup<View>
+          label="Default view"
+          errorMessage="Pick a view."
+          value="list"
+          onChange={() => {}}
+        >
+          {({ ToggleGroupItem }) => <ToggleGroupItem value="list">List</ToggleGroupItem>}
+        </ToggleGroup>,
+      );
+      expect(screen.queryByText("Pick a view.")).not.toBeInTheDocument();
+      expect(screen.getByRole("group")).not.toHaveAttribute("aria-invalid");
+    });
+
+    it("marks a required group with aria-required", () => {
+      render(
+        <ToggleGroup<View> label="Default view" required value="list" onChange={() => {}}>
+          {({ ToggleGroupItem }) => <ToggleGroupItem value="list">List</ToggleGroupItem>}
+        </ToggleGroup>,
+      );
+      expect(screen.getByRole("group", { name: "Default view" })).toHaveAttribute(
+        "aria-required",
+        "true",
+      );
+    });
+  });
 });

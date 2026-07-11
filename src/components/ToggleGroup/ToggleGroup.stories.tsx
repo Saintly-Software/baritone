@@ -86,3 +86,43 @@ export const Disabled: Story = {
     disabled: true,
   },
 };
+
+// A labelled form-control host: same segmented control, now with a group label,
+// inline help, and validation wiring — the form-control mode from DES-40.
+function LabelledViewToggle(
+  props: Omit<React.ComponentProps<typeof ToggleGroup<View>>, "value" | "onChange" | "children">,
+) {
+  const [value, setValue] = React.useState<View>("board");
+  return (
+    <ToggleGroup value={value} onChange={setValue} {...props}>
+      {({ ToggleGroupItem }) => (
+        <>
+          <ToggleGroupItem value="list">List</ToggleGroupItem>
+          <ToggleGroupItem value="board">Board</ToggleGroupItem>
+          <ToggleGroupItem value="calendar">Calendar</ToggleGroupItem>
+        </>
+      )}
+    </ToggleGroup>
+  );
+}
+
+export const FormControl: Story = {
+  render: () => (
+    <LabelledViewToggle
+      label="Default view"
+      required
+      description="Applies to newly created boards."
+    />
+  ),
+};
+
+export const Invalid: Story = {
+  render: () => (
+    <LabelledViewToggle
+      label="Default view"
+      required
+      state="invalid"
+      errorMessage="Pick a default view to continue."
+    />
+  ),
+};
