@@ -48,6 +48,7 @@ export {
   type GridAreas,
 } from "./components/Grid";
 export { Box, type BoxProps, type BoxElement } from "./components/Box";
+export { SrOnly, type SrOnlyProps } from "./components/SrOnly";
 export {
   Lockup,
   type LockupProps,
