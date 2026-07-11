@@ -58,8 +58,13 @@ describe("Flex", () => {
       { direction: "row" as const },
       { direction: "column" as const },
       { wrap: true },
+      { grow: true },
       { gap: "4" as const },
       { justify: "between" as const },
+      { width: "fill" as const },
+      { height: "8" as const },
+      { maxWidth: "12" as const },
+      { minHeight: "full" as const },
       { p: "2" as const },
       { mx: "auto" as const },
     ]) {
@@ -70,6 +75,61 @@ describe("Flex", () => {
       );
       expect(screen.getByTestId("flex").className).not.toBe(base);
     }
+  });
+
+  it("maps the width shorthand to distinct classes (fill vs fit vs inherit)", () => {
+    const { rerender } = render(
+      <Flex width="fill" data-testid="flex">
+        x
+      </Flex>,
+    );
+    const fill = screen.getByTestId("flex").className;
+    rerender(
+      <Flex width="fit" data-testid="flex">
+        x
+      </Flex>,
+    );
+    const fit = screen.getByTestId("flex").className;
+    rerender(
+      <Flex width="inherit" data-testid="flex">
+        x
+      </Flex>,
+    );
+    const inherit = screen.getByTestId("flex").className;
+    expect(new Set([fill, fit, inherit]).size).toBe(3);
+  });
+
+  it("distinguishes grow true and false", () => {
+    const { rerender } = render(
+      <Flex grow data-testid="flex">
+        x
+      </Flex>,
+    );
+    const growTrue = screen.getByTestId("flex").className;
+    rerender(
+      <Flex grow={false} data-testid="flex">
+        x
+      </Flex>,
+    );
+    expect(screen.getByTestId("flex").className).not.toBe(growTrue);
+  });
+
+  it("applies responsive visibility classes for hideOn / showOn", () => {
+    const { rerender } = render(<Flex data-testid="flex">x</Flex>);
+    const base = screen.getByTestId("flex").className;
+    rerender(
+      <Flex hideOn="md" data-testid="flex">
+        x
+      </Flex>,
+    );
+    const hidden = screen.getByTestId("flex").className;
+    expect(hidden).not.toBe(base);
+    rerender(
+      <Flex showOn={["mobile", "sm"]} data-testid="flex">
+        x
+      </Flex>,
+    );
+    expect(screen.getByTestId("flex").className).not.toBe(hidden);
   });
 });
 

@@ -52,6 +52,7 @@ describe("Box", () => {
       { mx: "auto" as const },
       { my: "1" as const },
       { mb: "3" as const },
+      { width: "fill" as const },
     ]) {
       rerender(
         <Box data-testid="box" {...props}>
@@ -60,5 +61,45 @@ describe("Box", () => {
       );
       expect(screen.getByTestId("box").className).not.toBe(base);
     }
+  });
+
+  it("maps the width shorthand to distinct classes (fill vs fit vs inherit)", () => {
+    const { rerender } = render(
+      <Box width="fill" data-testid="box">
+        x
+      </Box>,
+    );
+    const fill = screen.getByTestId("box").className;
+    rerender(
+      <Box width="fit" data-testid="box">
+        x
+      </Box>,
+    );
+    const fit = screen.getByTestId("box").className;
+    rerender(
+      <Box width="inherit" data-testid="box">
+        x
+      </Box>,
+    );
+    const inherit = screen.getByTestId("box").className;
+    expect(new Set([fill, fit, inherit]).size).toBe(3);
+  });
+
+  it("only emits a display class when a visibility prop is set", () => {
+    const { rerender } = render(<Box data-testid="box">x</Box>);
+    const base = screen.getByTestId("box").className;
+    rerender(
+      <Box hideOn="md" data-testid="box">
+        x
+      </Box>,
+    );
+    const hidden = screen.getByTestId("box").className;
+    expect(hidden).not.toBe(base);
+    rerender(
+      <Box showOn={["mobile", "sm"]} data-testid="box">
+        x
+      </Box>,
+    );
+    expect(screen.getByTestId("box").className).not.toBe(hidden);
   });
 });

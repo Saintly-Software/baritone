@@ -1,5 +1,11 @@
 "use client";
 import * as React from "react";
+import {
+  resolveDisplay,
+  resolveWidth,
+  type ResponsiveVisibility,
+  type WidthShorthand,
+} from "../../styles/layoutProps";
 import { atoms, type Atoms } from "../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import { cx } from "../../utils/cx";
@@ -63,6 +69,30 @@ export interface FlexProps
   direction?: FlexDirection;
   /** Allow children to wrap onto multiple lines. */
   wrap?: boolean;
+  /**
+   * `flex-grow` on the container itself — useful when this `Flex` is nested as a
+   * child of another flex layout. `true` grows to fill spare space (`1`),
+   * `false` stays at `0`.
+   */
+  grow?: boolean;
+  /** `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit`. */
+  width?: WidthShorthand;
+  /** `height`, from the atoms sizing scale. */
+  height?: Atoms["height"];
+  /** `max-width`, from the atoms sizing scale. */
+  maxWidth?: Atoms["maxWidth"];
+  /** `min-height`, from the atoms sizing scale. */
+  minHeight?: Atoms["minHeight"];
+  /**
+   * Hide at the given breakpoint(s) — responsive `display: none`. Accepts one
+   * breakpoint (`"md"`) or a set (`["mobile", "sm"]`).
+   */
+  hideOn?: ResponsiveVisibility;
+  /**
+   * Show *only* at the given breakpoint(s); hidden everywhere else. Accepts one
+   * breakpoint or a set.
+   */
+  showOn?: ResponsiveVisibility;
 
   /** Render as a different element/component (base-ui `render` pattern). */
   render?: RenderProp;
@@ -85,6 +115,13 @@ function FlexRoot({
   inline,
   direction,
   wrap,
+  grow,
+  width,
+  height,
+  maxWidth,
+  minHeight,
+  hideOn,
+  showOn,
   m,
   mx,
   my,
@@ -112,14 +149,19 @@ function FlexRoot({
       ref,
       className: cx(
         atoms({
-          display: inline ? "inline-flex" : "flex",
+          display: resolveDisplay(inline ? "inline-flex" : "flex", hideOn, showOn),
           // `direction` is already a valid `flex-direction` keyword (`row` /
           // `column`); undefined leaves it at the flexbox default (row).
           flexDirection: direction,
           flexWrap: wrap ? "wrap" : undefined,
+          flexGrow: grow === undefined ? undefined : grow ? 1 : 0,
           alignItems: align ? ALIGN[align] : undefined,
           justifyContent: justify ? JUSTIFY[justify] : undefined,
           gap,
+          width: resolveWidth(width),
+          height,
+          maxWidth,
+          minHeight,
           m,
           mx,
           my,
