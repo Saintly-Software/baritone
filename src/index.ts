@@ -26,6 +26,7 @@ export {
 export {
   FileUpload,
   type FileUploadProps,
+  type FileUploadSlotProps,
   type SingleFileUploadProps,
   type MultipleFileUploadProps,
 } from "./components/FileUpload";
