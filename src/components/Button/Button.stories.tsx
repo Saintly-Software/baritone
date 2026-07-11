@@ -12,6 +12,15 @@ const Sparkle = () => (
   </Icon>
 );
 
+// A plus glyph for the icon-only stories.
+const Plus = () => (
+  <Icon>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" />
+    </svg>
+  </Icon>
+);
+
 const meta: Meta<typeof Button> = {
   title: "Components/Button",
   component: Button,
@@ -68,6 +77,54 @@ export const WithIcons: Story = {
     startIcon: <Sparkle />,
     endIcon: <Sparkle />,
     children: "With icons",
+  },
+};
+
+export const IconOnly: Story = {
+  args: { icon: <Plus />, "aria-label": "Add item", children: undefined },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `icon` + `aria-label` (and no `children`) for a square, icon-only button. The `aria-label` is **required** — it's the accessible name, since there's no visible text. Only offered on the default (`solid`) look, not `appearance=\"text\"`.",
+      },
+    },
+  },
+};
+
+export const IconOnlySizes: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+      {SIZES.map((size) => (
+        <Button
+          key={size}
+          icon={<Plus />}
+          aria-label={`Add (${size})`}
+          intent="primary"
+          saliency="high"
+          size={size}
+        />
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: "The icon-only button stays square at every `size` — a 1:1 box of side = the control height.",
+      },
+    },
+  },
+};
+
+export const IconOnlyLoading: Story = {
+  args: { icon: <Plus />, "aria-label": "Add item", loading: true, children: undefined },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`loading` overlays a spinner on the glyph; the `aria-label` keeps naming the control while busy.",
+      },
+    },
   },
 };
 
