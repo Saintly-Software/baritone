@@ -119,12 +119,65 @@ describe("Checkbox", () => {
   });
 
   it("reflects an invalid state", () => {
-    render(<Subscribe invalid />);
+    render(<Subscribe state="invalid" />);
     expect(screen.getByRole("checkbox", { name: "Subscribe" })).toHaveAttribute("data-invalid");
   });
 
   it("renders without a label", () => {
     render(<Checkbox value={false} onChange={() => {}} />);
     expect(screen.getByRole("checkbox")).toBeInTheDocument();
+  });
+
+  it("reports aria-checked=mixed when indeterminate", () => {
+    render(<Subscribe indeterminate />);
+    expect(screen.getByRole("checkbox", { name: "Subscribe" })).toHaveAttribute(
+      "aria-checked",
+      "mixed",
+    );
+  });
+
+  it("still toggles from the indeterminate state, firing onChange with a boolean", async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<Subscribe indeterminate onChange={onChange} />);
+
+    await user.click(screen.getByRole("checkbox", { name: "Subscribe" }));
+
+    expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  it("names a label-less box with aria-label", () => {
+    render(<Checkbox value={false} onChange={() => {}} aria-label="Select row" />);
+    expect(screen.getByRole("checkbox", { name: "Select row" })).toBeInTheDocument();
+  });
+
+  it("names a label-less box with aria-labelledby", () => {
+    render(
+      <>
+        <span id="ext-label">External label</span>
+        <Checkbox value={false} onChange={() => {}} aria-labelledby="ext-label" />
+      </>,
+    );
+    expect(screen.getByRole("checkbox", { name: "External label" })).toBeInTheDocument();
+  });
+
+  it("prefers the visible label over aria-label", () => {
+    render(<Subscribe aria-label="Ignored" />);
+    expect(screen.getByRole("checkbox", { name: "Subscribe" })).toBeInTheDocument();
+  });
+
+  it("describes the box with its helpText", () => {
+    render(<Subscribe helpText="We send at most one email a week." />);
+    expect(screen.getByRole("checkbox", { name: "Subscribe" })).toHaveAccessibleDescription(
+      "We send at most one email a week.",
+    );
+  });
+
+  it("shows the error message only when invalid", () => {
+    const { rerender } = render(<Subscribe errorMessage="Required" />);
+    expect(screen.queryByText("Required")).not.toBeInTheDocument();
+
+    rerender(<Subscribe state="invalid" errorMessage="Required" />);
+    expect(screen.getByText("Required")).toBeInTheDocument();
   });
 });
