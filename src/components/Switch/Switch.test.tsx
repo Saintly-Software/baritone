@@ -169,4 +169,48 @@ describe("Switch", () => {
     // The switch is still named by its label, not by anything in the thumb.
     expect(screen.getByRole("switch", { name: "Notifications" })).toBeInTheDocument();
   });
+
+  it("names an unlabelled switch via aria-label", () => {
+    render(<Switch aria-label="Wi-Fi" value={false} onChange={() => {}} />);
+    expect(screen.getByRole("switch", { name: "Wi-Fi" })).toBeInTheDocument();
+  });
+
+  it("prefers a visible label over aria-label", () => {
+    render(<Notifications aria-label="ignored" />);
+    // aria-labelledby (the visible label) wins, so aria-label is not applied.
+    const toggle = screen.getByRole("switch", { name: "Notifications" });
+    expect(toggle).not.toHaveAttribute("aria-label");
+  });
+
+  it("points at an external label via aria-labelledby", () => {
+    render(
+      <>
+        <span id="ext-label">External name</span>
+        <Switch aria-labelledby="ext-label" value={false} onChange={() => {}} />
+      </>,
+    );
+    expect(screen.getByRole("switch", { name: "External name" })).toBeInTheDocument();
+  });
+
+  it("wires description text via aria-describedby", () => {
+    render(<Notifications description="We'll only ping you about outages." />);
+    const toggle = screen.getByRole("switch", { name: "Notifications" });
+    expect(toggle).toHaveAccessibleDescription("We'll only ping you about outages.");
+  });
+
+  it("shows the error message only when invalid", () => {
+    const { rerender } = render(<Notifications errorMessage="Required" />);
+    expect(screen.queryByText("Required")).toBeNull();
+
+    rerender(<Notifications invalid errorMessage="Required" />);
+    expect(screen.getByText("Required")).toBeInTheDocument();
+  });
+
+  it("keeps the accessible name stable across label positions", () => {
+    for (const labelPosition of ["top", "start", "end"] as const) {
+      const { unmount } = render(<Notifications labelPosition={labelPosition} />);
+      expect(screen.getByRole("switch", { name: "Notifications" })).toBeInTheDocument();
+      unmount();
+    }
+  });
 });

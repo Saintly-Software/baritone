@@ -27,24 +27,23 @@ export type FormState = (typeof FORM_STATES)[number];
 export const BODY_SIZES = ["xs", "sm", "base", "lg", "xl"] as const;
 export type BodySize = (typeof BODY_SIZES)[number];
 
-/** Named font-weight tokens, backing the typography `weight` variant. */
-export const FONT_WEIGHTS = ["regular", "medium", "semibold", "bold"] as const;
-export type FontWeight = (typeof FONT_WEIGHTS)[number];
-
-/** Text alignment (logical), backing the typography `align` variant. */
-export const TEXT_ALIGNS = ["start", "center", "end", "justify"] as const;
-export type TextAlign = (typeof TEXT_ALIGNS)[number];
-
-/** `text-wrap` behaviour, backing the typography `wrap` variant. */
-export const TEXT_WRAPS = ["wrap", "nowrap", "balance", "pretty"] as const;
-export type TextWrap = (typeof TEXT_WRAPS)[number];
-
 export const TITLE_SIZES = ["sm", "base", "lg", "xl", "2xl", "3xl", "3.5xl", "4xl"] as const;
 export type TitleSize = (typeof TITLE_SIZES)[number];
+
+/** Named font-weight steps a `Text` can select via its `weight` prop. */
+export const TEXT_WEIGHTS = ["default", "semibold", "bold", "superbold"] as const;
+export type TextWeight = (typeof TEXT_WEIGHTS)[number];
 
 /** Component sizing knob (padding / font / control height). */
 export const SIZES = ["sm", "md", "lg"] as const;
 export type Size = (typeof SIZES)[number];
+
+/**
+ * Where a control's visible label sits relative to the control. `start`/`end`
+ * are inline-logical (RTL-safe), `top` stacks the label above.
+ */
+export const LABEL_POSITIONS = ["top", "start", "end"] as const;
+export type LabelPosition = (typeof LABEL_POSITIONS)[number];
 
 export const SPACE_KEYS = ["0", "1", "2", "3", "4", "6", "8", "12", "16"] as const;
 export type SpaceKey = (typeof SPACE_KEYS)[number];

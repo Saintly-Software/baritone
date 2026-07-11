@@ -32,7 +32,7 @@ describe("Heading", () => {
     );
     const defaultClasses = screen.getByTestId("h").className;
     rerender(
-      <Heading level={2} data-testid="h" weight="regular">
+      <Heading level={2} data-testid="h" weight="superbold">
         Overridden
       </Heading>,
     );
@@ -51,7 +51,7 @@ describe("Heading", () => {
     );
     const base = screen.getByTestId("h").className.split(" ").length;
     rerender(
-      <Heading level={2} data-testid="h" align="center" weight="bold" wrap="balance">
+      <Heading level={2} data-testid="h" align="center" weight="bold" wrap="nowrap">
         Styled
       </Heading>,
     );

@@ -433,11 +433,16 @@ export function buildDefaultTokens(
         body: record(BODY_SIZES, (size) => bodyVariant(size)),
         title: record(TITLE_SIZES, (size) => titleVariant(size)),
       },
+      weight: {
+        default: fontWeight.regular,
+        semibold: fontWeight.semibold,
+        bold: fontWeight.bold,
+        superbold: fontWeight.superbold,
+      },
     },
     font: {
       sans: brand.fonts?.sans ?? fontFamily.sans,
       mono: brand.fonts?.mono ?? fontFamily.mono,
-      weight: { ...fontWeight },
     },
     space: spaceScale,
     radius: radiusScale,
