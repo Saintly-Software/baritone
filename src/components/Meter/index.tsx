@@ -150,9 +150,7 @@ export function Meter({
       {(label != null || showValue) && (
         <div className={meterHeader}>
           {label != null && (
-            <BaseMeter.Label
-              render={<Text variant="sm" saliency="high" {...slotProps?.label} />}
-            >
+            <BaseMeter.Label render={<Text variant="sm" saliency="high" {...slotProps?.label} />}>
               {label}
             </BaseMeter.Label>
           )}
