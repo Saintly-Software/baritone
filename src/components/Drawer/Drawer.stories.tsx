@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
+import { useOverlayHandle } from "../../utils/overlayHandle";
+import { Button } from "../Button";
 import { Text } from "../Text";
 import { Drawer } from "./index";
 
@@ -162,6 +165,46 @@ export const Intents: Story = {
       ))}
     </div>
   ),
+};
+
+export const ImperativeClose: Story = {
+  name: "Imperative close (async)",
+  render: (args) => {
+    const drawer = useOverlayHandle(Drawer);
+    const [saving, setSaving] = React.useState(false);
+    return (
+      <Drawer
+        {...args}
+        handle={drawer}
+        loading={saving}
+        trigger={<Drawer.Trigger>Edit settings</Drawer.Trigger>}
+        header={<Drawer.Header title="Edit settings" subtitle="Save closes it from code" />}
+        footer={
+          <Drawer.Footer>
+            <Drawer.Close>Cancel</Drawer.Close>
+            <Button
+              intent="primary"
+              saliency="high"
+              loading={saving}
+              onClick={async () => {
+                setSaving(true);
+                await new Promise((resolve) => setTimeout(resolve, 900));
+                setSaving(false);
+                drawer.close();
+              }}
+            >
+              Save
+            </Button>
+          </Drawer.Footer>
+        }
+      >
+        <Text render={<p />}>
+          Save runs an async action, then closes the drawer with `drawer.close()` — no need to lift
+          `open` into component state. `useOverlayHandle(Drawer)` mints the handle.
+        </Text>
+      </Drawer>
+    );
+  },
 };
 
 export const Nested: Story = {

@@ -69,6 +69,13 @@ export interface ModalProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "
   /** Called when the open state changes (base-ui signature). */
   onOpenChange?: RootProps["onOpenChange"];
   /**
+   * Imperative handle from `useOverlayHandle(Modal)`. Lets you close the modal
+   * from code — e.g. after an async action — without lifting `open` into
+   * component state. `handle.close()` is still vetoed while `disabled`, and the
+   * declarative `.Close` part / controlled `open` keep working alongside it.
+   */
+  handle?: RootProps["handle"];
+  /**
    * Modal behaviour. Default (base-ui) `true`: focus is trapped, page scroll is
    * locked, and the page behind is inert. `'trap-focus'` traps focus but leaves
    * the page scrollable/interactive; `false` is non-modal.
@@ -111,6 +118,7 @@ function ModalRoot({
   open,
   defaultOpen,
   onOpenChange,
+  handle,
   modal,
   initialFocus,
   finalFocus,
@@ -136,6 +144,7 @@ function ModalRoot({
       open={open}
       defaultOpen={defaultOpen}
       onOpenChange={handleOpenChange}
+      handle={handle}
       modal={modal}
       // Clicking outside never closes the modal (a deliberate constraint of this
       // component); dismissal is via Escape or an explicit close control.
@@ -281,4 +290,10 @@ export const Modal = Object.assign(ModalRoot, {
   Close: ModalClose,
   Header: ModalHeader,
   Footer: ModalFooter,
+  /**
+   * Creates a detached imperative handle (base-ui's `createHandle`). Prefer
+   * `useOverlayHandle(Modal)` inside components; reach for this only when the
+   * handle must live outside React (module scope, detached triggers).
+   */
+  createHandle: BaseDialog.createHandle,
 });

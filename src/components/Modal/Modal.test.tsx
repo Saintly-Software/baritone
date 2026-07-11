@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Modal } from "./index";
 
 describe("Modal", () => {
@@ -170,5 +171,56 @@ describe("Modal", () => {
       </Modal>,
     );
     expect(screen.getByText("Always visible")).toBeInTheDocument();
+  });
+
+  it("closes from an async callback via useOverlayHandle, without lifting open state", async () => {
+    const user = userEvent.setup();
+    function Example() {
+      const modal = useOverlayHandle(Modal);
+      return (
+        <Modal handle={modal} trigger={<Modal.Trigger>Open</Modal.Trigger>}>
+          Modal body
+          <button
+            type="button"
+            onClick={async () => {
+              await Promise.resolve();
+              modal.close();
+            }}
+          >
+            Save
+          </button>
+        </Modal>
+      );
+    }
+    render(<Example />);
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    expect(await screen.findByText("Modal body")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(screen.queryByText("Modal body")).not.toBeInTheDocument());
+  });
+
+  it("vetoes imperative close while disabled", async () => {
+    const user = userEvent.setup();
+    function Example() {
+      const modal = useOverlayHandle(Modal);
+      return (
+        <Modal disabled handle={modal} trigger={<Modal.Trigger>Open</Modal.Trigger>}>
+          Modal body
+          <button type="button" onClick={() => modal.close()}>
+            Force close
+          </button>
+        </Modal>
+      );
+    }
+    render(<Example />);
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    expect(await screen.findByText("Modal body")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Force close" }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.getByText("Modal body")).toBeInTheDocument();
   });
 });
