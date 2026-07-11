@@ -9,7 +9,7 @@ import {
 import { focusRingRecipe } from "../../../styles/recipes/focusRing.css";
 import { textVariantRecipe } from "../../../styles/recipes/text.css";
 import { cx } from "../../../utils/cx";
-import { mergeProps } from "../../../utils/render";
+import { mergeProps, type RenderProp } from "../../../utils/render";
 import {
   InternalGenericButtonAnchor,
   type InternalGenericButtonAnchorProps,
@@ -36,9 +36,27 @@ export type InternalButtonHtmlAttrs = React.ButtonHTMLAttributes<HTMLButtonEleme
   ref?: React.Ref<HTMLButtonElement>;
 };
 
+/**
+ * The link seam: when any of these is set, `InternalGenericButtonAnchor` renders
+ * the button chrome onto an `<a>`/router-link instead of a `<button>`. `Button`
+ * itself never sets them (they stay `undefined`, so it's always a real button);
+ * `Link`'s `appearance="button"` arm supplies them to get a button-styled link
+ * that reuses this recipe wholesale rather than duplicating the styles.
+ */
+export interface InternalButtonAnchorSeam {
+  render?: RenderProp;
+  href?: string;
+  target?: React.HTMLAttributeAnchorTarget;
+  rel?: string;
+}
+
 export interface InternalButtonProps {
-  /** The public `Button` API, exactly as a consumer set it. */
-  consumerProps: ButtonProps;
+  /**
+   * The public `Button` API, exactly as a consumer set it — optionally widened
+   * with the {@link InternalButtonAnchorSeam} so a button-styled link (`Link`'s
+   * `appearance="button"`) can render the same chrome on an anchor.
+   */
+  consumerProps: ButtonProps & InternalButtonAnchorSeam;
   /**
    * Host-supplied attributes merged onto the button — typically the props a
    * base-ui `Trigger`/`Close` passes via its `render` callback. Merged the way
