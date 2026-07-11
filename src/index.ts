@@ -91,7 +91,13 @@ export {
   type MetricTrend,
   type MetricTrendDirection,
 } from "./components/MetricCard";
-export { TextInput, type TextInputProps } from "./components/TextInput";
+export {
+  TextInput,
+  type TextInputProps,
+  type TextInputSlotProps,
+  type SingleLineTextInputProps,
+  type MultilineTextInputProps,
+} from "./components/TextInput";
 export {
   Combobox,
   type ComboboxProps,
