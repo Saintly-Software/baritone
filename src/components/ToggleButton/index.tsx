@@ -8,19 +8,32 @@ import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { toggleButtonSquare } from "./toggleButton.css";
 
-export interface ToggleButtonProps {
-  /** Whether the button is currently pressed / on (controlled). */
-  value: boolean;
-  /** Called with the next pressed state when the user toggles the button. */
-  onChange: (value: boolean) => void;
+/**
+ * A value that may either be given directly or derived from the pressed state.
+ * `aria-label` and `icon` accept this so the name / glyph can change with the
+ * toggle (e.g. a play ⇄ pause glyph, or an "Mute" ⇄ "Unmute" name).
+ */
+type PressedSlot<T> = T | ((pressed: boolean) => T);
+
+/** Fired on toggle. Exposes both the next pressed state and the DOM event. */
+export type ToggleButtonChange = (
+  value: boolean,
+  event: React.MouseEvent<HTMLButtonElement>,
+) => void;
+
+export interface ToggleButtonBaseProps {
   /**
    * Accessible name — **required**, because the button is icon-only and has no
    * visible text to name it. (The mirror image of `Button`, which *forbids*
-   * `aria-label` precisely because its visible label is already the name.)
+   * `aria-label` precisely because its visible label is already the name.) May
+   * be a function of the pressed state, so the name can flip with the toggle.
    */
-  "aria-label": string;
-  /** The glyph shown as the button's content. Typically an `<Icon>`. */
-  icon: React.ReactNode;
+  "aria-label": PressedSlot<string>;
+  /**
+   * The glyph shown as the button's content. Typically an `<Icon>`. May be a
+   * function of the pressed state, so the glyph can change with the toggle.
+   */
+  icon: PressedSlot<React.ReactNode>;
   /** Colour scheme of the pressed (on) state. Shared with `Button` / `Chip`. */
   intent?: Intent;
   /**
@@ -46,12 +59,38 @@ export interface ToggleButtonProps {
   ref?: React.Ref<HTMLButtonElement>;
 }
 
+/** Controlled: drive the pressed state with `value` (+ typically `onChange`). */
+export interface ToggleButtonControlledProps {
+  /** Whether the button is currently pressed / on (controlled). */
+  value: boolean;
+  defaultValue?: never;
+  /** Called with the next pressed state and the DOM event when toggled. */
+  onChange?: ToggleButtonChange;
+}
+
+/** Uncontrolled: seed the initial pressed state with `defaultValue`. */
+export interface ToggleButtonUncontrolledProps {
+  value?: never;
+  /** Initial pressed state; the component then manages its own. Default `false`. */
+  defaultValue?: boolean;
+  /** Called with the next pressed state and the DOM event when toggled. */
+  onChange?: ToggleButtonChange;
+}
+
+export type ToggleButtonProps = ToggleButtonBaseProps &
+  (ToggleButtonControlledProps | ToggleButtonUncontrolledProps);
+
 /**
  * ToggleButton — an icon-only button with an on / off (`aria-pressed`) state,
  * for toolbar-style toggles (bold, mute, pin, …). It's a thin wrapper over the
- * very same `InternalButton` that powers `Button`: `value` / `onChange` drive
- * the `aria-pressed` flag and the click, and the `icon` is the button's only
- * content.
+ * very same `InternalButton` that powers `Button`: the pressed state drives the
+ * `aria-pressed` flag and the click, and the `icon` is the button's only content.
+ *
+ * The pressed state can be **controlled** (`value` + `onChange`) or
+ * **uncontrolled** (`defaultValue`, or nothing, and the component tracks its own
+ * state). Either way `onChange` — when given — receives the next boolean *and*
+ * the DOM event. `icon` and `aria-label` may each be a function of the pressed
+ * state, so the glyph / name can flip with the toggle.
  *
  * The pressed state is expressed through saliency — `intent` / `saliency`
  * describe the *on* look, and the *off* look drops to `low` (ghost) saliency —
@@ -63,39 +102,64 @@ export interface ToggleButtonProps {
  * an overlay `Trigger` — the consumer-facing visual props (intent, size, …) go
  * through `consumerProps`. `aria-label` *must* travel via `htmlAttrs` because
  * `InternalButton` deliberately strips it from `consumerProps`; routing the
- * toggle `onClick` there too means the disabled guard gates it for free.
+ * toggle `onClick` there too means the disabled guard gates it for free (so a
+ * disabled toggle can't flip its own uncontrolled state either).
  *
  * @example
+ * // Controlled
  * const [muted, setMuted] = React.useState(false);
  * <ToggleButton
  *   value={muted}
- *   onChange={setMuted}
- *   aria-label={muted ? "Unmute" : "Mute"}
- *   icon={<Icon><MuteGlyph /></Icon>}
+ *   onChange={(next) => setMuted(next)}
+ *   aria-label={(pressed) => (pressed ? "Unmute" : "Mute")}
+ *   icon={(pressed) => <Icon>{pressed ? <MutedGlyph /> : <SoundGlyph />}</Icon>}
  *   intent="primary"
  * />
+ *
+ * @example
+ * // Uncontrolled
+ * <ToggleButton
+ *   defaultValue
+ *   aria-label="Pin"
+ *   icon={<Icon><PinGlyph /></Icon>}
+ * />
  */
-export function ToggleButton({
-  value,
-  onChange,
-  "aria-label": ariaLabel,
-  icon,
-  intent,
-  saliency = "high",
-  size,
-  disabled,
-  disabledReason,
-  className,
-  ref,
-}: ToggleButtonProps) {
+export function ToggleButton(props: ToggleButtonProps) {
+  const {
+    "aria-label": ariaLabel,
+    icon,
+    intent,
+    saliency = "high",
+    size,
+    disabled,
+    disabledReason,
+    className,
+    ref,
+  } = props;
+
+  // Controlled when a `value` is supplied; otherwise the component tracks its own
+  // pressed state, seeded from `defaultValue`.
+  const isControlled = props.value !== undefined;
+  const [uncontrolledValue, setUncontrolledValue] = React.useState(props.defaultValue ?? false);
+  const pressed = isControlled ? (props.value as boolean) : uncontrolledValue;
+
+  // Resolve the state-aware slots against the current pressed state.
+  const resolvedLabel = typeof ariaLabel === "function" ? ariaLabel(pressed) : ariaLabel;
+  const resolvedIcon = typeof icon === "function" ? icon(pressed) : icon;
+
   // Toggle semantics go through the `htmlAttrs` seam, the same one an overlay
   // `Trigger` uses. `aria-label` has to live here (InternalButton strips it from
   // `consumerProps`), and the toggle `onClick` rides alongside so InternalButton's
-  // disabled guard gates it — a disabled toggle can't flip its state.
+  // disabled guard gates it — a disabled toggle can't flip its state, and (only
+  // when uncontrolled) commit the next state locally before notifying `onChange`.
   const htmlAttrs: InternalButtonHtmlAttrs = {
-    "aria-label": ariaLabel,
-    "aria-pressed": value,
-    onClick: () => onChange(!value),
+    "aria-label": resolvedLabel,
+    "aria-pressed": pressed,
+    onClick: (event) => {
+      const next = !pressed;
+      if (!isControlled) setUncontrolledValue(next);
+      props.onChange?.(next, event);
+    },
   };
 
   return (
@@ -103,13 +167,13 @@ export function ToggleButton({
       consumerProps={{
         intent,
         // intent/saliency describe the *on* look; *off* drops to a ghost.
-        saliency: value ? saliency : "low",
+        saliency: pressed ? saliency : "low",
         size,
         disabled,
         disabledReason,
         className: cx(toggleButtonSquare, className),
         ref,
-        children: icon,
+        children: resolvedIcon,
       }}
       htmlAttrs={htmlAttrs}
     />

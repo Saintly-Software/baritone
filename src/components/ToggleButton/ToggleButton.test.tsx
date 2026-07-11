@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { ToggleButton } from "./index";
+import { ToggleButton, type ToggleButtonBaseProps } from "./index";
 
 // A throwaway glyph so the button has content to render.
 const Star = () => (
@@ -19,17 +19,17 @@ function Favourite({
   ...rest
 }: {
   value?: boolean;
-  onChange?: (value: boolean) => void;
-} & Partial<React.ComponentProps<typeof ToggleButton>>) {
+  onChange?: (value: boolean, event: React.MouseEvent<HTMLButtonElement>) => void;
+} & Partial<ToggleButtonBaseProps>) {
   const [value, setValue] = React.useState(initial);
   return (
     <ToggleButton
       aria-label="Favourite"
       icon={<Star />}
       value={value}
-      onChange={(next) => {
+      onChange={(next, event) => {
         setValue(next);
-        onChange?.(next);
+        onChange?.(next, event);
       }}
       {...rest}
     />
@@ -58,14 +58,14 @@ describe("ToggleButton", () => {
     expect(screen.getByRole("button", { name: "Favourite", pressed: true })).toBeInTheDocument();
   });
 
-  it("calls onChange with the negated value and flips pressed on click", async () => {
+  it("calls onChange with the negated value and the DOM event, and flips pressed on click", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     render(<Favourite onChange={onChange} />);
 
     await user.click(screen.getByRole("button", { name: "Favourite" }));
 
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.objectContaining({ type: "click" }));
     expect(screen.getByRole("button", { name: "Favourite" })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -79,11 +79,63 @@ describe("ToggleButton", () => {
 
     await user.click(screen.getByRole("button", { name: "Favourite" }));
 
-    expect(onChange).toHaveBeenCalledWith(false);
+    expect(onChange).toHaveBeenCalledWith(false, expect.objectContaining({ type: "click" }));
     expect(screen.getByRole("button", { name: "Favourite" })).toHaveAttribute(
       "aria-pressed",
       "false",
     );
+  });
+
+  describe("uncontrolled", () => {
+    it("manages its own pressed state with no value prop", async () => {
+      const user = userEvent.setup();
+      render(<ToggleButton aria-label="Favourite" icon={<Star />} />);
+      const button = screen.getByRole("button", { name: "Favourite" });
+
+      expect(button).toHaveAttribute("aria-pressed", "false");
+      await user.click(button);
+      expect(button).toHaveAttribute("aria-pressed", "true");
+      await user.click(button);
+      expect(button).toHaveAttribute("aria-pressed", "false");
+    });
+
+    it("seeds the initial pressed state from defaultValue", () => {
+      render(<ToggleButton aria-label="Favourite" icon={<Star />} defaultValue />);
+      expect(screen.getByRole("button", { name: "Favourite", pressed: true })).toBeInTheDocument();
+    });
+
+    it("still notifies onChange with the next value and event", async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(<ToggleButton aria-label="Favourite" icon={<Star />} onChange={onChange} />);
+
+      await user.click(screen.getByRole("button", { name: "Favourite" }));
+
+      expect(onChange).toHaveBeenCalledWith(true, expect.objectContaining({ type: "click" }));
+    });
+  });
+
+  describe("callback slots", () => {
+    it("resolves aria-label and icon against the pressed state", async () => {
+      const user = userEvent.setup();
+      render(
+        <ToggleButton
+          defaultValue={false}
+          aria-label={(pressed) => (pressed ? "Unmute" : "Mute")}
+          icon={(pressed) => <span data-testid="glyph">{pressed ? "muted" : "sound"}</span>}
+        />,
+      );
+
+      // Off: the "Mute" name and the sound glyph.
+      const button = screen.getByRole("button", { name: "Mute" });
+      expect(screen.getByTestId("glyph")).toHaveTextContent("sound");
+
+      await user.click(button);
+
+      // On: both slots have flipped.
+      expect(screen.getByRole("button", { name: "Unmute" })).toBeInTheDocument();
+      expect(screen.getByTestId("glyph")).toHaveTextContent("muted");
+    });
   });
 
   describe("disabled", () => {
