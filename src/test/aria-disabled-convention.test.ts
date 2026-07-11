@@ -35,6 +35,10 @@ const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  *   trigger); it never applies the native `disabled` attribute to any element,
  *   so it's not an interactive-control disable. (`BaseTooltip` is how the public
  *   `Tooltip` aliases the base-ui import to avoid clashing with its own name.)
+ * - `BaseSelect.Item` — base-ui's select option renders a `<div>` (a non-native
+ *   button), so its `disabled` maps to `aria-disabled` and keeps the option
+ *   focusable/announced in the listbox (`focusableWhenDisabled`), never the
+ *   native attribute. It's the idiomatic way to disable one option.
  * - `FileList` — a system component whose `disabled` is modelled the focusable
  *   way internally (dims the chips, sets the remove buttons' `aria-disabled` and
  *   swallows their clicks, never the native attribute — see its tests). Composing
@@ -55,6 +59,7 @@ function mayReceiveDisabled(tag: string): boolean {
     tag === "Tooltip.Root" ||
     tag === "BaseTooltip.Root" ||
     tag === "BaseTooltip.Trigger" ||
+    tag === "BaseSelect.Item" ||
     tag === "FileList" ||
     tag === "Chip" ||
     tag === "BaseCombobox.Item"

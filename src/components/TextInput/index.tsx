@@ -7,6 +7,7 @@ import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.c
 import { atoms } from "../../styles/sprinkles.css";
 import type { FormState, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { useIsFieldDisabled } from "../Fieldset";
 
 const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "1" });
 const labelClass = cx(
@@ -48,12 +49,15 @@ export function TextInput({
   label,
   description,
   errorMessage,
-  disabled,
+  disabled: disabledProp,
   readOnly,
   className,
   ref,
   ...rest
 }: TextInputProps) {
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
   return (
     <Field.Root className={wrapperClass} invalid={state === "invalid"}>
       {label != null && <Field.Label className={labelClass}>{label}</Field.Label>}

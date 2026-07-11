@@ -7,6 +7,7 @@ import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.c
 import { atoms } from "../../styles/sprinkles.css";
 import type { LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { useIsFieldDisabled } from "../Fieldset";
 import { switchLabelDisabled, switchRow, switchRowDisabled } from "./switch.css";
 
 // Field.Root defaults to a block `<div>`; shrink-wrap it into a column so the
@@ -160,7 +161,7 @@ export function Switch({
   errorMessage,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
-  disabled = false,
+  disabled: disabledProp = false,
   required = false,
   invalid = false,
   size = "md",
@@ -171,6 +172,9 @@ export function Switch({
   inactiveIcon,
 }: SwitchProps) {
   const labelId = React.useId();
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
 
   // `icon` is the single-glyph shorthand — reuse it for both states; otherwise
   // fall through to the per-state pair (both present or both absent).

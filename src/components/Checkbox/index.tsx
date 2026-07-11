@@ -7,6 +7,7 @@ import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.c
 import { atoms } from "../../styles/sprinkles.css";
 import type { FormState, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { useIsFieldDisabled } from "../Fieldset";
 import { checkboxLabelDisabled, checkboxRow, checkboxRowDisabled } from "./checkbox.css";
 
 // Field.Root defaults to a block `<div>`; shrink-wrap it and stack the row above
@@ -104,7 +105,7 @@ export function Checkbox({
   label,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
-  disabled = false,
+  disabled: disabledProp = false,
   required = false,
   state = "neutral",
   helpText,
@@ -114,6 +115,9 @@ export function Checkbox({
   className,
 }: CheckboxProps) {
   const labelId = React.useId();
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
 
   // Name the box explicitly. A visible `label` wins (base-ui's hidden `<input>`
   // is aria-hidden, so a wrapping `<label>` can't name the box); otherwise fall

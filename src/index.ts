@@ -93,6 +93,13 @@ export {
   type ComboboxSearchCopy,
 } from "./components/Combobox";
 export {
+  Fieldset,
+  FieldsetLegend,
+  useIsFieldDisabled,
+  type FieldsetProps,
+  type FieldsetLegendProps,
+} from "./components/Fieldset";
+export {
   RadioGroup,
   type RadioGroupProps,
   type RadioGroupItemProps,
@@ -106,6 +113,13 @@ export {
   type CheckboxGroupOrientation,
 } from "./components/CheckboxGroup";
 export { Switch, type SwitchProps } from "./components/Switch";
+export {
+  Select,
+  type SelectProps,
+  type SingleSelectProps,
+  type MultipleSelectProps,
+  type SelectOption,
+} from "./components/Select";
 export { Tabs, type TabsProps, type TabsItemProps } from "./components/Tabs";
 export {
   ToggleGroup,
