@@ -114,10 +114,18 @@ export const ItemShrink: Story = {
 export const WidthShorthand: Story = {
   render: () => (
     <Flex direction="column" gap="3" style={{ width: 320, border: "1px dashed #ccc" }} p="3">
-      <Flex width="fill" justify="center" style={{ background: "var(--baritone-color-neutral-100, #f1f1f4)" }}>
+      <Flex
+        width="fill"
+        justify="center"
+        style={{ background: "var(--baritone-color-neutral-100, #f1f1f4)" }}
+      >
         <Box>width=&quot;fill&quot; (100%)</Box>
       </Flex>
-      <Flex width="fit" justify="center" style={{ background: "var(--baritone-color-neutral-100, #f1f1f4)" }}>
+      <Flex
+        width="fit"
+        justify="center"
+        style={{ background: "var(--baritone-color-neutral-100, #f1f1f4)" }}
+      >
         <Box>width=&quot;fit&quot;</Box>
       </Flex>
     </Flex>
@@ -132,7 +140,16 @@ export const WidthShorthand: Story = {
 export const HideOnBreakpoint: Story = {
   render: () => (
     <Flex direction="column" gap="3">
-      <Flex hideOn={["md", "lg", "xl"]} justify="center" p="4" style={{ background: "var(--baritone-color-primary-500, #6366f1)", color: "white", borderRadius: 8 }}>
+      <Flex
+        hideOn={["md", "lg", "xl"]}
+        justify="center"
+        p="4"
+        style={{
+          background: "var(--baritone-color-primary-500, #6366f1)",
+          color: "white",
+          borderRadius: 8,
+        }}
+      >
         Visible on mobile + sm, hidden from md up (≥768px)
       </Flex>
       <div style={{ color: "#666" }}>Always visible — resize the viewport to test.</div>
@@ -147,7 +164,16 @@ export const HideOnBreakpoint: Story = {
 export const ShowOnBreakpoint: Story = {
   render: () => (
     <Flex direction="column" gap="3">
-      <Flex showOn={["lg", "xl"]} justify="center" p="4" style={{ background: "var(--baritone-color-primary-500, #6366f1)", color: "white", borderRadius: 8 }}>
+      <Flex
+        showOn={["lg", "xl"]}
+        justify="center"
+        p="4"
+        style={{
+          background: "var(--baritone-color-primary-500, #6366f1)",
+          color: "white",
+          borderRadius: 8,
+        }}
+      >
         Only visible from lg up (≥1024px)
       </Flex>
       <div style={{ color: "#666" }}>Always visible — resize the viewport to test.</div>
