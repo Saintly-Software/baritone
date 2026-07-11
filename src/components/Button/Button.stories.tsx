@@ -110,7 +110,8 @@ export const IconOnlySizes: Story = {
   parameters: {
     docs: {
       description: {
-        story: "The icon-only button stays square at every `size` — a 1:1 box of side = the control height.",
+        story:
+          "The icon-only button stays square at every `size` — a 1:1 box of side = the control height.",
       },
     },
   },
