@@ -144,3 +144,55 @@ export const Uncontrolled: Story = {
     <Tabs aria-label="Project sections" initialValue="activity" intent="primary" tabs={VIEWS} />
   ),
 };
+
+// Panel body copy, one blurb per view, so the panel stories have real content.
+const PANELS: Record<View, string> = {
+  overview: "A birds-eye summary of the project — health, owners, recent activity.",
+  activity: "A running feed of what changed and who changed it.",
+  settings: "Configuration for the project: visibility, integrations, danger zone.",
+};
+
+// With panels the content lives inside <Tabs> as <Tabs.Panel> children, so
+// base-ui shows the active one and wires the aria-controls/labelledby pair —
+// no separate content-switch of your own.
+export const WithPanels: Story = {
+  render: () => {
+    function PanelsHost() {
+      const [value, setValue] = React.useState<View>("overview");
+      return (
+        <Tabs
+          aria-label="Project sections"
+          value={value}
+          onChange={setValue}
+          intent="primary"
+          saliency="high"
+          tabs={[
+            { value: "overview", label: "Overview", leadIcon: <Dot /> },
+            { value: "activity", label: "Activity", leadIcon: <Dot /> },
+            { value: "settings", label: "Settings", leadIcon: <Dot /> },
+          ]}
+        >
+          {VIEWS.map(({ value: v }) => (
+            <Tabs.Panel key={v} value={v} style={{ fontFamily: "system-ui" }}>
+              {PANELS[v]}
+            </Tabs.Panel>
+          ))}
+        </Tabs>
+      );
+    }
+    return <PanelsHost />;
+  },
+};
+
+// Uncontrolled + panels: seed with initialValue and let Tabs manage the rest.
+export const UncontrolledWithPanels: Story = {
+  render: () => (
+    <Tabs aria-label="Project sections" initialValue="activity" intent="primary" tabs={VIEWS}>
+      {VIEWS.map(({ value: v }) => (
+        <Tabs.Panel key={v} value={v} style={{ fontFamily: "system-ui" }}>
+          {PANELS[v]}
+        </Tabs.Panel>
+      ))}
+    </Tabs>
+  ),
+};

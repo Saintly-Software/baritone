@@ -178,6 +178,62 @@ describe("Tabs", () => {
     expect(onChange).toHaveBeenCalledWith(Step.Two);
   });
 
+  it("shows the active tab's panel and wires aria-controls/aria-labelledby", () => {
+    render(
+      <Tabs aria-label="Sections" initialValue="overview" tabs={VIEWS}>
+        <Tabs.Panel value="overview">Overview panel</Tabs.Panel>
+        <Tabs.Panel value="activity">Activity panel</Tabs.Panel>
+        <Tabs.Panel value="settings">Settings panel</Tabs.Panel>
+      </Tabs>,
+    );
+
+    const overviewTab = screen.getByRole("tab", { name: "Overview" });
+    const panel = screen.getByRole("tabpanel");
+
+    // Only the active tab's panel is exposed; the wiring points both ways.
+    expect(panel).toHaveTextContent("Overview panel");
+    expect(overviewTab).toHaveAttribute("aria-controls", panel.getAttribute("id"));
+    expect(panel).toHaveAttribute("aria-labelledby", overviewTab.getAttribute("id"));
+  });
+
+  it("swaps the visible panel when the selection changes", async () => {
+    const user = userEvent.setup();
+    render(
+      <Tabs aria-label="Sections" initialValue="overview" tabs={VIEWS}>
+        <Tabs.Panel value="overview">Overview panel</Tabs.Panel>
+        <Tabs.Panel value="activity">Activity panel</Tabs.Panel>
+      </Tabs>,
+    );
+
+    expect(screen.getByRole("tabpanel")).toHaveTextContent("Overview panel");
+
+    await user.click(screen.getByRole("tab", { name: "Activity" }));
+    expect(screen.getByRole("tabpanel")).toHaveTextContent("Activity panel");
+  });
+
+  it("lazily mounts panels by default but keeps them mounted with keepMounted", async () => {
+    const user = userEvent.setup();
+    render(
+      <Tabs aria-label="Sections" initialValue="overview" tabs={VIEWS}>
+        <Tabs.Panel value="overview">Overview panel</Tabs.Panel>
+        <Tabs.Panel value="activity">
+          <span data-testid="lazy">Activity panel</span>
+        </Tabs.Panel>
+        <Tabs.Panel value="settings" keepMounted>
+          <span data-testid="kept">Settings panel</span>
+        </Tabs.Panel>
+      </Tabs>,
+    );
+
+    // Lazy panel isn't in the DOM until its tab is first activated...
+    expect(screen.queryByTestId("lazy")).not.toBeInTheDocument();
+    // ...but a keepMounted panel is present (just hidden) from the start.
+    expect(screen.getByTestId("kept")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: "Activity" }));
+    expect(screen.getByTestId("lazy")).toBeInTheDocument();
+  });
+
   it("renders lead and trail icons alongside the label", () => {
     render(
       <Tabs
