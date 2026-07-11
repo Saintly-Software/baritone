@@ -9,6 +9,7 @@ import {
   SHADOW_KEYS,
   SPACE_KEYS,
   SURFACE_SALIENCIES,
+  TEXT_WEIGHTS,
   TITLE_SIZES,
   Z_INDEX_KEYS,
 } from "./constants";
@@ -60,6 +61,9 @@ export const tokenShape = {
       body: record(BODY_SIZES, () => fontVariant()),
       title: record(TITLE_SIZES, () => fontVariant()),
     },
+    // Named `font-weight` steps selectable via `Text`'s `weight` prop, on top
+    // of the weight baked into each typography `variant`.
+    weight: record(TEXT_WEIGHTS, () => s()),
   },
   font: {
     sans: s(),

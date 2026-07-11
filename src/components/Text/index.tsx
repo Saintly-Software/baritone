@@ -1,6 +1,11 @@
 "use client";
 import * as React from "react";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import {
+  textIntentRecipe,
+  textTypographyRecipe,
+  type TextTypographyVariants,
+  textVariantRecipe,
+} from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import type { BodySize, Intent, Saliency } from "../../theme/constants";
@@ -18,6 +23,16 @@ interface TextOwnProps
   intent?: Intent;
   /** Override the inherited colour at this saliency. Falls back to `mid` when standalone. */
   saliency?: Saliency;
+  /** Font weight, from the `text.weight` tokens. Overrides the `variant`'s own weight. */
+  weight?: TextTypographyVariants["weight"];
+  /** Render the text in italics. */
+  italic?: TextTypographyVariants["italic"];
+  /** Horizontal text alignment. */
+  align?: TextTypographyVariants["align"];
+  /** Whether the text wraps onto multiple lines. */
+  wrap?: TextTypographyVariants["wrap"];
+  /** How the text breaks long words. */
+  wordBreak?: TextTypographyVariants["wordBreak"];
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
 }
@@ -52,12 +67,20 @@ export type TextProps = TextOwnProps &
  * standalone), so text in a coloured surface matches automatically; pass `intent`
  * and/or `saliency` to override. It also exposes its resolved colour to descendant
  * `Icon`s via `--iconColor`, so inline icons match the text.
+ *
+ * Typography can be tuned with token-backed knobs: `weight`, `italic`, `align`,
+ * `wrap`, and `wordBreak`.
  */
 export function Text(props: TextProps) {
   const {
     variant = "base",
     intent,
     saliency,
+    weight,
+    italic,
+    align,
+    wrap,
+    wordBreak,
     as,
     render,
     className,
@@ -88,6 +111,7 @@ export function Text(props: TextProps) {
       className: cx(
         textIntentRecipe({ intent, saliency }),
         textVariantRecipe({ family: "body", size: variant }),
+        textTypographyRecipe({ weight, italic, align, wrap, wordBreak }),
         atoms({ m, mx, my, mt, mr, mb, ml, p, px, py, pt, pr, pb, pl }),
         className,
       ),
