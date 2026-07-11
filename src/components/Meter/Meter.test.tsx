@@ -62,4 +62,79 @@ describe("Meter", () => {
     render(<Meter aria-label="Signal" value={30} />);
     expect(screen.queryByText("Signal")).not.toBeInTheDocument();
   });
+
+  it("renders a description and wires it up as aria-describedby", () => {
+    render(<Meter label="Storage" value={72} description="of your 100 GB quota" />);
+    const meter = screen.getByRole("meter");
+    const description = screen.getByText("of your 100 GB quota");
+    expect(description).toBeInTheDocument();
+    expect(meter).toHaveAttribute("aria-describedby", description.id);
+    expect(description.id).toBeTruthy();
+  });
+
+  it("does not set aria-describedby when there's no description", () => {
+    render(<Meter label="Storage" value={72} />);
+    expect(screen.getByRole("meter")).not.toHaveAttribute("aria-describedby");
+  });
+
+  it("shows the formatted value only when showValue is set", () => {
+    const { rerender } = render(<Meter label="Storage" value={72} />);
+    expect(screen.queryByText("72%")).not.toBeInTheDocument();
+    rerender(<Meter label="Storage" value={72} showValue />);
+    expect(screen.getByText("72%")).toBeInTheDocument();
+  });
+
+  it("formats the displayed value with format / locale", () => {
+    render(
+      <Meter
+        label="Download"
+        value={4.2}
+        min={0}
+        max={10}
+        showValue
+        format={{ style: "unit", unit: "gigabyte", unitDisplay: "short" }}
+      />,
+    );
+    // Intl renders "4.2 GB" (narrow no-break space between number and unit).
+    expect(screen.getByText(/4\.2\s*GB/)).toBeInTheDocument();
+  });
+
+  it("lets formatValue take over the displayed node", () => {
+    render(
+      <Meter
+        label="Seats"
+        value={18}
+        max={25}
+        showValue
+        formatValue={(_formatted, value) => `${value} / 25`}
+      />,
+    );
+    expect(screen.getByText("18 / 25")).toBeInTheDocument();
+  });
+
+  it("keeps the displayed value out of the accessibility tree", () => {
+    render(<Meter label="Storage" value={72} showValue />);
+    // The read-out is aria-hidden; the value reaches AT via aria-valuenow /
+    // aria-valuetext, so the meter's name stays just its label.
+    expect(screen.getByRole("meter", { name: "Storage" })).toBeInTheDocument();
+  });
+
+  it("forwards slotProps onto the label / value / description slots", () => {
+    render(
+      <Meter
+        label="Storage"
+        value={72}
+        showValue
+        description="quota"
+        slotProps={{
+          label: { className: "slot-label" },
+          value: { className: "slot-value" },
+          description: { className: "slot-description" },
+        }}
+      />,
+    );
+    expect(screen.getByText("Storage")).toHaveClass("slot-label");
+    expect(screen.getByText("72%")).toHaveClass("slot-value");
+    expect(screen.getByText("quota")).toHaveClass("slot-description");
+  });
 });
