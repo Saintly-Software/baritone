@@ -86,6 +86,68 @@ describe("Button", () => {
     expect(screen.getByTestId("forced")).not.toHaveAttribute("aria-label");
   });
 
+  describe("icon-only", () => {
+    it("renders a square button named by the required aria-label, with no visible label", () => {
+      render(<Button icon={<span data-testid="glyph" />} aria-label="Add item" />);
+      const button = screen.getByRole("button", { name: "Add item" });
+      expect(button.tagName).toBe("BUTTON");
+      expect(button).toHaveAttribute("aria-label", "Add item");
+      expect(screen.getByTestId("glyph")).toBeInTheDocument();
+      // No visible text content — the glyph is the whole content.
+      expect(button).toHaveTextContent("");
+    });
+
+    it("fires onClick when enabled", async () => {
+      const onClick = vi.fn();
+      const user = userEvent.setup();
+      render(<Button icon={<span />} aria-label="Add" onClick={onClick} />);
+      await user.click(screen.getByRole("button", { name: "Add" }));
+      expect(onClick).toHaveBeenCalledTimes(1);
+    });
+
+    it("supports disabled (aria-disabled) and suppresses onClick", async () => {
+      const onClick = vi.fn();
+      const user = userEvent.setup();
+      render(<Button icon={<span />} aria-label="Add" disabled onClick={onClick} />);
+      const button = screen.getByRole("button", { name: "Add" });
+      expect(button).toHaveAttribute("aria-disabled", "true");
+      expect(button).not.toHaveAttribute("disabled");
+      await user.click(button);
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it("keeps its accessible name and sets aria-busy while loading", async () => {
+      const onClick = vi.fn();
+      const user = userEvent.setup();
+      render(<Button icon={<span />} aria-label="Add" loading onClick={onClick} />);
+      const button = screen.getByRole("button", { name: "Add" });
+      expect(button).toHaveAttribute("aria-busy", "true");
+      expect(button).toHaveAttribute("aria-disabled", "true");
+      await user.click(button);
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it("rejects children, startIcon/endIcon, and appearance=text on the icon-only arm", () => {
+      render(
+        // @ts-expect-error `children` is unsupported alongside `icon`.
+        <Button icon={<span />} aria-label="Add">
+          Label
+        </Button>,
+      );
+      // @ts-expect-error `startIcon` is unsupported on the icon-only arm.
+      render(<Button icon={<span />} aria-label="Add" startIcon={<span />} />);
+      // @ts-expect-error the text appearance is label-only (no icon-only mode).
+      render(<Button icon={<span />} aria-label="Add" appearance="text" />);
+      expect(screen.getAllByRole("button").length).toBeGreaterThan(0);
+    });
+
+    it("requires an aria-label when icon-only", () => {
+      // @ts-expect-error `aria-label` is required on the icon-only arm.
+      render(<Button icon={<span data-testid="no-label" />} />);
+      expect(screen.getByTestId("no-label")).toBeInTheDocument();
+    });
+  });
+
   describe('appearance="text"', () => {
     it("renders a real <button> with the label as its accessible name", () => {
       render(<Button appearance="text">Learn more</Button>);

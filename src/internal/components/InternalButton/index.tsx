@@ -21,6 +21,7 @@ import {
   buttonContent,
   buttonContentLoading,
   buttonSpinner,
+  buttonSquare,
   textButtonRecipe,
 } from "./internalButton.css";
 
@@ -96,18 +97,25 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     loading = false,
     startIcon,
     endIcon,
+    icon,
     disabledReason,
     type,
     onClick,
     className,
     ref,
-    // Dropped, never forwarded: the accessible name must be the visible label, so
-    // an `aria-label` (which would override it) is intentionally unsupported. The
-    // interface types it as `never`, but strip it here so a cast/JS caller can't
-    // sneak it onto the DOM.
-    "aria-label": _unsupportedAriaLabel,
+    // Destructured out of `rest` so it's never blindly forwarded to the DOM. On a
+    // labelled button the accessible name must be the visible label, so a
+    // (type-`never`) `aria-label` is dropped here — a cast/JS caller can't sneak
+    // it on. On the icon-only arm it *is* the name, so it's forwarded explicitly
+    // below when `icon` is present.
+    "aria-label": ariaLabel,
     ...rest
   } = consumerProps;
+
+  // Icon-only look: `<Button icon aria-label>` renders a single centred glyph in
+  // a square box, named by the required `aria-label`. `icon` is the union
+  // discriminant, so its presence is what puts the button in this mode.
+  const isIconOnly = icon != null;
 
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
@@ -149,6 +157,8 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
         buttonBase,
         componentTypographyRecipe({ size }),
         componentIntentRecipe({ intent, saliency }),
+        // Square the box (drop inline padding, pin 1:1) for the icon-only look.
+        isIconOnly && buttonSquare,
       );
 
   // The button's own props; `hostAttrs` is merged underneath these below so the
@@ -162,13 +172,23 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     disabled: isDisabled,
     className: cx(appearanceClassName, focusRingRecipe({ type: "visible" }), className),
     "aria-busy": isLoading || undefined,
+    // The icon-only arm has no visible text, so its required `aria-label` is the
+    // accessible name and is forwarded here. Labelled buttons never reach this
+    // (their `aria-label` is type-`never` and was dropped above).
+    ...(isIconOnly && ariaLabel != null ? { "aria-label": ariaLabel } : {}),
     onClick: handleClick,
     children: (
       <>
         <span className={cx(buttonContent, isLoading && buttonContentLoading)}>
-          {startIcon}
-          {children}
-          {endIcon}
+          {isIconOnly ? (
+            icon
+          ) : (
+            <>
+              {startIcon}
+              {children}
+              {endIcon}
+            </>
+          )}
         </span>
         {isLoading && (
           <span className={buttonSpinner} aria-hidden>
