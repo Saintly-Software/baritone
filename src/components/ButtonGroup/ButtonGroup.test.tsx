@@ -121,10 +121,9 @@ describe("ButtonGroup", () => {
       );
       await user.tab();
       expect(screen.getByRole("button", { name: "Paste" })).toHaveFocus();
-      await waitFor(
-        () => expect(screen.getByText("Clipboard is empty.")).toBeInTheDocument(),
-        { timeout: 2000 },
-      );
+      await waitFor(() => expect(screen.getByText("Clipboard is empty.")).toBeInTheDocument(), {
+        timeout: 2000,
+      });
     });
   });
 
@@ -144,9 +143,7 @@ describe("ButtonGroup", () => {
   });
 
   it("renders a single member without error (only-child, no joins to collapse)", () => {
-    render(
-      <ButtonGroup items={[<ButtonGroup.Item key="a">Solo</ButtonGroup.Item>]} />,
-    );
+    render(<ButtonGroup items={[<ButtonGroup.Item key="a">Solo</ButtonGroup.Item>]} />);
     expect(screen.getByRole("button", { name: "Solo" })).toBeInTheDocument();
   });
 });
