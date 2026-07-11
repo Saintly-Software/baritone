@@ -8,6 +8,7 @@ import { atoms } from "../../styles/sprinkles.css";
 import type { FormState, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { checkboxLabelDisabled, checkboxRow, checkboxRowDisabled } from "../Checkbox/checkbox.css";
+import { useIsFieldDisabled } from "../Fieldset";
 import { checkboxGroupRoot } from "./checkboxGroup.css";
 
 const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "2" });
@@ -209,10 +210,13 @@ export function CheckboxGroup<T>({
   label,
   description,
   errorMessage,
-  disabled = false,
+  disabled: disabledProp = false,
   className,
 }: CheckboxGroupProps<T>) {
   const labelId = React.useId();
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
 
   // `onChange` is referenced from `toggle` below; keep the latest in a ref so the
   // memoised context value doesn't have to change identity on every `onChange`.
