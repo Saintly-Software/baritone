@@ -10,6 +10,18 @@ const spaceValues = Object.fromEntries(SPACE_KEYS.map((key) => [key, vars.space[
 
 const marginValues = { ...spaceValues, auto: "auto" };
 
+// Sizing values for `width` / `height` / `min*`: the spacing scale (so a flex
+// child can take a fixed size straight from the atoms scale) plus the intrinsic
+// keywords. `full` is a friendly alias for `100%`.
+const dimensionValues = {
+  ...spaceValues,
+  auto: "auto",
+  full: "100%",
+  "fit-content": "fit-content",
+  "max-content": "max-content",
+  "min-content": "min-content",
+};
+
 // Responsive atoms wired to the breakpoint tokens. `mobile` is the base
 // (mobile-first) condition; the rest are `min-width` media queries.
 const responsiveProperties = defineProperties({
@@ -35,6 +47,9 @@ const responsiveProperties = defineProperties({
     flexDirection: ["row", "row-reverse", "column", "column-reverse"],
     flexWrap: ["wrap", "nowrap"],
     alignItems: ["stretch", "flex-start", "center", "flex-end", "baseline"],
+    alignSelf: ["auto", "stretch", "flex-start", "center", "flex-end", "baseline"],
+    flexGrow: [0, 1],
+    flexShrink: [0, 1],
     justifyContent: [
       "flex-start",
       "center",
@@ -54,7 +69,10 @@ const responsiveProperties = defineProperties({
     marginBottom: marginValues,
     marginLeft: marginValues,
     marginRight: marginValues,
-    width: ["auto", "100%", "fit-content", "max-content", "min-content"],
+    width: dimensionValues,
+    height: dimensionValues,
+    minWidth: dimensionValues,
+    minHeight: dimensionValues,
     textAlign: ["left", "center", "right"],
   },
   shorthands: {
