@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Drawer } from "./index";
 
 describe("Drawer", () => {
@@ -170,5 +171,56 @@ describe("Drawer", () => {
       </Drawer>,
     );
     expect(screen.getByText("Always visible")).toBeInTheDocument();
+  });
+
+  it("closes from an async callback via useOverlayHandle, without lifting open state", async () => {
+    const user = userEvent.setup();
+    function Example() {
+      const drawer = useOverlayHandle(Drawer);
+      return (
+        <Drawer handle={drawer} trigger={<Drawer.Trigger>Open</Drawer.Trigger>}>
+          Drawer body
+          <button
+            type="button"
+            onClick={async () => {
+              await Promise.resolve();
+              drawer.close();
+            }}
+          >
+            Save
+          </button>
+        </Drawer>
+      );
+    }
+    render(<Example />);
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    expect(await screen.findByText("Drawer body")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(screen.queryByText("Drawer body")).not.toBeInTheDocument());
+  });
+
+  it("vetoes imperative close while disabled", async () => {
+    const user = userEvent.setup();
+    function Example() {
+      const drawer = useOverlayHandle(Drawer);
+      return (
+        <Drawer disabled handle={drawer} trigger={<Drawer.Trigger>Open</Drawer.Trigger>}>
+          Drawer body
+          <button type="button" onClick={() => drawer.close()}>
+            Force close
+          </button>
+        </Drawer>
+      );
+    }
+    render(<Example />);
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    expect(await screen.findByText("Drawer body")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Force close" }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(screen.getByText("Drawer body")).toBeInTheDocument();
   });
 });

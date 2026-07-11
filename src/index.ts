@@ -253,3 +253,8 @@ export { focusRingRecipe, type FocusRingVariants } from "./styles/recipes/focusR
 // Polymorphism helpers
 export { useRender, composeRefs, type RenderProp } from "./utils/render";
 export { cx } from "./utils/cx";
+export {
+  useOverlayHandle,
+  type OverlayHandle,
+  type OverlayWithHandle,
+} from "./utils/overlayHandle";

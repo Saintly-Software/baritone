@@ -48,6 +48,13 @@ export interface PopoverProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   /** Called when the open state changes (base-ui signature). */
   onOpenChange?: RootProps["onOpenChange"];
   /**
+   * Imperative handle from `useOverlayHandle(Popover)`. Lets you close the
+   * popover from code — e.g. after an async action — without lifting `open`
+   * into component state. The declarative `.Close` part / controlled `open`
+   * keep working alongside it.
+   */
+  handle?: RootProps["handle"];
+  /**
    * Modal behaviour. Default `false`: the rest of the page stays interactive and
    * clicking outside closes the popover. `true` locks scroll and traps focus.
    */
@@ -90,6 +97,7 @@ function PopoverRoot({
   open,
   defaultOpen,
   onOpenChange,
+  handle,
   modal,
   side,
   align,
@@ -106,6 +114,7 @@ function PopoverRoot({
       open={open}
       defaultOpen={defaultOpen}
       onOpenChange={onOpenChange}
+      handle={handle}
       modal={modal}
     >
       {trigger}
@@ -243,4 +252,10 @@ export const Popover = Object.assign(PopoverRoot, {
   Close: PopoverClose,
   Header: PopoverHeader,
   Footer: PopoverFooter,
+  /**
+   * Creates a detached imperative handle (base-ui's `createHandle`). Prefer
+   * `useOverlayHandle(Popover)` inside components; reach for this only when the
+   * handle must live outside React (module scope, detached triggers).
+   */
+  createHandle: BasePopover.createHandle,
 });

@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
+import { useOverlayHandle } from "../../utils/overlayHandle";
+import { Button } from "../Button";
 import { Text } from "../Text";
 import { Popover } from "./index";
 
@@ -80,6 +83,45 @@ export const Sides: Story = {
       ))}
     </div>
   ),
+};
+
+export const ImperativeClose: Story = {
+  name: "Imperative close (async)",
+  render: (args) => {
+    const popover = useOverlayHandle(Popover);
+    const [saving, setSaving] = React.useState(false);
+    return (
+      <Popover
+        {...args}
+        handle={popover}
+        trigger={<Popover.Trigger>Rename</Popover.Trigger>}
+        header={<Popover.Header title="Rename" subtitle="Save closes it from code" />}
+        footer={
+          <Popover.Footer>
+            <Popover.Close>Cancel</Popover.Close>
+            <Button
+              intent="primary"
+              saliency="high"
+              loading={saving}
+              onClick={async () => {
+                setSaving(true);
+                await new Promise((resolve) => setTimeout(resolve, 900));
+                setSaving(false);
+                popover.close();
+              }}
+            >
+              Save
+            </Button>
+          </Popover.Footer>
+        }
+      >
+        <Text render={<p />}>
+          Save runs an async action, then closes the popover with `popover.close()` — no need to
+          lift `open` into component state. `useOverlayHandle(Popover)` mints the handle.
+        </Text>
+      </Popover>
+    );
+  },
 };
 
 export const Intents: Story = {
