@@ -3,8 +3,8 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 import { iconColorVar, textColorVar } from "../../styles/vars.css";
 
-/** `Menu.Item`'s supported intents — the neutral default plus the two accents. */
-const MENU_ITEM_INTENTS = ["neutral", "warning", "negative"] as const;
+/** `Menu.Item`'s supported intents — the neutral default plus the accent intents. */
+const MENU_ITEM_INTENTS = ["neutral", "secondary", "warning", "negative"] as const;
 
 /** Sits the floating menu above page content, mirroring `Popover`. */
 export const menuPositioner = style({
@@ -46,9 +46,9 @@ export const menuPopup = style({
  * the background wash shown while base-ui flags it `data-highlighted`
  * (keyboard/pointer navigation) — the row's *only* focus indicator, matching
  * base-ui's own recommended pattern (no separate focus ring per item). The
- * `neutral` wash matches `Accordion`'s trigger hover; `warning`/`negative` use
- * their own tokens so a destructive item reads as such even before it's
- * highlighted.
+ * `neutral` wash matches `Accordion`'s trigger hover; the accent intents
+ * (`secondary`/`warning`/`negative`) use their own tokens so a destructive item
+ * reads as such even before it's highlighted.
  */
 export const menuItemRecipe = recipe({
   base: {

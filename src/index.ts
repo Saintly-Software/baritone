@@ -6,7 +6,12 @@ export {
   type ButtonGroupProps,
   type ButtonGroupItemProps,
 } from "./components/ButtonGroup";
-export { ToggleButton, type ToggleButtonProps } from "./components/ToggleButton";
+export {
+  ToggleButton,
+  type ToggleButtonProps,
+  type ToggleButtonBaseProps,
+  type ToggleButtonChange,
+} from "./components/ToggleButton";
 export {
   Chip,
   type ChipProps,
@@ -31,11 +36,13 @@ export {
 export {
   FileUpload,
   type FileUploadProps,
+  type FileUploadSlotProps,
   type SingleFileUploadProps,
   type MultipleFileUploadProps,
 } from "./components/FileUpload";
 export { Link, type LinkProps } from "./components/Link";
 export { Text, type TextProps, type TextElement } from "./components/Text";
+export { HelpText, type HelpTextProps, type HelpTextVariant } from "./components/HelpText";
 export { Heading, type HeadingProps } from "./components/Heading";
 export {
   Flex,
@@ -98,6 +105,13 @@ export {
   type ComboboxSearchCopy,
 } from "./components/Combobox";
 export {
+  Fieldset,
+  FieldsetLegend,
+  useIsFieldDisabled,
+  type FieldsetProps,
+  type FieldsetLegendProps,
+} from "./components/Fieldset";
+export {
   RadioGroup,
   type RadioGroupProps,
   type RadioGroupItemProps,
@@ -111,6 +125,13 @@ export {
   type CheckboxGroupOrientation,
 } from "./components/CheckboxGroup";
 export { Switch, type SwitchProps } from "./components/Switch";
+export {
+  Select,
+  type SelectProps,
+  type SingleSelectProps,
+  type MultipleSelectProps,
+  type SelectOption,
+} from "./components/Select";
 export { Tabs, type TabsProps, type TabsItemProps } from "./components/Tabs";
 export {
   ToggleGroup,
@@ -132,7 +153,16 @@ export {
   type BadgeTextProps,
   type BadgeDotProps,
 } from "./components/Badge";
-export { Notice, type NoticeProps, type NoticeIconProps } from "./components/Notice";
+export {
+  Notice,
+  type NoticeProps,
+  type NoticeIconProps,
+  type NoticeChipProps,
+  type NoticeActionProps,
+  type NoticeActionTextProps,
+  type NoticeActionIconOnlyProps,
+  type NoticeCloseProps,
+} from "./components/Notice";
 export {
   Popover,
   type PopoverProps,
@@ -170,19 +200,21 @@ export {
   type MenuItemIntent,
   type MenuTriggerProps,
 } from "./components/Menu";
+export { Tooltip, type TooltipProps, type TooltipTriggerProps } from "./components/Tooltip";
 export {
   InaccessibleTooltip,
   type InaccessibleTooltipProps,
 } from "./components/InaccessibleTooltip";
 
-// `InternalTooltip` itself is intentionally NOT exported. It's a fully
-// accessible tooltip, but tooltips are a pattern we don't want consumers
-// relying on (even a correct one is invisible to touch and easy to overlook),
-// so the system composes it only internally — e.g. Button's disabled
-// explanation. `InaccessibleTooltip` above is the deliberate, bluntly-named
-// escape hatch for consumers who genuinely need the pattern on an arbitrary
-// element; anything a user actually needs to read should use the exported
-// `Popover` instead.
+// `InternalTooltip` itself is intentionally NOT exported — it's the shared
+// tooltip *surface* that both public tooltips compose. The two exported
+// tooltips differ only in how their trigger is constrained:
+//   • `Tooltip` (above) mandates a `Tooltip.Trigger` button, so the hint is
+//     hover-, focus-, and tap-reachable — the accessible default.
+//   • `InaccessibleTooltip` attaches to an arbitrary element and leaves
+//     reachability to the caller — the bluntly-named escape hatch.
+// Either way, tooltip content must stay supplemental; anything a user actually
+// needs to read should use the exported `Popover` instead.
 
 // Theme: contract, factory, default themes, contrast tooling, vocabulary
 export * from "./theme";

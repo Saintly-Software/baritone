@@ -102,4 +102,126 @@ describe("Menu", () => {
     );
     expect(screen.getByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
   });
+
+  it("keeps the menu open after a keepOpen item fires", async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <Menu
+        trigger={<Menu.Trigger>Open</Menu.Trigger>}
+        items={[{ children: "Increment", keepOpen: true, onClick }]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    const item = await screen.findByRole("menuitem", { name: "Increment" });
+
+    await user.click(item);
+    expect(onClick).toHaveBeenCalledTimes(1);
+    // Still open — the row didn't dismiss the menu.
+    expect(screen.getByRole("menuitem", { name: "Increment" })).toBeInTheDocument();
+  });
+
+  it("skips falsy entries in items", async () => {
+    const user = userEvent.setup();
+    const canDelete = false;
+    render(
+      <Menu
+        trigger={<Menu.Trigger>Open</Menu.Trigger>}
+        items={[
+          { children: "Edit", onClick: () => {} },
+          canDelete && { children: "Delete", intent: "negative", onClick: () => {} },
+          null,
+          undefined,
+        ]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    expect(await screen.findByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Delete" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("menuitem")).toHaveLength(1);
+  });
+
+  it("opens a custom (non-Button) trigger and wires the popup attributes", async () => {
+    const user = userEvent.setup();
+    render(
+      <Menu
+        trigger={<Menu.Trigger render={<button type="button">Custom</button>} />}
+        items={[{ children: "Edit", onClick: () => {} }]}
+      />,
+    );
+
+    const trigger = screen.getByRole("button", { name: "Custom" });
+    expect(trigger).toHaveAttribute("aria-haspopup");
+
+    await user.click(trigger);
+    expect(await screen.findByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
+  });
+
+  it("opens on hover when openOnHover is set", async () => {
+    const user = userEvent.setup();
+    render(
+      <Menu
+        trigger={<Menu.Trigger openOnHover>Hover</Menu.Trigger>}
+        items={[{ children: "Edit" }]}
+      />,
+    );
+
+    await user.hover(screen.getByRole("button", { name: "Hover" }));
+    expect(await screen.findByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
+  });
+
+  it("returns focus to the trigger when closed with Escape", async () => {
+    const user = userEvent.setup();
+    render(
+      <Menu
+        trigger={<Menu.Trigger>Open</Menu.Trigger>}
+        items={[{ children: "Edit" }, { children: "Delete" }]}
+      />,
+    );
+
+    const trigger = screen.getByRole("button", { name: "Open" });
+    await user.click(trigger);
+    await screen.findByRole("menuitem", { name: "Edit" });
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it("moves keyboard focus through items with the arrow keys", async () => {
+    const user = userEvent.setup();
+    render(
+      <Menu
+        trigger={<Menu.Trigger>Open</Menu.Trigger>}
+        items={[{ children: "Edit" }, { children: "Delete" }]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    await screen.findByRole("menuitem", { name: "Edit" });
+
+    await user.keyboard("{ArrowDown}");
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Edit" })).toHaveFocus());
+
+    await user.keyboard("{ArrowDown}");
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Delete" })).toHaveFocus());
+  });
+
+  it("jumps to a matching item via type-ahead", async () => {
+    const user = userEvent.setup();
+    render(
+      <Menu
+        trigger={<Menu.Trigger>Open</Menu.Trigger>}
+        items={[{ children: "Edit" }, { children: "Duplicate" }, { children: "Delete" }]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    await screen.findByRole("menuitem", { name: "Edit" });
+
+    // Typing "Du" should land on "Duplicate".
+    await user.keyboard("Du");
+    await waitFor(() => expect(screen.getByRole("menuitem", { name: "Duplicate" })).toHaveFocus());
+  });
 });

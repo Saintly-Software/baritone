@@ -30,8 +30,15 @@ const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  *   `InternalSwitch`) take a *visual-only* `disabled` (it sets `data-disabled`,
  *   never the attribute) and the composed ones (`InternalTooltip`,
  *   `InternalButton`) forward it on correctly.
- * - `Tooltip.Root` — base-ui's tooltip `disabled` toggles whether the tooltip
- *   shows; it's not an interactive-control disable.
+ * - `Tooltip.Root` / `BaseTooltip.Root` / `BaseTooltip.Trigger` — base-ui's
+ *   tooltip `disabled` toggles whether the tooltip *shows* (on the root, or per
+ *   trigger); it never applies the native `disabled` attribute to any element,
+ *   so it's not an interactive-control disable. (`BaseTooltip` is how the public
+ *   `Tooltip` aliases the base-ui import to avoid clashing with its own name.)
+ * - `BaseSelect.Item` — base-ui's select option renders a `<div>` (a non-native
+ *   button), so its `disabled` maps to `aria-disabled` and keeps the option
+ *   focusable/announced in the listbox (`focusableWhenDisabled`), never the
+ *   native attribute. It's the idiomatic way to disable one option.
  * - `FileList` — a system component whose `disabled` is modelled the focusable
  *   way internally (dims the chips, sets the remove buttons' `aria-disabled` and
  *   swallows their clicks, never the native attribute — see its tests). Composing
@@ -50,6 +57,9 @@ function mayReceiveDisabled(tag: string): boolean {
   return (
     tag.startsWith("Internal") ||
     tag === "Tooltip.Root" ||
+    tag === "BaseTooltip.Root" ||
+    tag === "BaseTooltip.Trigger" ||
+    tag === "BaseSelect.Item" ||
     tag === "FileList" ||
     tag === "Chip" ||
     tag === "BaseCombobox.Item"

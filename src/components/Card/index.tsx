@@ -58,6 +58,8 @@ type CardHeaderControl =
       href?: string;
       target?: string;
       rel?: string;
+      /** Plain anchor `download` attribute — forwarded when the control is a link. */
+      download?: boolean | string;
       onClick?: React.MouseEventHandler<HTMLElement>;
       render?: RenderProp;
       disabled?: boolean;
@@ -175,6 +177,7 @@ export interface CardStaticProps extends CardBaseProps {
   onOpenChange?: (open: boolean) => void;
   href?: never;
   onClick?: never;
+  download?: never;
 }
 
 /**
@@ -190,6 +193,7 @@ export interface CardClickableProps extends CardBaseProps {
   /** Activation handler. Turns the header title into the card's `<button>`. Swallowed while disabled. */
   onClick: React.MouseEventHandler<HTMLElement>;
   href?: never;
+  download?: never;
   collapsible?: never;
   open?: never;
   defaultOpen?: never;
@@ -198,10 +202,23 @@ export interface CardClickableProps extends CardBaseProps {
 
 /**
  * A linkable Card. Like the clickable card, the card stays a container and its
- * `Card.Header` *title* becomes the one real `<a>` (or your router's link via
- * `render`), stretched across the whole surface. Other links/buttons may live
- * inside it. Give the card a `header={<Card.Header title=… />}` for the link's
- * accessible name.
+ * `Card.Header` *title* becomes the one real `<a>`, stretched across the whole
+ * surface. Other links/buttons may live inside it. Give the card a
+ * `header={<Card.Header title=… />}` for the link's accessible name.
+ *
+ * **Router integration.** The Card stays router-agnostic: no framework-specific
+ * navigation props (`to` / `params` / `search` / `preload`) live on this type.
+ * To use your app's router, keep `href` (the resolved URL — it names the link and
+ * is the no-JS fallback) and pass your router's link component via `render`, which
+ * owns navigation while keeping the overlay styling:
+ *
+ * ```tsx
+ * <Card
+ *   href={buildPath({ to: "/posts/$id", params: { id } })}
+ *   render={<RouterLink to="/posts/$id" params={{ id }} />}
+ *   header={<Card.Header title="Read the post" />}
+ * />
+ * ```
  */
 export interface CardLinkableProps extends CardBaseProps {
   /** Destination. Turns the header title into the card's `<a>`. */
@@ -210,6 +227,11 @@ export interface CardLinkableProps extends CardBaseProps {
   target?: string;
   /** Anchor rel (e.g. `noreferrer`). */
   rel?: string;
+  /**
+   * Plain anchor `download` attribute: `true` downloads the resource (using the
+   * server-provided or URL filename), or a string sets the suggested filename.
+   */
+  download?: boolean | string;
   onClick?: never;
   collapsible?: never;
   open?: never;
@@ -232,6 +254,7 @@ type InternalCardProps = CardBaseProps & {
   href?: string;
   target?: string;
   rel?: string;
+  download?: boolean | string;
   onClick?: React.MouseEventHandler<HTMLElement>;
   collapsible?: boolean;
   open?: boolean;
@@ -282,6 +305,7 @@ function CardRoot(props: CardProps) {
     onClick,
     target,
     rel,
+    download,
     collapsible,
     open,
     defaultOpen,
@@ -363,7 +387,7 @@ function CardRoot(props: CardProps) {
   // router link) belongs to the link too, so it's forwarded — never applied to
   // the container.
   const linkControl: CardHeaderControl | null = interactive
-    ? { kind: "link", href, target, rel, onClick, render, disabled, selected }
+    ? { kind: "link", href, target, rel, download, onClick, render, disabled, selected }
     : null;
 
   // `Card.Header` becomes a real `<header>` when this root scopes it (a sectioning
@@ -416,7 +440,7 @@ function CardPrimaryLink({
   link: Extract<CardHeaderControl, { kind: "link" }>;
   children: React.ReactNode;
 }) {
-  const { href, target, rel, onClick, render, disabled, selected } = link;
+  const { href, target, rel, download, onClick, render, disabled, selected } = link;
 
   const handleActivate = (event: React.MouseEvent<HTMLElement>) => {
     if (disabled) {
@@ -437,6 +461,9 @@ function CardPrimaryLink({
     elementProps.href = href;
     if (target != null) elementProps.target = target;
     if (rel != null) elementProps.rel = rel;
+    // Plain anchor `download` (boolean flag or a suggested filename). React omits
+    // the attribute for `false`/`undefined`, so only a truthy value takes effect.
+    if (download != null) elementProps.download = download;
     // A selected link is the current choice among the cards. Only emit the
     // attribute when selected — `aria-current="false"` is still announced by some
     // screen readers, so an unselected link should carry nothing.

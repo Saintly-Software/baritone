@@ -12,7 +12,10 @@ const meta: Meta<typeof FileUpload> = {
     required: { control: "boolean" },
     disabled: { control: "boolean" },
     label: { control: "text" },
+    info: { control: "text" },
+    name: { control: "text" },
     helpText: { control: "text" },
+    slotProps: { table: { disable: true } },
     value: { table: { disable: true } },
     onChange: { table: { disable: true } },
     multiple: { table: { disable: true } },
@@ -139,6 +142,67 @@ export const Disabled: Story = {
         onChange={setValue}
         acceptedFileTypes={["image/*", ".pdf"]}
       />
+    );
+  },
+};
+
+/** An `info` "i" affordance sits next to the label, opening a `Popover` on click. */
+export const WithInfo: Story = {
+  args: {
+    label: "Tax documents",
+    info: "We accept your W-2 or the most recent 1099. Files are encrypted at rest.",
+    helpText: "PDF only — up to 10MB.",
+  },
+  render: ({ label, info, invalid, required, disabled, helpText }) => {
+    const [value, setValue] = React.useState<FileInfo[]>([]);
+    return (
+      <FileUpload
+        label={label}
+        info={info}
+        invalid={invalid}
+        required={required}
+        disabled={disabled}
+        helpText={helpText}
+        multiple
+        value={value}
+        onChange={setValue}
+        acceptedFileTypes={[".pdf"]}
+        slotProps={{ info: { "aria-label": "About accepted tax documents" } }}
+      />
+    );
+  },
+};
+
+/** A `name`d field inside a `<form>`: the file shows up in `FormData` on submit. */
+export const NamedFieldInForm: Story = {
+  args: { label: "Resume", helpText: "PDF, DOC or DOCX." },
+  render: ({ label, invalid, required, disabled, helpText }) => {
+    const [value, setValue] = React.useState<FileInfo | null>(null);
+    const [submitted, setSubmitted] = React.useState<string | null>(null);
+    return (
+      <form
+        style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "flex-start" }}
+        onSubmit={(event) => {
+          event.preventDefault();
+          const data = new FormData(event.currentTarget);
+          const file = data.get("resume");
+          setSubmitted(file instanceof File ? file.name || "(empty file)" : "(no file)");
+        }}
+      >
+        <FileUpload
+          label={label}
+          name="resume"
+          invalid={invalid}
+          required={required}
+          disabled={disabled}
+          helpText={helpText}
+          value={value}
+          onChange={setValue}
+          acceptedFileTypes={[".pdf", ".doc", ".docx"]}
+        />
+        <button type="submit">Submit</button>
+        {submitted != null && <span>Submitted: {submitted}</span>}
+      </form>
     );
   },
 };

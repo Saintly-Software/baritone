@@ -1,4 +1,4 @@
-import { createVar, style } from "@vanilla-extract/css";
+import { createVar, fallbackVar, style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { iconColorVar, textColorVar } from "../../styles/vars.css";
 import { INTENTS, SALIENCIES, SURFACE_SALIENCIES } from "../../theme/constants";
@@ -63,6 +63,19 @@ export const noticeRecipe = recipe({
       square: {},
       pill: { borderRadius: vars.radius.full },
     },
+    inline: {
+      // Block banner (default) fills its container width; `inline` shrinks the
+      // notice to its content so it can sit within a line of layout.
+      false: {},
+      true: { display: "inline-flex" },
+    },
+    disabled: {
+      // Dim the whole callout; its interactive parts (actions/close) also go inert
+      // via context. `opacity` on the container is fine — a Notice is presentational,
+      // not a form control, so there's no token'd disabled palette to reach for.
+      false: {},
+      true: { opacity: 0.6 },
+    },
   },
   compoundVariants: INTENTS.flatMap((intent) =>
     SURFACE_SALIENCIES.map((saliency) => {
@@ -83,6 +96,8 @@ export const noticeRecipe = recipe({
     intent: "neutral",
     saliency: "high",
     shape: "square",
+    inline: false,
+    disabled: false,
   },
 });
 
@@ -101,6 +116,16 @@ export const noticeBody = style({
 /** The title line — the notice's `children`, set a touch heavier than body copy. */
 export const noticeTitle = style({
   fontWeight: "600",
+});
+
+/** The title row — the title and an optional status `chip`, on one line. */
+export const noticeHeader = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vars.space[2],
+  flexWrap: "wrap",
+  // Let a long title truncate rather than shove the chip off the row.
+  minWidth: 0,
 });
 
 /** The actions row — buttons wrapped beneath the text, with a little top gap. */
@@ -140,3 +165,62 @@ export const noticeIconRecipe = recipe({
 });
 
 export type NoticeIconRecipeVariants = NonNullable<RecipeVariants<typeof noticeIconRecipe>>;
+
+/**
+ * `Notice.Action` layout tweak on top of the shared component scheme. The colour
+ * (`componentIntentRecipe`), box + size (`componentTypographyRecipe`), and focus
+ * ring are the same ones `Button` uses, so an action looks like a small button;
+ * this recipe only squares the box for the icon-only form (equal padding, a 1:1
+ * aspect) so a lone glyph isn't stretched wide by the size's inline padding.
+ */
+export const noticeActionRecipe = recipe({
+  base: {},
+  variants: {
+    iconOnly: {
+      false: {},
+      true: { paddingInline: 0, aspectRatio: "1" },
+    },
+  },
+  defaultVariants: { iconOnly: false },
+});
+
+export type NoticeActionRecipeVariants = NonNullable<RecipeVariants<typeof noticeActionRecipe>>;
+
+/**
+ * `Notice.Close` — the bare "×" dismiss button in the notice's top corner.
+ * Chromeless (no fill or border): it inherits the notice's foreground through the
+ * published `--iconColor` and just dims at rest, brightening on hover. A fixed
+ * square keeps it a comfortable hit target. Mirrors the interactive
+ * `chipAdornmentRecipe` look, standalone. Inert (`aria-disabled`) when a disabled
+ * Notice makes it so — dimmer still, `not-allowed`.
+ */
+export const noticeClose = style({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  boxSizing: "border-box",
+  width: "1.5rem",
+  height: "1.5rem",
+  margin: 0,
+  padding: 0,
+  border: "none",
+  background: "transparent",
+  // Follow the notice's foreground (published as `--iconColor`); fall back to
+  // neutral text for a `Notice.Close` used outside a notice.
+  color: fallbackVar(iconColorVar, vars.component.color.neutral.mid.default.text),
+  borderRadius: vars.radius.full,
+  lineHeight: 0,
+  cursor: "pointer",
+  opacity: 0.7,
+  transitionProperty: "opacity",
+  transitionDuration: vars.motion.duration.fast,
+  transitionTimingFunction: vars.motion.easing.standard,
+  selectors: {
+    '&:hover:not([aria-disabled="true"])': { opacity: 1 },
+    '&[aria-disabled="true"]': { cursor: "not-allowed", opacity: 0.4 },
+  },
+  "@media": {
+    "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
+  },
+});

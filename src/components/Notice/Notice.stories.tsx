@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
-import { Button } from "../Button";
+import { Icon } from "../Icon";
 import { Notice } from "./index";
 
 // Throwaway glyph so the icon stories have something to render.
@@ -76,12 +76,12 @@ export const Anatomy: Story = {
         icon={<InfoGlyph />}
         description="Actions render as a row beneath the text."
         actions={[
-          <Button key="ok" size="sm">
+          <Notice.Action key="ok" intent="primary" onClick={() => {}}>
             Got it
-          </Button>,
-          <Button key="dismiss" size="sm" saliency="low">
-            Dismiss
-          </Button>,
+          </Notice.Action>,
+          <Notice.Action key="learn" saliency="low" href="#">
+            Learn more
+          </Notice.Action>,
         ]}
       >
         Title with actions
@@ -120,6 +120,132 @@ export const RecolouredIcon: Story = {
       description="The notice is neutral, but its icon is tinted `warning` via Notice.Icon."
     >
       Recoloured icon
+    </Notice>
+  ),
+};
+
+/**
+ * `close` adds a top-right "×" dismiss. Pass a handler for the built-in
+ * `Notice.Close`, or a `<Notice.Close>` element to set its label.
+ */
+export const Dismissible: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12, maxWidth: 520 }}>
+      <Notice
+        intent="primary"
+        icon={<InfoGlyph />}
+        description="A handler passed to `close` renders the built-in dismiss button."
+        close={() => alert("dismissed")}
+      >
+        Dismissible notice
+      </Notice>
+      <Notice
+        intent="warning"
+        icon={<InfoGlyph />}
+        description="Or pass a <Notice.Close> to customise its accessible label."
+        close={<Notice.Close label="Close this warning" onClick={() => alert("closed")} />}
+      >
+        Custom close label
+      </Notice>
+    </div>
+  ),
+};
+
+/** A status `chip` sits on the title line, after the title. */
+export const WithChip: Story = {
+  render: () => (
+    <Notice
+      intent="positive"
+      icon={<InfoGlyph />}
+      chip={
+        <Notice.Chip intent="positive" shape="pill">
+          New
+        </Notice.Chip>
+      }
+      description="The chip inherits the compact `sm` size by default."
+    >
+      Feature released
+    </Notice>
+  ),
+};
+
+/**
+ * `Notice.Action` covers the axes the row needs: a `<button>` (`onClick`), a link
+ * (`href`), and an icon-only control (`icon` + `label`).
+ */
+export const Actions: Story = {
+  render: () => (
+    <Notice
+      intent="primary"
+      icon={<InfoGlyph />}
+      description="A button action, a link action, and an icon-only action."
+      actions={[
+        <Notice.Action key="save" intent="primary" onClick={() => {}}>
+          Save
+        </Notice.Action>,
+        <Notice.Action
+          key="docs"
+          saliency="low"
+          href="#"
+          icon={
+            <Icon>
+              <InfoGlyph />
+            </Icon>
+          }
+        >
+          Read the docs
+        </Notice.Action>,
+        <Notice.Action
+          key="more"
+          saliency="low"
+          icon={
+            <Icon>
+              <InfoGlyph />
+            </Icon>
+          }
+          label="More options"
+          onClick={() => {}}
+        />,
+      ]}
+    >
+      Actions
+    </Notice>
+  ),
+};
+
+/** `inline` shrinks the notice to its content instead of filling the width. */
+export const Inline: Story = {
+  render: () => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+      <Notice intent="neutral" inline icon={<InfoGlyph />}>
+        Inline notice
+      </Notice>
+      <Notice intent="positive" inline shape="pill" icon={<InfoGlyph />}>
+        Inline pill
+      </Notice>
+    </div>
+  ),
+};
+
+/**
+ * `disabled` dims the whole notice and makes its actions/close inert (they stay
+ * focusable — `aria-disabled`, never the native attribute).
+ */
+export const Disabled: Story = {
+  render: () => (
+    <Notice
+      intent="primary"
+      disabled
+      icon={<InfoGlyph />}
+      description="The action and dismiss are inert while the notice is disabled."
+      close={() => {}}
+      actions={[
+        <Notice.Action key="ok" intent="primary" onClick={() => {}}>
+          Got it
+        </Notice.Action>,
+      ]}
+    >
+      Disabled notice
     </Notice>
   ),
 };

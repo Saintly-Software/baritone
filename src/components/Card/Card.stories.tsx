@@ -189,6 +189,62 @@ export const LinkableWithNestedActions: Story = {
 };
 
 /**
+ * Router-agnostic: the Card carries no framework navigation props (`to` /
+ * `params` / `search` / `preload`). To wire it to your app's router, keep `href`
+ * (the resolved URL — it names the link and is the no-JS fallback) and pass your
+ * router's link via `render`, which owns navigation while keeping the overlay
+ * styling. Here a plain element stands in for a framework's `<Link>` (Next.js,
+ * React Router, TanStack Router, …).
+ */
+export const AsRouterLink: Story = {
+  render: (args) => (
+    <Card
+      intent={args.intent}
+      saliency={args.saliency}
+      style={{ maxWidth: 320 }}
+      href="/posts/accessible-cards"
+      render={<a data-router-link="" />}
+      header={<Card.Header title="Read the post" subtitle="in Guides" />}
+    >
+      <Text render={<p />}>
+        The router owns navigation; the DS keeps `href` for the accessible name and the no-JS
+        fallback.
+      </Text>
+    </Card>
+  ),
+};
+
+/**
+ * `download`: a plain anchor attribute on a linkable card. `download` (boolean)
+ * saves the target using the server/URL filename; a string sets a suggested
+ * filename. It's forwarded straight to the overlay `<a>`.
+ */
+export const Downloadable: Story = {
+  render: (args) => (
+    <Card
+      intent={args.intent}
+      saliency={args.saliency}
+      style={{ maxWidth: 320 }}
+      href="/files/q3-report.pdf"
+      download="quarterly-report.pdf"
+      header={
+        <Card.Header
+          title="Quarterly report"
+          subtitle="PDF · 2.4 MB"
+          icon={
+            <Icon size="lg">
+              <FolderGlyph />
+            </Icon>
+          }
+        />
+      }
+    >
+      <Text render={<p />}>Clicking the card downloads the file as `quarterly-report.pdf`.</Text>
+    </Card>
+  ),
+};
+
+/**
  * Collapsible: a disclosure **button** in the header (the chevron) toggles it —
  * only the header shows when closed, and the body + footer collapse away. Because
  * only the button toggles (not the whole header), the header can carry its own

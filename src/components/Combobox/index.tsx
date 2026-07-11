@@ -8,6 +8,7 @@ import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
 import type { FormState, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { useIsFieldDisabled } from "../Fieldset";
 import {
   adornment,
   chip,
@@ -208,7 +209,7 @@ export function Combobox(props: ComboboxProps) {
     state = "neutral",
     size = "md",
     placeholder,
-    disabled,
+    disabled: disabledProp,
     required,
     name,
     hideClearButton,
@@ -227,6 +228,10 @@ export function Combobox(props: ComboboxProps) {
     ref,
     ...rest
   } = props;
+
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
 
   // Value <-> option registry. Public values are strings; base-ui items are the
   // option objects. We remember every option we've seen (props + async results +

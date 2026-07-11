@@ -304,6 +304,79 @@ describe("FileUpload", () => {
       );
       expect(getInput(container)).toHaveAccessibleName("Documents");
     });
+
+    it("forwards name to the underlying input", () => {
+      const { container } = render(
+        <FileUpload label="Resume" name="resume" value={null} onChange={() => {}} />,
+      );
+      expect(getInput(container)).toHaveAttribute("name", "resume");
+    });
+
+    it("omits the name attribute when not given", () => {
+      const { container } = render(<FileUpload label="Resume" value={null} onChange={() => {}} />);
+      expect(getInput(container)).not.toHaveAttribute("name");
+    });
+  });
+
+  describe("info", () => {
+    it("renders an InfoButton next to the label and reveals its content on click", async () => {
+      const user = userEvent.setup();
+      render(
+        <FileUpload
+          label="Tax docs"
+          info="We accept your W-2."
+          slotProps={{ info: { "aria-label": "About tax docs" } }}
+          value={null}
+          onChange={() => {}}
+        />,
+      );
+      const trigger = screen.getByRole("button", { name: "About tax docs" });
+      expect(screen.queryByText("We accept your W-2.")).not.toBeInTheDocument();
+      await user.click(trigger);
+      expect(screen.getByText("We accept your W-2.")).toBeInTheDocument();
+    });
+
+    it("uses a default aria-label when none is supplied", () => {
+      render(<FileUpload label="Tax docs" info="Details" value={null} onChange={() => {}} />);
+      expect(screen.getByRole("button", { name: "More information" })).toBeInTheDocument();
+    });
+
+    it("renders no InfoButton when info is absent", () => {
+      render(<FileUpload label="Files" value={null} onChange={() => {}} />);
+      expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("slotProps", () => {
+    it("merges a label slot className alongside the built-in class (no clobber)", () => {
+      render(
+        <FileUpload
+          label="Files"
+          slotProps={{ label: { className: "custom-label" } }}
+          value={null}
+          onChange={() => {}}
+        />,
+      );
+      const label = screen.getByText("Files");
+      expect(label).toHaveClass("custom-label");
+      // The built-in text classes are still applied (not clobbered).
+      expect(label.className.split(" ").length).toBeGreaterThan(1);
+    });
+
+    it("merges a help slot className onto the description", () => {
+      render(
+        <FileUpload
+          label="Files"
+          helpText="Up to 5MB"
+          slotProps={{ help: { className: "custom-help" } }}
+          value={null}
+          onChange={() => {}}
+        />,
+      );
+      const help = screen.getByText("Up to 5MB");
+      expect(help).toHaveClass("custom-help");
+      expect(help.className.split(" ").length).toBeGreaterThan(1);
+    });
   });
 });
 

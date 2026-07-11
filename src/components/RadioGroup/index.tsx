@@ -8,6 +8,7 @@ import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.c
 import { atoms } from "../../styles/sprinkles.css";
 import type { FormState, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { useIsFieldDisabled } from "../Fieldset";
 import {
   radioControl,
   radioGroupDisabled,
@@ -176,10 +177,13 @@ export function RadioGroup<T>({
   label,
   description,
   errorMessage,
-  disabled = false,
+  disabled: disabledProp = false,
   name,
   className,
 }: RadioGroupProps<T>) {
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
   const itemContext = React.useMemo<RadioGroupItemContextValue>(
     () => ({ size, state }),
     [size, state],
