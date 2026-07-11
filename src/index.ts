@@ -244,6 +244,12 @@ export * from "./theme";
 // Layout atoms (Sprinkles)
 export { atoms, type Atoms } from "./styles/sprinkles.css";
 export type { MarginProps, PaddingProps } from "./styles/spacingProps";
+export {
+  VISIBILITY_BREAKPOINTS,
+  type WidthShorthand,
+  type ResponsiveVisibility,
+  type VisibilityBreakpoint,
+} from "./styles/layoutProps";
 
 // Shared CSS variables (for advanced composition)
 export {

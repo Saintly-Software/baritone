@@ -1,5 +1,11 @@
 "use client";
 import * as React from "react";
+import {
+  resolveDisplay,
+  resolveWidth,
+  type ResponsiveVisibility,
+  type WidthShorthand,
+} from "../../styles/layoutProps";
 import { atoms } from "../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import { cx } from "../../utils/cx";
@@ -12,6 +18,18 @@ export interface BoxProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
   /** Render as a different element tag. Default `div`. */
   as?: BoxElement;
+  /** `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit`. */
+  width?: WidthShorthand;
+  /**
+   * Hide at the given breakpoint(s) — responsive `display: none`. Accepts one
+   * breakpoint (`"md"`) or a set (`["mobile", "sm"]`).
+   */
+  hideOn?: ResponsiveVisibility;
+  /**
+   * Show *only* at the given breakpoint(s); hidden everywhere else. Accepts one
+   * breakpoint or a set.
+   */
+  showOn?: ResponsiveVisibility;
 
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
@@ -27,6 +45,9 @@ export interface BoxProps
  */
 export function Box({
   as = "div",
+  width,
+  hideOn,
+  showOn,
   m,
   mx,
   my,
@@ -53,6 +74,14 @@ export function Box({
       ref,
       className: cx(
         atoms({
+          // Only emit `display` when a visibility prop is set, so the element
+          // otherwise keeps its natural display (`block` for div/section/article,
+          // `inline` for span).
+          display:
+            hideOn || showOn
+              ? resolveDisplay(as === "span" ? "inline" : "block", hideOn, showOn)
+              : undefined,
+          width: resolveWidth(width),
           m,
           mx,
           my,
