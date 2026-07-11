@@ -1,7 +1,12 @@
 // Components
 export { BaritoneTheme, type BaritoneThemeProps } from "./components/BaritoneTheme";
 export { Button, type ButtonProps } from "./components/Button";
-export { ToggleButton, type ToggleButtonProps } from "./components/ToggleButton";
+export {
+  ToggleButton,
+  type ToggleButtonProps,
+  type ToggleButtonBaseProps,
+  type ToggleButtonChange,
+} from "./components/ToggleButton";
 export {
   Chip,
   type ChipProps,
