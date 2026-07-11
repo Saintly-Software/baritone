@@ -6,6 +6,7 @@ import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.c
 import { atoms } from "../../styles/sprinkles.css";
 import { cx } from "../../utils/cx";
 import { FileList, type FileInfo } from "../FileList";
+import { InfoButton, type InfoButtonProps } from "../InfoButton";
 import {
   fileUploadContent,
   fileUploadDropzone,
@@ -14,6 +15,8 @@ import {
 } from "./fileUpload.css";
 
 const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "2" });
+// Puts the `info` InfoButton on the same baseline as the label text.
+const labelRowClass = atoms({ display: "flex", alignItems: "center", gap: "1" });
 const labelClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "high" }),
   textVariantRecipe({ family: "body", size: "sm" }),
@@ -30,6 +33,25 @@ const descriptionClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "low" }),
   textVariantRecipe({ family: "body", size: "xs" }),
 );
+
+/**
+ * Per-slot overrides for the label / help-text / info pieces. Every field is
+ * partial — you're layering props onto the slot's own defaults, so
+ * `slotProps={{ label: { className: "…" }, info: { side: "right" } }}` re-tunes
+ * just those pieces. A `className` set here merges onto (doesn't replace) the
+ * slot's built-in class.
+ */
+export interface FileUploadSlotProps {
+  /** Props for the `Field.Label` above the dropzone. */
+  label?: React.ComponentPropsWithoutRef<typeof Field.Label>;
+  /** Props for the `Field.Description` (help text) below the dropzone. */
+  help?: React.ComponentPropsWithoutRef<typeof Field.Description>;
+  /**
+   * Props for the label's `InfoButton` (only rendered when `info` is set). Use it
+   * to override the default `aria-label`, or to tune `side` / `intent` / etc.
+   */
+  info?: Partial<InfoButtonProps>;
+}
 
 /**
  * Props every `FileUpload` takes, regardless of `multiple`. The `value` /
@@ -61,10 +83,24 @@ interface FileUploadBaseProps {
   /** Visible field label; also the input's accessible name (via base-ui `Field`). */
   label?: React.ReactNode;
   /**
+   * Extra explanation surfaced in an `InfoButton` next to the `label` (the "i"
+   * affordance). Rendered only when there's a visible `label`. Give the button an
+   * accessible name via `slotProps.info["aria-label"]` (defaults to "More
+   * information").
+   */
+  info?: React.ReactNode;
+  /**
+   * Native form field `name` for the underlying file `<input>`, so the control
+   * participates in `<form>` submission / `FormData`.
+   */
+  name?: string;
+  /**
    * Supplementary guidance shown beneath the dropzone and wired to the input as
    * its accessible description (`aria-describedby`).
    */
   helpText?: React.ReactNode;
+  /** Per-slot overrides for the label / help-text / info pieces. */
+  slotProps?: FileUploadSlotProps;
   /** Accessible name when there's no visible `label`. */
   "aria-label"?: string;
   /** Accessible name by reference when the label lives elsewhere. */
@@ -118,6 +154,18 @@ export function matchesAccept(file: File, acceptedFileTypes?: string[]): boolean
     if (token.endsWith("/*")) return type.startsWith(token.slice(0, -1));
     return type === token;
   });
+}
+
+/**
+ * Fold a slot's caller-supplied `className` (base-ui's `string | (state) => …`
+ * form) together with the built-in `base` class, returning the function form
+ * base-ui always accepts. Keeps our base class and lets the caller add to it.
+ */
+function mergeSlotClass<S>(
+  base: string,
+  slot: string | ((state: S) => string | undefined) | undefined,
+) {
+  return (state: S) => cx(base, typeof slot === "function" ? slot(state) : slot);
 }
 
 // Monotonic id so each accepted `File` becomes a `FileInfo` with a stable, unique
@@ -184,6 +232,17 @@ function UploadGlyph({ className }: { className?: string }) {
  * // Single
  * const [file, setFile] = React.useState<FileInfo | null>(null);
  * <FileUpload label="Avatar" value={file} onChange={setFile} acceptedFileTypes={["image/*"]} />
+ *
+ * @example
+ * // Named form field with a label InfoButton
+ * <FileUpload
+ *   label="Resume"
+ *   name="resume"
+ *   info="PDF preferred; we parse it for your work history."
+ *   slotProps={{ info: { "aria-label": "About the resume upload" } }}
+ *   value={file}
+ *   onChange={setFile}
+ * />
  */
 export function FileUpload(props: FileUploadProps) {
   const {
@@ -192,12 +251,23 @@ export function FileUpload(props: FileUploadProps) {
     disabled = false,
     acceptedFileTypes,
     label,
+    info,
+    name,
     helpText,
+    slotProps,
     className,
     ref,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
   } = props;
+
+  // Split each slot's own `className` out so it merges *onto* the built-in class
+  // instead of clobbering it when the rest of the slot props spread. base-ui's
+  // Field parts accept a `string` or a `(state) => string` for `className`;
+  // `mergeSlotClass` folds either form together with our base class into the
+  // function form base-ui always accepts.
+  const { className: labelSlotClass, ...labelSlotProps } = slotProps?.label ?? {};
+  const { className: helpSlotClass, ...helpSlotProps } = slotProps?.help ?? {};
 
   const [dragging, setDragging] = React.useState(false);
 
@@ -267,7 +337,21 @@ export function FileUpload(props: FileUploadProps) {
 
   return (
     <Field.Root className={wrapperClass} invalid={invalid}>
-      {label != null && <Field.Label className={labelClass}>{label}</Field.Label>}
+      {label != null &&
+        (info != null ? (
+          <div className={labelRowClass}>
+            <Field.Label className={mergeSlotClass(labelClass, labelSlotClass)} {...labelSlotProps}>
+              {label}
+            </Field.Label>
+            <InfoButton aria-label="More information" {...slotProps?.info}>
+              {info}
+            </InfoButton>
+          </div>
+        ) : (
+          <Field.Label className={mergeSlotClass(labelClass, labelSlotClass)} {...labelSlotProps}>
+            {label}
+          </Field.Label>
+        ))}
       {/* The drop target. Decorative content is inert; the overlaid input owns
           clicks + keyboard, and drops are caught here so they can be filtered. */}
       <div
@@ -304,6 +388,7 @@ export function FileUpload(props: FileUploadProps) {
         <Field.Control
           ref={ref}
           type="file"
+          name={name}
           multiple={multiple}
           accept={acceptAttr}
           required={required}
@@ -316,7 +401,12 @@ export function FileUpload(props: FileUploadProps) {
         />
       </div>
       {helpText != null && (
-        <Field.Description className={descriptionClass}>{helpText}</Field.Description>
+        <Field.Description
+          className={mergeSlotClass(descriptionClass, helpSlotClass)}
+          {...helpSlotProps}
+        >
+          {helpText}
+        </Field.Description>
       )}
       {items.length > 0 && (
         <FileList
