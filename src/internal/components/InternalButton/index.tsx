@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import type { ButtonProps } from "../../../components/Button";
+import { useIsFieldDisabled } from "../../../components/Fieldset";
 import {
   componentIntentRecipe,
   componentTypographyRecipe,
@@ -73,7 +74,7 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     size,
     variant,
     children,
-    disabled = false,
+    disabled: disabledProp = false,
     loading = false,
     startIcon,
     endIcon,
@@ -89,6 +90,10 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     "aria-label": _unsupportedAriaLabel,
     ...rest
   } = consumerProps;
+
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
 
   // The hyperlink look: underlined text coloured by intent/saliency, no chrome.
   // `size`/`loading` are typed away on this appearance, so there's no spinner

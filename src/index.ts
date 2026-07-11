@@ -93,6 +93,13 @@ export {
   type ComboboxSearchCopy,
 } from "./components/Combobox";
 export {
+  Fieldset,
+  FieldsetLegend,
+  useIsFieldDisabled,
+  type FieldsetProps,
+  type FieldsetLegendProps,
+} from "./components/Fieldset";
+export {
   RadioGroup,
   type RadioGroupProps,
   type RadioGroupItemProps,
