@@ -94,10 +94,29 @@ export const formControlRecipe = recipe({
         fontSize: sizes.lg.font,
       },
     },
+    /**
+     * Multiline (`<textarea>`) mode. Declared *after* `size` so its rules win the
+     * cascade: it trades the fixed single-line `height` for an `auto` height that
+     * the native `rows` attribute governs, and swaps horizontal-only padding for
+     * symmetric block padding. A `<textarea>` doesn't take `size` (the type union
+     * makes them mutually exclusive), so it always renders at the `md` type scale.
+     */
+    multiline: {
+      true: {
+        height: "auto",
+        paddingBlock: vars.space[2],
+        lineHeight: vars.text.variant.body.base.lineHeight,
+        // Let the user drag it taller, but never sideways (would break the field
+        // column). `rows` sets the starting height.
+        resize: "vertical",
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     state: "neutral",
     size: "md",
+    multiline: false,
   },
 });
 

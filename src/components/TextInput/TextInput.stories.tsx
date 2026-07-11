@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { Text } from "../Text";
 import { FORM_STATES, SIZES } from "../../theme/constants";
 import { TextInput } from "./index";
 
@@ -63,5 +64,44 @@ export const Disabled: Story = {
     disabled: true,
     description: "Uses aria-disabled so it stays keyboard-reachable.",
     defaultValue: "cannot edit",
+  },
+};
+
+export const Multiline: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16 }}>
+      <TextInput
+        multiline
+        label="Notes"
+        placeholder="Anything we should know?"
+        description="Drag the corner to make it taller."
+      />
+      <TextInput
+        multiline
+        rows={6}
+        label="Bio (rows=6)"
+        defaultValue={"Multiple\nlines\nof\ntext"}
+      />
+      <TextInput
+        multiline
+        rows={3}
+        state="invalid"
+        label="Feedback"
+        errorMessage="Please tell us a little more."
+      />
+    </div>
+  ),
+};
+
+export const WithInfo: Story = {
+  args: {
+    label: "API key",
+    placeholder: "sk-…",
+    info: (
+      <Text render={<p />} variant="sm">
+        Find your key in Settings → Developer. It's shown only once.
+      </Text>
+    ),
+    slotProps: { info: { "aria-label": "About API keys" } },
   },
 };
