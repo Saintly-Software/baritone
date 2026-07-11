@@ -133,7 +133,7 @@ export {
   type MultipleSelectProps,
   type SelectOption,
 } from "./components/Select";
-export { Tabs, type TabsProps, type TabsItemProps } from "./components/Tabs";
+export { Tabs, type TabsProps, type TabsItemProps, type TabsPanelProps } from "./components/Tabs";
 export {
   ToggleGroup,
   type ToggleGroupProps,

@@ -104,4 +104,20 @@ export const tabsTabDisabled = style({
   opacity: 0.55,
 });
 
+/**
+ * A tab's panel — the content shown when its tab is active. base-ui makes the
+ * active panel focusable (`tabIndex={0}`) so keyboard users can reach content
+ * that has no other focusable child, so it carries the shared focus ring; the
+ * colour comes from the neutral text token (panels are body content, not a
+ * coloured surface, so they don't take `intent`/`saliency`).
+ */
+export const tabsPanel = style({
+  paddingBlock: vars.space[2],
+  color: vars.text.color.neutral.high,
+  vars: {
+    [textColorVar]: vars.text.color.neutral.high,
+    [iconColorVar]: vars.text.color.neutral.high,
+  },
+});
+
 export type TabsTabVariants = NonNullable<RecipeVariants<typeof tabsTab>>;
