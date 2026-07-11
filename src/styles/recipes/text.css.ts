@@ -1,6 +1,6 @@
 import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
-import { BODY_SIZES, INTENTS, SALIENCIES, TITLE_SIZES } from "../../theme/constants";
+import { BODY_SIZES, INTENTS, SALIENCIES, TEXT_WEIGHTS, TITLE_SIZES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { iconColorVar, textColorVar } from "../vars.css";
 
@@ -108,3 +108,36 @@ export const textVariantRecipe = recipe({
 });
 
 export type TextVariantVariants = NonNullable<RecipeVariants<typeof textVariantRecipe>>;
+
+/**
+ * "text typography" recipe — optional typographic knobs layered on top of a
+ * typography `variant`. Every value comes from a token or a fixed keyword (no
+ * ad-hoc CSS): `weight` reads a `text.weight` token, the rest map a closed set
+ * of keywords to the matching CSS property. Defined after `textVariantRecipe`
+ * so `weight` wins over the weight baked into the variant. All variants are
+ * optional — omitting a prop leaves the variant's own styling untouched.
+ */
+export const textTypographyRecipe = recipe({
+  variants: {
+    weight: Object.fromEntries(
+      TEXT_WEIGHTS.map((weight) => [weight, { fontWeight: vars.text.weight[weight] }]),
+    ) as Record<(typeof TEXT_WEIGHTS)[number], { fontWeight: string }>,
+    italic: {
+      true: { fontStyle: "italic" },
+    },
+    align: {
+      start: { textAlign: "start" },
+      center: { textAlign: "center" },
+    },
+    wrap: {
+      wrap: { whiteSpace: "normal" },
+      nowrap: { whiteSpace: "nowrap" },
+    },
+    wordBreak: {
+      "break-word": { overflowWrap: "break-word" },
+      normal: { overflowWrap: "normal" },
+    },
+  },
+});
+
+export type TextTypographyVariants = NonNullable<RecipeVariants<typeof textTypographyRecipe>>;

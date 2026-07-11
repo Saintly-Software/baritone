@@ -47,6 +47,85 @@ describe("FileList", () => {
     expect(onRemove).toHaveBeenCalledExactlyOnceWith("b");
   });
 
+  describe("download", () => {
+    const downloadable: FileInfo[] = [
+      { id: "a", file: new File([], "report.pdf"), download: true },
+      { id: "b", file: new File([], "logo.svg") },
+    ];
+
+    it("renders no download button when onDownload is omitted", () => {
+      render(<FileList items={downloadable} />);
+      expect(screen.queryByRole("button", { name: /^Download/ })).not.toBeInTheDocument();
+    });
+
+    it("renders a download button only for items marked download", () => {
+      render(<FileList items={downloadable} onDownload={() => {}} />);
+      expect(screen.getByRole("button", { name: "Download report.pdf" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Download logo.svg" })).not.toBeInTheDocument();
+    });
+
+    it("calls onDownload with the file id when the download button is clicked", async () => {
+      const onDownload = vi.fn();
+      const user = userEvent.setup();
+      render(<FileList items={downloadable} onDownload={onDownload} />);
+
+      await user.click(screen.getByRole("button", { name: "Download report.pdf" }));
+      expect(onDownload).toHaveBeenCalledExactlyOnceWith("a");
+    });
+
+    it("keeps onRemove keyed by id alongside a download button", async () => {
+      const onRemove = vi.fn();
+      const user = userEvent.setup();
+      render(<FileList items={downloadable} onRemove={onRemove} onDownload={() => {}} />);
+
+      await user.click(screen.getByRole("button", { name: "Remove report.pdf" }));
+      expect(onRemove).toHaveBeenCalledExactlyOnceWith("a");
+    });
+  });
+
+  describe("FileList.Item composition", () => {
+    it("renders composed items as chips inside the list", () => {
+      render(
+        <FileList onRemove={() => {}} onDownload={() => {}}>
+          <FileList.Item id="a" file={new File([], "report.pdf")} download />
+          <FileList.Item id="b" file={new File([], "logo.svg")} />
+        </FileList>,
+      );
+      expect(screen.getAllByRole("listitem")).toHaveLength(2);
+      expect(screen.getByText("report.pdf")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Download report.pdf" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Download logo.svg" })).not.toBeInTheDocument();
+    });
+
+    it("routes composed items' actions through the list handlers, keyed by id", async () => {
+      const onRemove = vi.fn();
+      const onDownload = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <FileList onRemove={onRemove} onDownload={onDownload}>
+          <FileList.Item id="a" file={new File([], "report.pdf")} download />
+        </FileList>,
+      );
+
+      await user.click(screen.getByRole("button", { name: "Download report.pdf" }));
+      await user.click(screen.getByRole("button", { name: "Remove report.pdf" }));
+      expect(onDownload).toHaveBeenCalledExactlyOnceWith("a");
+      expect(onRemove).toHaveBeenCalledExactlyOnceWith("a");
+    });
+
+    it("lets an item override the list's disabled state", () => {
+      render(
+        <FileList onRemove={() => {}}>
+          <FileList.Item id="a" file={new File([], "report.pdf")} disabled />
+        </FileList>,
+      );
+      expect(screen.getByRole("button", { name: "Remove report.pdf" })).toHaveAttribute(
+        "aria-disabled",
+        "true",
+      );
+    });
+  });
+
   describe("disabled", () => {
     it("marks the remove button aria-disabled (not the native attribute) and keeps it focusable", () => {
       render(<FileList items={files} disabled onRemove={() => {}} />);

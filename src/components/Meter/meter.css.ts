@@ -19,11 +19,17 @@ export const meterRoot = style({
   fontFamily: vars.font.sans,
 });
 
-/** The visible label above the track — neutral-high body text. */
-export const meterLabel = style({
-  fontSize: vars.text.variant.body.sm.fontSize,
-  lineHeight: vars.text.variant.body.sm.lineHeight,
-  color: vars.text.color.neutral.high,
+/**
+ * The header row above the track — the label sits at the start, the optional
+ * value read-out at the end. `space-between` pushes them apart and `baseline`
+ * keeps their text sitting on a shared line even when the two slots differ in
+ * size.
+ */
+export const meterHeader = style({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "baseline",
+  gap: vars.space[2],
 });
 
 /**

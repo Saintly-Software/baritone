@@ -19,6 +19,7 @@ export {
 export {
   FileList,
   type FileListProps,
+  type FileListItemProps,
   type FileInfo,
   type FileListOrientation,
 } from "./components/FileList";
@@ -54,7 +55,7 @@ export {
   type LockupTitleSlotProps,
   type LockupSlots,
 } from "./components/Lockup";
-export { Meter, type MeterProps } from "./components/Meter";
+export { Meter, type MeterProps, type MeterSlotProps } from "./components/Meter";
 export {
   Card,
   type CardProps,
