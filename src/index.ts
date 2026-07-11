@@ -48,7 +48,13 @@ export {
   type GridAreas,
 } from "./components/Grid";
 export { Box, type BoxProps, type BoxElement } from "./components/Box";
-export { Lockup, type LockupProps, type LockupSlotProps } from "./components/Lockup";
+export {
+  Lockup,
+  type LockupProps,
+  type LockupSlotProps,
+  type LockupTitleSlotProps,
+  type LockupSlots,
+} from "./components/Lockup";
 export { Meter, type MeterProps, type MeterSlotProps } from "./components/Meter";
 export {
   Card,

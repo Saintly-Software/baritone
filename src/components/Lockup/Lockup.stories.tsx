@@ -72,3 +72,48 @@ export const TintedIcon: Story = {
     slotProps: { icon: { intent: "primary", saliency: "high" } },
   },
 };
+
+/**
+ * `hideText` collapses the text column visually while leaving it in the
+ * accessible tree, so the lockup reads as icon-only but a screen reader still
+ * announces "Baritone — Design system".
+ */
+export const IconOnly: Story = {
+  args: { hideText: true },
+};
+
+/**
+ * `slotProps.title.level` switches the title from a `Text` to a semantic
+ * `Heading` (here an `<h2>`) for the document outline, without changing how it
+ * looks. Compare with the default text title above it.
+ */
+export const HeadingTitleVsTextTitle: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16 }}>
+      <Lockup title="Text title" subtitle="renders as a <div>" icon={<DiamondGlyph />} />
+      <Lockup
+        title="Heading title"
+        subtitle="renders as an <h2>"
+        icon={<DiamondGlyph />}
+        slotProps={{ title: { level: 2 } }}
+      />
+    </div>
+  ),
+};
+
+/**
+ * `slots` replaces a slot's content entirely with a ReactNode, bypassing the
+ * primitive the lockup would otherwise build.
+ */
+export const SlotOverrides: Story = {
+  args: {
+    slots: {
+      title: (
+        <span style={{ fontWeight: 700 }}>
+          Bari<span style={{ opacity: 0.6 }}>tone</span>
+        </span>
+      ),
+      subtitle: <em>custom subtitle node</em>,
+    },
+  },
+};
