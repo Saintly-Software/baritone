@@ -177,6 +177,7 @@ export {
   type DrawerCloseProps,
   type DrawerHeaderProps,
   type DrawerFooterProps,
+  type DrawerActionProps,
 } from "./components/Drawer";
 export {
   Modal,

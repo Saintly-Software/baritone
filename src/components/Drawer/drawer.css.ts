@@ -1,5 +1,6 @@
 import { style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
+import { focusRingColorVar, iconColorVar, textColorVar } from "../../styles/vars.css";
 import { vars } from "../../theme/contract.css";
 
 /**
@@ -175,3 +176,78 @@ export const drawerSpinner = style({
   placeItems: "center",
   pointerEvents: "none",
 });
+
+/** `Drawer.Action`'s supported intents — mirrors `Menu.Item` (neutral + accents). */
+const DRAWER_ACTION_INTENTS = ["neutral", "secondary", "warning", "negative"] as const;
+
+/**
+ * A menu-style action row for the drawer's header/footer/body. It reuses
+ * `Menu.Item`'s look (the same padding, radius, intent colours, and background
+ * wash) but is a plain tab-stop rather than a base-ui menu item — so instead of
+ * base-ui's `data-highlighted`, the wash is driven by `:hover`/`:focus-visible`
+ * and keyboard focus is drawn by the shared `focusRingRecipe` (colour published
+ * here via `--focusRingColor`). The accent intents keep their own text colour so
+ * a destructive row reads as such at rest, matching `Menu.Item`.
+ */
+export const drawerActionRecipe = recipe({
+  base: {
+    display: "flex",
+    alignItems: "center",
+    gap: vars.space[2],
+    width: "100%",
+    boxSizing: "border-box",
+    margin: 0,
+    padding: `${vars.space[2]} ${vars.space[3]}`,
+    border: "none",
+    borderRadius: vars.component.borderRadius,
+    background: "transparent",
+    fontFamily: vars.font.sans,
+    fontSize: vars.text.variant.body.sm.fontSize,
+    lineHeight: vars.text.variant.body.sm.lineHeight,
+    fontWeight: "500",
+    textAlign: "left",
+    textDecoration: "none",
+    cursor: "pointer",
+    userSelect: "none",
+    outline: "none",
+    transitionProperty: "background-color",
+    transitionDuration: vars.motion.duration.fast,
+    transitionTimingFunction: vars.motion.easing.standard,
+    selectors: {
+      '&[data-disabled], &[aria-disabled="true"]': {
+        cursor: "not-allowed",
+        opacity: 0.55,
+      },
+    },
+    "@media": {
+      "(prefers-reduced-motion: reduce)": { transitionDuration: "0ms" },
+    },
+  },
+  variants: {
+    intent: Object.fromEntries(
+      DRAWER_ACTION_INTENTS.map((intent) => [
+        intent,
+        {
+          color: vars.text.color[intent].mid,
+          vars: {
+            [iconColorVar]: vars.text.color[intent].mid,
+            [textColorVar]: vars.text.color[intent].mid,
+            [focusRingColorVar]: vars.component.focus[intent],
+          },
+          selectors: {
+            // No base-ui `data-highlighted` here (not a menu item), so the wash
+            // follows real pointer/keyboard focus — but never on a disabled row.
+            '&:not([aria-disabled="true"]):hover, &:not([aria-disabled="true"]):focus-visible': {
+              background: vars.component.color[intent].mid.default.bgc,
+            },
+          },
+        },
+      ]),
+    ) as unknown as Record<(typeof DRAWER_ACTION_INTENTS)[number], Record<string, unknown>>,
+  },
+  defaultVariants: {
+    intent: "neutral",
+  },
+});
+
+export type DrawerActionVariants = NonNullable<RecipeVariants<typeof drawerActionRecipe>>;

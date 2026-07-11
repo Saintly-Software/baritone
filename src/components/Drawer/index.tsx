@@ -6,11 +6,18 @@ import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { InternalButton } from "../../internal/components/InternalButton";
+import {
+  InternalGenericButtonAnchor,
+  type InternalGenericButtonAnchorProps,
+} from "../../internal/components/InternalGenericButtonAnchor";
 import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import type { ButtonProps } from "../Button";
 import { Heading } from "../Heading";
+import type { MenuItemProps } from "../Menu";
+import { menuItemIcon } from "../Menu/menu.css";
 import { Text } from "../Text";
 import {
+  drawerActionRecipe,
   drawerBackdrop,
   drawerBody,
   drawerBodyContentLoading,
@@ -271,11 +278,75 @@ function DrawerFooter({ className, children, ref, ...rest }: DrawerFooterProps) 
   );
 }
 
+/**
+ * `Drawer.Action` props — the same shape as `Menu.Item` (its `intent`, `icon`,
+ * label `children`, and `onClick`/`href`/`render`/`disabled` action seams),
+ * minus the menu-only `keepOpen`. A drawer action is a standalone control, not a
+ * dismiss-on-click menu row; wrap it in a `<Drawer.Close>` (or wire your own
+ * handler) if it should also close the drawer.
+ */
+export interface DrawerActionProps extends Omit<MenuItemProps, "keepOpen"> {
+  /** Extra className merged onto the action row. */
+  className?: string;
+  ref?: React.Ref<HTMLElement>;
+}
+
+/**
+ * Drawer.Action — a menu-style action row for a drawer's header, footer, or body
+ * action list. It borrows `Menu.Item`'s look and its button/link semantics
+ * (rendering a real `<button>` for `onClick`, or an `<a>`/router link for
+ * `href`/`render`, via `InternalGenericButtonAnchor`), but is an ordinary tab
+ * stop in the drawer's focus order rather than a base-ui menu item — so it's
+ * keyboard reachable with Tab, no roving-focus menu context required. Stack
+ * several to form an action list.
+ *
+ * @example
+ * <Drawer.Footer>
+ *   <Drawer.Action icon={<Icon name="edit" />} onClick={edit}>Edit</Drawer.Action>
+ *   <Drawer.Action icon={<Icon name="trash" />} intent="negative" onClick={remove}>
+ *     Delete
+ *   </Drawer.Action>
+ * </Drawer.Footer>
+ */
+function DrawerAction({
+  intent = "neutral",
+  icon,
+  children,
+  onClick,
+  href,
+  render,
+  disabled = false,
+  className,
+  ref,
+}: DrawerActionProps) {
+  const ownProps: InternalGenericButtonAnchorProps = {
+    ref,
+    href,
+    render,
+    disabled,
+    onClick,
+    className: cx(drawerActionRecipe({ intent }), focusRingRecipe({ type: "visible" }), className),
+    children: (
+      <>
+        {icon != null && (
+          <span className={menuItemIcon} aria-hidden>
+            {icon}
+          </span>
+        )}
+        {children}
+      </>
+    ),
+  };
+
+  return <InternalGenericButtonAnchor {...ownProps} />;
+}
+
 DrawerRoot.displayName = "Drawer";
 DrawerTrigger.displayName = "Drawer.Trigger";
 DrawerClose.displayName = "Drawer.Close";
 DrawerHeader.displayName = "Drawer.Header";
 DrawerFooter.displayName = "Drawer.Footer";
+DrawerAction.displayName = "Drawer.Action";
 
 /** Drawer with its compound parts attached. */
 export const Drawer = Object.assign(DrawerRoot, {
@@ -283,4 +354,5 @@ export const Drawer = Object.assign(DrawerRoot, {
   Close: DrawerClose,
   Header: DrawerHeader,
   Footer: DrawerFooter,
+  Action: DrawerAction,
 });
