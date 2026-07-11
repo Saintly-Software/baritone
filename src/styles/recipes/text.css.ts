@@ -1,6 +1,14 @@
 import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
-import { BODY_SIZES, INTENTS, SALIENCIES, TITLE_SIZES } from "../../theme/constants";
+import {
+  BODY_SIZES,
+  FONT_WEIGHTS,
+  INTENTS,
+  SALIENCIES,
+  TEXT_ALIGNS,
+  TEXT_WRAPS,
+  TITLE_SIZES,
+} from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { iconColorVar, textColorVar } from "../vars.css";
 
@@ -108,3 +116,29 @@ export const textVariantRecipe = recipe({
 });
 
 export type TextVariantVariants = NonNullable<RecipeVariants<typeof textVariantRecipe>>;
+
+/**
+ * "text style" recipe — optional typography knobs shared by `Text` and
+ * `Heading`: `align` (logical `text-align`), `weight` (a named `font.weight`
+ * token), and `wrap` (`text-wrap`). Each variant only emits when its prop is
+ * passed, so the family/size defaults from {@link textVariantRecipe} stand
+ * otherwise. Defined *after* `textVariantRecipe` so an explicit `weight` wins
+ * the cascade over the size variant's default `fontWeight`.
+ */
+export const textStyleRecipe = recipe({
+  variants: {
+    align: Object.fromEntries(TEXT_ALIGNS.map((align) => [align, { textAlign: align }])) as Record<
+      (typeof TEXT_ALIGNS)[number],
+      { textAlign: (typeof TEXT_ALIGNS)[number] }
+    >,
+    weight: Object.fromEntries(
+      FONT_WEIGHTS.map((weight) => [weight, { fontWeight: vars.font.weight[weight] }]),
+    ) as Record<(typeof FONT_WEIGHTS)[number], { fontWeight: string }>,
+    wrap: Object.fromEntries(TEXT_WRAPS.map((wrap) => [wrap, { textWrap: wrap }])) as Record<
+      (typeof TEXT_WRAPS)[number],
+      { textWrap: (typeof TEXT_WRAPS)[number] }
+    >,
+  },
+});
+
+export type TextStyleVariants = NonNullable<RecipeVariants<typeof textStyleRecipe>>;

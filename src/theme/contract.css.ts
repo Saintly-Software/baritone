@@ -2,6 +2,7 @@ import { createThemeContract } from "@vanilla-extract/css";
 import {
   BODY_SIZES,
   BORDER_WIDTH_KEYS,
+  FONT_WEIGHTS,
   FORM_STATES,
   INTENTS,
   RADIUS_KEYS,
@@ -64,6 +65,7 @@ export const tokenShape = {
   font: {
     sans: s(),
     mono: s(),
+    weight: record(FONT_WEIGHTS, () => s()),
   },
   space: record(SPACE_KEYS, () => s()),
   radius: record(RADIUS_KEYS, () => s()),

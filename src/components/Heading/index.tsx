@@ -1,13 +1,20 @@
 "use client";
 import * as React from "react";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import {
+  textIntentRecipe,
+  textStyleRecipe,
+  textVariantRecipe,
+} from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import {
   HEADING_LEVEL_VARIANT,
+  type FontWeight,
   type HeadingLevel,
   type Intent,
   type Saliency,
+  type TextAlign,
+  type TextWrap,
   type TitleSize,
 } from "../../theme/constants";
 import { cx } from "../../utils/cx";
@@ -25,6 +32,12 @@ export interface HeadingProps
   intent?: Intent;
   /** Default `high` (headings are high saliency). */
   saliency?: Saliency;
+  /** Logical text alignment. Inherits when omitted. */
+  align?: TextAlign;
+  /** Override the variant's default font weight with a named token. */
+  weight?: FontWeight;
+  /** `text-wrap` behaviour (e.g. `balance` for tidy multi-line titles). */
+  wrap?: TextWrap;
   /** Render as a different element/component (base-ui `render` pattern). */
   render?: RenderProp;
   ref?: React.Ref<HTMLHeadingElement>;
@@ -41,6 +54,9 @@ export function Heading({
   variant,
   intent,
   saliency = "high",
+  align,
+  weight,
+  wrap,
   render,
   className,
   children,
@@ -70,6 +86,7 @@ export function Heading({
       className: cx(
         textIntentRecipe({ intent, saliency }),
         textVariantRecipe({ family: "title", size: visual }),
+        textStyleRecipe({ align, weight, wrap }),
         atoms({ m, mx, my, mt, mr, mb, ml, p, px, py, pt, pr, pb, pl }),
         className,
       ),

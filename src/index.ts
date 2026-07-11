@@ -197,6 +197,8 @@ export {
   type TextIntentVariants,
   textVariantRecipe,
   type TextVariantVariants,
+  textStyleRecipe,
+  type TextStyleVariants,
 } from "./styles/recipes/text.css";
 export { formControlRecipe, type FormControlVariants } from "./styles/recipes/formControl.css";
 export { iconRecipe, type IconVariants } from "./styles/recipes/icon.css";

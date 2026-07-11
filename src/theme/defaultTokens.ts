@@ -437,6 +437,7 @@ export function buildDefaultTokens(
     font: {
       sans: brand.fonts?.sans ?? fontFamily.sans,
       mono: brand.fonts?.mono ?? fontFamily.mono,
+      weight: { ...fontWeight },
     },
     space: spaceScale,
     radius: radiusScale,

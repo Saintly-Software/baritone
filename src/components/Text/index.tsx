@@ -1,9 +1,20 @@
 "use client";
 import * as React from "react";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import {
+  textIntentRecipe,
+  textStyleRecipe,
+  textVariantRecipe,
+} from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
-import type { BodySize, Intent, Saliency } from "../../theme/constants";
+import type {
+  BodySize,
+  FontWeight,
+  Intent,
+  Saliency,
+  TextAlign,
+  TextWrap,
+} from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 
@@ -18,6 +29,12 @@ interface TextOwnProps
   intent?: Intent;
   /** Override the inherited colour at this saliency. Falls back to `mid` when standalone. */
   saliency?: Saliency;
+  /** Logical text alignment. Inherits when omitted. */
+  align?: TextAlign;
+  /** Override the variant's default font weight with a named token. */
+  weight?: FontWeight;
+  /** `text-wrap` behaviour (e.g. `balance`, `nowrap`). */
+  wrap?: TextWrap;
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
 }
@@ -58,6 +75,9 @@ export function Text(props: TextProps) {
     variant = "base",
     intent,
     saliency,
+    align,
+    weight,
+    wrap,
     as,
     render,
     className,
@@ -88,6 +108,7 @@ export function Text(props: TextProps) {
       className: cx(
         textIntentRecipe({ intent, saliency }),
         textVariantRecipe({ family: "body", size: variant }),
+        textStyleRecipe({ align, weight, wrap }),
         atoms({ m, mx, my, mt, mr, mb, ml, p, px, py, pt, pr, pb, pl }),
         className,
       ),

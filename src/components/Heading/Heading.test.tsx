@@ -23,4 +23,39 @@ describe("Heading", () => {
     );
     expect(screen.getByRole("heading", { level: 3 })).toBeInTheDocument();
   });
+
+  it("keeps the default weight when `weight` is omitted", () => {
+    const { rerender } = render(
+      <Heading level={2} data-testid="h">
+        Default
+      </Heading>,
+    );
+    const defaultClasses = screen.getByTestId("h").className;
+    rerender(
+      <Heading level={2} data-testid="h" weight="regular">
+        Overridden
+      </Heading>,
+    );
+    const weightedClasses = screen.getByTestId("h").className;
+    // Passing `weight` adds a class; omitting it must not, so the default render
+    // stays exactly as it was before the prop existed.
+    expect(weightedClasses).not.toBe(defaultClasses);
+    expect(weightedClasses.split(" ").length).toBeGreaterThan(defaultClasses.split(" ").length);
+  });
+
+  it("adds a class for each of align, weight, and wrap when passed", () => {
+    const { rerender } = render(
+      <Heading level={2} data-testid="h">
+        Plain
+      </Heading>,
+    );
+    const base = screen.getByTestId("h").className.split(" ").length;
+    rerender(
+      <Heading level={2} data-testid="h" align="center" weight="bold" wrap="balance">
+        Styled
+      </Heading>,
+    );
+    const styled = screen.getByTestId("h").className.split(" ").length;
+    expect(styled).toBe(base + 3);
+  });
 });
