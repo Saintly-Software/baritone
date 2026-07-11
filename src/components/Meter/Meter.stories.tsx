@@ -79,6 +79,57 @@ export const CustomValueText: Story = {
   },
 };
 
+/**
+ * A `description` beneath the track — supporting text (units, context) that's
+ * also wired to the meter as its `aria-describedby`.
+ */
+export const WithDescription: Story = {
+  args: {
+    label: "Storage used",
+    value: 72,
+    showValue: true,
+    description: "72 GB of your 100 GB quota",
+  },
+};
+
+/**
+ * `showValue` renders the value at the end of the header row. `format` (an
+ * `Intl.NumberFormat` options bag) drives how it reads — here as a unit — and
+ * feeds the default `aria-valuetext` too.
+ */
+export const CustomValueFormat: Story = {
+  args: {
+    label: "Download",
+    intent: "positive",
+    value: 4.2,
+    min: 0,
+    max: 10,
+    showValue: true,
+    format: { style: "unit", unit: "gigabyte", unitDisplay: "short" },
+    description: "Transferring…",
+  },
+};
+
+/**
+ * `formatValue` takes full control of the displayed node — here composing the
+ * raw value against the max — while `slotProps` re-tunes each `Text` slot.
+ */
+export const CustomValueNode: Story = {
+  args: {
+    label: "Seats",
+    intent: "secondary",
+    value: 18,
+    max: 25,
+    showValue: true,
+    formatValue: (_formatted, value) => `${value} / 25`,
+    slotProps: {
+      value: { saliency: "high" },
+      description: { intent: "warning" },
+    },
+    description: "7 seats remaining",
+  },
+};
+
 /** No visible label — named for assistive tech via `aria-label`. */
 export const AriaLabelOnly: Story = {
   args: {
