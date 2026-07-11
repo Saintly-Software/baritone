@@ -26,6 +26,7 @@ const meta: Meta<typeof FileList> = {
     size: { control: "select", options: SIZES },
     disabled: { control: "boolean" },
     onRemove: { table: { disable: true } },
+    onDownload: { table: { disable: true } },
     items: { table: { disable: true } },
   },
 };
@@ -77,6 +78,74 @@ export const FileTypes: Story = {
       fileInfo("doc", "readme.txt"),
       fileInfo("bin", "firmware"),
     ],
+  },
+};
+
+/**
+ * Per-item `download`: only files flagged `download` get a download button
+ * (here the report and the export). `onRemove` stays keyed by `id`, so removing
+ * one file leaves the rest — and their download buttons — intact.
+ */
+export const Downloadable: Story = {
+  render: (args) => {
+    const [items, setItems] = React.useState((): FileInfo[] => [
+      { ...fileInfo("1", "quarterly-report.pdf"), download: true },
+      fileInfo("2", "hero-banner.png"),
+      { ...fileInfo("3", "data-export-2026-06.csv"), download: true },
+    ]);
+    return (
+      <FileList
+        {...args}
+        items={items}
+        onRemove={(id) => setItems((cur) => cur.filter((f) => f.id !== id))}
+        onDownload={(id) => {
+          // A real consumer would stream / save the File here; the story just
+          // proves the affordance is wired and keyed by `id`.
+          const hit = items.find((f) => f.id === id);
+          if (hit != null) window.alert(`Download ${hit.file.name}`);
+        }}
+      />
+    );
+  },
+};
+
+/**
+ * Element composition: instead of the `items` array, drop `FileList.Item`
+ * children in directly — mix per-item overrides (`download`, `intent`) while the
+ * list still supplies the shared handlers and defaults.
+ */
+export const Composed: Story = {
+  render: (args) => {
+    const [rows, setRows] = React.useState(() => [
+      {
+        id: "1",
+        file: new File([], "signed-contract.pdf"),
+        download: true,
+        intent: "positive" as const,
+      },
+      { id: "2", file: new File([], "appendix-a.docx"), download: true },
+      { id: "3", file: new File([], "raw-scan.tiff") },
+    ]);
+    return (
+      <FileList
+        {...args}
+        onRemove={(id) => setRows((cur) => cur.filter((r) => r.id !== id))}
+        onDownload={(id) => {
+          const hit = rows.find((r) => r.id === id);
+          if (hit != null) window.alert(`Download ${hit.file.name}`);
+        }}
+      >
+        {rows.map((row) => (
+          <FileList.Item
+            key={row.id}
+            id={row.id}
+            file={row.file}
+            download={row.download}
+            intent={row.intent}
+          />
+        ))}
+      </FileList>
+    );
   },
 };
 
