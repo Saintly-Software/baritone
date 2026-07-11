@@ -32,6 +32,10 @@ const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  *   `InternalButton`) forward it on correctly.
  * - `Tooltip.Root` — base-ui's tooltip `disabled` toggles whether the tooltip
  *   shows; it's not an interactive-control disable.
+ * - `BaseSelect.Item` — base-ui's select option renders a `<div>` (a non-native
+ *   button), so its `disabled` maps to `aria-disabled` and keeps the option
+ *   focusable/announced in the listbox (`focusableWhenDisabled`), never the
+ *   native attribute. It's the idiomatic way to disable one option.
  * - `FileList` — a system component whose `disabled` is modelled the focusable
  *   way internally (dims the chips, sets the remove buttons' `aria-disabled` and
  *   swallows their clicks, never the native attribute — see its tests). Composing
@@ -50,6 +54,7 @@ function mayReceiveDisabled(tag: string): boolean {
   return (
     tag.startsWith("Internal") ||
     tag === "Tooltip.Root" ||
+    tag === "BaseSelect.Item" ||
     tag === "FileList" ||
     tag === "Chip" ||
     tag === "BaseCombobox.Item"
