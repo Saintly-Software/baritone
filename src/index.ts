@@ -66,6 +66,7 @@ export {
   type LockupSlots,
 } from "./components/Lockup";
 export { Meter, type MeterProps, type MeterSlotProps } from "./components/Meter";
+export { LoadingIndicator, type LoadingIndicatorProps } from "./components/LoadingIndicator";
 export {
   Card,
   type CardProps,
