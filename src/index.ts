@@ -19,6 +19,7 @@ export {
 export {
   FileList,
   type FileListProps,
+  type FileListItemProps,
   type FileInfo,
   type FileListOrientation,
 } from "./components/FileList";
@@ -37,6 +38,8 @@ export {
   type FlexAlign,
   type FlexJustify,
   type FlexDirection,
+  type FlexItemProps,
+  type FlexItemAlign,
 } from "./components/Flex";
 export {
   Grid,
@@ -47,8 +50,15 @@ export {
   type GridAreas,
 } from "./components/Grid";
 export { Box, type BoxProps, type BoxElement } from "./components/Box";
-export { Lockup, type LockupProps, type LockupSlotProps } from "./components/Lockup";
-export { Meter, type MeterProps } from "./components/Meter";
+export { SrOnly, type SrOnlyProps } from "./components/SrOnly";
+export {
+  Lockup,
+  type LockupProps,
+  type LockupSlotProps,
+  type LockupTitleSlotProps,
+  type LockupSlots,
+} from "./components/Lockup";
+export { Meter, type MeterProps, type MeterSlotProps } from "./components/Meter";
 export {
   Card,
   type CardProps,
@@ -65,7 +75,23 @@ export {
   type CardDividerProps,
 } from "./components/Card";
 export { CardList, type CardListProps } from "./components/CardList";
+export {
+  MetricCard,
+  type MetricCardProps,
+  type MetricCardStaticProps,
+  type MetricCardClickableProps,
+  type MetricCardLinkableProps,
+  type MetricTrend,
+  type MetricTrendDirection,
+} from "./components/MetricCard";
 export { TextInput, type TextInputProps } from "./components/TextInput";
+export {
+  Combobox,
+  type ComboboxProps,
+  type ComboboxOption,
+  type ComboboxSearch,
+  type ComboboxSearchCopy,
+} from "./components/Combobox";
 export {
   RadioGroup,
   type RadioGroupProps,
@@ -108,6 +134,7 @@ export {
   type BadgeTextProps,
   type BadgeDotProps,
 } from "./components/Badge";
+export { Notice, type NoticeProps, type NoticeIconProps } from "./components/Notice";
 export {
   Popover,
   type PopoverProps,
@@ -117,6 +144,7 @@ export {
   type PopoverHeaderProps,
   type PopoverFooterProps,
 } from "./components/Popover";
+export { InfoButton, type InfoButtonProps, type InfoButtonIntent } from "./components/InfoButton";
 export {
   Drawer,
   type DrawerProps,
@@ -137,6 +165,13 @@ export {
   type ModalHeaderProps,
   type ModalFooterProps,
 } from "./components/Modal";
+export {
+  Menu,
+  type MenuProps,
+  type MenuItemProps,
+  type MenuItemIntent,
+  type MenuTriggerProps,
+} from "./components/Menu";
 export {
   InaccessibleTooltip,
   type InaccessibleTooltipProps,

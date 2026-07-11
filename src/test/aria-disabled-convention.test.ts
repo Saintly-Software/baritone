@@ -44,6 +44,11 @@ const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  *   `aria-disabled` on its span, never the native attribute, and propagates the
  *   state to its clickable adornments via context so they go inert but stay
  *   focusable. `FileList` passes its own disabled state down to each chip.
+ * - `BaseCombobox.Item` — a listbox option, which is never a tab stop (the
+ *   combobox input keeps focus; options are navigated by roving highlight /
+ *   `aria-activedescendant`). base-ui renders it as a `<div>` and its `disabled`
+ *   sets `aria-disabled`, blocking selection without removing anything from the
+ *   tab order — so the "must stay focusable" rule doesn't apply.
  */
 function mayReceiveDisabled(tag: string): boolean {
   return (
@@ -51,7 +56,8 @@ function mayReceiveDisabled(tag: string): boolean {
     tag === "Tooltip.Root" ||
     tag === "BaseSelect.Item" ||
     tag === "FileList" ||
-    tag === "Chip"
+    tag === "Chip" ||
+    tag === "BaseCombobox.Item"
   );
 }
 

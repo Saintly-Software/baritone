@@ -34,6 +34,21 @@ const JUSTIFY: Record<FlexJustify, NonNullable<Atoms["justifyContent"]>> = {
   evenly: "space-evenly",
 };
 
+/**
+ * `align-self`, in friendly terms. Adds `auto` (defer to the container's
+ * `align-items`) on top of the container `align` values.
+ */
+export type FlexItemAlign = FlexAlign | "auto";
+
+const ALIGN_SELF: Record<FlexItemAlign, NonNullable<Atoms["alignSelf"]>> = {
+  auto: "auto",
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  stretch: "stretch",
+  baseline: "baseline",
+};
+
 export interface FlexProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
   /** `align-items`. Omit to leave it at the flexbox default (`stretch`). */
@@ -63,7 +78,7 @@ export interface FlexProps
  * margin (`m` / `mx` / …) and padding (`p` / `px` / …) props are wired straight to
  * the spacing scale (each responsive-capable). Use `render` to change the element.
  */
-export function Flex({
+function FlexRoot({
   align,
   justify,
   gap,
@@ -128,4 +143,115 @@ export function Flex({
   });
 }
 
-Flex.displayName = "Flex";
+FlexRoot.displayName = "Flex";
+
+export interface FlexItemProps
+  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
+  /**
+   * `align-self` — override the container's cross-axis alignment for this child.
+   * Alias for `alignSelf` (which wins if both are set).
+   */
+  align?: FlexItemAlign;
+  /** `align-self`. Omit to inherit the container's `align-items` (`auto`). */
+  alignSelf?: FlexItemAlign;
+  /** `flex-grow`: `true` grows to fill spare space (`1`), `false` stays at `0`. */
+  grow?: boolean;
+  /** `flex-shrink`: `false` prevents shrinking (`0`); defaults to the flexbox default (`1`). */
+  shrink?: boolean;
+  /** `width`, from the atoms scale (spacing tokens, `full`, `fit-content`, …). */
+  width?: Atoms["width"];
+  /** `height`, from the atoms scale. */
+  height?: Atoms["height"];
+  /** `min-width`, from the atoms scale. */
+  minWidth?: Atoms["minWidth"];
+  /** `min-height`, from the atoms scale. */
+  minHeight?: Atoms["minHeight"];
+
+  /** Render as a different element/component (base-ui `render` pattern). */
+  render?: RenderProp;
+  ref?: React.Ref<HTMLElement>;
+  children?: React.ReactNode;
+}
+
+/**
+ * Flex.Item — a flex child with per-child layout knobs, so a single child can
+ * override the container without reaching for `atoms` directly. `align` /
+ * `alignSelf` set the cross-axis alignment, `grow` / `shrink` control how it
+ * flexes, `width` / `height` / `minWidth` / `minHeight` map to the atoms sizing
+ * scale, and the margin (`m` / `mx` / …) and padding (`p` / `px` / …) props are
+ * wired to the spacing scale (each responsive-capable). Use `render` to change
+ * the element. Purely optional — plain children work fine inside `Flex`.
+ */
+export function FlexItem({
+  align,
+  alignSelf,
+  grow,
+  shrink,
+  width,
+  height,
+  minWidth,
+  minHeight,
+  m,
+  mx,
+  my,
+  mt,
+  mr,
+  mb,
+  ml,
+  p,
+  px,
+  py,
+  pt,
+  pr,
+  pb,
+  pl,
+  render,
+  className,
+  children,
+  ref,
+  ...rest
+}: FlexItemProps) {
+  const self = alignSelf ?? align;
+  return useRender({
+    render,
+    defaultElement: "div",
+    props: {
+      ref,
+      className: cx(
+        atoms({
+          alignSelf: self ? ALIGN_SELF[self] : undefined,
+          flexGrow: grow === undefined ? undefined : grow ? 1 : 0,
+          flexShrink: shrink === undefined ? undefined : shrink ? 1 : 0,
+          width,
+          height,
+          minWidth,
+          minHeight,
+          m,
+          mx,
+          my,
+          mt,
+          mr,
+          mb,
+          ml,
+          p,
+          px,
+          py,
+          pt,
+          pr,
+          pb,
+          pl,
+        }),
+        className,
+      ),
+      children,
+      ...rest,
+    },
+  });
+}
+
+FlexItem.displayName = "Flex.Item";
+
+/** Flex with its compound parts attached. */
+export const Flex = Object.assign(FlexRoot, {
+  Item: FlexItem,
+});

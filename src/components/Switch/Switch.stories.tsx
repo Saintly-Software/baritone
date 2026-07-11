@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { SIZES } from "../../theme/constants";
+import { LABEL_POSITIONS, SIZES } from "../../theme/constants";
 import { Switch } from "./index";
 
 // Distribute the omit across each member of `SwitchProps`' icon union so the
@@ -23,12 +23,14 @@ const meta: Meta<typeof ControlledSwitch> = {
   args: {
     label: "Enable notifications",
     size: "md",
+    labelPosition: "end",
     disabled: false,
     required: false,
     invalid: false,
   },
   argTypes: {
     size: { control: "select", options: SIZES },
+    labelPosition: { control: "inline-radio", options: LABEL_POSITIONS },
     disabled: { control: "boolean" },
     required: { control: "boolean" },
     invalid: { control: "boolean" },
@@ -77,6 +79,74 @@ export const Invalid: Story = {
     required: true,
     invalid: true,
   },
+};
+
+/**
+ * `labelPosition` places the label `end` (default), `start`, or `top`. It's
+ * flex-direction only — `start`/`end` are inline-logical, so they flip under RTL
+ * without the DOM (or the accessible name) moving.
+ */
+export const LabelPositions: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 24 }}>
+      {LABEL_POSITIONS.map((labelPosition) => (
+        <ControlledSwitch
+          key={labelPosition}
+          label={`labelPosition="${labelPosition}"`}
+          labelPosition={labelPosition}
+        />
+      ))}
+    </div>
+  ),
+};
+
+/** The same three positions mirrored under `dir="rtl"`. */
+export const LabelPositionsRTL: Story = {
+  render: () => (
+    <div dir="rtl" style={{ display: "grid", gap: 24 }}>
+      {LABEL_POSITIONS.map((labelPosition) => (
+        <ControlledSwitch
+          key={labelPosition}
+          label={`الموضع "${labelPosition}"`}
+          labelPosition={labelPosition}
+        />
+      ))}
+    </div>
+  ),
+};
+
+/** Inline help under the row, wired to the control via `aria-describedby`. */
+export const WithDescription: Story = {
+  args: {
+    label: "Notifications",
+    labelPosition: "top",
+    description: "We'll only ping you about outages, never marketing.",
+  },
+};
+
+/** An error message announced under the row when the field is `invalid`. */
+export const WithErrorMessage: Story = {
+  args: {
+    label: "Accept tracking",
+    labelPosition: "top",
+    required: true,
+    invalid: true,
+    errorMessage: "You must accept to continue.",
+  },
+};
+
+/**
+ * With no visible `label`, name the control explicitly with `aria-label` — the
+ * glyph stays decorative. Inspect the accessibility tree to confirm the name.
+ */
+export const IconOnly: Story = {
+  render: () => (
+    <ControlledSwitch
+      aria-label="Wi-Fi"
+      activeIcon={<CheckGlyph />}
+      inactiveIcon={<CrossGlyph />}
+    />
+  ),
 };
 
 // Bare `currentColor` glyphs — the switch sizes and recolours them inside the
