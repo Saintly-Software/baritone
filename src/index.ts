@@ -2,6 +2,11 @@
 export { BaritoneTheme, type BaritoneThemeProps } from "./components/BaritoneTheme";
 export { Button, type ButtonProps } from "./components/Button";
 export {
+  ButtonGroup,
+  type ButtonGroupProps,
+  type ButtonGroupItemProps,
+} from "./components/ButtonGroup";
+export {
   ToggleButton,
   type ToggleButtonProps,
   type ToggleButtonBaseProps,
