@@ -85,8 +85,7 @@ interface TextInputBaseProps {
 
 /** Single-line variant — a native `<input>` sized by `size`. */
 export interface SingleLineTextInputProps
-  extends TextInputBaseProps,
-    Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
+  extends TextInputBaseProps, Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   multiline?: false;
   /** Control size. Default `md`. Mutually exclusive with `multiline` / `rows`. */
   size?: Size;
@@ -95,8 +94,7 @@ export interface SingleLineTextInputProps
 
 /** Multiline variant — a native `<textarea>` whose height is governed by `rows`. */
 export interface MultilineTextInputProps
-  extends TextInputBaseProps,
-    Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "size"> {
+  extends TextInputBaseProps, Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "size"> {
   multiline: true;
   /** Visible rows (the textarea's starting height). Default `3`. */
   rows?: number;
