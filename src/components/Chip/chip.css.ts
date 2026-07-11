@@ -43,6 +43,27 @@ export const chipShapeRecipe = recipe({
 export type ChipShapeRecipeVariants = NonNullable<RecipeVariants<typeof chipShapeRecipe>>;
 
 /**
+ * Chip width override. By default a chip is `inline-flex` and hugs its content
+ * (`fit`). `fill` switches it to a block-level `flex` that stretches to its
+ * container's full width — handy when chips stack in a column (e.g. a filter
+ * rail) and should line up their edges. The label keeps truncating either way.
+ * Applied after `componentTypographyRecipe`.
+ */
+export const chipWidthRecipe = recipe({
+  variants: {
+    width: {
+      fit: {},
+      fill: { display: "flex", width: "100%" },
+    },
+  },
+  defaultVariants: {
+    width: "fit",
+  },
+});
+
+export type ChipWidthRecipeVariants = NonNullable<RecipeVariants<typeof chipWidthRecipe>>;
+
+/**
  * The chip's text label — the single flex item that wraps the (string) children
  * between the lead/trail adornment lists. `min-width: 0` plus the overflow trio
  * let a long label ellipsize when the chip is width-constrained (e.g. a FileList

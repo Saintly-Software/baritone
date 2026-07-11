@@ -11,7 +11,7 @@ import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { mergeProps, useRender, type RenderProp } from "../../utils/render";
 import type { PopoverProps } from "../Popover";
-import { chipLabelRecipe, chipShapeRecipe, chipSizeRecipe } from "./chip.css";
+import { chipLabelRecipe, chipShapeRecipe, chipSizeRecipe, chipWidthRecipe } from "./chip.css";
 import { chipAdornmentRecipe } from "./chipAdornment.css";
 
 /**
@@ -124,6 +124,86 @@ function CloseGlyph() {
   );
 }
 
+/** A pair of overlapping sheets; decorative — the copy adornment carries the accessible name. */
+function CopyGlyph() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h8" />
+    </svg>
+  );
+}
+
+/** A checkmark shown briefly after a successful copy; decorative. */
+function CheckGlyph() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+/**
+ * The built-in copy-to-clipboard adornment appended when a Chip is given
+ * `contentToCopy`. It's a clickable `Chip.Adornment` that writes the text to the
+ * clipboard on activation and, as success feedback, briefly swaps its glyph to a
+ * checkmark and its accessible name to "Copied" before reverting. Being a
+ * clickable adornment it inherits the chip's disabled state through context.
+ */
+function ChipCopyAdornment({ content }: { content: string }) {
+  const [copied, setCopied] = React.useState(false);
+  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Clear the pending revert if the chip unmounts mid-feedback.
+  React.useEffect(() => () => clearTimeout(timeoutRef.current), []);
+
+  const handleCopy = () => {
+    const { clipboard } = navigator;
+    if (clipboard == null) return;
+    void clipboard.writeText(content).then(
+      () => {
+        setCopied(true);
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => setCopied(false), 2000);
+      },
+      () => {
+        // Swallow a rejected clipboard write (denied permission, insecure
+        // context) — the chip just doesn't show success feedback.
+      },
+    );
+  };
+
+  return (
+    <ChipAdornment
+      icon={copied ? <CheckGlyph /> : <CopyGlyph />}
+      label={copied ? "Copied" : "Copy"}
+      onClick={handleCopy}
+    />
+  );
+}
+
 /**
  * Chip.Adornment — a small icon slotted before/after a Chip's label via the
  * `leadAdornments` / `trailAdornments` props (or dropped directly in the Chip's
@@ -197,6 +277,13 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
    * ends into a Bootstrap-style pill/badge.
    */
   shape?: "square" | "pill";
+  /**
+   * The chip's width. `fit` (default) keeps the chip `inline-flex`, hugging its
+   * content. `fill` stretches it to its container's full width — useful when
+   * chips stack in a column and should share one edge. The label truncates
+   * either way.
+   */
+  width?: "fit" | "fill";
   /** Uses `aria-disabled` (keyboard-focusable) rather than `disabled`. */
   disabled?: boolean;
   /**
@@ -234,10 +321,25 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
    * inherits the chip's colour like any adornment.
    */
   icon?: React.ReactNode;
+  /**
+   * Shorthand for a trailing icon — mirrors `icon` at the other end, appending a
+   * decorative `<Chip.Adornment>` *after* any `trailAdornments` (and before the
+   * built-in `contentToCopy` / `handleRemove` buttons). Typically an `<Icon>`; it
+   * inherits the chip's colour like any adornment.
+   */
+  trailIcon?: React.ReactNode;
   /** Adornments rendered before the label — each a `<Chip.Adornment>`. */
   leadAdornments?: Array<React.ReactElement<ChipAdornmentProps>>;
   /** Adornments rendered after the label — each a `<Chip.Adornment>`. */
   trailAdornments?: Array<React.ReactElement<ChipAdornmentProps>>;
+  /**
+   * When provided, appends a built-in copy-to-clipboard trailing adornment that
+   * writes this string to the clipboard on click. It's a labelled clickable
+   * `Chip.Adornment` ("Copy") that briefly shows a checkmark + "Copied" as
+   * success feedback, and — being clickable — inherits the chip's disabled state.
+   * It sits after `trailIcon`, before the `handleRemove` "×".
+   */
+  contentToCopy?: string;
   /**
    * When provided, appends a built-in clickable remove "×" adornment that calls
    * this on activation. It always sits last among the trailing adornments, after
@@ -273,11 +375,14 @@ function ChipRoot({
   saliency,
   size,
   shape,
+  width,
   disabled,
   loading = false,
   icon,
+  trailIcon,
   leadAdornments,
   trailAdornments,
+  contentToCopy,
   handleRemove,
   popover,
   render,
@@ -380,6 +485,7 @@ function ChipRoot({
         componentTypographyRecipe({ size }),
         chipSizeRecipe({ size }),
         chipShapeRecipe({ shape }),
+        chipWidthRecipe({ width }),
         componentIntentRecipe({ intent, saliency }),
         focusRingRecipe({ type: "visible" }),
         className,
@@ -399,6 +505,12 @@ function ChipRoot({
           {React.Children.toArray(leadAdornments)}
           {label}
           {React.Children.toArray(trailAdornments)}
+          {/* `trailIcon` mirrors the lead `icon`: a decorative trailing shorthand
+              that sits just after any supplied `trailAdornments`. */}
+          {trailIcon != null && <ChipAdornment icon={trailIcon} />}
+          {/* The built-in copy button, appended when `contentToCopy` is set. It's
+              a clickable adornment, so it inherits the chip's disabled state. */}
+          {contentToCopy != null && <ChipCopyAdornment content={contentToCopy} />}
           {/* The built-in remove "×" always sits last, after any supplied
               trailing adornments. It's a clickable adornment, so it inherits the
               chip's disabled state through context (inert but focusable). */}

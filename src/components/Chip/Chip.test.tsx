@@ -465,5 +465,110 @@ describe("Chip", () => {
       expect(link).toHaveAttribute("href", "/docs");
       expect(link.className).toContain("mine");
     });
+
+    it("renders the `trailIcon` shorthand after the label and any trailAdornments", () => {
+      render(
+        <Chip
+          data-testid="chip"
+          icon={<span>I</span>}
+          leadAdornments={[<Chip.Adornment icon={<span>L</span>} />]}
+          trailAdornments={[<Chip.Adornment icon={<span>R</span>} />]}
+          trailIcon={<span>T</span>}
+        >
+          Tag
+        </Chip>,
+      );
+      // icon → leadAdornments → label → trailAdornments → trailIcon.
+      expect(screen.getByTestId("chip").textContent).toBe("ILTagRT");
+    });
+
+    it("places the built-in copy button after trailIcon and before the handleRemove ×", () => {
+      render(
+        <Chip
+          trailIcon={<span data-testid="trail">T</span>}
+          contentToCopy="x"
+          handleRemove={() => {}}
+        >
+          Tag
+        </Chip>,
+      );
+      const trail = screen.getByTestId("trail").parentElement as HTMLElement;
+      const copy = screen.getByRole("button", { name: "Copy" });
+      const remove = screen.getByRole("button", { name: "Remove" });
+      // DOM order: trailIcon → copy → remove.
+      expect(trail.compareDocumentPosition(copy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(copy.compareDocumentPosition(remove) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+  });
+
+  describe("contentToCopy", () => {
+    it("renders no copy button when contentToCopy is omitted", () => {
+      render(<Chip>Tag</Chip>);
+      expect(screen.queryByRole("button", { name: "Copy" })).not.toBeInTheDocument();
+    });
+
+    it("writes the content to the clipboard and shows labelled success feedback", async () => {
+      const user = userEvent.setup();
+      render(<Chip contentToCopy="npm i baritone">Package</Chip>);
+      const button = screen.getByRole("button", { name: "Copy" });
+      expect(button.tagName).toBe("BUTTON");
+
+      await user.click(button);
+
+      expect(await navigator.clipboard.readText()).toBe("npm i baritone");
+      // Success feedback: the same button relabels to "Copied".
+      expect(await screen.findByRole("button", { name: "Copied" })).toBeInTheDocument();
+    });
+
+    it("makes the copy button inert (but focusable) when the chip is disabled and does not write", async () => {
+      const user = userEvent.setup();
+      render(
+        <Chip disabled contentToCopy="secret">
+          Package
+        </Chip>,
+      );
+      const button = screen.getByRole("button", { name: "Copy" });
+      expect(button).toHaveAttribute("aria-disabled", "true");
+      expect(button).not.toHaveAttribute("disabled");
+
+      button.focus();
+      expect(button).toHaveFocus();
+
+      await user.click(button);
+      expect(await navigator.clipboard.readText()).toBe("");
+    });
+  });
+
+  describe("width", () => {
+    it("applies a distinct class for fill vs. the default fit", () => {
+      render(
+        <>
+          <Chip data-testid="fit">Fit</Chip>
+          <Chip data-testid="fill" width="fill">
+            Fill
+          </Chip>
+        </>,
+      );
+      const fit = screen.getByTestId("fit");
+      const fill = screen.getByTestId("fill");
+      const extra = fill.className
+        .split(/\s+/)
+        .filter((cls) => !fit.className.split(/\s+/).includes(cls));
+      expect(extra.length).toBeGreaterThan(0);
+    });
+
+    it("treats an explicit fit width the same as the default", () => {
+      render(
+        <>
+          <Chip data-testid="default">Default</Chip>
+          <Chip data-testid="explicit" width="fit">
+            Explicit
+          </Chip>
+        </>,
+      );
+      expect(screen.getByTestId("explicit").className).toBe(
+        screen.getByTestId("default").className,
+      );
+    });
   });
 });
