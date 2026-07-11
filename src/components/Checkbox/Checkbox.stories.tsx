@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { SIZES } from "../../theme/constants";
+import { FORM_STATES, SIZES } from "../../theme/constants";
 import { Checkbox } from "./index";
 
 // Checkbox is controlled, so the stories drive it from local state — the same
@@ -18,15 +18,17 @@ const meta: Meta<typeof ControlledCheckbox> = {
   args: {
     label: "Email me about product updates",
     size: "md",
+    state: "neutral",
     disabled: false,
     required: false,
-    invalid: false,
+    indeterminate: false,
   },
   argTypes: {
     size: { control: "select", options: SIZES },
+    state: { control: "select", options: FORM_STATES },
     disabled: { control: "boolean" },
     required: { control: "boolean" },
-    invalid: { control: "boolean" },
+    indeterminate: { control: "boolean" },
   },
   decorators: [
     (Story) => (
@@ -65,11 +67,69 @@ export const Sizes: Story = {
   ),
 };
 
-/** Invalid pulls the negative accent onto the box and wires `aria-invalid`. */
+/** Invalid pulls the negative accent onto the box, wires `aria-invalid`, and
+ * surfaces the `errorMessage` beneath. */
 export const Invalid: Story = {
   args: {
     label: "I accept the terms",
     required: true,
-    invalid: true,
+    state: "invalid",
+    errorMessage: "You must accept the terms to continue.",
+  },
+};
+
+/**
+ * `indeterminate` shows the "mixed" dash and reports `aria-checked="mixed"` —
+ * the usual "select all" parent for a partly-selected set. Toggling it resolves
+ * to a plain boolean.
+ */
+export const Indeterminate: Story = {
+  render: () => {
+    const options = ["Product updates", "Billing", "Security alerts"] as const;
+    const [selected, setSelected] = React.useState<string[]>(["Billing"]);
+    const allChecked = selected.length === options.length;
+    const someChecked = selected.length > 0 && !allChecked;
+
+    return (
+      <div style={{ display: "grid", gap: 12 }}>
+        <Checkbox
+          label="Select all"
+          value={allChecked}
+          indeterminate={someChecked}
+          onChange={(next) => setSelected(next ? [...options] : [])}
+        />
+        <div style={{ display: "grid", gap: 8, paddingLeft: 24 }}>
+          {options.map((option) => (
+            <Checkbox
+              key={option}
+              label={option}
+              value={selected.includes(option)}
+              onChange={(next) =>
+                setSelected((prev) => (next ? [...prev, option] : prev.filter((o) => o !== option)))
+              }
+            />
+          ))}
+        </div>
+      </div>
+    );
+  },
+};
+
+/** Inline `helpText` beneath the box, wired as the control's `aria-describedby`. */
+export const HelpText: Story = {
+  args: {
+    label: "Email me about product updates",
+    helpText: "We send at most one email a week. Unsubscribe anytime.",
+  },
+};
+
+/**
+ * A label-less checkbox (e.g. a table row selector) still needs an accessible
+ * name — supply one with `aria-label`.
+ */
+export const AriaLabel: Story = {
+  render: () => {
+    const [value, setValue] = React.useState(false);
+    return <Checkbox aria-label="Select row" value={value} onChange={setValue} />;
   },
 };
