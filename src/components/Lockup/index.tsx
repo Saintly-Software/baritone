@@ -1,12 +1,6 @@
 "use client";
 import * as React from "react";
-import type {
-  BodySize,
-  HeadingLevel,
-  Intent,
-  Saliency,
-  TitleSize,
-} from "../../theme/constants";
+import type { BodySize, HeadingLevel, Intent, Saliency, TitleSize } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 import { Heading } from "../Heading";
@@ -22,8 +16,10 @@ import { lockupRoot, lockupText, lockupTextHidden } from "./lockup.css";
  * way. The `sm`/`base`/`lg`/`xl` sizes overlap between the body and title
  * scales, so a `variant` set here works whether or not `level` is present.
  */
-export interface LockupTitleSlotProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color" | "children"> {
+export interface LockupTitleSlotProps extends Omit<
+  React.HTMLAttributes<HTMLElement>,
+  "color" | "children"
+> {
   /** Title size — a `body` (`Text`) or `title` (`Heading`) variant. Default `lg`. */
   variant?: BodySize | TitleSize;
   /** Override the inherited colour with this intent. */
