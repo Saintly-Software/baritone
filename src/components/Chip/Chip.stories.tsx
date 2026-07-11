@@ -392,6 +392,70 @@ export const AdornmentIntentOverride: Story = {
 };
 
 /**
+ * `trailIcon` mirrors the lead `icon` shorthand at the other end: a decorative
+ * trailing `Chip.Adornment` after any `trailAdornments`, before the built-in
+ * copy / remove buttons.
+ */
+export const TrailingIcon: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      {/* Lead + trail shorthand icons together. */}
+      <Chip intent="primary" saliency="mid" icon={<TagGlyph />} trailIcon={<ExternalGlyph />}>
+        Tagged
+      </Chip>
+
+      {/* The trailing shorthand sits after an explicit trailing adornment. */}
+      <Chip
+        intent="neutral"
+        saliency="mid"
+        trailAdornments={[<Chip.Adornment icon={<TagGlyph />} />]}
+        trailIcon={<ExternalGlyph />}
+      >
+        Trail last
+      </Chip>
+    </div>
+  ),
+};
+
+/**
+ * `contentToCopy` appends a built-in copy-to-clipboard adornment: a labelled
+ * ("Copy") clickable `Chip.Adornment` that writes the string to the clipboard and
+ * briefly shows a checkmark + "Copied" as success feedback.
+ */
+export const CopyToClipboard: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      <Chip intent="neutral" saliency="mid" contentToCopy="npm i @saintly-software/baritone">
+        npm i @saintly-software/baritone
+      </Chip>
+
+      {/* Alongside a leading icon. */}
+      <Chip intent="primary" saliency="mid" icon={<TagGlyph />} contentToCopy="DES-35">
+        DES-35
+      </Chip>
+    </div>
+  ),
+};
+
+/**
+ * `width` controls the chip's box: `fit` (default) hugs the content, `fill`
+ * stretches to the container. In a fixed-width column the `fill` chips share one
+ * edge and their labels truncate.
+ */
+export const Width: Story = {
+  render: () => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12, width: 240 }}>
+      <Chip intent="primary" saliency="mid" width="fit">
+        fit — hugs content
+      </Chip>
+      <Chip intent="primary" saliency="mid" width="fill" trailIcon={<ExternalGlyph />}>
+        fill — stretches to the container and truncates a very long label
+      </Chip>
+    </div>
+  ),
+};
+
+/**
  * A disabled chip drags its clickable adornments along: they go inert but stay
  * keyboard-focusable (`aria-disabled`, per the system convention).
  */

@@ -2,6 +2,11 @@
 export { BaritoneTheme, type BaritoneThemeProps } from "./components/BaritoneTheme";
 export { Button, type ButtonProps } from "./components/Button";
 export {
+  ButtonGroup,
+  type ButtonGroupProps,
+  type ButtonGroupItemProps,
+} from "./components/ButtonGroup";
+export {
   ToggleButton,
   type ToggleButtonProps,
   type ToggleButtonBaseProps,
@@ -35,7 +40,12 @@ export {
   type SingleFileUploadProps,
   type MultipleFileUploadProps,
 } from "./components/FileUpload";
-export { Link, type LinkProps } from "./components/Link";
+export {
+  Link,
+  type LinkProps,
+  type InlineLinkProps,
+  type ButtonLinkProps,
+} from "./components/Link";
 export { Text, type TextProps, type TextElement } from "./components/Text";
 export { HelpText, type HelpTextProps, type HelpTextVariant } from "./components/HelpText";
 export { Heading, type HeadingProps } from "./components/Heading";
@@ -66,6 +76,7 @@ export {
   type LockupSlots,
 } from "./components/Lockup";
 export { Meter, type MeterProps, type MeterSlotProps } from "./components/Meter";
+export { LoadingIndicator, type LoadingIndicatorProps } from "./components/LoadingIndicator";
 export {
   Card,
   type CardProps,
@@ -127,7 +138,7 @@ export {
   type MultipleSelectProps,
   type SelectOption,
 } from "./components/Select";
-export { Tabs, type TabsProps, type TabsItemProps } from "./components/Tabs";
+export { Tabs, type TabsProps, type TabsItemProps, type TabsPanelProps } from "./components/Tabs";
 export {
   ToggleGroup,
   type ToggleGroupProps,
@@ -190,6 +201,15 @@ export {
   type ModalFooterProps,
 } from "./components/Modal";
 export {
+  ConfirmationModal,
+  type ConfirmationModalProps,
+  type ConfirmationIntent,
+  type ConfirmationConfirmProps,
+  type ConfirmationCancelProps,
+  type ConfirmationModalTriggerProps,
+  type ConfirmationModalCloseProps,
+} from "./components/ConfirmationModal";
+export {
   Menu,
   type MenuProps,
   type MenuItemProps,
@@ -248,3 +268,8 @@ export { focusRingRecipe, type FocusRingVariants } from "./styles/recipes/focusR
 // Polymorphism helpers
 export { useRender, composeRefs, type RenderProp } from "./utils/render";
 export { cx } from "./utils/cx";
+export {
+  useOverlayHandle,
+  type OverlayHandle,
+  type OverlayWithHandle,
+} from "./utils/overlayHandle";

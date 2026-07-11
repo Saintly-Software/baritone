@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
+import { useOverlayHandle } from "../../utils/overlayHandle";
+import { Button } from "../Button";
 import { Text } from "../Text";
 import { Modal } from "./index";
 
@@ -162,6 +165,47 @@ export const Intents: Story = {
       ))}
     </div>
   ),
+};
+
+export const ImperativeClose: Story = {
+  name: "Imperative close (async)",
+  render: (args) => {
+    const modal = useOverlayHandle(Modal);
+    const [saving, setSaving] = React.useState(false);
+    return (
+      <Modal
+        {...args}
+        handle={modal}
+        loading={saving}
+        trigger={<Modal.Trigger>Edit profile</Modal.Trigger>}
+        header={<Modal.Header title="Edit profile" subtitle="Save closes it from code" />}
+        footer={
+          <Modal.Footer>
+            <Modal.Close>Cancel</Modal.Close>
+            <Button
+              intent="primary"
+              saliency="high"
+              loading={saving}
+              onClick={async () => {
+                setSaving(true);
+                await new Promise((resolve) => setTimeout(resolve, 900));
+                setSaving(false);
+                modal.close();
+              }}
+            >
+              Save
+            </Button>
+          </Modal.Footer>
+        }
+      >
+        <Text render={<p />}>
+          Save runs an async action, then closes the modal with `modal.close()` — no need to lift
+          `open` into component state. `useOverlayHandle(Modal)` mints the handle; passing it to the
+          `handle` prop wires it up.
+        </Text>
+      </Modal>
+    );
+  },
 };
 
 export const Nested: Story = {

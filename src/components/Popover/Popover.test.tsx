@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Popover } from "./index";
 
 describe("Popover", () => {
@@ -119,5 +120,33 @@ describe("Popover", () => {
       </Popover>,
     );
     expect(screen.getByText("Always visible")).toBeInTheDocument();
+  });
+
+  it("closes from an async callback via useOverlayHandle, without lifting open state", async () => {
+    const user = userEvent.setup();
+    function Example() {
+      const popover = useOverlayHandle(Popover);
+      return (
+        <Popover handle={popover} trigger={<Popover.Trigger>Open</Popover.Trigger>}>
+          Popover body
+          <button
+            type="button"
+            onClick={async () => {
+              await Promise.resolve();
+              popover.close();
+            }}
+          >
+            Save
+          </button>
+        </Popover>
+      );
+    }
+    render(<Example />);
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    expect(await screen.findByText("Popover body")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await waitFor(() => expect(screen.queryByText("Popover body")).not.toBeInTheDocument());
   });
 });

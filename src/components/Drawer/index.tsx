@@ -76,6 +76,13 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   /** Called when the open state changes (base-ui signature). */
   onOpenChange?: RootProps["onOpenChange"];
   /**
+   * Imperative handle from `useOverlayHandle(Drawer)`. Lets you close the drawer
+   * from code — e.g. after an async action — without lifting `open` into
+   * component state. `handle.close()` is still vetoed while `disabled`, and the
+   * declarative `.Close` part / controlled `open` keep working alongside it.
+   */
+  handle?: RootProps["handle"];
+  /**
    * Modal behaviour. Default (base-ui) `true`: focus is trapped, page scroll is
    * locked, and the page behind is inert. `'trap-focus'` traps focus but leaves
    * the page scrollable/interactive; `false` is non-modal.
@@ -118,6 +125,7 @@ function DrawerRoot({
   open,
   defaultOpen,
   onOpenChange,
+  handle,
   modal,
   initialFocus,
   finalFocus,
@@ -143,6 +151,7 @@ function DrawerRoot({
       open={open}
       defaultOpen={defaultOpen}
       onOpenChange={handleOpenChange}
+      handle={handle}
       modal={modal}
       // `side` is purely visual (CSS); the swipe-to-dismiss gesture follows it.
       swipeDirection={side}
@@ -355,4 +364,10 @@ export const Drawer = Object.assign(DrawerRoot, {
   Header: DrawerHeader,
   Footer: DrawerFooter,
   Action: DrawerAction,
+  /**
+   * Creates a detached imperative handle (base-ui's `createHandle`). Prefer
+   * `useOverlayHandle(Drawer)` inside components; reach for this only when the
+   * handle must live outside React (module scope, detached triggers).
+   */
+  createHandle: BaseDrawer.createHandle,
 });
