@@ -33,4 +33,35 @@ describe("Lockup", () => {
     render(<Lockup title="Baritone" render={<header />} />);
     expect(screen.getByText("Baritone").closest("header")).toBeInTheDocument();
   });
+
+  it("keeps the text in the accessible tree when hideText is set", () => {
+    render(<Lockup title="Baritone" subtitle="Design system" hideText />);
+    // Still queryable (present for screen readers), just visually hidden.
+    expect(screen.getByText("Baritone")).toBeInTheDocument();
+    expect(screen.getByText("Design system")).toBeInTheDocument();
+  });
+
+  it("renders the title as a semantic heading when slotProps.title.level is set", () => {
+    render(<Lockup title="Baritone" slotProps={{ title: { level: 2 } }} />);
+    expect(screen.getByRole("heading", { level: 2, name: "Baritone" })).toBeInTheDocument();
+  });
+
+  it("renders the title as a non-heading Text by default", () => {
+    render(<Lockup title="Baritone" />);
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+  });
+
+  it("replaces slot content entirely via the slots prop", () => {
+    render(
+      <Lockup
+        title="ignored"
+        subtitle="ignored too"
+        slots={{ title: <span>Custom title</span>, subtitle: <span>Custom subtitle</span> }}
+      />,
+    );
+    expect(screen.getByText("Custom title")).toBeInTheDocument();
+    expect(screen.getByText("Custom subtitle")).toBeInTheDocument();
+    expect(screen.queryByText("ignored")).not.toBeInTheDocument();
+    expect(screen.queryByText("ignored too")).not.toBeInTheDocument();
+  });
 });

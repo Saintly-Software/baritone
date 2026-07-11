@@ -25,3 +25,21 @@ export const lockupText = style({
   gap: vars.space[1],
   minWidth: 0,
 });
+
+/**
+ * `hideText` — visually hide the text column while keeping it in the accessible
+ * tree, so the lockup reads as icon-only but a screen reader still announces the
+ * title/subtitle. Taken out of flow (`position: absolute`) so the icon sits on
+ * its own without the row's gap reserving space for the collapsed text.
+ */
+export const lockupTextHidden = style({
+  position: "absolute",
+  width: 1,
+  height: 1,
+  padding: 0,
+  margin: -1,
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  border: 0,
+});
