@@ -256,6 +256,33 @@ describe("Card", () => {
       expect(link).toHaveAttribute("href", "/about");
       expect(link.className).toContain("router");
     });
+
+    it("forwards the download attribute (boolean flag and suggested filename)", () => {
+      const { rerender } = render(
+        <Card href="/report.pdf" download header={<Card.Header title="Report" />}>
+          Body
+        </Card>,
+      );
+      const link = screen.getByRole("link", { name: "Report" });
+      // A boolean `download` renders the bare attribute (empty value).
+      expect(link).toHaveAttribute("download", "");
+
+      rerender(
+        <Card href="/report.pdf" download="q3.pdf" header={<Card.Header title="Report" />}>
+          Body
+        </Card>,
+      );
+      expect(link).toHaveAttribute("download", "q3.pdf");
+    });
+
+    it("omits the download attribute when unset", () => {
+      render(
+        <Card href="/report.pdf" header={<Card.Header title="Report" />}>
+          Body
+        </Card>,
+      );
+      expect(screen.getByRole("link", { name: "Report" })).not.toHaveAttribute("download");
+    });
   });
 
   describe("collapsible", () => {
