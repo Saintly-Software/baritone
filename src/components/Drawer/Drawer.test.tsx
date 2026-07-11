@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Drawer } from "./index";
 
@@ -222,5 +222,76 @@ describe("Drawer", () => {
     await user.click(screen.getByRole("button", { name: "Force close" }));
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByText("Drawer body")).toBeInTheDocument();
+  });
+});
+
+describe("Drawer.Action", () => {
+  it("renders an onClick action as a real button and fires its handler", async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <Drawer trigger={<Drawer.Trigger>Open</Drawer.Trigger>} open>
+        <Drawer.Action onClick={onClick}>Rename</Drawer.Action>
+      </Drawer>,
+    );
+
+    const action = screen.getByRole("button", { name: "Rename" });
+    expect(action.tagName).toBe("BUTTON");
+
+    await user.click(action);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders an href action as a real anchor", () => {
+    render(
+      <Drawer trigger={<Drawer.Trigger>Open</Drawer.Trigger>} open>
+        <Drawer.Action href="https://example.com">Docs</Drawer.Action>
+      </Drawer>,
+    );
+
+    const action = screen.getByRole("link", { name: "Docs" });
+    expect(action.tagName).toBe("A");
+    expect(action).toHaveAttribute("href", "https://example.com");
+  });
+
+  it("is keyboard reachable — a real tab stop, not a roving menu item", () => {
+    render(
+      <Drawer trigger={<Drawer.Trigger>Open</Drawer.Trigger>} open>
+        <Drawer.Action>Edit</Drawer.Action>
+        <Drawer.Action>Duplicate</Drawer.Action>
+      </Drawer>,
+    );
+
+    const edit = screen.getByRole("button", { name: "Edit" });
+    const duplicate = screen.getByRole("button", { name: "Duplicate" });
+    // Native buttons that stay in the tab order — unlike menu items, which base-ui
+    // pulls out with tabindex="-1" and drives with roving focus instead.
+    expect(edit.tagName).toBe("BUTTON");
+    expect(edit).not.toHaveAttribute("tabindex", "-1");
+    expect(duplicate).not.toHaveAttribute("tabindex", "-1");
+
+    // Each accepts programmatic focus (natively focusable, nothing traps it out).
+    edit.focus();
+    expect(edit).toHaveFocus();
+    duplicate.focus();
+    expect(duplicate).toHaveFocus();
+  });
+
+  it("swallows activation on a disabled action and stays focusable", async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <Drawer trigger={<Drawer.Trigger>Open</Drawer.Trigger>} open>
+        <Drawer.Action onClick={onClick} disabled>
+          Delete
+        </Drawer.Action>
+      </Drawer>,
+    );
+
+    const action = screen.getByRole("button", { name: "Delete" });
+    expect(action).toHaveAttribute("aria-disabled", "true");
+
+    await user.click(action);
+    expect(onClick).not.toHaveBeenCalled();
   });
 });

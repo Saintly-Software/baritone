@@ -3,8 +3,37 @@ import * as React from "react";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
 import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Button } from "../Button";
+import { Icon } from "../Icon";
 import { Text } from "../Text";
 import { Drawer } from "./index";
+
+// Throwaway glyphs so the action demos have something to render.
+const EditGlyph = () => (
+  <Icon>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  </Icon>
+);
+
+const ShareGlyph = () => (
+  <Icon>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
+    </svg>
+  </Icon>
+);
+
+const TrashGlyph = () => (
+  <Icon>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+      <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+    </svg>
+  </Icon>
+);
 
 const meta: Meta<typeof Drawer> = {
   title: "Surfaces/Drawer",
@@ -164,6 +193,66 @@ export const Intents: Story = {
         </Drawer>
       ))}
     </div>
+  ),
+};
+
+export const Actions: Story = {
+  name: "Actions (menu-style)",
+  render: (args) => (
+    <Drawer
+      {...args}
+      header={<Drawer.Header title="Document" subtitle="Quick actions for this file" />}
+      trigger={<Drawer.Trigger>Open actions</Drawer.Trigger>}
+      footer={
+        <Drawer.Footer>
+          <Drawer.Close>Done</Drawer.Close>
+        </Drawer.Footer>
+      }
+    >
+      {/* A menu-style action list rendered inline in the body. Each row is a real
+          button/link and an ordinary tab stop, so the list is keyboard reachable. */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <Drawer.Action icon={<EditGlyph />} onClick={() => {}}>
+          Rename
+        </Drawer.Action>
+        <Drawer.Action icon={<ShareGlyph />} onClick={() => {}}>
+          Share
+        </Drawer.Action>
+        <Drawer.Action icon={<EditGlyph />} href="https://example.com">
+          Open in editor
+        </Drawer.Action>
+        <Drawer.Action icon={<TrashGlyph />} intent="negative" onClick={() => {}}>
+          Delete
+        </Drawer.Action>
+      </div>
+    </Drawer>
+  ),
+};
+
+export const ActionIntents: Story = {
+  name: "Action intents",
+  render: (args) => (
+    <Drawer
+      {...args}
+      header={<Drawer.Header title="Action intents" />}
+      trigger={<Drawer.Trigger>Open</Drawer.Trigger>}
+      footer={
+        <Drawer.Footer>
+          <Drawer.Close>Close</Drawer.Close>
+        </Drawer.Footer>
+      }
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {(["neutral", "secondary", "warning", "negative"] as const).map((intent) => (
+          <Drawer.Action key={intent} icon={<EditGlyph />} intent={intent} onClick={() => {}}>
+            {intent}
+          </Drawer.Action>
+        ))}
+        <Drawer.Action icon={<TrashGlyph />} disabled onClick={() => {}}>
+          Disabled
+        </Drawer.Action>
+      </div>
+    </Drawer>
   ),
 };
 
