@@ -52,6 +52,11 @@ const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  *   `aria-activedescendant`). base-ui renders it as a `<div>` and its `disabled`
  *   sets `aria-disabled`, blocking selection without removing anything from the
  *   tab order — so the "must stay focusable" rule doesn't apply.
+ * - `Modal` / `Modal.Close` — the `Modal` surface's `disabled` is a non-DOM
+ *   *veto flag* (it cancels every close attempt while a blocking action is in
+ *   flight; it never reaches an element as an attribute), and `Modal.Close`
+ *   forwards its `disabled` through `InternalButton`, which models it as
+ *   `aria-disabled` (focusable). `ConfirmationModal` composes both.
  */
 function mayReceiveDisabled(tag: string): boolean {
   return (
@@ -62,7 +67,9 @@ function mayReceiveDisabled(tag: string): boolean {
     tag === "BaseSelect.Item" ||
     tag === "FileList" ||
     tag === "Chip" ||
-    tag === "BaseCombobox.Item"
+    tag === "BaseCombobox.Item" ||
+    tag === "Modal" ||
+    tag === "Modal.Close"
   );
 }
 

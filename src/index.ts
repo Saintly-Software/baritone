@@ -195,6 +195,15 @@ export {
   type ModalFooterProps,
 } from "./components/Modal";
 export {
+  ConfirmationModal,
+  type ConfirmationModalProps,
+  type ConfirmationIntent,
+  type ConfirmationConfirmProps,
+  type ConfirmationCancelProps,
+  type ConfirmationModalTriggerProps,
+  type ConfirmationModalCloseProps,
+} from "./components/ConfirmationModal";
+export {
   Menu,
   type MenuProps,
   type MenuItemProps,
