@@ -38,6 +38,13 @@ export type TextWeight = (typeof TEXT_WEIGHTS)[number];
 export const SIZES = ["sm", "md", "lg"] as const;
 export type Size = (typeof SIZES)[number];
 
+/**
+ * Where a control's visible label sits relative to the control. `start`/`end`
+ * are inline-logical (RTL-safe), `top` stacks the label above.
+ */
+export const LABEL_POSITIONS = ["top", "start", "end"] as const;
+export type LabelPosition = (typeof LABEL_POSITIONS)[number];
+
 export const SPACE_KEYS = ["0", "1", "2", "3", "4", "6", "8", "12", "16"] as const;
 export type SpaceKey = (typeof SPACE_KEYS)[number];
 
