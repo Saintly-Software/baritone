@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { textVariantRecipe } from "../../styles/recipes/text.css";
 import { Heading } from "./index";
 
 describe("Heading", () => {
@@ -22,6 +23,19 @@ describe("Heading", () => {
       </Heading>,
     );
     expect(screen.getByRole("heading", { level: 3 })).toBeInTheDocument();
+  });
+
+  it("supports a body-scale variant (shared scale with Text)", () => {
+    // `xs` is unique to the body scale; a Heading can render it, borrowing body
+    // styling, since Heading and Text share the full size scale.
+    render(
+      <Heading level={2} variant="xs">
+        Tiny
+      </Heading>,
+    );
+    expect(screen.getByRole("heading", { level: 2 }).className).toContain(
+      textVariantRecipe({ family: "body", size: "xs" }),
+    );
   });
 
   it("keeps the default weight when `weight` is omitted", () => {

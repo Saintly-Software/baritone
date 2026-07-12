@@ -42,7 +42,10 @@ export default meta;
 
 type Story = StoryObj<typeof ConfirmationModal>;
 
+// Destructive / Warning / Secondary open by default (`defaultOpen`) so the dialog
+// itself is what a snapshot (e.g. Chromatic) captures, not just the trigger.
 export const Destructive: Story = {
+  args: { defaultOpen: true },
   render: (args) => (
     <ConfirmationModal
       {...args}
@@ -63,7 +66,7 @@ export const Destructive: Story = {
 };
 
 export const Warning: Story = {
-  args: { intent: "warning" },
+  args: { intent: "warning", defaultOpen: true },
   render: (args) => (
     <ConfirmationModal
       {...args}
@@ -79,7 +82,7 @@ export const Warning: Story = {
 };
 
 export const Secondary: Story = {
-  args: { intent: "secondary" },
+  args: { intent: "secondary", defaultOpen: true },
   render: (args) => (
     <ConfirmationModal
       {...args}
@@ -92,7 +95,10 @@ export const Secondary: Story = {
   ),
 };
 
+// Hidden from the sidebar (`!dev`) — a controlled-usage reference that still runs
+// as a story test, but doesn't clutter the curated nav.
 export const Controlled: Story = {
+  tags: ["!dev"],
   render: (args) => {
     const [open, setOpen] = React.useState(false);
     return (
@@ -121,8 +127,11 @@ export const Controlled: Story = {
   },
 };
 
+// Hidden from the sidebar (`!dev`) — the async-confirm behaviour belongs with the
+// tests, not the curated nav.
 export const Loading: Story = {
   name: "Loading (async confirm)",
+  tags: ["!dev"],
   render: (args) => {
     const [open, setOpen] = React.useState(false);
     const [submitting, setSubmitting] = React.useState(false);

@@ -53,7 +53,14 @@ export default meta;
 
 type Story = StoryObj<typeof ThemeSwitcher>;
 
-export const Playground: Story = {};
+// Interactive default — renamed from "Playground". Ships with a `description` so
+// the default view shows the described-by wiring, folding in the old
+// "WithDescription" story.
+export const Basic: Story = {
+  args: {
+    description: "Affects the appearance across the whole app.",
+  },
+};
 
 export const Sizes: Story = {
   render: () => (
@@ -85,20 +92,5 @@ export const Horizontal: Story = {
   args: {
     label: "Theme",
     orientation: "horizontal",
-  },
-};
-
-export const Disabled: Story = {
-  args: {
-    label: "Theme (disabled)",
-    disabled: true,
-    description: "The whole group is locked.",
-  },
-};
-
-export const WithDescription: Story = {
-  args: {
-    label: "Theme",
-    description: "Affects the appearance across the whole app.",
   },
 };

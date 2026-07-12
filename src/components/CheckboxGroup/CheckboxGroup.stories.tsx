@@ -50,7 +50,14 @@ export default meta;
 
 type Story = StoryObj<typeof Subscriptions>;
 
-export const Playground: Story = {};
+// Interactive default — renamed from "Playground". Ships with a `description` so
+// the default view shows the described-by wiring, folding in the old
+// "WithDescription" story.
+export const Basic: Story = {
+  args: {
+    description: "Pick any topics you'd like to hear about.",
+  },
+};
 
 export const Sizes: Story = {
   render: () => (
@@ -82,20 +89,5 @@ export const Horizontal: Story = {
   args: {
     label: "Email me about",
     orientation: "horizontal",
-  },
-};
-
-export const Disabled: Story = {
-  args: {
-    label: "Email me about (disabled)",
-    disabled: true,
-    description: "The whole group is locked.",
-  },
-};
-
-export const WithDescription: Story = {
-  args: {
-    label: "Email me about",
-    description: "Pick any topics you'd like to hear about.",
   },
 };

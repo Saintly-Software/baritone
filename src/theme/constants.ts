@@ -30,6 +30,14 @@ export type BodySize = (typeof BODY_SIZES)[number];
 export const TITLE_SIZES = ["sm", "base", "lg", "xl", "2xl", "3xl", "3.5xl", "4xl"] as const;
 export type TitleSize = (typeof TITLE_SIZES)[number];
 
+// Every typography size a `variant` can take — the union of body + title sizes,
+// shared by `Text` and `Heading`. The two components differ only in semantics
+// (Heading renders `h1`–`h6` and defaults to the title family; Text renders body
+// tags and defaults to the body family), not in the sizes they can render. Mirrors
+// the keys of the `fontSize` scale.
+export const TEXT_SIZES = ["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "3.5xl", "4xl"] as const;
+export type TextSize = (typeof TEXT_SIZES)[number];
+
 /** Named font-weight steps a `Text` can select via its `weight` prop. */
 export const TEXT_WEIGHTS = ["default", "semibold", "bold", "superbold"] as const;
 export type TextWeight = (typeof TEXT_WEIGHTS)[number];

@@ -1,9 +1,21 @@
 import type { Decorator, Preview } from "@storybook/react-vite";
+import * as React from "react";
 import { darkTheme, lightTheme, vars } from "../src/theme";
 
 const withTheme: Decorator = (Story, context) => {
   const scheme = context.globals.scheme === "dark" ? "dark" : "light";
   const themeClass = scheme === "dark" ? darkTheme : lightTheme;
+
+  // Also mirror the active theme class onto <body>. base-ui popups (Modal, Drawer,
+  // Popover, Menu, Combobox, Select, Tooltip) portal out to the document body,
+  // outside this decorator's wrapper — without the theme class there, the theme's
+  // CSS variables don't resolve and the portaled surface renders unstyled. Keeping
+  // <body> in sync means open overlays (and their snapshots) are themed too.
+  React.useEffect(() => {
+    document.body.classList.add(themeClass);
+    return () => document.body.classList.remove(themeClass);
+  }, [themeClass]);
+
   return (
     <div
       className={themeClass}

@@ -16,30 +16,78 @@ function ServerGlyph() {
   );
 }
 
+// A fully-featured item set — leading icons, trailing status chips, subtitles,
+// and a disabled item — so the default story is a genuine kitchen sink.
 const ITEMS = [
   {
-    value: "shipping",
-    header: <Accordion.ItemHeader title="Shipping" subtitle="2–4 business days" />,
-    children: <Text variant="sm">We ship worldwide with tracked carriers.</Text>,
+    value: "production",
+    header: (
+      <Accordion.ItemHeader
+        title="Production"
+        subtitle="api.example.com"
+        icon={
+          <Icon>
+            <ServerGlyph />
+          </Icon>
+        }
+        chip={
+          <Chip intent="positive" saliency="low" size="sm">
+            Healthy
+          </Chip>
+        }
+      />
+    ),
+    children: <Text variant="sm">All systems operational.</Text>,
   },
   {
-    value: "returns",
-    header: <Accordion.ItemHeader title="Returns & exchanges" />,
-    children: <Text variant="sm">Unused items can be returned within 30 days.</Text>,
+    value: "staging",
+    header: (
+      <Accordion.ItemHeader
+        title="Staging"
+        subtitle="staging.example.com"
+        icon={
+          <Icon>
+            <ServerGlyph />
+          </Icon>
+        }
+        chip={
+          <Chip intent="warning" saliency="low" size="sm">
+            Degraded
+          </Chip>
+        }
+      />
+    ),
+    children: <Text variant="sm">Elevated error rate in the last hour.</Text>,
   },
   {
-    value: "warranty",
-    header: <Accordion.ItemHeader title="Warranty" subtitle="What's covered" />,
-    children: <Text variant="sm">Every order includes a one-year limited warranty.</Text>,
+    value: "legacy",
+    disabled: true,
+    header: (
+      <Accordion.ItemHeader
+        title="Legacy"
+        subtitle="Decommissioned"
+        icon={
+          <Icon>
+            <ServerGlyph />
+          </Icon>
+        }
+        chip={
+          <Chip intent="neutral" saliency="low" size="sm">
+            Archived
+          </Chip>
+        }
+      />
+    ),
+    children: <Text variant="sm">This environment has been retired.</Text>,
   },
 ] as const;
 type Section = (typeof ITEMS)[number]["value"];
 
-function FAQ({ disabled }: { disabled?: boolean }) {
-  const [value, setValue] = React.useState<Section | null>("shipping");
+function Environments({ disabled }: { disabled?: boolean }) {
+  const [value, setValue] = React.useState<Section | null>("production");
   return (
     <Accordion
-      aria-label="Frequently asked questions"
+      aria-label="Environments"
       value={value}
       onChange={setValue}
       disabled={disabled}
@@ -48,9 +96,9 @@ function FAQ({ disabled }: { disabled?: boolean }) {
   );
 }
 
-const meta: Meta<typeof FAQ> = {
+const meta: Meta<typeof Environments> = {
   title: "Surfaces/Accordion",
-  component: FAQ,
+  component: Environments,
   args: { disabled: false },
   argTypes: { disabled: { control: "boolean" } },
   parameters: { layout: "padded" },
@@ -64,24 +112,23 @@ const meta: Meta<typeof FAQ> = {
 };
 export default meta;
 
-type Story = StoryObj<typeof FAQ>;
+type Story = StoryObj<typeof Environments>;
 
-/** Single-open (default): opening one item collapses the others. */
-export const Playground: Story = {};
-
-/** Disabled group: every trigger dims but stays keyboard-focusable. */
-export const DisabledGroup: Story = {
-  args: { disabled: true },
-};
+/**
+ * Kitchen sink — single-open (default) with the full feature set: leading icons,
+ * trailing status chips, subtitles, and a disabled ("Legacy") item. Opening one
+ * item collapses the others; the `disabled` control locks the whole group.
+ */
+export const KitchenSink: Story = {};
 
 /** Multi-open: any number of panels can be expanded at once. */
 export const Multiple: Story = {
   render: () => {
-    function MultiFAQ() {
-      const [value, setValue] = React.useState<Section[]>(["shipping", "warranty"]);
+    function MultiEnvironments() {
+      const [value, setValue] = React.useState<Section[]>(["production", "staging"]);
       return (
         <Accordion
-          aria-label="Frequently asked questions"
+          aria-label="Environments"
           multiple
           value={value}
           onChange={setValue}
@@ -89,83 +136,6 @@ export const Multiple: Story = {
         />
       );
     }
-    return <MultiFAQ />;
-  },
-};
-
-/** Uncontrolled: seed the initially open item with `initialValue`. */
-export const Uncontrolled: Story = {
-  render: () => (
-    <Accordion aria-label="Frequently asked questions" initialValue="returns" items={ITEMS} />
-  ),
-};
-
-/** Headers with a leading `icon` and a trailing status `chip`. */
-export const WithIconAndChip: Story = {
-  render: () => (
-    <Accordion
-      aria-label="Environments"
-      initialValue="production"
-      items={[
-        {
-          value: "production",
-          header: (
-            <Accordion.ItemHeader
-              title="Production"
-              subtitle="api.example.com"
-              icon={
-                <Icon>
-                  <ServerGlyph />
-                </Icon>
-              }
-              chip={
-                <Chip intent="positive" saliency="low" size="sm">
-                  Healthy
-                </Chip>
-              }
-            />
-          ),
-          children: <Text variant="sm">All systems operational.</Text>,
-        },
-        {
-          value: "staging",
-          header: (
-            <Accordion.ItemHeader
-              title="Staging"
-              subtitle="staging.example.com"
-              icon={
-                <Icon>
-                  <ServerGlyph />
-                </Icon>
-              }
-              chip={
-                <Chip intent="warning" saliency="low" size="sm">
-                  Degraded
-                </Chip>
-              }
-            />
-          ),
-          children: <Text variant="sm">Elevated error rate in the last hour.</Text>,
-        },
-      ]}
-    />
-  ),
-};
-
-/** A single disabled item sits among interactive ones. */
-export const WithDisabledItem: Story = {
-  render: () => {
-    function PartlyDisabled() {
-      const [value, setValue] = React.useState<Section | null>(null);
-      return (
-        <Accordion
-          aria-label="Frequently asked questions"
-          value={value}
-          onChange={setValue}
-          items={[ITEMS[0], { ...ITEMS[1], disabled: true }, ITEMS[2]]}
-        />
-      );
-    }
-    return <PartlyDisabled />;
+    return <MultiEnvironments />;
   },
 };
