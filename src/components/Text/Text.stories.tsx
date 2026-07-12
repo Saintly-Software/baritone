@@ -1,12 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { CSSProperties } from "react";
-import {
-  BODY_SIZES,
-  INTENTS,
-  SALIENCIES,
-  TEXT_SIZES,
-  TEXT_WEIGHTS,
-} from "../../theme/constants";
+import { BODY_SIZES, INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
 import { Text } from "./index";
 
 const meta: Meta<typeof Text> = {

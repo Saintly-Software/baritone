@@ -35,17 +35,7 @@ export type TitleSize = (typeof TITLE_SIZES)[number];
 // (Heading renders `h1`–`h6` and defaults to the title family; Text renders body
 // tags and defaults to the body family), not in the sizes they can render. Mirrors
 // the keys of the `fontSize` scale.
-export const TEXT_SIZES = [
-  "xs",
-  "sm",
-  "base",
-  "lg",
-  "xl",
-  "2xl",
-  "3xl",
-  "3.5xl",
-  "4xl",
-] as const;
+export const TEXT_SIZES = ["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "3.5xl", "4xl"] as const;
 export type TextSize = (typeof TEXT_SIZES)[number];
 
 /** Named font-weight steps a `Text` can select via its `weight` prop. */
