@@ -10,6 +10,7 @@ import { Text } from "./index";
 const meta: Meta<typeof Text> = {
   title: "Components/Text",
   component: Text,
+  tags: ["!dev"],
 };
 export default meta;
 

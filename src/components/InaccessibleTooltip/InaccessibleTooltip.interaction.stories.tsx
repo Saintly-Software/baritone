@@ -9,6 +9,7 @@ import { InaccessibleTooltip } from "./index";
 const meta: Meta<typeof InaccessibleTooltip> = {
   title: "Components/InaccessibleTooltip",
   component: InaccessibleTooltip,
+  tags: ["!dev"],
 };
 export default meta;
 

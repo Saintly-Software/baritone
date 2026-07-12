@@ -13,6 +13,7 @@ type SideName = "top" | "right" | "bottom" | "left";
 const meta: Meta<typeof Popover> = {
   title: "Surfaces/Popover",
   component: Popover,
+  tags: ["!dev"],
 };
 export default meta;
 

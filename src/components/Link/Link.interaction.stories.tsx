@@ -11,6 +11,7 @@ import { Link } from "./index";
 const meta: Meta<typeof Link> = {
   title: "Components/Link",
   component: Link,
+  tags: ["!dev"],
 };
 export default meta;
 

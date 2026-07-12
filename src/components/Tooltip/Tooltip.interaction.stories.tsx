@@ -10,6 +10,7 @@ import { Tooltip } from "./index";
 const meta: Meta<typeof Tooltip> = {
   title: "Components/Tooltip",
   component: Tooltip,
+  tags: ["!dev"],
 };
 export default meta;
 

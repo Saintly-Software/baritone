@@ -11,6 +11,7 @@ import { Drawer } from "./index";
 const meta: Meta<typeof Drawer> = {
   title: "Surfaces/Drawer",
   component: Drawer,
+  tags: ["!dev"],
 };
 export default meta;
 

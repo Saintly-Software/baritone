@@ -11,6 +11,7 @@ import { Modal } from "./index";
 const meta: Meta<typeof Modal> = {
   title: "Surfaces/Modal",
   component: Modal,
+  tags: ["!dev"],
 };
 export default meta;
 

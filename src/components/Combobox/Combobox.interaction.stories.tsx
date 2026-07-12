@@ -19,6 +19,7 @@ const FRUITS: ComboboxOption[] = [
 const meta: Meta<typeof Combobox> = {
   title: "Form Controls/Combobox",
   component: Combobox,
+  tags: ["!dev"],
   decorators: [
     (Story) => (
       <div style={{ maxWidth: 340 }}>
