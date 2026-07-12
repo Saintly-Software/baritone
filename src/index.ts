@@ -156,6 +156,11 @@ export {
   type AccordionItemProps,
   type AccordionItemHeaderProps,
 } from "./components/Accordion";
+export {
+  ScrollArea,
+  type ScrollAreaProps,
+  type ScrollAreaOrientation,
+} from "./components/ScrollArea";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Badge,
