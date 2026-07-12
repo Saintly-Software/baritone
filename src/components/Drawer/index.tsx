@@ -3,31 +3,44 @@ import { Drawer as BaseDrawer } from "@base-ui/react/drawer";
 import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
-import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
+import type { HeadingLevel, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { InternalButton } from "../../internal/components/InternalButton";
-import {
-  InternalGenericButtonAnchor,
-  type InternalGenericButtonAnchorProps,
-} from "../../internal/components/InternalGenericButtonAnchor";
 import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import type { ButtonProps } from "../Button";
+import { ButtonGroup, type ButtonGroupProps } from "../ButtonGroup";
 import { Heading } from "../Heading";
-import type { MenuItemProps } from "../Menu";
-import { menuItemIcon } from "../Menu/menu.css";
+import { Icon } from "../Icon";
+import { Menu, type MenuProps } from "../Menu";
 import { Text } from "../Text";
 import {
-  drawerActionRecipe,
   drawerBackdrop,
   drawerBody,
   drawerBodyContentLoading,
   drawerFooter,
   drawerHeader,
+  drawerHeaderActions,
   drawerHeaderText,
   drawerPopup,
   drawerSpinner,
   drawerViewport,
 } from "./drawer.css";
+
+/**
+ * The "more options" glyph (a vertical ellipsis) used as the header actions
+ * `Menu` trigger. Inlined here since the library ships no icon set.
+ */
+function MoreIcon() {
+  return (
+    <Icon>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+        <circle cx="12" cy="5" r="1.75" />
+        <circle cx="12" cy="12" r="1.75" />
+        <circle cx="12" cy="19" r="1.75" />
+      </svg>
+    </Icon>
+  );
+}
 
 type RootProps = React.ComponentProps<typeof BaseDrawer.Root>;
 type PopupProps = React.ComponentProps<typeof BaseDrawer.Popup>;
@@ -48,8 +61,6 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   header?: React.ReactNode;
   /** Rendered below the body — typically a `<Drawer.Footer />`. */
   footer?: React.ReactNode;
-  /** Default `neutral` (most surfaces are neutral). */
-  intent?: Intent;
   /** `low` (default neutral surface) or `high` (washed). Default `low`. */
   saliency?: SurfaceSaliency;
   /** Internal padding from the spacing scale. Default `md`. */
@@ -101,9 +112,9 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
 
 /**
  * Drawer — a "surface" element type shown in a panel that slides in from the edge
- * of the screen. Its API mirrors `Popover`: it composes `header` / `footer` props
- * (or `<Drawer.Header>` / `<Drawer.Footer>` children) around its content and takes
- * the same `intent` / `saliency` / `padding` surface knobs.
+ * of the screen. Like `Popover` / `Modal`, it composes `header` / `footer` props
+ * (or `<Drawer.Header>` / `<Drawer.Footer>` children) around its content, and takes
+ * `saliency` / `padding` surface knobs.
  *
  * Built on base-ui's `Drawer`, so the ARIA wiring, focus management, and
  * swipe-to-dismiss are handled for you. It opens from a `<Drawer.Trigger>` (a
@@ -116,7 +127,6 @@ function DrawerRoot({
   trigger,
   header,
   footer,
-  intent,
   saliency,
   padding,
   side = "right",
@@ -167,7 +177,7 @@ function DrawerRoot({
           <BaseDrawer.Popup
             ref={ref}
             className={cx(
-              surfaceRecipe({ intent, saliency, padding }),
+              surfaceRecipe({ saliency, padding }),
               focusRingRecipe({ type: "visible" }),
               drawerPopup({ side }),
               className,
@@ -242,6 +252,16 @@ export interface DrawerHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElem
   subtitle?: React.ReactNode;
   /** Document-outline level for the rendered title heading. Default `3`. */
   level?: HeadingLevel;
+  /**
+   * Overflow actions for the header, rendered as a `Menu` behind an icon-only
+   * "more options" trigger placed at the header's end. Each entry is a
+   * `Menu.Item`'s props (see {@link MenuProps.items}); falsy entries are skipped.
+   * Use this for secondary, per-item actions — the footer's `actions` is for the
+   * primary button row.
+   */
+  actions?: MenuProps["items"];
+  /** Accessible name for the header actions menu trigger. Default `"Actions"`. */
+  actionsLabel?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -249,11 +269,14 @@ function DrawerHeader({
   title,
   subtitle,
   level = 3,
+  actions,
+  actionsLabel = "Actions",
   className,
   children,
   ref,
   ...rest
 }: DrawerHeaderProps) {
+  const hasActions = actions != null && actions.some(Boolean);
   return (
     <div ref={ref} className={cx(drawerHeader, className)} {...rest}>
       {(title != null || subtitle != null) && (
@@ -270,84 +293,47 @@ function DrawerHeader({
           )}
         </div>
       )}
-      {children}
+      {(children != null || hasActions) && (
+        <div className={drawerHeaderActions}>
+          {children}
+          {hasActions && (
+            <Menu
+              trigger={
+                <Menu.Trigger
+                  icon={<MoreIcon />}
+                  aria-label={actionsLabel}
+                  intent="neutral"
+                  saliency="low"
+                  size="sm"
+                />
+              }
+              items={actions}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 export type DrawerFooterProps = React.HTMLAttributes<HTMLDivElement> & {
+  /**
+   * The footer's primary actions, rendered as a joined `ButtonGroup` at the
+   * footer's end. Each entry is a `ButtonGroup.Item` element (see
+   * {@link ButtonGroupProps.items}). Use this for the main button row; the
+   * header's `actions` is for a secondary overflow menu.
+   */
+  actions?: ButtonGroupProps["items"];
   ref?: React.Ref<HTMLDivElement>;
 };
 
-function DrawerFooter({ className, children, ref, ...rest }: DrawerFooterProps) {
+function DrawerFooter({ actions, className, children, ref, ...rest }: DrawerFooterProps) {
   return (
     <div ref={ref} className={cx(drawerFooter, className)} {...rest}>
       {children}
+      {actions != null && actions.length > 0 && <ButtonGroup items={actions} />}
     </div>
   );
-}
-
-/**
- * `Drawer.Action` props — the same shape as `Menu.Item` (its `intent`, `icon`,
- * label `children`, and `onClick`/`href`/`render`/`disabled` action seams),
- * minus the menu-only `keepOpen`. A drawer action is a standalone control, not a
- * dismiss-on-click menu row; wrap it in a `<Drawer.Close>` (or wire your own
- * handler) if it should also close the drawer.
- */
-export interface DrawerActionProps extends Omit<MenuItemProps, "keepOpen"> {
-  /** Extra className merged onto the action row. */
-  className?: string;
-  ref?: React.Ref<HTMLElement>;
-}
-
-/**
- * Drawer.Action — a menu-style action row for a drawer's header, footer, or body
- * action list. It borrows `Menu.Item`'s look and its button/link semantics
- * (rendering a real `<button>` for `onClick`, or an `<a>`/router link for
- * `href`/`render`, via `InternalGenericButtonAnchor`), but is an ordinary tab
- * stop in the drawer's focus order rather than a base-ui menu item — so it's
- * keyboard reachable with Tab, no roving-focus menu context required. Stack
- * several to form an action list.
- *
- * @example
- * <Drawer.Footer>
- *   <Drawer.Action icon={<Icon name="edit" />} onClick={edit}>Edit</Drawer.Action>
- *   <Drawer.Action icon={<Icon name="trash" />} intent="negative" onClick={remove}>
- *     Delete
- *   </Drawer.Action>
- * </Drawer.Footer>
- */
-function DrawerAction({
-  intent = "neutral",
-  icon,
-  children,
-  onClick,
-  href,
-  render,
-  disabled = false,
-  className,
-  ref,
-}: DrawerActionProps) {
-  const ownProps: InternalGenericButtonAnchorProps = {
-    ref,
-    href,
-    render,
-    disabled,
-    onClick,
-    className: cx(drawerActionRecipe({ intent }), focusRingRecipe({ type: "visible" }), className),
-    children: (
-      <>
-        {icon != null && (
-          <span className={menuItemIcon} aria-hidden>
-            {icon}
-          </span>
-        )}
-        {children}
-      </>
-    ),
-  };
-
-  return <InternalGenericButtonAnchor {...ownProps} />;
 }
 
 DrawerRoot.displayName = "Drawer";
@@ -355,7 +341,6 @@ DrawerTrigger.displayName = "Drawer.Trigger";
 DrawerClose.displayName = "Drawer.Close";
 DrawerHeader.displayName = "Drawer.Header";
 DrawerFooter.displayName = "Drawer.Footer";
-DrawerAction.displayName = "Drawer.Action";
 
 /** Drawer with its compound parts attached. */
 export const Drawer = Object.assign(DrawerRoot, {
@@ -363,7 +348,6 @@ export const Drawer = Object.assign(DrawerRoot, {
   Close: DrawerClose,
   Header: DrawerHeader,
   Footer: DrawerFooter,
-  Action: DrawerAction,
   /**
    * Creates a detached imperative handle (base-ui's `createHandle`). Prefer
    * `useOverlayHandle(Drawer)` inside components; reach for this only when the

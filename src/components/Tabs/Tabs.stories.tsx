@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { ReactNode } from "react";
 import * as React from "react";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
 import type { Intent, Saliency } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Icon } from "../Icon";
 import { Tabs } from "./index";
 
@@ -20,6 +22,13 @@ const VIEWS = [
   { value: "settings", label: "Settings" },
 ] as const;
 type View = (typeof VIEWS)[number]["value"];
+
+// Panel body copy, one blurb per view, so the panel story has real content.
+const PANELS: Record<View, string> = {
+  overview: "A birds-eye summary of the project — health, owners, recent activity.",
+  activity: "A running feed of what changed and who changed it.",
+  settings: "Configuration for the project: visibility, integrations, danger zone.",
+};
 
 // Tabs are controlled, so the stories drive them from local state — the same
 // shape a consumer would use — and show the active view's content underneath.
@@ -69,108 +78,56 @@ export default meta;
 
 type Story = StoryObj<typeof Sections>;
 
-export const Playground: Story = {};
+const Row = ({ label, children }: { label: string; children: ReactNode }) => (
+  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+    <span style={{ fontSize: 12, opacity: 0.6 }}>{label}</span>
+    {children}
+  </div>
+);
 
-export const Saliencies: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 20 }}>
-      {SALIENCIES.map((saliency) => (
-        <Sections key={saliency} intent="primary" saliency={saliency} />
-      ))}
-    </div>
-  ),
-};
+export const KitchenSink: Story = {
+  render: (args) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20, alignItems: "flex-start" }}>
+      <Row label="Default — driven by the toolbar controls">
+        <Tabs {...args} aria-label="Project sections" initialValue="overview" tabs={VIEWS} />
+      </Row>
 
-export const Intents: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 20 }}>
-      {INTENTS.map((intent) => (
-        <Sections key={intent} intent={intent} saliency="high" />
-      ))}
-    </div>
-  ),
-};
-
-export const WithIcons: Story = {
-  render: () => {
-    function WithIconsHost() {
-      const [value, setValue] = React.useState<View>("overview");
-      return (
+      <Row label="With lead and trail icons">
         <Tabs
+          {...args}
           aria-label="Project sections"
-          value={value}
-          onChange={setValue}
           intent="primary"
           saliency="high"
+          initialValue="overview"
           tabs={[
             { value: "overview", label: "Overview", leadIcon: <Dot /> },
             { value: "activity", label: "Activity", trailIcon: <Dot /> },
             { value: "settings", label: "Settings", leadIcon: <Dot />, trailIcon: <Dot /> },
           ]}
         />
-      );
-    }
-    return <WithIconsHost />;
-  },
-};
+      </Row>
 
-export const DisabledGroup: Story = {
-  args: { disabled: true },
-};
-
-export const WithDisabledTab: Story = {
-  render: () => {
-    function DisabledTabHost() {
-      const [value, setValue] = React.useState<View>("overview");
-      return (
+      <Row label="A single disabled tab — the rest stay reachable">
         <Tabs
+          {...args}
           aria-label="Project sections"
-          value={value}
-          onChange={setValue}
+          initialValue="overview"
           tabs={[
             { value: "overview", label: "Overview" },
             { value: "activity", label: "Activity" },
             { value: "settings", label: "Settings", disabled: true },
           ]}
         />
-      );
-    }
-    return <DisabledTabHost />;
-  },
-};
+      </Row>
 
-export const Uncontrolled: Story = {
-  render: () => (
-    <Tabs aria-label="Project sections" initialValue="activity" intent="primary" tabs={VIEWS} />
-  ),
-};
-
-// Panel body copy, one blurb per view, so the panel stories have real content.
-const PANELS: Record<View, string> = {
-  overview: "A birds-eye summary of the project — health, owners, recent activity.",
-  activity: "A running feed of what changed and who changed it.",
-  settings: "Configuration for the project: visibility, integrations, danger zone.",
-};
-
-// With panels the content lives inside <Tabs> as <Tabs.Panel> children, so
-// base-ui shows the active one and wires the aria-controls/labelledby pair —
-// no separate content-switch of your own.
-export const WithPanels: Story = {
-  render: () => {
-    function PanelsHost() {
-      const [value, setValue] = React.useState<View>("overview");
-      return (
+      <Row label="With panels — the active panel is wired via aria-controls/labelledby">
         <Tabs
+          {...args}
           aria-label="Project sections"
-          value={value}
-          onChange={setValue}
           intent="primary"
           saliency="high"
-          tabs={[
-            { value: "overview", label: "Overview", leadIcon: <Dot /> },
-            { value: "activity", label: "Activity", leadIcon: <Dot /> },
-            { value: "settings", label: "Settings", leadIcon: <Dot /> },
-          ]}
+          initialValue="overview"
+          tabs={VIEWS.map(({ value, label }) => ({ value, label, leadIcon: <Dot /> }))}
         >
           {VIEWS.map(({ value: v }) => (
             <Tabs.Panel key={v} value={v} style={{ fontFamily: "system-ui" }}>
@@ -178,21 +135,48 @@ export const WithPanels: Story = {
             </Tabs.Panel>
           ))}
         </Tabs>
-      );
-    }
-    return <PanelsHost />;
+      </Row>
+
+      <Row label="Disabled group — set via the toolbar disabled control">
+        <Tabs
+          {...args}
+          disabled
+          aria-label="Project sections"
+          initialValue="overview"
+          tabs={VIEWS}
+        />
+      </Row>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "One survey of common `Tabs` shapes: the default arg-driven bar, tabs with lead/trail icons, a single disabled tab (the rest stay reachable), a bar with wired `Tabs.Panel` content, and a fully disabled group. The toolbar controls flow into every row via `args` (except where a row pins its own intent/saliency to make the point).",
+      },
+    },
   },
 };
 
-// Uncontrolled + panels: seed with initialValue and let Tabs manage the rest.
-export const UncontrolledWithPanels: Story = {
+// A bare tab bar (no panel/paragraph) so the matrix cells stay compact.
+function TabBar({ intent, saliency }: { intent: Intent; saliency: Saliency }) {
+  const [value, setValue] = React.useState<View>("overview");
+  return (
+    <Tabs
+      aria-label={`Sections (${intent} ${saliency})`}
+      value={value}
+      onChange={setValue}
+      intent={intent}
+      saliency={saliency}
+      tabs={VIEWS}
+    />
+  );
+}
+
+export const IntentsAndSaliencies: Story = {
   render: () => (
-    <Tabs aria-label="Project sections" initialValue="activity" intent="primary" tabs={VIEWS}>
-      {VIEWS.map(({ value: v }) => (
-        <Tabs.Panel key={v} value={v} style={{ fontFamily: "system-ui" }}>
-          {PANELS[v]}
-        </Tabs.Panel>
-      ))}
-    </Tabs>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => <TabBar intent={intent} saliency={saliency} />}
+    </IntentSaliencyMatrix>
   ),
 };

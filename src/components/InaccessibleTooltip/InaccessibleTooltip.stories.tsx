@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Chip } from "../Chip";
 import { InaccessibleTooltip } from "./index";
 
 /**
@@ -30,37 +29,14 @@ export default meta;
 
 type Story = StoryObj<typeof InaccessibleTooltip>;
 
-/** A focusable trigger — the tooltip works on both hover and keyboard focus. */
-export const FocusableTrigger: Story = {
-  render: (args) => (
-    <InaccessibleTooltip {...args} content="Visible on hover and focus">
-      <Chip render={<button type="button" />} intent="neutral" saliency="low">
-        Hover or focus me
-      </Chip>
-    </InaccessibleTooltip>
-  ),
-};
-
 /**
  * An arbitrary, non-focusable element. The tooltip shows on hover only — this is
  * exactly the accessibility gap the component's name warns about.
  */
-export const ArbitraryElement: Story = {
+export const Basic: Story = {
   render: (args) => (
     <InaccessibleTooltip {...args} content="Hover only — not keyboard reachable">
       <span style={{ textDecoration: "underline dotted", cursor: "help" }}>Hover this text</span>
     </InaccessibleTooltip>
-  ),
-};
-
-export const Sides: Story = {
-  render: (args) => (
-    <div style={{ display: "flex", gap: 48, padding: 64 }}>
-      {(["top", "right", "bottom", "left"] as const).map((side) => (
-        <InaccessibleTooltip key={side} {...args} side={side} content={`side="${side}"`}>
-          <button type="button">{side}</button>
-        </InaccessibleTooltip>
-      ))}
-    </div>
   ),
 };

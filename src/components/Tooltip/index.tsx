@@ -9,7 +9,6 @@ import {
 } from "../../internal/components/InternalTooltip/internalTooltip.css";
 import { cx } from "../../utils/cx";
 import type { ButtonProps } from "../Button";
-import { tooltipLines } from "./tooltip.css";
 
 type RootProps = React.ComponentProps<typeof BaseTooltip.Root>;
 type TriggerProps = React.ComponentProps<typeof BaseTooltip.Trigger>;
@@ -43,12 +42,11 @@ export interface TooltipProps {
    */
   children?: React.ReactNode;
   /**
-   * Tooltip text. Pass a `string`, or a `string[]` to render each entry on its
-   * own line. Keep it supplemental — the button must stay fully operable for
+   * Tooltip text. Keep it supplemental — the button must stay fully operable for
    * someone who never sees the tooltip; anything a user *must* read belongs in a
    * `Popover`.
    */
-  content: string | string[];
+  content: string;
   /** Disables the tooltip so it can never open; the trigger stays mounted. */
   disabled?: RootProps["disabled"];
   /** Controlled open state. */
@@ -144,16 +142,7 @@ function TooltipRoot({
               className={cx(tooltipPopup, className)}
             >
               <BaseTooltip.Arrow className={tooltipArrow} />
-              {Array.isArray(content) ? (
-                <span className={tooltipLines}>
-                  {content.map((line, index) => (
-                    // Lines are static text with no stable id; index key is fine.
-                    <span key={index}>{line}</span>
-                  ))}
-                </span>
-              ) : (
-                content
-              )}
+              {content}
             </BaseTooltip.Popup>
           </BaseTooltip.Positioner>
         </BaseTooltip.Portal>

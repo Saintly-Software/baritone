@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { ReactNode } from "react";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { Icon } from "../Icon";
 import { ButtonGroup } from "./index";
@@ -37,79 +38,112 @@ export default meta;
 
 type Story = StoryObj<typeof ButtonGroup>;
 
-export const Playground: Story = {
-  args: {
-    items: [
-      <ButtonGroup.Item key="left">Left</ButtonGroup.Item>,
-      <ButtonGroup.Item key="center">Center</ButtonGroup.Item>,
-      <ButtonGroup.Item key="right">Right</ButtonGroup.Item>,
-    ],
-  },
-};
+const Row = ({ label, children }: { label: string; children: ReactNode }) => (
+  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+    <span style={{ fontSize: 12, opacity: 0.6 }}>{label}</span>
+    {children}
+  </div>
+);
 
-export const TwoButtons: Story = {
-  args: {
-    items: [
-      <ButtonGroup.Item key="prev" startIcon={<ChevronLeft />}>
-        Previous
-      </ButtonGroup.Item>,
-      <ButtonGroup.Item key="next" endIcon={<ChevronRight />}>
-        Next
-      </ButtonGroup.Item>,
-    ],
-  },
-};
+export const KitchenSink: Story = {
+  render: (args) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20, alignItems: "flex-start" }}>
+      <Row label="Default — driven by the toolbar controls">
+        <ButtonGroup
+          {...args}
+          items={[
+            <ButtonGroup.Item key="left">Left</ButtonGroup.Item>,
+            <ButtonGroup.Item key="center">Center</ButtonGroup.Item>,
+            <ButtonGroup.Item key="right">Right</ButtonGroup.Item>,
+          ]}
+        />
+      </Row>
 
-export const FourButtons: Story = {
-  args: {
-    intent: "primary",
-    saliency: "high",
-    items: [
-      <ButtonGroup.Item key="1">One</ButtonGroup.Item>,
-      <ButtonGroup.Item key="2">Two</ButtonGroup.Item>,
-      <ButtonGroup.Item key="3">Three</ButtonGroup.Item>,
-      <ButtonGroup.Item key="4">Four</ButtonGroup.Item>,
-    ],
-  },
-};
+      <Row label="Two buttons">
+        <ButtonGroup
+          {...args}
+          items={[
+            <ButtonGroup.Item key="prev" startIcon={<ChevronLeft />}>
+              Previous
+            </ButtonGroup.Item>,
+            <ButtonGroup.Item key="next" endIcon={<ChevronRight />}>
+              Next
+            </ButtonGroup.Item>,
+          ]}
+        />
+      </Row>
 
-export const MixedIntents: Story = {
-  args: {
-    intent: "neutral",
-    saliency: "low",
-    items: [
-      <ButtonGroup.Item key="save" intent="primary" saliency="high">
-        Save
-      </ButtonGroup.Item>,
-      <ButtonGroup.Item key="draft">Save draft</ButtonGroup.Item>,
-      <ButtonGroup.Item key="discard" intent="negative" saliency="high">
-        Discard
-      </ButtonGroup.Item>,
-    ],
-  },
+      <Row label="Four buttons">
+        <ButtonGroup
+          {...args}
+          intent="primary"
+          saliency="high"
+          items={[
+            <ButtonGroup.Item key="1">One</ButtonGroup.Item>,
+            <ButtonGroup.Item key="2">Two</ButtonGroup.Item>,
+            <ButtonGroup.Item key="3">Three</ButtonGroup.Item>,
+            <ButtonGroup.Item key="4">Four</ButtonGroup.Item>,
+          ]}
+        />
+      </Row>
+
+      <Row label="Mixed intents — each member overrides the group">
+        <ButtonGroup
+          {...args}
+          intent="neutral"
+          saliency="low"
+          items={[
+            <ButtonGroup.Item key="save" intent="primary" saliency="high">
+              Save
+            </ButtonGroup.Item>,
+            <ButtonGroup.Item key="draft">Save draft</ButtonGroup.Item>,
+            <ButtonGroup.Item key="discard" intent="negative" saliency="high">
+              Discard
+            </ButtonGroup.Item>,
+          ]}
+        />
+      </Row>
+
+      <Row label="With icons">
+        <ButtonGroup
+          {...args}
+          intent="primary"
+          saliency="high"
+          items={[
+            <ButtonGroup.Item key="prev" startIcon={<ChevronLeft />}>
+              Prev
+            </ButtonGroup.Item>,
+            <ButtonGroup.Item key="today">Today</ButtonGroup.Item>,
+            <ButtonGroup.Item key="next" endIcon={<ChevronRight />}>
+              Next
+            </ButtonGroup.Item>,
+          ]}
+        />
+      </Row>
+
+      <Row label="Disabled member — focusable, surfaces its disabledReason">
+        <ButtonGroup
+          {...args}
+          intent="neutral"
+          saliency="mid"
+          items={[
+            <ButtonGroup.Item key="cut">Cut</ButtonGroup.Item>,
+            <ButtonGroup.Item key="copy">Copy</ButtonGroup.Item>,
+            <ButtonGroup.Item key="paste" disabled disabledReason="Clipboard is empty.">
+              Paste
+            </ButtonGroup.Item>,
+          ]}
+        />
+      </Row>
+    </div>
+  ),
   parameters: {
     docs: {
       description: {
         story:
-          "Each member can override the group's `intent`/`saliency` while still sharing the joined surface and a single `size`.",
+          "One survey of common `ButtonGroup` shapes: the default arg-driven group, two- and four-member groups, per-member `intent`/`saliency` overrides sharing a single joined surface, members with start/end icons, and a disabled member (`aria-disabled`, so it stays focusable and can surface its `disabledReason` tooltip). The toolbar controls flow into every row via `args` (except where a row pins its own intent to make the point).",
       },
     },
-  },
-};
-
-export const WithIcons: Story = {
-  args: {
-    intent: "primary",
-    saliency: "high",
-    items: [
-      <ButtonGroup.Item key="prev" startIcon={<ChevronLeft />}>
-        Prev
-      </ButtonGroup.Item>,
-      <ButtonGroup.Item key="today">Today</ButtonGroup.Item>,
-      <ButtonGroup.Item key="next" endIcon={<ChevronRight />}>
-        Next
-      </ButtonGroup.Item>,
-    ],
   },
 };
 
@@ -131,26 +165,4 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
-};
-
-export const WithDisabledMember: Story = {
-  args: {
-    intent: "neutral",
-    saliency: "mid",
-    items: [
-      <ButtonGroup.Item key="cut">Cut</ButtonGroup.Item>,
-      <ButtonGroup.Item key="copy">Copy</ButtonGroup.Item>,
-      <ButtonGroup.Item key="paste" disabled disabledReason="Clipboard is empty.">
-        Paste
-      </ButtonGroup.Item>,
-    ],
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "A disabled member uses `aria-disabled`, so it stays focusable and can surface its `disabledReason` tooltip.",
-      },
-    },
-  },
 };

@@ -5,7 +5,7 @@ import { SPACE_KEYS } from "../../theme/constants";
 import { CardList } from "./index";
 
 const meta: Meta<typeof CardList> = {
-  title: "Card/CardList",
+  title: "Surfaces/CardList",
   component: CardList,
   args: { "aria-label": "Settings", gap: "4" },
   argTypes: {
@@ -16,7 +16,7 @@ export default meta;
 
 type Story = StoryObj<typeof CardList>;
 
-export const Playground: Story = {
+export const Basic: Story = {
   render: (args) => (
     <CardList {...args} style={{ maxWidth: 480 }}>
       <Card
@@ -46,17 +46,6 @@ export const Playground: Story = {
           </Button>
         }
       />
-    </CardList>
-  ),
-};
-
-export const Tighter: Story = {
-  args: { gap: "2" },
-  render: (args) => (
-    <CardList {...args} style={{ maxWidth: 480 }}>
-      <Card header="Alpha" description="First item" />
-      <Card header="Beta" description="Second item" />
-      <Card header="Gamma" description="Third item" />
     </CardList>
   ),
 };

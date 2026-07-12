@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { Text } from "../Text";
 import { FileList, type FileInfo } from "./index";
 
 /** Storybook-only helper: a `FileInfo` with a real (empty) `File`. */
@@ -34,23 +35,104 @@ export default meta;
 
 type Story = StoryObj<typeof FileList>;
 
-/** Removable + interactive: the × actually drops the file from local state. */
-export const Playground: Story = {
-  render: (args) => {
-    const [items, setItems] = React.useState(sample);
-    return (
-      <FileList
-        {...args}
-        items={items}
-        onRemove={(id) => setItems((cur) => cur.filter((f) => f.id !== id))}
-      />
-    );
-  },
+/** A captioned example, stacked label-over-content. */
+const Section = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <Text variant="sm" saliency="low">
+      {label}
+    </Text>
+    {children}
+  </div>
+);
+
+/** A list wired to local state: the × removes, and (when `downloadable`) the ↓ alerts. */
+const Interactive = ({
+  initial,
+  downloadable = false,
+  ...props
+}: React.ComponentProps<typeof FileList> & {
+  initial: FileInfo[];
+  downloadable?: boolean;
+}) => {
+  const [items, setItems] = React.useState(initial);
+  return (
+    <FileList
+      {...props}
+      items={items}
+      onRemove={(id) => setItems((cur) => cur.filter((f) => f.id !== id))}
+      onDownload={
+        downloadable
+          ? (id) => {
+              const hit = items.find((f) => f.id === id);
+              if (hit != null) window.alert(`Download ${hit.file.name}`);
+            }
+          : undefined
+      }
+    />
+  );
+};
+
+/**
+ * Everything at once — each section reacts to the shared controls (orientation,
+ * intent, saliency, size):
+ * - **Interactive + downloadable**: mixed file-type icons, per-item `download`
+ *   flags and an `intent` override; the × removes and flagged files get a ↓.
+ * - **Read-only**: no `onRemove`, so no remove buttons.
+ * - **Disabled**: chips dim and buttons go inert (but stay focusable).
+ * - **Long file names**: ellipsize when the list is width-constrained.
+ */
+export const KitchenSink: Story = {
+  render: (args) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 440 }}>
+      <Section label="Interactive · mixed types, per-item download">
+        <Interactive
+          {...args}
+          downloadable
+          initial={[
+            { ...fileInfo("1", "quarterly-report.pdf"), download: true },
+            fileInfo("2", "hero-banner.png"),
+            { ...fileInfo("3", "data-export-2026-06.csv"), download: true },
+            fileInfo("4", "podcast-episode.mp3"),
+            fileInfo("5", "assets-bundle.zip"),
+            { ...fileInfo("6", "meeting-notes.docx"), download: true },
+          ]}
+        />
+      </Section>
+
+      <Section label="Read-only · no onRemove, no remove buttons">
+        <FileList {...args} items={sample()} />
+      </Section>
+
+      <Section label="Disabled · chips dim, buttons focusable but inert">
+        <Interactive
+          {...args}
+          disabled
+          downloadable
+          initial={[
+            { ...fileInfo("d1", "quarterly-report.pdf"), download: true },
+            fileInfo("d2", "hero-banner.png"),
+            fileInfo("d3", "assets-bundle.zip"),
+          ]}
+        />
+      </Section>
+
+      <Section label="Long file names · ellipsize when width-constrained">
+        <Interactive
+          {...args}
+          style={{ maxWidth: 280 }}
+          initial={[
+            fileInfo("g1", "2026-Q2-board-deck-final-FINAL-v3-reviewed.pdf"),
+            fileInfo("g2", "marketing-assets-bundle-hi-res-export.zip"),
+          ]}
+        />
+      </Section>
+    </div>
+  ),
 };
 
 export const Horizontal: Story = {
-  ...Playground,
   args: { orientation: "horizontal" },
+  render: (args) => <Interactive {...args} downloadable initial={sample()} />,
 };
 
 /** No `onRemove` → a read-only list, no remove buttons. */
@@ -60,8 +142,8 @@ export const ReadOnly: Story = {
 
 /** The whole list disabled: chips dim, remove buttons stay focusable but inert. */
 export const Disabled: Story = {
-  ...Playground,
   args: { disabled: true },
+  render: (args) => <Interactive {...args} initial={sample()} />,
 };
 
 /** One chip per file-type icon (image, audio, video, pdf, spreadsheet, archive, doc, generic). */

@@ -1,7 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { useOverlayHandle } from "../../utils/overlayHandle";
+import { ButtonGroup } from "../ButtonGroup";
 import { Drawer } from "./index";
 
 describe("Drawer", () => {
@@ -225,73 +226,103 @@ describe("Drawer", () => {
   });
 });
 
-describe("Drawer.Action", () => {
-  it("renders an onClick action as a real button and fires its handler", async () => {
+describe("Drawer.Header actions", () => {
+  it("renders header actions behind a 'more options' menu trigger", async () => {
     const user = userEvent.setup();
-    const onClick = vi.fn();
+    const onRename = vi.fn();
     render(
-      <Drawer trigger={<Drawer.Trigger>Open</Drawer.Trigger>} open>
-        <Drawer.Action onClick={onClick}>Rename</Drawer.Action>
+      <Drawer
+        open
+        trigger={<Drawer.Trigger>Open</Drawer.Trigger>}
+        header={
+          <Drawer.Header
+            title="Document"
+            actions={[
+              { children: "Rename", onClick: onRename },
+              { children: "Delete", intent: "negative", onClick: () => {} },
+            ]}
+          />
+        }
+      >
+        Body
       </Drawer>,
     );
 
-    const action = screen.getByRole("button", { name: "Rename" });
-    expect(action.tagName).toBe("BUTTON");
+    // The actions collapse into an icon-only trigger; the items are hidden until it opens.
+    const trigger = screen.getByRole("button", { name: "Actions" });
+    expect(screen.queryByRole("menuitem", { name: "Rename" })).not.toBeInTheDocument();
 
-    await user.click(action);
-    expect(onClick).toHaveBeenCalledTimes(1);
+    await user.click(trigger);
+    const rename = await screen.findByRole("menuitem", { name: "Rename" });
+    await user.click(rename);
+    expect(onRename).toHaveBeenCalledTimes(1);
   });
 
-  it("renders an href action as a real anchor", () => {
+  it("names the actions trigger from actionsLabel", () => {
     render(
-      <Drawer trigger={<Drawer.Trigger>Open</Drawer.Trigger>} open>
-        <Drawer.Action href="https://example.com">Docs</Drawer.Action>
+      <Drawer
+        open
+        trigger={<Drawer.Trigger>Open</Drawer.Trigger>}
+        header={
+          <Drawer.Header
+            title="Document"
+            actionsLabel="Document actions"
+            actions={[{ children: "Rename", onClick: () => {} }]}
+          />
+        }
+      >
+        Body
       </Drawer>,
     );
 
-    const action = screen.getByRole("link", { name: "Docs" });
-    expect(action.tagName).toBe("A");
-    expect(action).toHaveAttribute("href", "https://example.com");
+    expect(screen.getByRole("button", { name: "Document actions" })).toBeInTheDocument();
   });
 
-  it("is keyboard reachable — a real tab stop, not a roving menu item", () => {
+  it("renders no actions trigger when actions is empty", () => {
     render(
-      <Drawer trigger={<Drawer.Trigger>Open</Drawer.Trigger>} open>
-        <Drawer.Action>Edit</Drawer.Action>
-        <Drawer.Action>Duplicate</Drawer.Action>
+      <Drawer
+        open
+        trigger={<Drawer.Trigger>Open</Drawer.Trigger>}
+        header={<Drawer.Header title="Document" actions={[]} />}
+      >
+        Body
       </Drawer>,
     );
 
-    const edit = screen.getByRole("button", { name: "Edit" });
-    const duplicate = screen.getByRole("button", { name: "Duplicate" });
-    // Native buttons that stay in the tab order — unlike menu items, which base-ui
-    // pulls out with tabindex="-1" and drives with roving focus instead.
-    expect(edit.tagName).toBe("BUTTON");
-    expect(edit).not.toHaveAttribute("tabindex", "-1");
-    expect(duplicate).not.toHaveAttribute("tabindex", "-1");
-
-    // Each accepts programmatic focus (natively focusable, nothing traps it out).
-    edit.focus();
-    expect(edit).toHaveFocus();
-    duplicate.focus();
-    expect(duplicate).toHaveFocus();
+    expect(screen.queryByRole("button", { name: "Actions" })).not.toBeInTheDocument();
   });
+});
 
-  it("swallows activation on a disabled action and stays focusable", async () => {
+describe("Drawer.Footer actions", () => {
+  it("renders footer actions as a grouped set of real buttons", async () => {
     const user = userEvent.setup();
-    const onClick = vi.fn();
+    const onSave = vi.fn();
     render(
-      <Drawer trigger={<Drawer.Trigger>Open</Drawer.Trigger>} open>
-        <Drawer.Action onClick={onClick} disabled>
-          Delete
-        </Drawer.Action>
+      <Drawer
+        open
+        trigger={<Drawer.Trigger>Open</Drawer.Trigger>}
+        footer={
+          <Drawer.Footer
+            actions={[
+              <ButtonGroup.Item key="cancel" onClick={() => {}}>
+                Cancel
+              </ButtonGroup.Item>,
+              <ButtonGroup.Item key="save" intent="primary" saliency="high" onClick={onSave}>
+                Save
+              </ButtonGroup.Item>,
+            ]}
+          />
+        }
+      >
+        Body
       </Drawer>,
     );
 
-    const action = screen.getByRole("button", { name: "Delete" });
-    expect(action).toHaveAttribute("aria-disabled", "true");
+    const group = screen.getByRole("group");
+    const save = within(group).getByRole("button", { name: "Save" });
+    expect(save.tagName).toBe("BUTTON");
 
-    await user.click(action);
-    expect(onClick).not.toHaveBeenCalled();
+    await user.click(save);
+    expect(onSave).toHaveBeenCalledTimes(1);
   });
 });

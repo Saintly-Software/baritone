@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Text } from "../Text";
 import { Icon } from "./index";
 
@@ -28,17 +29,18 @@ export default meta;
 
 type Story = StoryObj<typeof Icon>;
 
-export const Playground: Story = {};
+export const Basic: Story = {};
 
-export const StandaloneIntents: Story = {
+/** Every `intent` (rows) at each `saliency` (columns), driven by the `component` token. */
+export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-      {INTENTS.map((intent) => (
-        <Icon key={intent} intent={intent} saliency="high" size="lg" label={intent}>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
+        <Icon intent={intent} saliency={saliency} size="lg" label={`${intent} ${saliency}`}>
           <StarSvg />
         </Icon>
-      ))}
-    </div>
+      )}
+    </IntentSaliencyMatrix>
   ),
 };
 

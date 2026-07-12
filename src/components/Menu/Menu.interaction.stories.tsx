@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Menu } from "./index";
+import { Menu, type MenuProps } from "./index";
 
 /**
  * Interaction coverage for `Menu`. The `play` functions open the menu and assert
- * that hovering moves the highlight and that a `keepOpen` item leaves the menu
- * open after it fires.
+ * behaviour that only surfaces once it's mounted: the highlight follows the
+ * pointer, a `keepOpen` row leaves the menu up, and each `side` places the popup
+ * where it was asked to.
  */
 const meta: Meta<typeof Menu> = {
   title: "Surfaces/Menu",
@@ -71,3 +72,57 @@ export const KeepOpenStaysOpen: Story = {
     );
   },
 };
+
+/**
+ * Builds a story that opens on the given `side` and asserts the popup landed
+ * there. The trigger is centred in a roomy box so there's space on every side —
+ * otherwise base-ui's collision avoidance would flip the popup and change where
+ * it resolves. base-ui records the resolved placement as `data-side` on the
+ * positioner (the element that wraps the `menu` popup).
+ */
+function sideStory(side: NonNullable<MenuProps["side"]>): Story {
+  return {
+    render: () => (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 400,
+          padding: 160,
+        }}
+      >
+        <Menu
+          side={side}
+          trigger={<Menu.Trigger>Open {side}</Menu.Trigger>}
+          items={[
+            { children: "Edit", onClick: () => {} },
+            { children: "Duplicate", onClick: () => {} },
+          ]}
+        />
+      </div>
+    ),
+    play: async ({ canvasElement }) => {
+      const canvas = within(canvasElement);
+      await userEvent.click(canvas.getByRole("button", { name: `Open ${side}` }));
+
+      const body = within(document.body);
+      const popup = await body.findByRole("menu");
+      // The positioner is the popup's parent and carries the resolved side.
+      const positioner = popup.parentElement as HTMLElement;
+      await waitFor(() => expect(positioner).toHaveAttribute("data-side", side));
+    },
+  };
+}
+
+/** Opens above the trigger. */
+export const SideTop = sideStory("top");
+
+/** Opens below the trigger (base-ui's default). */
+export const SideBottom = sideStory("bottom");
+
+/** Opens to the left of the trigger. */
+export const SideLeft = sideStory("left");
+
+/** Opens to the right of the trigger. */
+export const SideRight = sideStory("right");

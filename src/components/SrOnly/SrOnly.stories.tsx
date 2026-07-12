@@ -17,41 +17,12 @@ export default meta;
 
 type Story = StoryObj<typeof SrOnly>;
 
-export const Playground: Story = {
+export const Basic: Story = {
   args: { children: "This text is only announced to screen readers." },
   render: (args) => (
     <p>
       There is a visually-hidden message right here →<SrOnly {...args} />← between the arrows.
       Inspect the DOM (or use a screen reader) to find it.
     </p>
-  ),
-};
-
-/** Give an icon-only control an accessible name without any visible label. */
-export const IconOnlyButtonLabel: Story = {
-  render: () => (
-    <button type="button" style={{ fontSize: 20, padding: "4px 10px" }}>
-      <span aria-hidden>×</span>
-      <SrOnly>Close dialog</SrOnly>
-    </button>
-  ),
-};
-
-/** Add context to a repeated, visually-terse link. */
-export const LinkContext: Story = {
-  render: () => (
-    <a href="#pricing">
-      Read more
-      <SrOnly> about our pricing plans</SrOnly>
-    </a>
-  ),
-};
-
-/** A polite live region for status updates that shouldn't shift the layout. */
-export const LiveStatus: Story = {
-  render: () => (
-    <SrOnly role="status" aria-live="polite">
-      Your changes have been saved.
-    </SrOnly>
   ),
 };

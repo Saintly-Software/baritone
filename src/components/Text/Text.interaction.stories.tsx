@@ -8,9 +8,8 @@ import { Text } from "./index";
  * to a distinct colour.
  */
 const meta: Meta<typeof Text> = {
-  title: "Components/Text",
+  title: "Interaction Tests/Text",
   component: Text,
-  tags: ["!dev"],
 };
 export default meta;
 

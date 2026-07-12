@@ -11,9 +11,8 @@ type SideName = "top" | "right" | "bottom" | "left";
  * it resolves to (`data-side`), placed with room so it never collision-flips.
  */
 const meta: Meta<typeof Popover> = {
-  title: "Surfaces/Popover",
+  title: "Interaction Tests/Popover",
   component: Popover,
-  tags: ["!dev"],
 };
 export default meta;
 

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { FORM_STATES, SIZES } from "../../theme/constants";
+import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
 import { Combobox, type ComboboxOption } from "./index";
 
 const FRUITS: ComboboxOption[] = [
@@ -57,31 +57,80 @@ export const Sizes: Story = {
   ),
 };
 
-export const States: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 16 }}>
-      {FORM_STATES.map((state) => (
-        <Combobox
-          key={state}
-          label={`State: ${state}`}
-          options={FRUITS}
-          state={state}
-          description={state === "warning" ? "Double-check this choice." : undefined}
-          errorMessage={state === "invalid" ? "Please pick a fruit." : undefined}
-          defaultValue={state === "valid" ? "apple" : undefined}
-        />
-      ))}
-    </div>
-  ),
+const thStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "16px 20px",
+  whiteSpace: "nowrap",
+  verticalAlign: "top",
 };
 
-export const Disabled: Story = {
-  args: {
-    label: "Fruit (disabled, still focusable)",
+const cellStyle: React.CSSProperties = {
+  padding: "16px 20px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+  verticalAlign: "top",
+};
+
+interface StateRow {
+  label: string;
+  state?: FormState;
+  disabled?: boolean;
+  defaultValue?: string;
+  description?: string;
+  errorMessage?: string;
+}
+
+// Every validation state plus disabled — the combinations that used to be their
+// own stories, folded into one table.
+const stateRows: StateRow[] = [
+  { label: "neutral" },
+  { label: "warning", state: "warning", description: "Double-check this choice." },
+  { label: "invalid", state: "invalid", errorMessage: "Please pick a fruit." },
+  { label: "valid", state: "valid", defaultValue: "apple" },
+  {
+    label: "disabled",
     disabled: true,
     defaultValue: "apple",
     description: "Uses aria-disabled so it stays keyboard-reachable.",
   },
+];
+
+/** Every state (rows) against the rendered control (right column). */
+export const States: Story = {
+  render: () => (
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>Combobox</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stateRows.map((row) => (
+          <tr key={row.label}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {row.label}
+            </th>
+            <td style={cellStyle}>
+              <div style={{ maxWidth: 320 }}>
+                <Combobox
+                  label="Fruit"
+                  options={FRUITS}
+                  state={row.state}
+                  disabled={row.disabled}
+                  defaultValue={row.defaultValue}
+                  description={row.description}
+                  errorMessage={row.errorMessage}
+                />
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
 };
 
 /** `freeText` lets the user commit a value that isn't in the list via an "Add …" row. */

@@ -3,7 +3,7 @@ import { Popover as BasePopover } from "@base-ui/react/popover";
 import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
-import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
+import type { HeadingLevel } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { InternalButton } from "../../internal/components/InternalButton";
 import type { ButtonProps } from "../Button";
@@ -35,10 +35,6 @@ export interface PopoverProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   header?: React.ReactNode;
   /** Rendered below the content — typically a `<Popover.Footer />`. */
   footer?: React.ReactNode;
-  /** Default `neutral` (most surfaces are neutral). */
-  intent?: Intent;
-  /** `low` (default neutral surface) or `high` (washed). Default `low`. */
-  saliency?: SurfaceSaliency;
   /** Internal padding from the spacing scale. Default `md`. */
   padding?: PopoverPadding;
   /** Controlled open state. */
@@ -79,8 +75,9 @@ export interface PopoverProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
 /**
  * Popover — a "surface" element type shown in a floating layer, anchored to a
  * trigger. Its API mirrors `Card`: it composes `header` / `footer` props (or
- * `<Popover.Header>` / `<Popover.Footer>` children) around its content, and
- * takes the same `intent` / `saliency` / `padding` surface knobs.
+ * `<Popover.Header>` / `<Popover.Footer>` children) around its content, with
+ * `padding` controlling internal spacing. The surface itself is always the
+ * default neutral, low-saliency shade.
  *
  * Built on base-ui's `Popover`, so the ARIA wiring, focus management, and
  * dismissal are handled for you. It opens from a `<Popover.Trigger>` (a `Button`)
@@ -91,8 +88,6 @@ function PopoverRoot({
   trigger,
   header,
   footer,
-  intent,
-  saliency,
   padding,
   open,
   defaultOpen,
@@ -128,7 +123,7 @@ function PopoverRoot({
           <BasePopover.Popup
             ref={ref}
             className={cx(
-              surfaceRecipe({ intent, saliency, padding }),
+              surfaceRecipe({ padding }),
               focusRingRecipe({ type: "visible" }),
               popoverPopup,
               className,

@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS } from "../../theme/constants";
-import { CardList } from "../CardList";
-import { Heading } from "../Heading";
 import { Icon } from "../Icon";
 import { MetricCard } from "./index";
 
@@ -43,12 +41,19 @@ export default meta;
 
 type Story = StoryObj<typeof MetricCard>;
 
-/** The default read-only stat: a value, a label, and an optional caption. */
-export const Playground: Story = {};
-
-/** With an optional leading icon (decorative — the label already names the metric). */
-export const WithIcon: Story = {
-  args: { icon: <TargetGlyph />, caption: undefined },
+/**
+ * Every optional prop wired up at once — a leading icon, a caption, and a trend
+ * badge — driven by the `args` controls. Tweak `intent` / `valueSize` in the
+ * controls panel to see them tint the value and resize the figure.
+ */
+export const KitchenSink: Story = {
+  args: {
+    icon: <TargetGlyph />,
+    intent: "primary",
+    valueSize: "3xl",
+    trend: { direction: "up", value: "12%" },
+  },
+  render: (args) => <MetricCard {...args} />,
 };
 
 /**
@@ -81,6 +86,7 @@ export const Trend: Story = {
         label="Revenue"
         caption="vs. last month"
         trend={{ direction: "up", value: "12%" }}
+        icon={<TargetGlyph />}
       />
       {/* Inverted metric: churn going down is good, so force a positive sentiment. */}
       <MetricCard
@@ -95,82 +101,6 @@ export const Trend: Story = {
         caption="vs. last week"
         trend={{ direction: "flat", value: "0%" }}
       />
-    </div>
-  ),
-};
-
-/**
- * Interactive tiles. Passing `onClick` (a button) or `href` (a link) makes the
- * value + label the card's single control, stretched over the whole surface — so
- * a click anywhere activates it, while a screen reader hears one control named by
- * the value **and** the label ("Active goals, 2").
- */
-export const Interactive: Story = {
-  render: () => (
-    <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-      <MetricCard value={2} label="Active goals" href="#goals" />
-      <MetricCard value={5} label="Open tasks" onClick={() => alert("clicked")} />
-      <MetricCard value={1} label="Locked" href="#locked" disabled />
-    </div>
-  ),
-};
-
-/**
- * The intended a11y shape, recreating a dashboard: each group of metrics is a
- * `CardList` named by its section `Heading`. A screen reader announces "Goals,
- * list, 3 items" and then each tile as a list item — never a stream of bare,
- * context-free numbers.
- */
-export const Dashboard: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 32, maxWidth: 760 }}>
-      <Heading level={1}>Dashboard</Heading>
-
-      <section style={{ display: "grid", gap: 12 }}>
-        <Heading level={2} id="goals-h" variant="sm">
-          Goals
-        </Heading>
-        <CardList
-          aria-labelledby="goals-h"
-          style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}
-        >
-          <MetricCard value={2} label="Active" href="#goals-active" />
-          <MetricCard value={1} label="Paused" href="#goals-paused" />
-          <MetricCard value={1} label="Complete" href="#goals-complete" />
-        </CardList>
-      </section>
-
-      <section style={{ display: "grid", gap: 12 }}>
-        <Heading level={2} id="tasks-h" variant="sm">
-          Tasks
-        </Heading>
-        <CardList
-          aria-labelledby="tasks-h"
-          style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}
-        >
-          <MetricCard value={3} label="Open" href="#tasks-open" />
-          <MetricCard value={1} label="In progress" href="#tasks-progress" />
-          <MetricCard
-            value={2}
-            label="Done this week"
-            caption="tasks completed"
-            href="#tasks-done"
-          />
-        </CardList>
-      </section>
-
-      <section style={{ display: "grid", gap: 12 }}>
-        <Heading level={2} id="contrib-h" variant="sm">
-          Contributions
-        </Heading>
-        <CardList
-          aria-labelledby="contrib-h"
-          style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 }}
-        >
-          <MetricCard value={5} label="This week" href="#contrib-week" />
-          <MetricCard value={18} label="This month" href="#contrib-month" />
-        </CardList>
-      </section>
     </div>
   ),
 };

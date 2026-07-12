@@ -9,9 +9,8 @@ import { Link } from "./index";
  * asserts the disabled button-appearance link explains itself on hover.
  */
 const meta: Meta<typeof Link> = {
-  title: "Components/Link",
+  title: "Interaction Tests/Link",
   component: Link,
-  tags: ["!dev"],
 };
 export default meta;
 

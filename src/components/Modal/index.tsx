@@ -3,7 +3,7 @@ import { Dialog as BaseDialog } from "@base-ui/react/dialog";
 import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
-import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
+import type { HeadingLevel } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { InternalButton } from "../../internal/components/InternalButton";
 import { InternalSpinner } from "../../internal/components/InternalSpinner";
@@ -41,10 +41,6 @@ export interface ModalProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "
   header?: React.ReactNode;
   /** Rendered below the body — typically a `<Modal.Footer />`. */
   footer?: React.ReactNode;
-  /** Default `neutral` (most surfaces are neutral). */
-  intent?: Intent;
-  /** `low` (default neutral surface) or `high` (washed). Default `low`. */
-  saliency?: SurfaceSaliency;
   /** Internal padding from the spacing scale. Default `md`. */
   padding?: ModalPadding;
   /** Max width of the panel: `sm`, `md` (default), or `lg`. */
@@ -95,8 +91,9 @@ export interface ModalProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "
 /**
  * Modal — a "surface" element type shown in a panel centred over the page. Its
  * API mirrors `Drawer`: it composes `header` / `footer` props (or
- * `<Modal.Header>` / `<Modal.Footer>` children) around its content and takes the
- * same `intent` / `saliency` / `padding` surface knobs.
+ * `<Modal.Header>` / `<Modal.Footer>` children) around its content, with
+ * `padding` controlling internal spacing. The surface itself is always the
+ * default neutral, low-saliency shade.
  *
  * Built on base-ui's `Dialog`, so the ARIA wiring and focus management are
  * handled for you. It opens from a `<Modal.Trigger>` (a `Button`) passed via
@@ -109,8 +106,6 @@ function ModalRoot({
   trigger,
   header,
   footer,
-  intent,
-  saliency,
   padding,
   size = "md",
   loading = false,
@@ -158,7 +153,7 @@ function ModalRoot({
           <BaseDialog.Popup
             ref={ref}
             className={cx(
-              surfaceRecipe({ intent, saliency, padding }),
+              surfaceRecipe({ padding }),
               focusRingRecipe({ type: "visible" }),
               modalPopup({ size }),
               className,

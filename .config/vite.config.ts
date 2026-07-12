@@ -17,7 +17,13 @@ export default defineConfig({
       // (it otherwise auto-resolves tsconfig.json from the vite root).
       tsconfigPath: resolve(__dirname, "tsconfig.json"),
       include: ["src"],
-      exclude: ["src/**/*.stories.tsx", "src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**"],
+      exclude: [
+        "src/**/*.stories.tsx",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "src/test/**",
+        "src/components/_stories/**",
+      ],
       // Type-only files (contract / theme) re-export fine as separate .d.ts.
     }),
   ],

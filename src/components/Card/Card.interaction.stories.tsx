@@ -6,14 +6,13 @@ import { Card } from "./index";
 
 /**
  * Interaction coverage for `Card`'s interactive arms. A clickable card's title is
- * the one real `<button>`; a linkable card's title is the one real `<a>`; a
- * collapsible card's header hosts a disclosure trigger. The `play` functions drive
- * each and assert the behaviour.
+ * the one real `<button>`; a collapsible card's header hosts a disclosure trigger.
+ * The `play` functions drive each and assert the behaviour. (Linkable cards are a
+ * pure render assertion, covered by the `linkable` unit tests in `Card.test.tsx`.)
  */
 const meta: Meta<typeof Card> = {
-  title: "Surfaces/Card",
+  title: "Interaction Tests/Card",
   component: Card,
-  tags: ["!dev"],
 };
 export default meta;
 
@@ -45,27 +44,6 @@ export const ClickableActivates: Story = {
 
     await userEvent.click(button);
     expect(canvas.getByText("Pressed 1 time.")).toBeInTheDocument();
-  },
-};
-
-/**
- * A linkable card: the whole surface navigates, but only the title is the real
- * `<a>`, so the card is named by its title alone.
- */
-export const LinkableNavigates: Story = {
-  render: () => (
-    <Card
-      style={{ maxWidth: 320 }}
-      href="https://example.com"
-      header={<Card.Header title="Read the docs" subtitle="example.com" />}
-    >
-      <Text render={<p />}>The entire surface navigates on click.</Text>
-    </Card>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const link = canvas.getByRole("link", { name: "Read the docs" });
-    expect(link).toHaveAttribute("href", "https://example.com");
   },
 };
 

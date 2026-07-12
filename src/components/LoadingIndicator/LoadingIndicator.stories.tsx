@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { LoadingIndicator } from "./index";
 
 const meta: Meta<typeof LoadingIndicator> = {
@@ -47,17 +48,18 @@ export const Sizes: Story = {
   ),
 };
 
-/** Standalone colour comes from the `component` token for the intent/saliency. */
-export const Intents: Story = {
+/** Standalone colour comes from the `component` token for each intent/saliency. */
+export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 24, alignItems: "center", flexWrap: "wrap" }}>
-      {INTENTS.map((intent) => (
-        <div key={intent} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <LoadingIndicator intent={intent} />
-          <span>{intent}</span>
-        </div>
-      ))}
-    </div>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
+        <LoadingIndicator
+          intent={intent}
+          saliency={saliency}
+          aria-label={`${intent} ${saliency}`}
+        />
+      )}
+    </IntentSaliencyMatrix>
   ),
 };
 

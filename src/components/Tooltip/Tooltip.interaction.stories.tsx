@@ -8,15 +8,12 @@ import { Tooltip } from "./index";
  * and by keyboard focus, and assert the portaled popup and its resolved `side`.
  */
 const meta: Meta<typeof Tooltip> = {
-  title: "Components/Tooltip",
+  title: "Interaction Tests/Tooltip",
   component: Tooltip,
-  tags: ["!dev"],
 };
 export default meta;
 
 type Story = StoryObj<typeof Tooltip>;
-
-type SideName = "top" | "right" | "bottom" | "left";
 
 const centred: CSSProperties = {
   display: "flex",
@@ -24,26 +21,6 @@ const centred: CSSProperties = {
   alignItems: "center",
   minHeight: 320,
   padding: 120,
-};
-
-/** Hovering the trigger opens the portaled tooltip. */
-export const OpensOnHover: Story = {
-  render: () => (
-    <div style={centred}>
-      <Tooltip content="Copied to your clipboard">
-        <Tooltip.Trigger delay={0}>Copy</Tooltip.Trigger>
-      </Tooltip>
-    </div>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.hover(canvas.getByRole("button", { name: "Copy" }));
-    await waitFor(() =>
-      expect(within(document.body).getByRole("tooltip")).toHaveTextContent(
-        "Copied to your clipboard",
-      ),
-    );
-  },
 };
 
 /** The tooltip is keyboard-reachable: tabbing to the trigger opens it too. */
@@ -83,27 +60,74 @@ export const LongContent: Story = {
   },
 };
 
-/** A single centred trigger whose tooltip resolves to the requested `side` with no flip. */
-function makeSideStory(side: SideName): Story {
-  return {
-    render: () => (
-      <div style={centred}>
-        <Tooltip side={side} content={`side="${side}"`}>
-          <Tooltip.Trigger delay={0}>{side}</Tooltip.Trigger>
-        </Tooltip>
-      </div>
-    ),
-    play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
-      const canvas = within(canvasElement);
-      await userEvent.hover(canvas.getByRole("button", { name: side }));
-      const tooltip = await within(document.body).findByRole("tooltip");
-      const positioner = tooltip.closest("[data-side]");
-      await waitFor(() => expect(positioner).toHaveAttribute("data-side", side));
-    },
-  };
-}
+/** `side="top"`: a centred trigger whose tooltip resolves above it with no flip. */
+export const SideTop: Story = {
+  render: () => (
+    <div style={centred}>
+      <Tooltip side="top" content='side="top"'>
+        <Tooltip.Trigger delay={0}>top</Tooltip.Trigger>
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.hover(canvas.getByRole("button", { name: "top" }));
+    const tooltip = await within(document.body).findByRole("tooltip");
+    const positioner = tooltip.closest("[data-side]");
+    await waitFor(() => expect(positioner).toHaveAttribute("data-side", "top"));
+  },
+};
 
-export const SideTop: Story = makeSideStory("top");
-export const SideRight: Story = makeSideStory("right");
-export const SideBottom: Story = makeSideStory("bottom");
-export const SideLeft: Story = makeSideStory("left");
+/** `side="right"`: a centred trigger whose tooltip resolves to its right with no flip. */
+export const SideRight: Story = {
+  render: () => (
+    <div style={centred}>
+      <Tooltip side="right" content='side="right"'>
+        <Tooltip.Trigger delay={0}>right</Tooltip.Trigger>
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.hover(canvas.getByRole("button", { name: "right" }));
+    const tooltip = await within(document.body).findByRole("tooltip");
+    const positioner = tooltip.closest("[data-side]");
+    await waitFor(() => expect(positioner).toHaveAttribute("data-side", "right"));
+  },
+};
+
+/** `side="bottom"`: a centred trigger whose tooltip resolves below it with no flip. */
+export const SideBottom: Story = {
+  render: () => (
+    <div style={centred}>
+      <Tooltip side="bottom" content='side="bottom"'>
+        <Tooltip.Trigger delay={0}>bottom</Tooltip.Trigger>
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.hover(canvas.getByRole("button", { name: "bottom" }));
+    const tooltip = await within(document.body).findByRole("tooltip");
+    const positioner = tooltip.closest("[data-side]");
+    await waitFor(() => expect(positioner).toHaveAttribute("data-side", "bottom"));
+  },
+};
+
+/** `side="left"`: a centred trigger whose tooltip resolves to its left with no flip. */
+export const SideLeft: Story = {
+  render: () => (
+    <div style={centred}>
+      <Tooltip side="left" content='side="left"'>
+        <Tooltip.Trigger delay={0}>left</Tooltip.Trigger>
+      </Tooltip>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.hover(canvas.getByRole("button", { name: "left" }));
+    const tooltip = await within(document.body).findByRole("tooltip");
+    const positioner = tooltip.closest("[data-side]");
+    await waitFor(() => expect(positioner).toHaveAttribute("data-side", "left"));
+  },
+};

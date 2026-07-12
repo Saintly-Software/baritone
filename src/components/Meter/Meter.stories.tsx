@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Meter } from "./index";
 
 const meta: Meta<typeof Meter> = {
@@ -19,8 +20,10 @@ const meta: Meta<typeof Meter> = {
     value: { control: { type: "range", min: 0, max: 100, step: 1 } },
   },
   decorators: [
-    (Story) => (
-      <div style={{ maxWidth: 360 }}>
+    // Single-meter stories read best capped at 360px; the matrix opts out via
+    // `parameters.wide` so its columns aren't squeezed into a scroll box.
+    (Story, ctx) => (
+      <div style={{ maxWidth: ctx.parameters.wide ? undefined : 360 }}>
         <Story />
       </div>
     ),
@@ -30,32 +33,39 @@ export default meta;
 
 type Story = StoryObj<typeof Meter>;
 
-export const Playground: Story = {};
-
-/** Every intent at the default `high` saliency. */
-export const Intents: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 20 }}>
-      {INTENTS.map((intent) => (
-        <Meter key={intent} label={intent} intent={intent} value={66} />
-      ))}
-    </div>
-  ),
+export const Basic: Story = {
+  args: {
+    showValue: true,
+    description: "72 GB of your 100 GB quota",
+  },
 };
 
-/** `high` / `mid` / `low` — the fill stays a solid, visible ink at each level. */
-export const Saliencies: Story = {
+/**
+ * Every `intent` (rows) at each `saliency` (columns). The fill stays a solid,
+ * visible ink at every level.
+ */
+export const IntentsAndSaliencies: Story = {
+  parameters: { wide: true },
   render: () => (
-    <div style={{ display: "grid", gap: 20 }}>
-      {SALIENCIES.map((saliency) => (
-        <Meter key={saliency} label={saliency} intent="primary" saliency={saliency} value={66} />
-      ))}
-    </div>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
+        <div style={{ width: 140 }}>
+          <Meter
+            aria-label={`${intent} ${saliency}`}
+            intent={intent}
+            saliency={saliency}
+            value={66}
+          />
+        </div>
+      )}
+    </IntentSaliencyMatrix>
   ),
 };
 
 /** A non-default range: `min` / `max` drive the fill percentage and the ARIA wiring. */
 export const CustomRange: Story = {
+  // Kept as a test, hidden from the sidebar so the showcase stays focused.
+  tags: ["!dev"],
   args: {
     label: "Temperature",
     intent: "warning",
@@ -71,6 +81,8 @@ export const CustomRange: Story = {
  * screen readers announce.
  */
 export const CustomValueText: Story = {
+  // Kept as a test, hidden from the sidebar so the showcase stays focused.
+  tags: ["!dev"],
   args: {
     label: "Battery",
     intent: "positive",
@@ -80,24 +92,13 @@ export const CustomValueText: Story = {
 };
 
 /**
- * A `description` beneath the track — supporting text (units, context) that's
- * also wired to the meter as its `aria-describedby`.
- */
-export const WithDescription: Story = {
-  args: {
-    label: "Storage used",
-    value: 72,
-    showValue: true,
-    description: "72 GB of your 100 GB quota",
-  },
-};
-
-/**
  * `showValue` renders the value at the end of the header row. `format` (an
  * `Intl.NumberFormat` options bag) drives how it reads — here as a unit — and
  * feeds the default `aria-valuetext` too.
  */
 export const CustomValueFormat: Story = {
+  // Kept as a test, hidden from the sidebar so the showcase stays focused.
+  tags: ["!dev"],
   args: {
     label: "Download",
     intent: "positive",
@@ -115,6 +116,8 @@ export const CustomValueFormat: Story = {
  * raw value against the max — while `slotProps` re-tunes each `Text` slot.
  */
 export const CustomValueNode: Story = {
+  // Kept as a test, hidden from the sidebar so the showcase stays focused.
+  tags: ["!dev"],
   args: {
     label: "Seats",
     intent: "secondary",
@@ -132,6 +135,8 @@ export const CustomValueNode: Story = {
 
 /** No visible label — named for assistive tech via `aria-label`. */
 export const AriaLabelOnly: Story = {
+  // Kept as a test, hidden from the sidebar so the showcase stays focused.
+  tags: ["!dev"],
   args: {
     label: undefined,
     "aria-label": "Signal strength",

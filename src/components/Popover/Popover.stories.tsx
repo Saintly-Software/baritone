@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
 import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Button } from "../Button";
 import { Text } from "../Text";
@@ -10,15 +9,11 @@ const meta: Meta<typeof Popover> = {
   title: "Surfaces/Popover",
   component: Popover,
   args: {
-    intent: "neutral",
-    saliency: "low",
     padding: "md",
     side: "bottom",
     align: "center",
   },
   argTypes: {
-    intent: { control: "select", options: INTENTS },
-    saliency: { control: "select", options: SURFACE_SALIENCIES },
     padding: { control: "select", options: ["none", "sm", "md", "lg"] },
     side: { control: "select", options: ["top", "right", "bottom", "left"] },
     align: { control: "select", options: ["start", "center", "end"] },
@@ -27,7 +22,7 @@ const meta: Meta<typeof Popover> = {
     docs: {
       description: {
         component:
-          "A floating surface anchored to a trigger. Its API mirrors Card (`header` / `footer` props, `intent` / `saliency` / `padding`). Built on base-ui, so it is non-modal by default — clicking outside or pressing Escape closes it while the rest of the page stays interactive.",
+          "A floating surface anchored to a trigger. Its API mirrors Card (`header` / `footer` props, `padding`); the surface is always the default neutral, low-saliency shade. Built on base-ui, so it is non-modal by default — clicking outside or pressing Escape closes it while the rest of the page stays interactive.",
       },
     },
   },
@@ -36,17 +31,14 @@ export default meta;
 
 type Story = StoryObj<typeof Popover>;
 
-export const Playground: Story = {
-  render: (args) => (
-    <Popover {...args} trigger={<Popover.Trigger>Open popover</Popover.Trigger>}>
-      <Text render={<p />}>
-        A floating surface anchored to its trigger. Click outside or press Escape to dismiss.
-      </Text>
-    </Popover>
-  ),
-};
-
-export const WithHeaderAndFooter: Story = {
+/**
+ * Every region at once — a `Popover.Header` (title + subtitle), a body, and a
+ * `Popover.Footer` whose `.Close` buttons dismiss the surface — all driven by
+ * the toolbar controls (`padding`, `side`, `align`). Opens by default so the
+ * surface is visible on load.
+ */
+export const KitchenSink: Story = {
+  args: { defaultOpen: true },
   render: (args) => (
     <Popover
       {...args}
@@ -66,22 +58,11 @@ export const WithHeaderAndFooter: Story = {
       }
     >
       <Text render={<p />}>
-        The header and footer are passed as props; content sits between them, and the footer buttons
-        close the popover.
+        A floating surface anchored to its trigger. The header and footer are passed as props with
+        the body between them; the footer buttons close the popover, as does clicking outside or
+        pressing Escape.
       </Text>
     </Popover>
-  ),
-};
-
-export const Sides: Story = {
-  render: () => (
-    <div style={{ display: "flex", gap: 16, padding: 80 }}>
-      {(["top", "right", "bottom", "left"] as const).map((side) => (
-        <Popover key={side} side={side} trigger={<Popover.Trigger>{side}</Popover.Trigger>}>
-          <Text render={<p />}>Placed on the {side}.</Text>
-        </Popover>
-      ))}
-    </div>
   ),
 };
 
@@ -125,17 +106,4 @@ export const ImperativeClose: Story = {
       </Popover>
     );
   },
-};
-
-export const Intents: Story = {
-  name: "Intents (Notice-style)",
-  render: () => (
-    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-      {INTENTS.map((intent) => (
-        <Popover key={intent} intent={intent} trigger={<Popover.Trigger>{intent}</Popover.Trigger>}>
-          <Text render={<p />}>This popover uses the {intent} intent.</Text>
-        </Popover>
-      ))}
-    </div>
-  ),
 };

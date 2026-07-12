@@ -8,9 +8,8 @@ import { Button } from "./index";
  * and Chromatic snapshot drivers.
  */
 const meta: Meta<typeof Button> = {
-  title: "Components/Button",
+  title: "Interaction Tests/Button",
   component: Button,
-  tags: ["!dev"],
 };
 export default meta;
 

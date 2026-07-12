@@ -64,21 +64,6 @@ describe("Tooltip", () => {
     expect(description).toHaveTextContent("Copied to clipboard");
   });
 
-  it("renders string[] content on separate lines", async () => {
-    const user = userEvent.setup();
-    render(
-      <Tooltip content={["Line one", "Line two"]}>
-        <Tooltip.Trigger delay={0}>Details</Tooltip.Trigger>
-      </Tooltip>,
-    );
-
-    await user.hover(screen.getByRole("button", { name: "Details" }));
-    await waitFor(() => expect(screen.getByText("Line one")).toBeInTheDocument(), {
-      timeout: 2000,
-    });
-    expect(screen.getByText("Line two")).toBeInTheDocument();
-  });
-
   it("does not open when disabled", async () => {
     const user = userEvent.setup();
     render(
