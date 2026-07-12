@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { CSSProperties } from "react";
 import * as React from "react";
-import { FORM_STATES, SIZES } from "../../theme/constants";
+import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
 import { Checkbox } from "./index";
 
 // Checkbox is controlled, so the stories drive it from local state — the same
@@ -42,17 +43,87 @@ export default meta;
 
 type Story = StoryObj<typeof ControlledCheckbox>;
 
-export const Playground: Story = {};
+// Interactive default — renamed from "Playground". Ships with `helpText` so the
+// default view shows the described-by wiring, not a bare box.
+export const Basic: Story = {
+  args: {
+    helpText: "We send at most one email a week. Unsubscribe anytime.",
+  },
+};
 
-/** Unchecked, checked, and disabled side by side. */
+const thStyle: CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "10px 16px",
+  whiteSpace: "nowrap",
+};
+
+const cellStyle: CSSProperties = {
+  padding: "10px 16px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+};
+
+interface StateRow {
+  label: string;
+  value?: boolean;
+  indeterminate?: boolean;
+  disabled?: boolean;
+  state?: FormState;
+}
+
+// Every meaningful checkbox state, including the combinations (invalid ×
+// checked/indeterminate × disabled) that don't get their own story.
+const stateRows: StateRow[] = [
+  { label: "Unchecked" },
+  { label: "Checked", value: true },
+  { label: "Indeterminate", indeterminate: true },
+  { label: "Disabled", disabled: true },
+  { label: "Disabled + checked", disabled: true, value: true },
+  { label: "Invalid", state: "invalid" },
+  { label: "Checked + invalid", state: "invalid", value: true },
+  { label: "Disabled + invalid", disabled: true, state: "invalid" },
+  { label: "Disabled + checked + invalid", disabled: true, value: true, state: "invalid" },
+  { label: "Invalid + indeterminate", state: "invalid", indeterminate: true },
+  {
+    label: "Invalid + indeterminate + disabled",
+    state: "invalid",
+    indeterminate: true,
+    disabled: true,
+  },
+];
+
+/** Every state (rows) against the rendered control (right column). */
 export const States: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 16 }}>
-      <Checkbox label="Unchecked" value={false} onChange={() => {}} />
-      <Checkbox label="Checked" value onChange={() => {}} />
-      <Checkbox label="Disabled" value={false} disabled onChange={() => {}} />
-      <Checkbox label="Disabled + checked" value disabled onChange={() => {}} />
-    </div>
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>Checkbox</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stateRows.map((row) => (
+          <tr key={row.label}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {row.label}
+            </th>
+            <td style={cellStyle}>
+              <Checkbox
+                aria-label={row.label}
+                value={row.value ?? false}
+                indeterminate={row.indeterminate}
+                disabled={row.disabled}
+                state={row.state}
+                onChange={() => {}}
+              />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ),
 };
 
@@ -65,71 +136,4 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
-};
-
-/** Invalid pulls the negative accent onto the box, wires `aria-invalid`, and
- * surfaces the `errorMessage` beneath. */
-export const Invalid: Story = {
-  args: {
-    label: "I accept the terms",
-    required: true,
-    state: "invalid",
-    errorMessage: "You must accept the terms to continue.",
-  },
-};
-
-/**
- * `indeterminate` shows the "mixed" dash and reports `aria-checked="mixed"` —
- * the usual "select all" parent for a partly-selected set. Toggling it resolves
- * to a plain boolean.
- */
-export const Indeterminate: Story = {
-  render: () => {
-    const options = ["Product updates", "Billing", "Security alerts"] as const;
-    const [selected, setSelected] = React.useState<string[]>(["Billing"]);
-    const allChecked = selected.length === options.length;
-    const someChecked = selected.length > 0 && !allChecked;
-
-    return (
-      <div style={{ display: "grid", gap: 12 }}>
-        <Checkbox
-          label="Select all"
-          value={allChecked}
-          indeterminate={someChecked}
-          onChange={(next) => setSelected(next ? [...options] : [])}
-        />
-        <div style={{ display: "grid", gap: 8, paddingLeft: 24 }}>
-          {options.map((option) => (
-            <Checkbox
-              key={option}
-              label={option}
-              value={selected.includes(option)}
-              onChange={(next) =>
-                setSelected((prev) => (next ? [...prev, option] : prev.filter((o) => o !== option)))
-              }
-            />
-          ))}
-        </div>
-      </div>
-    );
-  },
-};
-
-/** Inline `helpText` beneath the box, wired as the control's `aria-describedby`. */
-export const HelpText: Story = {
-  args: {
-    label: "Email me about product updates",
-    helpText: "We send at most one email a week. Unsubscribe anytime.",
-  },
-};
-
-/**
- * A label-less checkbox (e.g. a table row selector) still needs an accessible
- * name — supply one with `aria-label`.
- */
-export const AriaLabel: Story = {
-  render: () => {
-    const [value, setValue] = React.useState(false);
-    return <Checkbox aria-label="Select row" value={value} onChange={setValue} />;
-  },
 };

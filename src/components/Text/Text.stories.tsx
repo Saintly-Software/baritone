@@ -1,5 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { BODY_SIZES, INTENTS, SALIENCIES, TEXT_WEIGHTS } from "../../theme/constants";
+import type { CSSProperties } from "react";
+import {
+  BODY_SIZES,
+  INTENTS,
+  SALIENCIES,
+  TEXT_SIZES,
+  TEXT_WEIGHTS,
+} from "../../theme/constants";
 import { Text } from "./index";
 
 const meta: Meta<typeof Text> = {
@@ -7,7 +14,7 @@ const meta: Meta<typeof Text> = {
   component: Text,
   args: { children: "The quick brown fox", variant: "base", saliency: "mid" },
   argTypes: {
-    variant: { control: "select", options: BODY_SIZES },
+    variant: { control: "select", options: TEXT_SIZES },
     intent: { control: "select", options: INTENTS },
     saliency: { control: "select", options: SALIENCIES },
     weight: { control: "select", options: TEXT_WEIGHTS },
@@ -21,27 +28,71 @@ export default meta;
 
 type Story = StoryObj<typeof Text>;
 
-export const Playground: Story = {};
+// Interactive default — tune every knob from the controls panel. Renamed from
+// "Playground".
+export const Basic: Story = {};
 
-export const Variants: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 8 }}>
-      {BODY_SIZES.map((variant) => (
-        <Text key={variant} as="p" variant={variant}>
-          body/{variant} — The quick brown fox jumps over the lazy dog
-        </Text>
-      ))}
-    </div>
-  ),
+const thStyle: CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "8px 12px",
+  whiteSpace: "nowrap",
+  verticalAlign: "bottom",
 };
 
-export const Elements: Story = {
+const cellStyle: CSSProperties = {
+  padding: "8px 12px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+  verticalAlign: "baseline",
+};
+
+/**
+ * Every typography `variant` (rows, the full shared body + title scale) against
+ * every `weight` (columns), each cell showing regular and italic. `Text` and
+ * `Heading` render the same scale — sizes unique to the title scale (`2xl`+) take
+ * title styling, so the larger rows read as display type.
+ */
+export const Variants: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 8 }}>
-      <Text>as="div" (default) — a block-level container</Text>
-      <Text as="p">as="p" — a paragraph</Text>
-      <Text as="label">as="label" — an inline label</Text>
-      <Text as="span">as="span" — inline text</Text>
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th style={thStyle}>variant</th>
+            {TEXT_WEIGHTS.map((weight) => (
+              <th key={weight} style={thStyle}>
+                {weight}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {TEXT_SIZES.map((size) => {
+            const family = (BODY_SIZES as readonly string[]).includes(size) ? "body" : "title";
+            return (
+              <tr key={size}>
+                <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+                  {family}/{size}
+                </th>
+                {TEXT_WEIGHTS.map((weight) => (
+                  <td key={weight} style={cellStyle}>
+                    <div style={{ display: "grid", gap: 4 }}>
+                      <Text variant={size} weight={weight}>
+                        Baritone
+                      </Text>
+                      <Text variant={size} weight={weight} italic>
+                        Baritone
+                      </Text>
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   ),
 };
@@ -66,61 +117,6 @@ export const Intents: Story = {
           {intent} text
         </Text>
       ))}
-    </div>
-  ),
-};
-
-export const Weights: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 8 }}>
-      {TEXT_WEIGHTS.map((weight) => (
-        <Text key={weight} as="p" weight={weight}>
-          weight={weight} — The quick brown fox jumps over the lazy dog
-        </Text>
-      ))}
-    </div>
-  ),
-};
-
-export const Italic: Story = {
-  args: { italic: true, children: "Italicised body copy" },
-};
-
-export const Align: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 8, width: 320 }}>
-      <Text as="p" align="start">
-        align="start" — leading-aligned text
-      </Text>
-      <Text as="p" align="center">
-        align="center" — centred text
-      </Text>
-    </div>
-  ),
-};
-
-export const Wrap: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 8, width: 220 }}>
-      <Text as="p" wrap="wrap">
-        wrap="wrap" — this text is allowed to wrap onto multiple lines
-      </Text>
-      <Text as="p" wrap="nowrap">
-        wrap="nowrap" — this text stays on a single line and overflows
-      </Text>
-    </div>
-  ),
-};
-
-export const WordBreak: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 8, width: 200 }}>
-      <Text as="p" wordBreak="break-word">
-        wordBreak="break-word" — supercalifragilisticexpialidocious
-      </Text>
-      <Text as="p" wordBreak="normal">
-        wordBreak="normal" — supercalifragilisticexpialidocious
-      </Text>
     </div>
   ),
 };

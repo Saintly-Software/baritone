@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { textTypographyRecipe } from "../../styles/recipes/text.css";
+import { textTypographyRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
 import { TEXT_WEIGHTS } from "../../theme/constants";
 import { Text } from "./index";
 
@@ -58,6 +58,22 @@ describe("Text", () => {
     render(<Text wordBreak="break-word">Breakable</Text>);
     expect(screen.getByText("Breakable").className).toContain(
       textTypographyRecipe({ wordBreak: "break-word" }),
+    );
+  });
+
+  it("renders a body-scale variant with the body family", () => {
+    render(<Text variant="lg">Body</Text>);
+    expect(screen.getByText("Body").className).toContain(
+      textVariantRecipe({ family: "body", size: "lg" }),
+    );
+  });
+
+  it("renders a title-scale variant with title styling (shared scale with Heading)", () => {
+    // Sizes unique to the title scale (2xl+) are valid on Text and borrow title
+    // styling — Text and Heading differ only in semantics, not the sizes they render.
+    render(<Text variant="4xl">Display</Text>);
+    expect(screen.getByText("Display").className).toContain(
+      textVariantRecipe({ family: "title", size: "4xl" }),
     );
   });
 

@@ -47,17 +47,72 @@ export default meta;
 
 type Story = StoryObj<typeof ControlledSwitch>;
 
-export const Playground: Story = {};
+// Interactive default — renamed from "Playground".
+export const Basic: Story = {};
 
-/** Off, on, and disabled side by side. */
+const thStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "10px 16px",
+  whiteSpace: "nowrap",
+};
+
+const cellStyle: React.CSSProperties = {
+  padding: "10px 16px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+};
+
+interface StateRow {
+  label: string;
+  value?: boolean;
+  disabled?: boolean;
+  invalid?: boolean;
+}
+
+// Every meaningful switch state, including the invalid × checked × disabled
+// combinations that don't get their own story.
+const stateRows: StateRow[] = [
+  { label: "Off" },
+  { label: "On", value: true },
+  { label: "Disabled", disabled: true },
+  { label: "Disabled + on", disabled: true, value: true },
+  { label: "Invalid", invalid: true },
+  { label: "On + invalid", invalid: true, value: true },
+  { label: "Disabled + invalid", disabled: true, invalid: true },
+  { label: "Disabled + on + invalid", disabled: true, value: true, invalid: true },
+];
+
+/** Every state (rows) against the rendered control (right column). */
 export const States: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 16 }}>
-      <Switch label="Off" value={false} onChange={() => {}} />
-      <Switch label="On" value onChange={() => {}} />
-      <Switch label="Disabled" value={false} disabled onChange={() => {}} />
-      <Switch label="Disabled + on" value disabled onChange={() => {}} />
-    </div>
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>Switch</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stateRows.map((row) => (
+          <tr key={row.label}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {row.label}
+            </th>
+            <td style={cellStyle}>
+              <Switch
+                aria-label={row.label}
+                value={row.value ?? false}
+                disabled={row.disabled}
+                invalid={row.invalid}
+                onChange={() => {}}
+              />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ),
 };
 
@@ -70,15 +125,6 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
-};
-
-/** Invalid pulls the negative accent onto the track and wires `aria-invalid`. */
-export const Invalid: Story = {
-  args: {
-    label: "Accept tracking",
-    required: true,
-    invalid: true,
-  },
 };
 
 /**
