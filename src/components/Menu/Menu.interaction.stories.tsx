@@ -11,6 +11,7 @@ import { Menu } from "./index";
 const meta: Meta<typeof Menu> = {
   title: "Surfaces/Menu",
   component: Menu,
+  tags: ["!dev"],
 };
 export default meta;
 

@@ -10,6 +10,7 @@ import { Button } from "./index";
 const meta: Meta<typeof Button> = {
   title: "Components/Button",
   component: Button,
+  tags: ["!dev"],
 };
 export default meta;
 

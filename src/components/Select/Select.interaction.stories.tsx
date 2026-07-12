@@ -17,6 +17,7 @@ const FRUITS: SelectOption[] = [
 const meta: Meta<typeof Select> = {
   title: "Form Controls/Select",
   component: Select,
+  tags: ["!dev"],
   decorators: [
     (Story) => (
       <div style={{ maxWidth: 320 }}>

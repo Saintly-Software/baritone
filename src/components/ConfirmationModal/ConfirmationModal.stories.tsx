@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
+import { Button } from "../Button";
 import { Icon } from "../Icon";
 import { Text } from "../Text";
 import { ConfirmationModal } from "./index";
@@ -107,14 +108,14 @@ export const Controlled: Story = {
         >
           <Text render={<p />}>Your account and all associated data will be removed.</Text>
         </ConfirmationModal>
-        <ConfirmationModal.Trigger
-          // A trigger can live outside the dialog when you drive `open` yourself.
-          intent="negative"
-          saliency="high"
-          onClick={() => setOpen(true)}
-        >
+        {/*
+          When you drive `open` yourself, the opener lives outside the dialog, so
+          it's a plain `Button` — not `ConfirmationModal.Trigger` (a base-ui
+          `Dialog.Trigger`, which must sit inside the dialog via the `trigger` prop).
+        */}
+        <Button intent="negative" saliency="high" onClick={() => setOpen(true)}>
           Delete account
-        </ConfirmationModal.Trigger>
+        </Button>
       </>
     );
   },

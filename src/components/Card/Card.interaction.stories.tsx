@@ -13,6 +13,7 @@ import { Card } from "./index";
 const meta: Meta<typeof Card> = {
   title: "Surfaces/Card",
   component: Card,
+  tags: ["!dev"],
 };
 export default meta;
 
