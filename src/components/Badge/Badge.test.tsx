@@ -72,31 +72,7 @@ describe("Badge", () => {
     });
   });
 
-  describe("square", () => {
-    it("renders no content — a content-less swatch", () => {
-      render(<Badge data-testid="badge" square />);
-      expect(screen.getByTestId("badge")).toBeEmptyDOMElement();
-    });
-
-    it("applies a distinct class from both a dot and a content-bearing badge", () => {
-      render(
-        <>
-          <Badge data-testid="square" size="md" square />
-          <Badge data-testid="dot" size="md" />
-          <Badge data-testid="count" size="md" count={1} />
-        </>,
-      );
-      const classesOf = (id: string) => screen.getByTestId(id).className.split(/\s+/);
-      const square = classesOf("square");
-      const dot = classesOf("dot");
-      const count = classesOf("count");
-      // The square variant carries a class neither the dot nor the count badge has.
-      const extra = square.filter((cls) => !dot.includes(cls) && !count.includes(cls));
-      expect(extra.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe("dot", () => {
+  describe("blank", () => {
     it("renders no content when no icon/count/text is supplied", () => {
       render(<Badge data-testid="badge" />);
       expect(screen.getByTestId("badge")).toBeEmptyDOMElement();
@@ -105,17 +81,46 @@ describe("Badge", () => {
     it("applies a distinct class from a content-bearing badge of the same size", () => {
       render(
         <>
-          <Badge data-testid="dot" size="md" />
+          <Badge data-testid="blank" size="md" />
           <Badge data-testid="count" size="md" count={1} />
         </>,
       );
-      const dot = screen.getByTestId("dot");
+      const blank = screen.getByTestId("blank");
       const count = screen.getByTestId("count");
-      // The dot variant adds a class the content-bearing badge does not carry.
-      const extra = dot.className
+      // The blank variant adds a class the content-bearing badge does not carry.
+      const extra = blank.className
         .split(/\s+/)
         .filter((cls) => !count.className.split(/\s+/).includes(cls));
       expect(extra.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("shape", () => {
+    it("applies a distinct class for square vs round of the same kind", () => {
+      render(
+        <>
+          <Badge data-testid="round" count={1} shape="round" />
+          <Badge data-testid="square" count={1} shape="square" />
+        </>,
+      );
+      const round = screen.getByTestId("round").className.split(/\s+/);
+      const square = screen.getByTestId("square").className.split(/\s+/);
+      const extra = square.filter((cls) => !round.includes(cls));
+      expect(extra.length).toBeGreaterThan(0);
+    });
+
+    it("squares the content-less blank kind too", () => {
+      // The shape axis is orthogonal to content, so a blank badge squares just
+      // like the content-bearing kinds.
+      render(
+        <>
+          <Badge data-testid="round-blank" shape="round" />
+          <Badge data-testid="square-blank" shape="square" />
+        </>,
+      );
+      const round = screen.getByTestId("round-blank").className.split(/\s+/);
+      const square = screen.getByTestId("square-blank").className.split(/\s+/);
+      expect(square.some((cls) => !round.includes(cls))).toBe(true);
     });
   });
 });

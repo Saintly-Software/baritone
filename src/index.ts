@@ -168,7 +168,8 @@ export {
   type BadgeIconProps,
   type BadgeCountProps,
   type BadgeTextProps,
-  type BadgeDotProps,
+  type BadgeBlankProps,
+  type BadgeShape,
 } from "./components/Badge";
 export {
   Notice,
