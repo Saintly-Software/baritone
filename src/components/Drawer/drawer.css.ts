@@ -11,7 +11,6 @@ import { vars } from "../../theme/contract.css";
 export const drawerBackdrop = style({
   position: "fixed",
   inset: 0,
-  zIndex: vars.zIndex.modal,
   backgroundColor: "rgb(0 0 0 / 0.32)",
   opacity: "calc(1 - var(--drawer-swipe-progress, 0))",
   transitionProperty: "opacity",
@@ -38,7 +37,6 @@ export const drawerViewport = recipe({
   base: {
     position: "fixed",
     inset: 0,
-    zIndex: vars.zIndex.modal,
     display: "flex",
     alignItems: "stretch",
   },

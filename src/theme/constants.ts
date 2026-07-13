@@ -65,9 +65,6 @@ export type BorderWidthKey = (typeof BORDER_WIDTH_KEYS)[number];
 export const SHADOW_KEYS = ["sm", "md", "lg"] as const;
 export type ShadowKey = (typeof SHADOW_KEYS)[number];
 
-export const Z_INDEX_KEYS = ["base", "dropdown", "sticky", "overlay", "modal", "toast"] as const;
-export type ZIndexKey = (typeof Z_INDEX_KEYS)[number];
-
 /** Semantic heading levels — the number maps 1:1 to the `h1`–`h6` tag. */
 export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const;
 export type HeadingLevel = (typeof HEADING_LEVELS)[number];

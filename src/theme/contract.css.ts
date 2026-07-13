@@ -11,7 +11,6 @@ import {
   SURFACE_SALIENCIES,
   TEXT_WEIGHTS,
   TITLE_SIZES,
-  Z_INDEX_KEYS,
 } from "./constants";
 
 function record<K extends string, V>(keys: readonly K[], make: (key: K) => V): Record<K, V> {
@@ -73,7 +72,6 @@ export const tokenShape = {
   radius: record(RADIUS_KEYS, () => s()),
   borderWidth: record(BORDER_WIDTH_KEYS, () => s()),
   shadow: record(SHADOW_KEYS, () => s()),
-  zIndex: record(Z_INDEX_KEYS, () => s()),
   motion: {
     duration: { fast: s(), base: s(), slow: s() },
     easing: { standard: s() },

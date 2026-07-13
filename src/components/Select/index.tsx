@@ -21,7 +21,6 @@ import {
   selectItemText,
   selectList,
   selectPopup,
-  selectPositioner,
   selectSpinner,
   selectTrigger,
   selectTriggerRow,
@@ -305,7 +304,6 @@ export function Select(props: SelectProps) {
         </div>
         <BaseSelect.Portal>
           <BaseSelect.Positioner
-            className={selectPositioner}
             sideOffset={6}
             side="bottom"
             align="start"

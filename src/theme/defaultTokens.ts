@@ -23,7 +23,6 @@ import {
   motion,
   radius,
   space,
-  zIndex,
 } from "./scales";
 
 // ---------------------------------------------------------------------------
@@ -448,7 +447,6 @@ export function buildDefaultTokens(
     radius: radiusScale,
     borderWidth: borderWidthScale,
     shadow: shadows(isDark),
-    zIndex: { ...zIndex },
     motion: {
       duration: { ...motion.duration },
       easing: { ...motion.easing },

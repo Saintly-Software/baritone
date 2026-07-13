@@ -59,15 +59,6 @@ export const fontFamily = {
   mono: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
 } as const;
 
-export const zIndex = {
-  base: "0",
-  dropdown: "1000",
-  sticky: "1100",
-  overlay: "1300",
-  modal: "1400",
-  toast: "1600",
-} as const;
-
 export const motion = {
   duration: {
     fast: "120ms",

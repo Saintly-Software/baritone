@@ -10,7 +10,6 @@ import { vars } from "../../theme/contract.css";
 export const modalBackdrop = style({
   position: "fixed",
   inset: 0,
-  zIndex: vars.zIndex.modal,
   backgroundColor: "rgb(0 0 0 / 0.32)",
   transitionProperty: "opacity",
   transitionDuration: vars.motion.duration.base,
@@ -34,7 +33,6 @@ export const modalBackdrop = style({
 export const modalViewport = style({
   position: "fixed",
   inset: 0,
-  zIndex: vars.zIndex.modal,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
