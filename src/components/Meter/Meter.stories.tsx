@@ -134,16 +134,16 @@ export const CustomValueNode: Story = {
 };
 
 /**
- * `color` is the escape hatch: paint the indicator any CSS colour, overriding
- * `intent` × `saliency`. Reach for it only when you need a colour outside the
- * system palette.
+ * `slotProps.bar.color` is the escape hatch: paint the indicator any CSS colour,
+ * overriding `intent` × `saliency`. Reach for it only when you need a colour
+ * outside the system palette.
  */
 export const CustomColor: Story = {
   args: {
     label: "Brand health",
-    color: "#8b5cf6",
     value: 58,
     showValue: true,
+    slotProps: { bar: { color: "#8b5cf6" } },
   },
 };
 

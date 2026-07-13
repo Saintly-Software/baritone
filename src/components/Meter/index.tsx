@@ -8,8 +8,8 @@ import { Text, type TextProps } from "../Text";
 import { meterFillVar, meterHeader, meterIndicator, meterRoot, meterTrack } from "./meter.css";
 
 /**
- * Per-slot overrides for the meter's three `Text` pieces. Every field is
- * partial: you're layering props onto the slot's own defaults, so
+ * Overrides for the meter's inner pieces. The three `Text` slots are partial:
+ * you're layering props onto the slot's own defaults, so
  * `slotProps={{ value: { saliency: "high" }, label: { variant: "base" } }}`
  * just re-tunes those pieces while the rest of the meter stays as-is. Set
  * `children` here to override a slot's content entirely (rarely needed — prefer
@@ -22,6 +22,18 @@ export interface MeterSlotProps {
   value?: Partial<TextProps>;
   /** Props for the description `Text` beneath the track. */
   description?: Partial<TextProps>;
+  /**
+   * Overrides for the filled indicator (the "bar"). Not a `Text` slot — the one
+   * knob here is `color`, an escape hatch that paints the bar any CSS colour,
+   * overriding `intent` × `saliency`. Accepts anything CSS `color` takes (a
+   * hex/rgb value, a custom property, `currentColor`). Prefer `intent` /
+   * `saliency` so the bar stays on the system palette — reach for this only when
+   * you genuinely need a colour outside it, and mind contrast against the track.
+   */
+  bar?: {
+    /** Paint the indicator any CSS colour, overriding `intent` × `saliency`. */
+    color?: React.CSSProperties["color"];
+  };
 }
 
 export interface MeterProps {
@@ -29,14 +41,6 @@ export interface MeterProps {
   intent?: Intent;
   /** Prominence of the indicator's fill within its intent. Default `high`. */
   saliency?: Saliency;
-  /**
-   * Escape hatch: paint the indicator any CSS colour, overriding `intent` ×
-   * `saliency`. Accepts anything a CSS `color` takes (a hex/rgb value, a custom
-   * property, `currentColor`). Prefer `intent` / `saliency` so the bar stays on
-   * the system palette — reach for this only when you genuinely need a colour
-   * outside it, and mind contrast against the track.
-   */
-  color?: React.CSSProperties["color"];
   /**
    * Visible label rendered above the track. base-ui wires it up as the meter's
    * accessible name (`aria-labelledby`). To name the meter *without* a visible
@@ -85,7 +89,10 @@ export interface MeterProps {
    * value (forwarded as base-ui's `getAriaValueText`).
    */
   "aria-valuetext"?: string | ((formattedValue: string, value: number) => string);
-  /** Per-slot overrides passed down into the label / value / description `Text`s. */
+  /**
+   * Overrides for the inner pieces: the label / value / description `Text`s, plus
+   * `bar.color` as a colour escape hatch for the indicator.
+   */
   slotProps?: MeterSlotProps;
   /** Extra className merged onto the root. */
   className?: string;
@@ -112,7 +119,6 @@ export interface MeterProps {
 export function Meter({
   intent = "primary",
   saliency = "high",
-  color,
   label,
   description,
   showValue = false,
@@ -174,7 +180,11 @@ export function Meter({
       <BaseMeter.Track className={meterTrack}>
         <BaseMeter.Indicator
           className={meterIndicator({ intent, saliency })}
-          style={color != null ? assignInlineVars({ [meterFillVar]: color }) : undefined}
+          style={
+            slotProps?.bar?.color != null
+              ? assignInlineVars({ [meterFillVar]: slotProps.bar.color })
+              : undefined
+          }
         />
       </BaseMeter.Track>
       {description != null && (
