@@ -7,11 +7,6 @@ import { vars } from "../../../theme/contract.css";
  * surface definition.
  */
 
-/** Sits the tooltip above page content. */
-export const tooltipPositioner = style({
-  zIndex: vars.zIndex.overlay,
-});
-
 /**
  * A small neutral surface. Reuses the surface tokens so it themes with
  * everything else, and fades/scales out of the trigger on open and close.

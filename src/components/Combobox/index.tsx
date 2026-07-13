@@ -23,7 +23,6 @@ import {
   itemLabel,
   list,
   popup,
-  positioner,
   status as statusClass,
   statusError,
   statusSpinner,
@@ -432,7 +431,7 @@ export function Combobox(props: ComboboxProps) {
         </BaseCombobox.InputGroup>
 
         <BaseCombobox.Portal>
-          <BaseCombobox.Positioner className={positioner} sideOffset={4}>
+          <BaseCombobox.Positioner sideOffset={4}>
             <BaseCombobox.Popup
               className={cx(
                 surfaceRecipe({ intent: "neutral", saliency: "low", padding: "none" }),

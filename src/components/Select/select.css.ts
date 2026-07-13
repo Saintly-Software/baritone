@@ -134,11 +134,6 @@ export const selectClearButton = recipe({
 
 export type SelectClearButtonVariants = NonNullable<RecipeVariants<typeof selectClearButton>>;
 
-/** Floating list container: sits above the page and animates from the anchor. */
-export const selectPositioner = style({
-  zIndex: vars.zIndex.overlay,
-});
-
 /**
  * The popup surface. Colour/border/radius come from the shared `surfaceRecipe`
  * (neutral, low, padding `none`); this adds the elevation shadow, the

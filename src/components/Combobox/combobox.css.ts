@@ -149,11 +149,6 @@ export const adornment = style({
   },
 });
 
-/** Sits the floating popup above page content (mirrors `Popover`). */
-export const positioner = style({
-  zIndex: vars.zIndex.dropdown,
-});
-
 /**
  * The popup surface. Colour/border/padding come from the shared `surfaceRecipe`
  * (applied in the component); this adds elevation, the anchor-matched width, a

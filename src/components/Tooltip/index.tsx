@@ -5,7 +5,6 @@ import { InternalButton } from "../../internal/components/InternalButton";
 import {
   tooltipArrow,
   tooltipPopup,
-  tooltipPositioner,
 } from "../../internal/components/InternalTooltip/internalTooltip.css";
 import { cx } from "../../utils/cx";
 import type { ButtonProps } from "../Button";
@@ -130,7 +129,6 @@ function TooltipRoot({
         {children}
         <BaseTooltip.Portal>
           <BaseTooltip.Positioner
-            className={tooltipPositioner}
             side={side}
             align={align}
             sideOffset={sideOffset}

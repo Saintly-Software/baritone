@@ -2,14 +2,6 @@ import { style } from "@vanilla-extract/css";
 import { vars } from "../../theme/contract.css";
 
 /**
- * Sits the floating popover above page content. The positioner is the element
- * base-ui anchors to the trigger; the popup inside it is the visible surface.
- */
-export const popoverPositioner = style({
-  zIndex: vars.zIndex.overlay,
-});
-
-/**
  * Popover surface layout — a vertical stack mirroring `Card`, so the optional
  * header, the content, and the optional footer lay out top-to-bottom. The
  * surface colour/border/padding come from the shared `surfaceRecipe`; this adds

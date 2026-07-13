@@ -1,4 +1,4 @@
-import { createTheme } from "@vanilla-extract/css";
+import { createTheme, globalStyle } from "@vanilla-extract/css";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { warnOnContrastIssues } from "./contrast";
 import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
@@ -41,7 +41,15 @@ export function createDesignSystemTheme(
   if (shouldCheck(options)) {
     warnOnContrastIssues(full, options.name ?? options.scheme);
   }
-  return createTheme(vars, full);
+  const themeClass = createTheme(vars, full);
+  // `isolation: isolate` makes the themed root its own stacking context, so any
+  // z-indexed app content stays contained below the popups base-ui portals to the
+  // end of `<body>` (Tooltip/Popover/Menu/Select/Combobox/Modal/Drawer) — which is
+  // why those surfaces need no z-index of their own. Attached to the generated
+  // class itself (not a second class) so the return value stays a single class,
+  // safe for `classList.add`. `BaritoneTheme` sets the same via inline style.
+  globalStyle(`.${themeClass}`, { isolation: "isolate" });
+  return themeClass;
 }
 
 /**

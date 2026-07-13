@@ -6,9 +6,9 @@ import { iconColorVar, textColorVar } from "../../styles/vars.css";
 /** `Menu.Item`'s supported intents — the neutral default plus the accent intents. */
 const MENU_ITEM_INTENTS = ["neutral", "secondary", "warning", "negative"] as const;
 
-/** Sits the floating menu above page content, mirroring `Popover`. */
+/** base-ui portals the menu to the end of `<body>`, so it stacks above page
+ * content by DOM order — no z-index needed (see `BaritoneTheme`'s `isolation`). */
 export const menuPositioner = style({
-  zIndex: vars.zIndex.overlay,
   outline: "none",
 });
 

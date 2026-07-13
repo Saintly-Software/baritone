@@ -14,7 +14,6 @@ import {
   popoverHeader,
   popoverHeaderText,
   popoverPopup,
-  popoverPositioner,
 } from "./popover.css";
 
 type RootProps = React.ComponentProps<typeof BasePopover.Root>;
@@ -115,7 +114,6 @@ function PopoverRoot({
       {trigger}
       <BasePopover.Portal>
         <BasePopover.Positioner
-          className={popoverPositioner}
           side={side}
           align={align}
           sideOffset={sideOffset}
