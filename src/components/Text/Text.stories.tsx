@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { CSSProperties } from "react";
 import { BODY_SIZES, INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Text } from "./index";
 
 const meta: Meta<typeof Text> = {
-  title: "Text/Text",
+  title: "Typography/Text",
   component: Text,
   args: { children: "The quick brown fox", variant: "base", saliency: "mid" },
   argTypes: {
@@ -91,26 +92,19 @@ export const Variants: Story = {
   ),
 };
 
-export const Saliencies: Story = {
+/**
+ * Every `intent` (rows) against every `saliency` (columns). Each cell renders the
+ * colour token for that combination, so you can read a full matrix of the text
+ * palette at a glance.
+ */
+export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 8 }}>
-      {SALIENCIES.map((saliency) => (
-        <Text key={saliency} saliency={saliency} render={<p />}>
-          neutral/{saliency} — the default body colour is mid
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
+        <Text intent={intent} saliency={saliency}>
+          The quick brown fox
         </Text>
-      ))}
-    </div>
-  ),
-};
-
-export const Intents: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 8 }}>
-      {INTENTS.map((intent) => (
-        <Text key={intent} intent={intent} saliency="high" render={<p />}>
-          {intent} text
-        </Text>
-      ))}
-    </div>
+      )}
+    </IntentSaliencyMatrix>
   ),
 };

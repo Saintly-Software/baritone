@@ -17,9 +17,8 @@ const FRUITS: ComboboxOption[] = [
  * row, and the async error state.
  */
 const meta: Meta<typeof Combobox> = {
-  title: "Form Controls/Combobox",
+  title: "Interaction Tests/Combobox",
   component: Combobox,
-  tags: ["!dev"],
   decorators: [
     (Story) => (
       <div style={{ maxWidth: 340 }}>
@@ -98,6 +97,24 @@ export const FreeTextAddRow: Story = {
   },
 };
 
+/**
+ * A mocked async search that stays pending: typing kicks off `onSearch`, the popup
+ * enters `loading` and holds there so the snapshot captures the in-menu spinner.
+ */
+export const AsyncSearchLoading: Story = {
+  name: "Async search loading",
+  render: () => <PendingSearchExample />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole("combobox", { name: "City" });
+    await userEvent.click(input);
+    await userEvent.keyboard("london");
+
+    // The spinner and its "Searching…" copy live in the portaled popup.
+    await waitFor(() => expect(within(document.body).getByText("Searching…")).toBeInTheDocument());
+  },
+};
+
 /** A mocked async search: querying "xyz" resolves to the error copy, replacing the spinner. */
 export const AsyncSearchError: Story = {
   name: "Async search error",
@@ -117,6 +134,24 @@ export const AsyncSearchError: Story = {
     );
   },
 };
+
+// A mock remote search that never resolves: any query leaves the popup in the
+// loading state, so the story captures the in-menu spinner.
+function PendingSearchExample() {
+  const [loading, setLoading] = React.useState(false);
+
+  const onSearch = React.useCallback((query: string) => {
+    setLoading(query.trim() !== "");
+  }, []);
+
+  return (
+    <Combobox
+      label="City"
+      placeholder="Search cities…"
+      search={{ loading, error: undefined, results: [], onSearch }}
+    />
+  );
+}
 
 // A debounced, abortable mock remote search: "xyz" always errors.
 function AsyncExample() {

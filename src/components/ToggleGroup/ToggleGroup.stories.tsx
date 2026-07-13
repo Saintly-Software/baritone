@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { type FormState, INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { ToggleGroup } from "./index";
 
 type View = "list" | "board" | "calendar";
@@ -46,28 +47,17 @@ type Story = StoryObj<typeof ViewToggle>;
 
 export const Playground: Story = {};
 
-export const Intents: Story = {
+export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 16, justifyItems: "start" }}>
-      {INTENTS.map((intent) => (
-        <ViewToggle key={intent} intent={intent} aria-label={`View (${intent})`} />
-      ))}
-    </div>
-  ),
-};
-
-export const Saliencies: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 16, justifyItems: "start" }}>
-      {SALIENCIES.map((saliency) => (
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
         <ViewToggle
-          key={saliency}
-          intent="primary"
+          intent={intent}
           saliency={saliency}
-          aria-label={`View (${saliency})`}
+          aria-label={`View (${intent} ${saliency})`}
         />
-      ))}
-    </div>
+      )}
+    </IntentSaliencyMatrix>
   ),
 };
 
@@ -79,12 +69,6 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
-};
-
-export const Disabled: Story = {
-  args: {
-    disabled: true,
-  },
 };
 
 // A labelled form-control host: same segmented control, now with a group label,
@@ -116,13 +100,64 @@ export const FormControl: Story = {
   ),
 };
 
-export const Invalid: Story = {
+const thStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "16px 20px",
+  whiteSpace: "nowrap",
+  verticalAlign: "top",
+};
+
+const cellStyle: React.CSSProperties = {
+  padding: "16px 20px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+  verticalAlign: "top",
+};
+
+interface StateRow {
+  label: string;
+  disabled?: boolean;
+  state?: FormState;
+  errorMessage?: string;
+}
+
+// Disabled and invalid, folded into one table alongside the default.
+const stateRows: StateRow[] = [
+  { label: "default" },
+  { label: "disabled", disabled: true },
+  { label: "invalid", state: "invalid", errorMessage: "Pick a default view to continue." },
+];
+
+/** Every state (rows) against the rendered control (right column). */
+export const States: Story = {
   render: () => (
-    <LabelledViewToggle
-      label="Default view"
-      required
-      state="invalid"
-      errorMessage="Pick a default view to continue."
-    />
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>ToggleGroup</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stateRows.map((row) => (
+          <tr key={row.label}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {row.label}
+            </th>
+            <td style={cellStyle}>
+              <LabelledViewToggle
+                label="Default view"
+                required
+                disabled={row.disabled}
+                state={row.state}
+                errorMessage={row.errorMessage}
+              />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ),
 };

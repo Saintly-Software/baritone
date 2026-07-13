@@ -44,54 +44,7 @@ export default meta;
 type Story = StoryObj<typeof ControlledToggle>;
 
 /** Click to toggle. Off renders as a `low`-saliency ghost; on fills in. */
-export const Playground: Story = {};
-
-/**
- * The on look at each intent / saliency (the toggle starts pressed). Compare with
- * the off column on the far left, which always renders at `low` saliency.
- */
-export const IntentsAndSaliencies: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 16 }}>
-      {INTENTS.map((intent) => (
-        <div key={intent} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <ToggleButton
-            value={false}
-            onChange={() => {}}
-            aria-label={`${intent} off`}
-            icon={<StarIcon />}
-            intent={intent}
-          />
-          {SALIENCIES.map((saliency) => (
-            <ControlledToggle
-              key={saliency}
-              aria-label={`${intent} ${saliency}`}
-              icon={<StarIcon />}
-              intent={intent}
-              saliency={saliency}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
-  ),
-};
-
-export const Sizes: Story = {
-  render: () => (
-    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-      {SIZES.map((size) => (
-        <ControlledToggle
-          key={size}
-          aria-label={`Favourite (${size})`}
-          icon={<StarIcon />}
-          intent="primary"
-          size={size}
-        />
-      ))}
-    </div>
-  ),
-};
+export const Basic: Story = {};
 
 /**
  * Uncontrolled + state-aware slots: no `value`/`onChange` wiring, and both the
@@ -99,6 +52,7 @@ export const Sizes: Story = {
  * the initial state.
  */
 export const UncontrolledWithCallbackSlots: Story = {
+  tags: ["!dev"],
   render: () => (
     <ToggleButton
       defaultValue={false}
@@ -117,16 +71,4 @@ export const UncontrolledWithCallbackSlots: Story = {
       intent="primary"
     />
   ),
-};
-
-export const Disabled: Story = {
-  args: { disabled: true, disabledReason: "Sign in to save favourites." },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Tab to or hover the button to see why it is disabled. The button keeps focus (aria-disabled), so the explanation is reachable by keyboard.",
-      },
-    },
-  },
 };

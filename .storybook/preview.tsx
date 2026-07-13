@@ -39,7 +39,18 @@ const preview: Preview = {
     layout: "fullscreen",
     options: {
       storySort: {
-        order: ["Theming", "Surfaces", "Text", "Form Controls", "Components"],
+        order: [
+          "Theming",
+          "Typography",
+          "Layout",
+          "Surfaces",
+          "Text",
+          "Form Controls",
+          "Components",
+          "Utilities",
+          "Internal",
+          "Interaction Tests",
+        ],
       },
     },
   },

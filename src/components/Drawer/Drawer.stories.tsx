@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
+import { SURFACE_SALIENCIES } from "../../theme/constants";
 import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Button } from "../Button";
+import { ButtonGroup } from "../ButtonGroup";
 import { Icon } from "../Icon";
+import { Modal } from "../Modal";
 import { Text } from "../Text";
 import { Drawer } from "./index";
 
@@ -39,7 +41,6 @@ const meta: Meta<typeof Drawer> = {
   title: "Surfaces/Drawer",
   component: Drawer,
   args: {
-    intent: "neutral",
     saliency: "low",
     padding: "md",
     side: "right",
@@ -47,7 +48,6 @@ const meta: Meta<typeof Drawer> = {
     disabled: false,
   },
   argTypes: {
-    intent: { control: "select", options: INTENTS },
     saliency: { control: "select", options: SURFACE_SALIENCIES },
     padding: { control: "select", options: ["none", "sm", "md", "lg"] },
     side: { control: "inline-radio", options: ["left", "right"] },
@@ -58,7 +58,7 @@ const meta: Meta<typeof Drawer> = {
     docs: {
       description: {
         component:
-          "A panel that slides in from the edge of the screen. Its API mirrors Popover (`header` / `footer` / `trigger` props, `intent` / `saliency` / `padding`). Built on base-ui's Drawer, so it is modal with an always-rendered backdrop and supports swipe-to-dismiss. Clicking outside never closes it; `disabled` additionally vetoes Escape / the close button / swipe, and `loading` overlays a spinner on the body.",
+          "A panel that slides in from the edge of the screen. It composes `header` / `footer` / `trigger` props around its content (the same pattern as Popover / Modal) and takes `saliency` / `padding` surface knobs. Built on base-ui's Drawer, so it is modal with an always-rendered backdrop and supports swipe-to-dismiss. Clicking outside never closes it; `disabled` additionally vetoes Escape / the close button / swipe, and `loading` overlays a spinner on the body.",
       },
     },
   },
@@ -67,69 +67,83 @@ export default meta;
 
 type Story = StoryObj<typeof Drawer>;
 
-export const Playground: Story = {
+/**
+ * Every region at once — a header carrying an overflow-actions `Menu`, a
+ * scrolling body, and a footer whose primary actions render as a joined
+ * `ButtonGroup` — all driven by the toolbar controls (`saliency`, `padding`,
+ * `side`, `loading`, `disabled`). Opens by default so the panel is visible on
+ * load.
+ */
+export const KitchenSink: Story = {
+  args: { defaultOpen: true },
   render: (args) => (
-    <Drawer {...args} trigger={<Drawer.Trigger>Open drawer</Drawer.Trigger>}>
+    <Drawer
+      {...args}
+      trigger={<Drawer.Trigger>Open drawer</Drawer.Trigger>}
+      header={
+        <Drawer.Header
+          title="Edit profile"
+          subtitle="Update your account details"
+          actions={[
+            { children: "Rename", icon: <EditGlyph />, onClick: () => {} },
+            { children: "Share", icon: <ShareGlyph />, onClick: () => {} },
+            { children: "Delete", icon: <TrashGlyph />, intent: "negative", onClick: () => {} },
+          ]}
+        />
+      }
+      footer={
+        <Drawer.Footer
+          actions={[
+            <ButtonGroup.Item key="cancel" onClick={() => {}}>
+              Cancel
+            </ButtonGroup.Item>,
+            <ButtonGroup.Item key="save" intent="primary" saliency="high" onClick={() => {}}>
+              Save
+            </ButtonGroup.Item>,
+          ]}
+        />
+      }
+    >
       <Text render={<p />}>
-        A panel anchored to the {args.side ?? "right"} edge. Press Escape or use a close control to
+        A panel anchored to the {args.side ?? "right"} edge. The body sits between the header and
+        footer and scrolls on overflow. Header actions collapse into a &ldquo;more options&rdquo;
+        menu; footer actions join into a button group. Press Escape or use a close control to
         dismiss — clicking the backdrop won&apos;t.
       </Text>
     </Drawer>
   ),
 };
 
-export const WithHeaderAndFooter: Story = {
+/**
+ * A drawer docked to the left edge, opened by default so the panel is visible on
+ * load. Toggle `side` in the toolbar to slide it in from the right instead.
+ */
+export const Sides: Story = {
+  name: "Opens from the left",
+  args: { side: "left", defaultOpen: true },
   render: (args) => (
     <Drawer
       {...args}
-      trigger={
-        <Drawer.Trigger intent="primary" saliency="high">
-          Edit profile
-        </Drawer.Trigger>
-      }
-      header={<Drawer.Header title="Edit profile" subtitle="Update your account details" />}
+      header={<Drawer.Header title={`Opens from the ${args.side ?? "left"}`} />}
+      trigger={<Drawer.Trigger>From {args.side ?? "left"}</Drawer.Trigger>}
       footer={
         <Drawer.Footer>
-          <Drawer.Close>Cancel</Drawer.Close>
-          <Drawer.Close intent="primary" saliency="high">
-            Save
-          </Drawer.Close>
+          <Drawer.Close>Close</Drawer.Close>
         </Drawer.Footer>
       }
     >
-      <Text render={<p />}>
-        The header and footer are passed as props; the body sits between them and scrolls
-        independently, while the footer buttons close the drawer.
-      </Text>
+      <Text render={<p />}>This drawer slides in from the {args.side ?? "left"} edge.</Text>
     </Drawer>
   ),
 };
 
-export const Sides: Story = {
-  render: (args) => (
-    <div style={{ display: "flex", gap: 16 }}>
-      {(["left", "right"] as const).map((side) => (
-        <Drawer
-          {...args}
-          key={side}
-          side={side}
-          header={<Drawer.Header title={`Opens from the ${side}`} />}
-          trigger={<Drawer.Trigger>From {side}</Drawer.Trigger>}
-          footer={
-            <Drawer.Footer>
-              <Drawer.Close>Close</Drawer.Close>
-            </Drawer.Footer>
-          }
-        >
-          <Text render={<p />}>This drawer slides in from the {side} edge.</Text>
-        </Drawer>
-      ))}
-    </div>
-  ),
-};
-
+/**
+ * The body sits behind a spinner while `loading` is set; the header and footer
+ * stay live so the drawer can still be closed. Opens by default so the spinner
+ * is visible on load.
+ */
 export const Loading: Story = {
-  args: { loading: true },
+  args: { loading: true, defaultOpen: true },
   render: (args) => (
     <Drawer
       {...args}
@@ -145,113 +159,6 @@ export const Loading: Story = {
         While `loading` is set, this body is hidden behind a spinner, but the header and footer stay
         live so the drawer can still be closed.
       </Text>
-    </Drawer>
-  ),
-};
-
-export const Disabled: Story = {
-  name: "Disabled (non-dismissable)",
-  args: { disabled: true },
-  render: (args) => (
-    <Drawer
-      {...args}
-      header={<Drawer.Header title="Action in progress" subtitle="This drawer can't be closed" />}
-      trigger={<Drawer.Trigger>Open locked drawer</Drawer.Trigger>}
-      footer={
-        <Drawer.Footer>
-          <Drawer.Close disabled disabledReason="Finish the current step first">
-            Close
-          </Drawer.Close>
-        </Drawer.Footer>
-      }
-    >
-      <Text render={<p />}>
-        While `disabled` is set, Escape, the close button, swipe, and the backdrop all refuse to
-        close the drawer. Toggle the control in the toolbar to release it.
-      </Text>
-    </Drawer>
-  ),
-};
-
-export const Intents: Story = {
-  name: "Intents (Notice-style)",
-  render: () => (
-    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-      {INTENTS.map((intent) => (
-        <Drawer
-          key={intent}
-          intent={intent}
-          header={<Drawer.Header title={`${intent} drawer`} />}
-          trigger={<Drawer.Trigger>{intent}</Drawer.Trigger>}
-          footer={
-            <Drawer.Footer>
-              <Drawer.Close>Close</Drawer.Close>
-            </Drawer.Footer>
-          }
-        >
-          <Text render={<p />}>This drawer uses the {intent} intent.</Text>
-        </Drawer>
-      ))}
-    </div>
-  ),
-};
-
-export const Actions: Story = {
-  name: "Actions (menu-style)",
-  render: (args) => (
-    <Drawer
-      {...args}
-      header={<Drawer.Header title="Document" subtitle="Quick actions for this file" />}
-      trigger={<Drawer.Trigger>Open actions</Drawer.Trigger>}
-      footer={
-        <Drawer.Footer>
-          <Drawer.Close>Done</Drawer.Close>
-        </Drawer.Footer>
-      }
-    >
-      {/* A menu-style action list rendered inline in the body. Each row is a real
-          button/link and an ordinary tab stop, so the list is keyboard reachable. */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        <Drawer.Action icon={<EditGlyph />} onClick={() => {}}>
-          Rename
-        </Drawer.Action>
-        <Drawer.Action icon={<ShareGlyph />} onClick={() => {}}>
-          Share
-        </Drawer.Action>
-        <Drawer.Action icon={<EditGlyph />} href="https://example.com">
-          Open in editor
-        </Drawer.Action>
-        <Drawer.Action icon={<TrashGlyph />} intent="negative" onClick={() => {}}>
-          Delete
-        </Drawer.Action>
-      </div>
-    </Drawer>
-  ),
-};
-
-export const ActionIntents: Story = {
-  name: "Action intents",
-  render: (args) => (
-    <Drawer
-      {...args}
-      header={<Drawer.Header title="Action intents" />}
-      trigger={<Drawer.Trigger>Open</Drawer.Trigger>}
-      footer={
-        <Drawer.Footer>
-          <Drawer.Close>Close</Drawer.Close>
-        </Drawer.Footer>
-      }
-    >
-      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-        {(["neutral", "secondary", "warning", "negative"] as const).map((intent) => (
-          <Drawer.Action key={intent} icon={<EditGlyph />} intent={intent} onClick={() => {}}>
-            {intent}
-          </Drawer.Action>
-        ))}
-        <Drawer.Action icon={<TrashGlyph />} disabled onClick={() => {}}>
-          Disabled
-        </Drawer.Action>
-      </div>
     </Drawer>
   ),
 };
@@ -299,21 +206,28 @@ export const ImperativeClose: Story = {
   },
 };
 
+/**
+ * A drawer opened from inside a modal — each surface renders its own backdrop, so
+ * the stack stays legible. Both surfaces open by default so the Chromatic snapshot
+ * captures the layered backdrops.
+ */
 export const Nested: Story = {
   render: (args) => (
-    <Drawer
-      {...args}
-      header={<Drawer.Header title="Account" subtitle="Open a second drawer on top" />}
-      trigger={<Drawer.Trigger>Open drawer</Drawer.Trigger>}
+    <Modal
+      defaultOpen
+      header={<Modal.Header title="Account" subtitle="Open a drawer on top" />}
+      trigger={<Modal.Trigger>Open modal</Modal.Trigger>}
       footer={
-        <Drawer.Footer>
-          <Drawer.Close>Close</Drawer.Close>
-        </Drawer.Footer>
+        <Modal.Footer>
+          <Modal.Close>Close</Modal.Close>
+        </Modal.Footer>
       }
     >
-      <Text render={<p />}>Each drawer renders its own backdrop, so the stack stays legible.</Text>
+      <Text render={<p />}>Each surface renders its own backdrop, so the stack stays legible.</Text>
       <div style={{ marginTop: 16 }}>
         <Drawer
+          {...args}
+          defaultOpen
           header={<Drawer.Header title="Security" />}
           trigger={<Drawer.Trigger>Security settings</Drawer.Trigger>}
           footer={
@@ -322,9 +236,9 @@ export const Nested: Story = {
             </Drawer.Footer>
           }
         >
-          <Text render={<p />}>A nested drawer, opened from inside the first.</Text>
+          <Text render={<p />}>A nested drawer, opened from inside the modal.</Text>
         </Drawer>
       </div>
-    </Drawer>
+    </Modal>
   ),
 };

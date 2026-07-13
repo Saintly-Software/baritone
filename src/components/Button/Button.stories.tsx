@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { BODY_SIZES, INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Icon } from "../Icon";
 import { Button } from "./index";
 
@@ -46,30 +47,48 @@ export const Playground: Story = {};
 
 export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 16 }}>
-      {INTENTS.map((intent) => (
-        <div key={intent} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          {SALIENCIES.map((saliency) => (
-            <Button key={saliency} intent={intent} saliency={saliency}>
-              {intent}/{saliency}
-            </Button>
-          ))}
-        </div>
-      ))}
-    </div>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
+        <Button intent={intent} saliency={saliency}>
+          Button
+        </Button>
+      )}
+    </IntentSaliencyMatrix>
   ),
 };
 
 export const Sizes: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-      {SIZES.map((size) => (
-        <Button key={size} intent="primary" saliency="high" size={size}>
-          {size}
-        </Button>
-      ))}
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        {SIZES.map((size) => (
+          <Button key={size} intent="primary" saliency="high" size={size}>
+            {size}
+          </Button>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        {SIZES.map((size) => (
+          <Button
+            key={size}
+            icon={<Plus />}
+            aria-label={`Add (${size})`}
+            intent="primary"
+            saliency="high"
+            size={size}
+          />
+        ))}
+      </div>
     </div>
   ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Buttons render at every `size`. The icon-only button (bottom row) stays square at every `size` — a 1:1 box of side = the control height.",
+      },
+    },
+  },
 };
 
 export const WithIcons: Story = {
@@ -92,62 +111,23 @@ export const IconOnly: Story = {
   },
 };
 
-export const IconOnlySizes: Story = {
+export const States: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-      {SIZES.map((size) => (
-        <Button
-          key={size}
-          icon={<Plus />}
-          aria-label={`Add (${size})`}
-          intent="primary"
-          saliency="high"
-          size={size}
-        />
-      ))}
+      <Button intent="primary" saliency="high" loading>
+        Saving…
+      </Button>
+      <Button icon={<Plus />} aria-label="Add item" intent="primary" saliency="high" loading />
+      <Button intent="primary" saliency="high" disabled>
+        Disabled
+      </Button>
     </div>
   ),
   parameters: {
     docs: {
       description: {
         story:
-          "The icon-only button stays square at every `size` — a 1:1 box of side = the control height.",
-      },
-    },
-  },
-};
-
-export const IconOnlyLoading: Story = {
-  args: { icon: <Plus />, "aria-label": "Add item", loading: true, children: undefined },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "`loading` overlays a spinner on the glyph; the `aria-label` keeps naming the control while busy.",
-      },
-    },
-  },
-};
-
-export const Loading: Story = {
-  args: { loading: true, children: "Saving…" },
-};
-
-export const Disabled: Story = {
-  args: { disabled: true, children: "Disabled" },
-};
-
-export const DisabledWithReason: Story = {
-  args: {
-    disabled: true,
-    children: "Publish",
-    disabledReason: "Add a title before publishing.",
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Tab to or hover the button to see why it is disabled. The button keeps focus (aria-disabled), so the explanation is reachable by keyboard.",
+          "The non-default states side by side. `loading` overlays a spinner (on the label, or on the glyph for an icon-only button, where the `aria-label` keeps naming the control while busy); `disabled` dims the control and blocks interaction.",
       },
     },
   },
@@ -167,17 +147,13 @@ export const TextAppearance: Story = {
 
 export const TextIntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 12 }}>
-      {INTENTS.map((intent) => (
-        <div key={intent} style={{ display: "flex", gap: 20, alignItems: "center" }}>
-          {SALIENCIES.map((saliency) => (
-            <Button key={saliency} appearance="text" intent={intent} saliency={saliency}>
-              {intent}/{saliency}
-            </Button>
-          ))}
-        </div>
-      ))}
-    </div>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
+        <Button appearance="text" intent={intent} saliency={saliency}>
+          Learn more
+        </Button>
+      )}
+    </IntentSaliencyMatrix>
   ),
 };
 

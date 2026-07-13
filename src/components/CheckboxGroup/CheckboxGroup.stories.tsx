@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { CSSProperties } from "react";
 import * as React from "react";
 import { FORM_STATES, SIZES } from "../../theme/constants";
 import { CheckboxGroup } from "./index";
@@ -69,19 +70,52 @@ export const Sizes: Story = {
   ),
 };
 
+const thStyle: CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "16px 20px",
+  whiteSpace: "nowrap",
+  verticalAlign: "top",
+};
+
+const cellStyle: CSSProperties = {
+  padding: "16px 20px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+  verticalAlign: "top",
+};
+
+/** Every validation state (rows) against the rendered group (right column). */
 export const States: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 24 }}>
-      {FORM_STATES.map((state) => (
-        <Subscriptions
-          key={state}
-          label={`State: ${state}`}
-          state={state}
-          description={state === "warning" ? "Double-check these choices." : undefined}
-          errorMessage={state === "invalid" ? "Pick at least one topic." : undefined}
-        />
-      ))}
-    </div>
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>CheckboxGroup</th>
+        </tr>
+      </thead>
+      <tbody>
+        {FORM_STATES.map((state) => (
+          <tr key={state}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {state}
+            </th>
+            <td style={cellStyle}>
+              <div style={{ maxWidth: 320 }}>
+                <Subscriptions
+                  label="Email me about"
+                  state={state}
+                  description={state === "warning" ? "Double-check these choices." : undefined}
+                  errorMessage={state === "invalid" ? "Pick at least one topic." : undefined}
+                />
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ),
 };
 

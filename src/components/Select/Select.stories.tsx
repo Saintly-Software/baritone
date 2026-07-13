@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { FORM_STATES, SIZES } from "../../theme/constants";
+import { type FormState, SIZES } from "../../theme/constants";
 import { Select, type SelectOption } from "./index";
 
 const FRUITS: SelectOption[] = [
@@ -62,28 +62,91 @@ export const Multiple: Story = {
   },
 };
 
-/** Every validation state, with description / error copy. */
-export const States: Story = {
-  render: () => {
-    const [value, setValue] = React.useState<string | null>("apple");
-    return (
-      <div style={{ display: "grid", gap: 16 }}>
-        {FORM_STATES.map((state) => (
-          <Select
-            key={state}
-            label={`State: ${state}`}
-            placeholder="Pick one"
-            state={state}
-            value={value}
-            onChange={setValue}
-            options={FRUITS}
-            description={state === "warning" ? "This choice seems unusual." : undefined}
-            errorMessage={state === "invalid" ? "Please choose a fruit." : undefined}
-          />
-        ))}
-      </div>
-    );
+const thStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "16px 20px",
+  whiteSpace: "nowrap",
+  verticalAlign: "top",
+};
+
+const cellStyle: React.CSSProperties = {
+  padding: "16px 20px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+  verticalAlign: "top",
+};
+
+interface StateRow {
+  label: string;
+  state?: FormState;
+  disabled?: boolean;
+  loading?: boolean;
+  description?: string;
+  errorMessage?: string;
+}
+
+// Every validation state plus disabled / loading — the combinations that used to
+// be their own stories, folded into one table.
+const stateRows: StateRow[] = [
+  { label: "neutral" },
+  { label: "warning", state: "warning", description: "This choice seems unusual." },
+  { label: "invalid", state: "invalid", errorMessage: "Please choose a fruit." },
+  { label: "valid", state: "valid" },
+  {
+    label: "disabled",
+    disabled: true,
+    description: "Uses aria-disabled so it stays keyboard-reachable.",
   },
+  { label: "loading", loading: true },
+];
+
+// Select is controlled, so each row drives its own local state.
+function StateSelect(row: StateRow) {
+  const [value, setValue] = React.useState<string | null>("apple");
+  return (
+    <Select
+      label="Favourite fruit"
+      placeholder="Pick one"
+      value={value}
+      onChange={setValue}
+      options={FRUITS}
+      state={row.state}
+      disabled={row.disabled}
+      loading={row.loading}
+      description={row.description}
+      errorMessage={row.errorMessage}
+    />
+  );
+}
+
+/** Every state (rows) against the rendered control (right column). */
+export const States: Story = {
+  render: () => (
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>Select</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stateRows.map((row) => (
+          <tr key={row.label}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {row.label}
+            </th>
+            <td style={cellStyle}>
+              <div style={{ maxWidth: 320 }}>
+                <StateSelect {...row} />
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
 };
 
 /** Control sizes. */
@@ -103,33 +166,6 @@ export const Sizes: Story = {
           />
         ))}
       </div>
-    );
-  },
-};
-
-/** Busy: a spinner replaces the chevron and interaction is vetoed. */
-export const Loading: Story = {
-  render: () => {
-    const [value, setValue] = React.useState<string | null>("cherry");
-    return (
-      <Select label="Loading options" loading value={value} onChange={setValue} options={FRUITS} />
-    );
-  },
-};
-
-/** Disabled (still focusable via `aria-disabled`). */
-export const Disabled: Story = {
-  render: () => {
-    const [value, setValue] = React.useState<string | null>("apple");
-    return (
-      <Select
-        label="Disabled (still focusable)"
-        description="Uses aria-disabled so it stays keyboard-reachable."
-        disabled
-        value={value}
-        onChange={setValue}
-        options={FRUITS}
-      />
     );
   },
 };

@@ -15,9 +15,8 @@ const FRUITS: SelectOption[] = [
  * drive selection, asserting the committed value and the ARIA state of options.
  */
 const meta: Meta<typeof Select> = {
-  title: "Form Controls/Select",
+  title: "Interaction Tests/Select",
   component: Select,
-  tags: ["!dev"],
   decorators: [
     (Story) => (
       <div style={{ maxWidth: 320 }}>

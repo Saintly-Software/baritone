@@ -7,9 +7,8 @@ import { InaccessibleTooltip } from "./index";
  * waits past the open delay, and asserts the portaled hint appears in the body.
  */
 const meta: Meta<typeof InaccessibleTooltip> = {
-  title: "Components/InaccessibleTooltip",
+  title: "Interaction Tests/InaccessibleTooltip",
   component: InaccessibleTooltip,
-  tags: ["!dev"],
 };
 export default meta;
 

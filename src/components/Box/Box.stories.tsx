@@ -57,14 +57,6 @@ export const Margin: Story = {
   ),
 };
 
-export const AsSection: Story = {
-  render: () => (
-    <Box as="section" p="4" style={swatch}>
-      Rendered as a &lt;section&gt;
-    </Box>
-  ),
-};
-
 /** `width="fill"` stretches the box to its container; `fit` shrinks to content. */
 export const WidthShorthand: Story = {
   render: () => (

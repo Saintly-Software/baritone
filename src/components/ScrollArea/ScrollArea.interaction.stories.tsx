@@ -3,13 +3,14 @@ import { expect, userEvent, waitFor } from "storybook/test";
 import { ScrollArea } from "./index";
 
 /**
- * Interaction coverage for `ScrollArea`. These run in a real browser (unlike the
- * jsdom unit tests), so base-ui can actually measure overflow and mount the
- * scrollbars — which is what these stories assert: the right scrollbars appear
- * per orientation, and they stay hidden until the area is hovered.
+ * Interaction coverage for `ScrollArea`, one story per supported orientation.
+ * These run in a real browser (unlike the jsdom unit tests), so base-ui can
+ * actually measure overflow and mount the scrollbars — which is what these
+ * stories assert: the orientation mounts exactly the scrollbars it should, and
+ * each stays hidden until the area is hovered, then fades back out on leave.
  */
 const meta: Meta<typeof ScrollArea> = {
-  title: "Layout/ScrollArea",
+  title: "Interaction Tests/ScrollArea",
   component: ScrollArea,
 };
 export default meta;
@@ -56,78 +57,102 @@ const Big = () => (
   </div>
 );
 
-/** A vertical area mounts a vertical scrollbar and no horizontal one. */
-export const VerticalScrollbar: Story = {
+/** The root element that base-ui wraps around a viewport with this label. */
+const getRoot = (canvasElement: HTMLElement, label: string) =>
+  canvasElement.querySelector(`[aria-label="${label}"]`)!.parentElement!;
+
+/** Wait for the scrollbar on `axis` to mount, then return it. */
+const waitForBar = async (rootEl: HTMLElement, axis: "vertical" | "horizontal") => {
+  return waitFor(() => {
+    const el = rootEl.querySelector(`[data-orientation="${axis}"]`);
+    expect(el).not.toBeNull();
+    return el as HTMLElement;
+  });
+};
+
+/**
+ * A vertical area mounts only the vertical scrollbar, which is hidden at rest
+ * and fades in while the area is hovered.
+ */
+export const Vertical: Story = {
   render: () => (
     <ScrollArea aria-label="Vertical" style={{ height: 200, width: 360 }}>
       <Tall />
     </ScrollArea>
   ),
   play: async ({ canvasElement }) => {
-    const rootEl = canvasElement.querySelector('[aria-label="Vertical"]')!.parentElement!;
-    await waitFor(() =>
-      expect(rootEl.querySelector('[data-orientation="vertical"]')).not.toBeNull(),
-    );
+    const rootEl = getRoot(canvasElement, "Vertical");
+    const bar = await waitForBar(rootEl, "vertical");
+
+    // Only the vertical scrollbar exists.
     expect(rootEl.querySelector('[data-orientation="horizontal"]')).toBeNull();
+
+    // Hidden at rest, revealed on hover, hidden again on leave.
+    expect(getComputedStyle(bar).opacity).toBe("0");
+    await userEvent.hover(rootEl);
+    await waitFor(() => expect(getComputedStyle(bar).opacity).toBe("1"));
+    await userEvent.unhover(rootEl);
+    await waitFor(() => expect(getComputedStyle(bar).opacity).toBe("0"));
   },
 };
 
-/** A horizontal area mounts a horizontal scrollbar and no vertical one. */
-export const HorizontalScrollbar: Story = {
+/**
+ * A horizontal area mounts only the horizontal scrollbar, which is hidden at
+ * rest and fades in while the area is hovered.
+ */
+export const Horizontal: Story = {
   render: () => (
     <ScrollArea orientation="horizontal" aria-label="Horizontal" style={{ width: 360 }}>
       <Wide />
     </ScrollArea>
   ),
   play: async ({ canvasElement }) => {
-    const rootEl = canvasElement.querySelector('[aria-label="Horizontal"]')!.parentElement!;
-    await waitFor(() =>
-      expect(rootEl.querySelector('[data-orientation="horizontal"]')).not.toBeNull(),
-    );
+    const rootEl = getRoot(canvasElement, "Horizontal");
+    const bar = await waitForBar(rootEl, "horizontal");
+
+    // Only the horizontal scrollbar exists.
     expect(rootEl.querySelector('[data-orientation="vertical"]')).toBeNull();
+
+    // Hidden at rest, revealed on hover, hidden again on leave.
+    expect(getComputedStyle(bar).opacity).toBe("0");
+    await userEvent.hover(rootEl);
+    await waitFor(() => expect(getComputedStyle(bar).opacity).toBe("1"));
+    await userEvent.unhover(rootEl);
+    await waitFor(() => expect(getComputedStyle(bar).opacity).toBe("0"));
   },
 };
 
-/** A both-axis area mounts both scrollbars. */
-export const BothScrollbars: Story = {
+/**
+ * A both-axis area mounts both scrollbars; both are hidden at rest and fade in
+ * together while the area is hovered.
+ */
+export const Both: Story = {
   render: () => (
     <ScrollArea orientation="both" aria-label="Both" style={{ height: 200, width: 360 }}>
       <Big />
     </ScrollArea>
   ),
   play: async ({ canvasElement }) => {
-    const rootEl = canvasElement.querySelector('[aria-label="Both"]')!.parentElement!;
-    await waitFor(() => {
-      expect(rootEl.querySelector('[data-orientation="vertical"]')).not.toBeNull();
-      expect(rootEl.querySelector('[data-orientation="horizontal"]')).not.toBeNull();
-    });
-  },
-};
+    const rootEl = getRoot(canvasElement, "Both");
+    const verticalBar = await waitForBar(rootEl, "vertical");
+    const horizontalBar = await waitForBar(rootEl, "horizontal");
 
-/** The scrollbar is hidden at rest and fades in only while the area is hovered. */
-export const RevealsOnHover: Story = {
-  render: () => (
-    <ScrollArea aria-label="Hover me" style={{ height: 200, width: 360 }}>
-      <Tall />
-    </ScrollArea>
-  ),
-  play: async ({ canvasElement }) => {
-    const rootEl = canvasElement.querySelector('[aria-label="Hover me"]')!.parentElement!;
-    const bar = await waitFor(() => {
-      const el = rootEl.querySelector('[data-orientation="vertical"]');
-      expect(el).not.toBeNull();
-      return el as HTMLElement;
-    });
+    // Both hidden at rest.
+    expect(getComputedStyle(verticalBar).opacity).toBe("0");
+    expect(getComputedStyle(horizontalBar).opacity).toBe("0");
 
-    // Hidden at rest.
-    expect(getComputedStyle(bar).opacity).toBe("0");
-
-    // Hovering the area reveals it.
+    // Hovering reveals both.
     await userEvent.hover(rootEl);
-    await waitFor(() => expect(getComputedStyle(bar).opacity).toBe("1"));
+    await waitFor(() => {
+      expect(getComputedStyle(verticalBar).opacity).toBe("1");
+      expect(getComputedStyle(horizontalBar).opacity).toBe("1");
+    });
 
-    // Leaving hides it again.
+    // Leaving hides both again.
     await userEvent.unhover(rootEl);
-    await waitFor(() => expect(getComputedStyle(bar).opacity).toBe("0"));
+    await waitFor(() => {
+      expect(getComputedStyle(verticalBar).opacity).toBe("0");
+      expect(getComputedStyle(horizontalBar).opacity).toBe("0");
+    });
   },
 };

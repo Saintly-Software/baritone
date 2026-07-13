@@ -3,7 +3,7 @@ import { HEADING_LEVELS, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants"
 import { Heading } from "./index";
 
 const meta: Meta<typeof Heading> = {
-  title: "Text/Heading",
+  title: "Typography/Heading",
   component: Heading,
   args: { children: "The quick brown fox", level: 2 },
   argTypes: {

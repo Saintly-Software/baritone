@@ -1,25 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
 import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Button } from "../Button";
+import { Drawer } from "../Drawer";
 import { Text } from "../Text";
-import { Modal } from "./index";
+import { Modal, type ModalProps, type ModalSize } from "./index";
 
 const meta: Meta<typeof Modal> = {
   title: "Surfaces/Modal",
   component: Modal,
   args: {
-    intent: "neutral",
-    saliency: "low",
     padding: "md",
     size: "md",
     loading: false,
     disabled: false,
   },
   argTypes: {
-    intent: { control: "select", options: INTENTS },
-    saliency: { control: "select", options: SURFACE_SALIENCIES },
     padding: { control: "select", options: ["none", "sm", "md", "lg"] },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
     loading: { control: "boolean" },
@@ -29,7 +25,7 @@ const meta: Meta<typeof Modal> = {
     docs: {
       description: {
         component:
-          "A panel centred over the page. Its API mirrors Drawer (`header` / `footer` / `trigger` props, `intent` / `saliency` / `padding`). Built on base-ui's Dialog, so it is modal with an always-rendered backdrop and comes in three sizes (`sm` / `md` / `lg`). Clicking outside never closes it; `disabled` additionally vetoes Escape / the close button, and `loading` overlays a spinner on the body.",
+          "A panel centred over the page. Its API mirrors Drawer (`header` / `footer` / `trigger` props, `padding`); the surface is always the default neutral, low-saliency shade. Built on base-ui's Dialog, so it is modal with an always-rendered backdrop and comes in three sizes (`sm` / `md` / `lg`). Clicking outside never closes it; `disabled` additionally vetoes Escape / the close button, and `loading` overlays a spinner on the body.",
       },
     },
   },
@@ -38,26 +34,18 @@ export default meta;
 
 type Story = StoryObj<typeof Modal>;
 
-export const Playground: Story = {
-  render: (args) => (
-    <Modal {...args} trigger={<Modal.Trigger>Open modal</Modal.Trigger>}>
-      <Text render={<p />}>
-        A panel centred over the page. Press Escape or use a close control to dismiss — clicking the
-        backdrop won&apos;t.
-      </Text>
-    </Modal>
-  ),
-};
-
-export const WithHeaderAndFooter: Story = {
+/**
+ * Every region at once — a header carrying a title and subtitle, a scrolling
+ * body, and a footer with cancel / save actions — all driven by the toolbar
+ * controls (`size`, `padding`, `loading`, `disabled`). Opens by default so the
+ * panel is visible on load.
+ */
+export const KitchenSink: Story = {
+  args: { defaultOpen: true },
   render: (args) => (
     <Modal
       {...args}
-      trigger={
-        <Modal.Trigger intent="primary" saliency="high">
-          Edit profile
-        </Modal.Trigger>
-      }
+      trigger={<Modal.Trigger>Open modal</Modal.Trigger>}
       header={<Modal.Header title="Edit profile" subtitle="Update your account details" />}
       footer={
         <Modal.Footer>
@@ -69,38 +57,54 @@ export const WithHeaderAndFooter: Story = {
       }
     >
       <Text render={<p />}>
-        The header and footer are passed as props; the body sits between them and scrolls
-        independently, while the footer buttons close the modal.
+        A panel centred over the page. The body sits between the header and footer and scrolls on
+        overflow. Press Escape or use a close control to dismiss — clicking the backdrop won&apos;t.
       </Text>
     </Modal>
   ),
 };
 
-export const Sizes: Story = {
-  render: (args) => (
-    <div style={{ display: "flex", gap: 16 }}>
-      {(["sm", "md", "lg"] as const).map((size) => (
-        <Modal
-          {...args}
-          key={size}
-          size={size}
-          header={<Modal.Header title={`Size ${size}`} />}
-          trigger={<Modal.Trigger>Size {size}</Modal.Trigger>}
-          footer={
-            <Modal.Footer>
-              <Modal.Close>Close</Modal.Close>
-            </Modal.Footer>
-          }
-        >
-          <Text render={<p />}>This modal uses the {size} max width.</Text>
-        </Modal>
-      ))}
-    </div>
-  ),
+/**
+ * Renders a single modal at a given `size`, opened from a trigger. Shared by the
+ * per-size stories below so each one only differs in its `size` arg.
+ */
+function sizedModal(size: ModalSize) {
+  return (args: ModalProps) => (
+    <Modal
+      {...args}
+      header={<Modal.Header title={`Size ${size}`} subtitle="Only the max width changes" />}
+      trigger={<Modal.Trigger>Open {size} modal</Modal.Trigger>}
+      footer={
+        <Modal.Footer>
+          <Modal.Close>Close</Modal.Close>
+        </Modal.Footer>
+      }
+    >
+      <Text render={<p />}>This modal uses the {size} max width.</Text>
+    </Modal>
+  );
+}
+
+/** The `sm` (narrowest) width. Opens by default so the panel is visible on load. */
+export const Small: Story = {
+  args: { size: "sm", defaultOpen: true },
+  render: sizedModal("sm"),
+};
+
+/** The `md` (default) width. Opens by default so the panel is visible on load. */
+export const Medium: Story = {
+  args: { size: "md", defaultOpen: true },
+  render: sizedModal("md"),
+};
+
+/** The `lg` (widest) width. Opens by default so the panel is visible on load. */
+export const Large: Story = {
+  args: { size: "lg", defaultOpen: true },
+  render: sizedModal("lg"),
 };
 
 export const Loading: Story = {
-  args: { loading: true },
+  args: { loading: true, defaultOpen: true },
   render: (args) => (
     <Modal
       {...args}
@@ -117,53 +121,6 @@ export const Loading: Story = {
         live so the modal can still be closed.
       </Text>
     </Modal>
-  ),
-};
-
-export const Disabled: Story = {
-  name: "Disabled (non-dismissable)",
-  args: { disabled: true },
-  render: (args) => (
-    <Modal
-      {...args}
-      header={<Modal.Header title="Action in progress" subtitle="This modal can't be closed" />}
-      trigger={<Modal.Trigger>Open locked modal</Modal.Trigger>}
-      footer={
-        <Modal.Footer>
-          <Modal.Close disabled disabledReason="Finish the current step first">
-            Close
-          </Modal.Close>
-        </Modal.Footer>
-      }
-    >
-      <Text render={<p />}>
-        While `disabled` is set, Escape, the close button, and the backdrop all refuse to close the
-        modal. Toggle the control in the toolbar to release it.
-      </Text>
-    </Modal>
-  ),
-};
-
-export const Intents: Story = {
-  name: "Intents (Notice-style)",
-  render: () => (
-    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-      {INTENTS.map((intent) => (
-        <Modal
-          key={intent}
-          intent={intent}
-          header={<Modal.Header title={`${intent} modal`} />}
-          trigger={<Modal.Trigger>{intent}</Modal.Trigger>}
-          footer={
-            <Modal.Footer>
-              <Modal.Close>Close</Modal.Close>
-            </Modal.Footer>
-          }
-        >
-          <Text render={<p />}>This modal uses the {intent} intent.</Text>
-        </Modal>
-      ))}
-    </div>
   ),
 };
 
@@ -211,32 +168,41 @@ export const ImperativeClose: Story = {
   },
 };
 
+/**
+ * A Modal opened from inside a Drawer — the surfaces stack, each rendering its own
+ * backdrop. Both open by default so the full stack is visible on load.
+ */
 export const Nested: Story = {
+  name: "Nested in a Drawer",
   render: (args) => (
-    <Modal
-      {...args}
-      header={<Modal.Header title="Account" subtitle="Open a second modal on top" />}
-      trigger={<Modal.Trigger>Open modal</Modal.Trigger>}
+    <Drawer
+      defaultOpen
+      trigger={<Drawer.Trigger>Open drawer</Drawer.Trigger>}
+      header={<Drawer.Header title="Account" subtitle="Open a modal on top" />}
       footer={
-        <Modal.Footer>
-          <Modal.Close>Close</Modal.Close>
-        </Modal.Footer>
+        <Drawer.Footer>
+          <Drawer.Close>Close</Drawer.Close>
+        </Drawer.Footer>
       }
     >
-      <Text render={<p />}>Each modal renders its own backdrop, so the stack stays legible.</Text>
+      <Text render={<p />}>
+        A modal opened from inside a drawer stacks above it, each rendering its own backdrop.
+      </Text>
       <div style={{ marginTop: 16 }}>
         <Modal
-          header={<Modal.Header title="Security" />}
-          trigger={<Modal.Trigger>Security settings</Modal.Trigger>}
+          {...args}
+          defaultOpen
+          header={<Modal.Header title="Security" subtitle="This modal sits above the drawer" />}
+          trigger={<Modal.Trigger>Open modal</Modal.Trigger>}
           footer={
             <Modal.Footer>
               <Modal.Close>Close</Modal.Close>
             </Modal.Footer>
           }
         >
-          <Text render={<p />}>A nested modal, opened from inside the first.</Text>
+          <Text render={<p />}>A modal, opened from inside the drawer.</Text>
         </Modal>
       </div>
-    </Modal>
+    </Drawer>
   ),
 };

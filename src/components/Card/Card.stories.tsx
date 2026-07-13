@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Button } from "../Button";
 import { Checkbox } from "../Checkbox";
 import { Chip } from "../Chip";
@@ -208,43 +209,17 @@ export const Selected: Story = {
   },
 };
 
-const variantLabelStyle: React.CSSProperties = {
-  fontSize: 12,
-  fontWeight: 600,
-  opacity: 0.6,
-  textTransform: "capitalize",
-};
-
 /** Every `intent` (rows) against every surface `saliency` (columns). */
-export const Variants: Story = {
+export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: `auto repeat(${SURFACE_SALIENCIES.length}, minmax(140px, 1fr))`,
-        gap: 12,
-        alignItems: "center",
-        maxWidth: 520,
-      }}
-    >
-      <span />
-      {SURFACE_SALIENCIES.map((saliency) => (
-        <span key={saliency} style={variantLabelStyle}>
-          {saliency}
-        </span>
-      ))}
-      {INTENTS.map((intent) => (
-        <React.Fragment key={intent}>
-          <span style={variantLabelStyle}>{intent}</span>
-          {SURFACE_SALIENCIES.map((saliency) => (
-            <Card key={saliency} intent={intent} saliency={saliency}>
-              <Text render={<p />} variant="sm">
-                {intent} / {saliency}
-              </Text>
-            </Card>
-          ))}
-        </React.Fragment>
-      ))}
-    </div>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SURFACE_SALIENCIES}>
+      {(intent, saliency) => (
+        <Card intent={intent} saliency={saliency} style={{ width: 160 }}>
+          <Text render={<p />} variant="sm">
+            Surface text
+          </Text>
+        </Card>
+      )}
+    </IntentSaliencyMatrix>
   ),
 };

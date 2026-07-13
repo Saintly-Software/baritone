@@ -11,7 +11,7 @@ function DiamondGlyph() {
 }
 
 const meta: Meta<typeof Lockup> = {
-  title: "Typography/Lockup",
+  title: "Components/Lockup",
   component: Lockup,
   args: {
     title: "Baritone",

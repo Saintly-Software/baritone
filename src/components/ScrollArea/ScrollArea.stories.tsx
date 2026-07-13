@@ -72,7 +72,8 @@ export default meta;
 type Story = StoryObj<typeof ScrollArea>;
 
 /** Drive `orientation` from the toolbar; the box swaps content to match. */
-export const Playground: Story = {
+export const Vertical: Story = {
+  name: "Vertical (default)",
   render: (args) => (
     <ScrollArea
       {...args}
@@ -86,24 +87,6 @@ export const Playground: Story = {
       }}
     >
       {args.orientation === "both" ? <Grid /> : <Article />}
-    </ScrollArea>
-  ),
-};
-
-/** The default: vertical scroll, with the content fading at the top/bottom edges. */
-export const Vertical: Story = {
-  render: () => (
-    <ScrollArea
-      aria-label="Article"
-      style={{
-        height: 240,
-        width: 420,
-        border: "1px solid #d8d8d8",
-        borderRadius: 8,
-        padding: 16,
-      }}
-    >
-      <Article />
     </ScrollArea>
   ),
 };

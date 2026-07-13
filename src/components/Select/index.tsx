@@ -304,7 +304,13 @@ export function Select(props: SelectProps) {
           )}
         </div>
         <BaseSelect.Portal>
-          <BaseSelect.Positioner className={selectPositioner} sideOffset={6}>
+          <BaseSelect.Positioner
+            className={selectPositioner}
+            sideOffset={6}
+            side="bottom"
+            align="start"
+            alignItemWithTrigger={false}
+          >
             <BaseSelect.Popup
               className={cx(
                 surfaceRecipe({ intent: "neutral", saliency: "low", padding: "none" }),

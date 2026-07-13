@@ -122,6 +122,7 @@ function FileListItem({ id, file, download, intent, saliency, size, disabled }: 
   if (showDownload) {
     trail.push(
       <Chip.Adornment
+        key="download"
         icon={<DownloadGlyph />}
         label={`Download ${file.name}`}
         onClick={() => ctx.onDownload?.(id)}
@@ -131,6 +132,7 @@ function FileListItem({ id, file, download, intent, saliency, size, disabled }: 
   if (ctx.onRemove != null) {
     trail.push(
       <Chip.Adornment
+        key="remove"
         icon={<CloseGlyph />}
         label={`Remove ${file.name}`}
         onClick={() => ctx.onRemove?.(id)}
@@ -149,7 +151,7 @@ function FileListItem({ id, file, download, intent, saliency, size, disabled }: 
         // the download / remove buttons inert while keeping them focusable.
         disabled={itemDisabled}
         className={fileListChip}
-        leadAdornments={[<Chip.Adornment icon={<FileTypeIcon file={file} />} />]}
+        leadAdornments={[<Chip.Adornment key="type" icon={<FileTypeIcon file={file} />} />]}
         trailAdornments={trail.length > 0 ? trail : undefined}
       >
         {file.name}

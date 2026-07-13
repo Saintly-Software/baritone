@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SURFACE_SALIENCIES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Icon } from "../Icon";
 import { Notice } from "./index";
 
@@ -33,27 +34,56 @@ export default meta;
 
 type Story = StoryObj<typeof Notice>;
 
-export const Playground: Story = {
-  args: { icon: <InfoGlyph /> },
+/**
+ * Kitchen sink — one notice exercising the full surface in a single composition:
+ * a leading `icon`, a status `chip` on the title line, a `description`, a
+ * dismiss `close`, and a row of `actions` (a primary button, a link, and an
+ * icon-only control). The `intent`, `saliency`, and `shape` controls drive it.
+ */
+export const KitchenSink: Story = {
+  render: (args) => (
+    <Notice
+      {...args}
+      icon={<InfoGlyph />}
+      chip={
+        <Notice.Chip intent={args.intent} shape="pill">
+          New
+        </Notice.Chip>
+      }
+      close={<Notice.Close label="Dismiss" onClick={() => alert("dismissed")} />}
+      actions={[
+        <Notice.Action key="save" intent={args.intent} onClick={() => {}}>
+          Save
+        </Notice.Action>,
+        <Notice.Action key="docs" saliency="low" href="#">
+          Read the docs
+        </Notice.Action>,
+        <Notice.Action
+          key="more"
+          saliency="low"
+          icon={
+            <Icon>
+              <InfoGlyph />
+            </Icon>
+          }
+          label="More options"
+          onClick={() => {}}
+        />,
+      ]}
+    />
+  ),
 };
 
 /** Every intent, at both saliencies (`high` = washed fill, `low` = subtle). */
 export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 12, maxWidth: 520 }}>
-      {INTENTS.map((intent) =>
-        SURFACE_SALIENCIES.map((saliency) => (
-          <Notice
-            key={`${intent}-${saliency}`}
-            intent={intent}
-            saliency={saliency}
-            icon={<InfoGlyph />}
-          >
-            {intent} · {saliency}
-          </Notice>
-        )),
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SURFACE_SALIENCIES}>
+      {(intent, saliency) => (
+        <Notice intent={intent} saliency={saliency} icon={<InfoGlyph />}>
+          {intent}
+        </Notice>
       )}
-    </div>
+    </IntentSaliencyMatrix>
   ),
 };
 
@@ -109,6 +139,7 @@ export const Shapes: Story = {
  * neutral notice with a warning-coloured icon.
  */
 export const RecolouredIcon: Story = {
+  tags: ["!dev"],
   render: () => (
     <Notice
       intent="neutral"
@@ -120,95 +151,6 @@ export const RecolouredIcon: Story = {
       description="The notice is neutral, but its icon is tinted `warning` via Notice.Icon."
     >
       Recoloured icon
-    </Notice>
-  ),
-};
-
-/**
- * `close` adds a top-right "×" dismiss. Pass a handler for the built-in
- * `Notice.Close`, or a `<Notice.Close>` element to set its label.
- */
-export const Dismissible: Story = {
-  render: () => (
-    <div style={{ display: "grid", gap: 12, maxWidth: 520 }}>
-      <Notice
-        intent="primary"
-        icon={<InfoGlyph />}
-        description="A handler passed to `close` renders the built-in dismiss button."
-        close={() => alert("dismissed")}
-      >
-        Dismissible notice
-      </Notice>
-      <Notice
-        intent="warning"
-        icon={<InfoGlyph />}
-        description="Or pass a <Notice.Close> to customise its accessible label."
-        close={<Notice.Close label="Close this warning" onClick={() => alert("closed")} />}
-      >
-        Custom close label
-      </Notice>
-    </div>
-  ),
-};
-
-/** A status `chip` sits on the title line, after the title. */
-export const WithChip: Story = {
-  render: () => (
-    <Notice
-      intent="positive"
-      icon={<InfoGlyph />}
-      chip={
-        <Notice.Chip intent="positive" shape="pill">
-          New
-        </Notice.Chip>
-      }
-      description="The chip inherits the compact `sm` size by default."
-    >
-      Feature released
-    </Notice>
-  ),
-};
-
-/**
- * `Notice.Action` covers the axes the row needs: a `<button>` (`onClick`), a link
- * (`href`), and an icon-only control (`icon` + `label`).
- */
-export const Actions: Story = {
-  render: () => (
-    <Notice
-      intent="primary"
-      icon={<InfoGlyph />}
-      description="A button action, a link action, and an icon-only action."
-      actions={[
-        <Notice.Action key="save" intent="primary" onClick={() => {}}>
-          Save
-        </Notice.Action>,
-        <Notice.Action
-          key="docs"
-          saliency="low"
-          href="#"
-          icon={
-            <Icon>
-              <InfoGlyph />
-            </Icon>
-          }
-        >
-          Read the docs
-        </Notice.Action>,
-        <Notice.Action
-          key="more"
-          saliency="low"
-          icon={
-            <Icon>
-              <InfoGlyph />
-            </Icon>
-          }
-          label="More options"
-          onClick={() => {}}
-        />,
-      ]}
-    >
-      Actions
     </Notice>
   ),
 };

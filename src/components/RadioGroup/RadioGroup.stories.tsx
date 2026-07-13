@@ -72,19 +72,52 @@ export const Sizes: Story = {
   ),
 };
 
+const thStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "16px 20px",
+  whiteSpace: "nowrap",
+  verticalAlign: "top",
+};
+
+const cellStyle: React.CSSProperties = {
+  padding: "16px 20px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+  verticalAlign: "top",
+};
+
+/** Every validation state (rows) against the rendered group (right column). */
 export const States: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 24 }}>
-      {FORM_STATES.map((state) => (
-        <ThemeSwitcher
-          key={state}
-          label={`State: ${state}`}
-          state={state}
-          description={state === "warning" ? "Double-check this choice." : undefined}
-          errorMessage={state === "invalid" ? "Pick a theme to continue." : undefined}
-        />
-      ))}
-    </div>
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>RadioGroup</th>
+        </tr>
+      </thead>
+      <tbody>
+        {FORM_STATES.map((state) => (
+          <tr key={state}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {state}
+            </th>
+            <td style={cellStyle}>
+              <div style={{ maxWidth: 320 }}>
+                <ThemeSwitcher
+                  label="Theme"
+                  state={state}
+                  description={state === "warning" ? "Double-check this choice." : undefined}
+                  errorMessage={state === "invalid" ? "Pick a theme to continue." : undefined}
+                />
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ),
 };
 

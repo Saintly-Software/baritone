@@ -122,6 +122,22 @@ describe("Menu", () => {
     expect(screen.getByRole("menuitem", { name: "Increment" })).toBeInTheDocument();
   });
 
+  it("highlights an item on hover", async () => {
+    const user = userEvent.setup();
+    render(
+      <Menu
+        trigger={<Menu.Trigger>Open</Menu.Trigger>}
+        items={[{ children: "Edit" }, { children: "Duplicate" }]}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    const duplicate = await screen.findByRole("menuitem", { name: "Duplicate" });
+
+    await user.hover(duplicate);
+    await waitFor(() => expect(duplicate).toHaveAttribute("data-highlighted"));
+  });
+
   it("skips falsy entries in items", async () => {
     const user = userEvent.setup();
     const canDelete = false;

@@ -42,9 +42,9 @@ export default meta;
 
 type Story = StoryObj<typeof ConfirmationModal>;
 
-// Destructive / Warning / Secondary open by default (`defaultOpen`) so the dialog
+// Negative / Warning / Secondary open by default (`defaultOpen`) so the dialog
 // itself is what a snapshot (e.g. Chromatic) captures, not just the trigger.
-export const Destructive: Story = {
+export const Negative: Story = {
   args: { defaultOpen: true },
   render: (args) => (
     <ConfirmationModal
@@ -64,6 +64,7 @@ export const Destructive: Story = {
     </ConfirmationModal>
   ),
 };
+Negative.storyName = "Negative (Default)";
 
 export const Warning: Story = {
   args: { intent: "warning", defaultOpen: true },

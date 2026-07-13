@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Icon } from "../Icon";
 import { Popover } from "../Popover";
 import { Text } from "../Text";
@@ -66,17 +67,13 @@ export const Playground: Story = {};
 
 export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 16 }}>
-      {INTENTS.map((intent) => (
-        <div key={intent} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          {SALIENCIES.map((saliency) => (
-            <Chip key={saliency} intent={intent} saliency={saliency}>
-              {intent}/{saliency}
-            </Chip>
-          ))}
-        </div>
-      ))}
-    </div>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
+        <Chip intent={intent} saliency={saliency}>
+          Chip
+        </Chip>
+      )}
+    </IntentSaliencyMatrix>
   ),
 };
 

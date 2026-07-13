@@ -1,5 +1,7 @@
+import * as React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { HelpText } from "./index";
 
 const VARIANTS = ["xs", "sm", "md", "lg"] as const;
@@ -40,15 +42,13 @@ export const Playground: Story = {};
 /** Every intent at each saliency. Attention intents auto-show a warning glyph. */
 export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 8, maxWidth: 420 }}>
-      {INTENTS.map((intent) =>
-        SALIENCIES.map((saliency) => (
-          <HelpText key={`${intent}-${saliency}`} intent={intent} saliency={saliency}>
-            {intent} · {saliency}
-          </HelpText>
-        )),
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => (
+        <HelpText intent={intent} saliency={saliency}>
+          {intent}
+        </HelpText>
       )}
-    </div>
+    </IntentSaliencyMatrix>
   ),
 };
 
@@ -65,14 +65,66 @@ export const Variants: Story = {
   ),
 };
 
-/** The convenience flags: `invalid` (→ negative + glyph) and `disabled` (→ dimmed). */
-export const InvalidAndDisabled: Story = {
+const thStyle: React.CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "10px 16px",
+  whiteSpace: "nowrap",
+};
+
+const cellStyle: React.CSSProperties = {
+  padding: "10px 16px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+};
+
+interface StateRow {
+  label: string;
+  text: string;
+  invalid?: boolean;
+  disabled?: boolean;
+}
+
+// The convenience flags — `invalid` (→ negative + glyph) and `disabled`
+// (→ dimmed) — including the combination where `disabled` wins over `invalid`.
+const stateRows: StateRow[] = [
+  { label: "Default", text: "Neutral helper text." },
+  { label: "Invalid", text: "This field is required.", invalid: true },
+  { label: "Disabled", text: "This field is currently unavailable.", disabled: true },
+  {
+    label: "Disabled + invalid",
+    text: "Disabled wins — no error colour.",
+    disabled: true,
+    invalid: true,
+  },
+];
+
+/** Every state (rows) against the rendered help text (right column). */
+export const States: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 8, maxWidth: 420 }}>
-      <HelpText>Neutral helper text (default).</HelpText>
-      <HelpText invalid>This field is required.</HelpText>
-      <HelpText disabled>This field is currently unavailable.</HelpText>
-    </div>
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>HelpText</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stateRows.map((row) => (
+          <tr key={row.label}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {row.label}
+            </th>
+            <td style={cellStyle}>
+              <HelpText invalid={row.invalid} disabled={row.disabled}>
+                {row.text}
+              </HelpText>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ),
 };
 

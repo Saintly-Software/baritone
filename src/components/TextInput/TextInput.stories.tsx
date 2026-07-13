@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { CSSProperties } from "react";
 import { Text } from "../Text";
 import { FORM_STATES, SIZES } from "../../theme/constants";
 import { TextInput } from "./index";
@@ -30,21 +31,54 @@ type Story = StoryObj<typeof TextInput>;
 
 export const Playground: Story = {};
 
+const thStyle: CSSProperties = {
+  fontSize: 12,
+  fontWeight: 600,
+  opacity: 0.6,
+  textAlign: "left",
+  padding: "16px 20px",
+  whiteSpace: "nowrap",
+  verticalAlign: "top",
+};
+
+const cellStyle: CSSProperties = {
+  padding: "16px 20px",
+  borderTop: "1px solid rgba(128,128,128,0.25)",
+  verticalAlign: "top",
+};
+
+/** Every validation state (rows) against the rendered input (right column). */
 export const States: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 16 }}>
-      {FORM_STATES.map((state) => (
-        <TextInput
-          key={state}
-          label={`State: ${state}`}
-          placeholder="Type here"
-          state={state}
-          description={state === "warning" ? "This value seems unusual." : undefined}
-          errorMessage={state === "invalid" ? "This field is required." : undefined}
-          defaultValue={state === "valid" ? "looks good" : undefined}
-        />
-      ))}
-    </div>
+    <table style={{ borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>State</th>
+          <th style={thStyle}>TextInput</th>
+        </tr>
+      </thead>
+      <tbody>
+        {FORM_STATES.map((state) => (
+          <tr key={state}>
+            <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+              {state}
+            </th>
+            <td style={cellStyle}>
+              <div style={{ maxWidth: 320 }}>
+                <TextInput
+                  label="Email"
+                  placeholder="Type here"
+                  state={state}
+                  description={state === "warning" ? "This value seems unusual." : undefined}
+                  errorMessage={state === "invalid" ? "This field is required." : undefined}
+                  defaultValue={state === "valid" ? "looks good" : undefined}
+                />
+              </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   ),
 };
 

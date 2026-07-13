@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { CSSProperties } from "react";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Icon } from "../Icon";
 import { Badge } from "./index";
 
@@ -33,27 +35,63 @@ export const Playground: Story = {};
 
 /** A badge takes one of four shapes: a count, text, an icon, or a bare dot. */
 export const Shapes: Story = {
-  render: () => (
-    <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
-      <Badge intent="primary" saliency="high" count={5} />
-      <Badge intent="primary" saliency="high" text="NEW" />
-      <Badge intent="primary" saliency="high" icon={<BellGlyph />} />
-      <Badge intent="primary" saliency="high" />
-    </div>
-  ),
+  render: () => {
+    const shapes = [
+      {
+        kind: "Count",
+        description: "A numeric value.",
+        badge: <Badge intent="primary" saliency="high" count={5} />,
+      },
+      {
+        kind: "Text",
+        description: "A short label.",
+        badge: <Badge intent="primary" saliency="high" text="NEW" />,
+      },
+      {
+        kind: "Icon",
+        description: "A glyph.",
+        badge: <Badge intent="primary" saliency="high" icon={<BellGlyph />} />,
+      },
+      {
+        kind: "Dot",
+        description: "A bare indicator with no content.",
+        badge: <Badge intent="primary" saliency="high" />,
+      },
+    ];
+    const cellStyle = {
+      padding: "12px 16px",
+      textAlign: "left",
+      verticalAlign: "middle",
+      borderBottom: "1px solid var(--baritone-color-border-subtle, #e0e0e0)",
+    } satisfies CSSProperties;
+    return (
+      <table style={{ borderCollapse: "collapse", minWidth: 360 }}>
+        <thead>
+          <tr>
+            <th style={{ ...cellStyle, fontWeight: 600 }}>Kind</th>
+            <th style={{ ...cellStyle, fontWeight: 600 }}>Description</th>
+            <th style={{ ...cellStyle, fontWeight: 600 }}>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          {shapes.map(({ kind, description, badge }) => (
+            <tr key={kind}>
+              <td style={{ ...cellStyle, fontWeight: 500 }}>{kind}</td>
+              <td style={cellStyle}>{description}</td>
+              <td style={cellStyle}>{badge}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  },
 };
 
 export const IntentsAndSaliencies: Story = {
   render: () => (
-    <div style={{ display: "grid", gap: 16 }}>
-      {INTENTS.map((intent) => (
-        <div key={intent} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          {SALIENCIES.map((saliency) => (
-            <Badge key={saliency} intent={intent} saliency={saliency} count={8} />
-          ))}
-        </div>
-      ))}
-    </div>
+    <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
+      {(intent, saliency) => <Badge intent={intent} saliency={saliency} count={8} />}
+    </IntentSaliencyMatrix>
   ),
 };
 
