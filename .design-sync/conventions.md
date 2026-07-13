@@ -11,7 +11,7 @@ Two things must be present or components fall back to unstyled defaults:
    - Apply an exported theme **class** to a root element: `<div className={lightTheme}>` (also `darkTheme`). The class defines the token CSS variables the components read.
    - Or wrap in the **`BaritoneTheme`** provider for runtime/per-tenant tokens: `<BaritoneTheme tokens={buildDefaultTokens("light")} scheme="light">…</BaritoneTheme>` (`buildDefaultTokens(scheme, brandSeed?)` accepts a small `BrandSeed` — hue/chroma per intent, fonts, radius — and fills in the rest).
 
-**Overlay gotcha:** Modal, Drawer, Popover, Menu, Combobox, Select, and Tooltip portal to `document.body`, *outside* your React tree. Put the theme class on `<html>`/`<body>` (or use `<BaritoneTheme render={<body />}>`) or open overlays render unthemed.
+**Overlay gotcha:** Modal, Drawer, Popover, Menu, Combobox, Select, and Tooltip portal to `document.body`, _outside_ your React tree. Put the theme class on `<html>`/`<body>` (or use `<BaritoneTheme render={<body />}>`) or open overlays render unthemed.
 
 ### The design language — shared props
 
@@ -35,7 +35,15 @@ Most components accept these (see each component's `.d.ts` for its exact set):
 
 ```tsx
 import "@saintly-software/baritone/styles.css";
-import { lightTheme, Card, Heading, Text, Button, Flex, TextInput } from "@saintly-software/baritone";
+import {
+  lightTheme,
+  Card,
+  Heading,
+  Text,
+  Button,
+  Flex,
+  TextInput,
+} from "@saintly-software/baritone";
 
 <div className={lightTheme}>
   <Card saliency="high" style={{ display: "grid", gap: 16, width: 320 }}>
@@ -43,9 +51,13 @@ import { lightTheme, Card, Heading, Text, Button, Flex, TextInput } from "@saint
     <Text saliency="mid">Everything here is themed by the wrapping scope.</Text>
     <TextInput label="Display name" placeholder="Ada Lovelace" />
     <Flex gap="2">
-      <Button intent="primary" saliency="high">Save</Button>
-      <Button intent="neutral" saliency="low">Cancel</Button>
+      <Button intent="primary" saliency="high">
+        Save
+      </Button>
+      <Button intent="neutral" saliency="low">
+        Cancel
+      </Button>
     </Flex>
   </Card>
-</div>
+</div>;
 ```

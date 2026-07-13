@@ -9,9 +9,7 @@
   "provider": {
     "component": "PreviewRoot"
   },
-  "extraEntries": [
-    "./.design-sync/preview-provider.tsx"
-  ],
+  "extraEntries": ["./.design-sync/preview-provider.tsx"],
   "storyImports": {
     "shim": ["src/theme/index"]
   },

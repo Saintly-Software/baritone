@@ -18,12 +18,7 @@
 // consumer-facing wrap guidance (BaritoneTheme / lightTheme class + styles.css)
 // lives in .design-sync/conventions.md, not here.
 import * as React from "react";
-import {
-  BaritoneTheme,
-  buildDefaultTokens,
-  createInlineTheme,
-  vars,
-} from "../dist/index.js";
+import { BaritoneTheme, buildDefaultTokens, createInlineTheme, vars } from "../dist/index.js";
 
 const previewTokens = buildDefaultTokens("light");
 const bodyVars = createInlineTheme(previewTokens, { scheme: "light" });
