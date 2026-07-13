@@ -72,6 +72,30 @@ describe("Badge", () => {
     });
   });
 
+  describe("square", () => {
+    it("renders no content — a content-less swatch", () => {
+      render(<Badge data-testid="badge" square />);
+      expect(screen.getByTestId("badge")).toBeEmptyDOMElement();
+    });
+
+    it("applies a distinct class from both a dot and a content-bearing badge", () => {
+      render(
+        <>
+          <Badge data-testid="square" size="md" square />
+          <Badge data-testid="dot" size="md" />
+          <Badge data-testid="count" size="md" count={1} />
+        </>,
+      );
+      const classesOf = (id: string) => screen.getByTestId(id).className.split(/\s+/);
+      const square = classesOf("square");
+      const dot = classesOf("dot");
+      const count = classesOf("count");
+      // The square variant carries a class neither the dot nor the count badge has.
+      const extra = square.filter((cls) => !dot.includes(cls) && !count.includes(cls));
+      expect(extra.length).toBeGreaterThan(0);
+    });
+  });
+
   describe("dot", () => {
     it("renders no content when no icon/count/text is supplied", () => {
       render(<Badge data-testid="badge" />);

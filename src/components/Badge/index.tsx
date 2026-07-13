@@ -27,6 +27,7 @@ export interface BadgeIconProps extends BadgeBaseProps {
   count?: never;
   max?: never;
   text?: never;
+  square?: never;
 }
 
 /** A badge whose content is a number, optionally capped at `max` as `{max}+`. */
@@ -40,6 +41,7 @@ export interface BadgeCountProps extends BadgeBaseProps {
   max?: number;
   icon?: never;
   text?: never;
+  square?: never;
 }
 
 /** A badge whose content is a short string of text. */
@@ -49,6 +51,17 @@ export interface BadgeTextProps extends BadgeBaseProps {
   icon?: never;
   count?: never;
   max?: never;
+  square?: never;
+}
+
+/** A content-less square colour swatch — like a palette chip. */
+export interface BadgeSquareProps extends BadgeBaseProps {
+  /** Render a content-less square swatch instead of the default rounded shape. */
+  square: true;
+  icon?: never;
+  count?: never;
+  max?: never;
+  text?: never;
 }
 
 /** A content-less badge — a small dot indicator. */
@@ -57,16 +70,23 @@ export interface BadgeDotProps extends BadgeBaseProps {
   count?: never;
   max?: never;
   text?: never;
+  square?: never;
 }
 
 /**
- * A Badge, as one of four shapes discriminated by its content prop:
+ * A Badge, as one of five shapes discriminated by its content prop:
  *   - **icon** — pass `icon`,
  *   - **count** — pass `count` (optionally `max`),
  *   - **text** — pass `text`,
+ *   - **square** — pass `square` for a content-less colour swatch,
  *   - **dot** — pass none of them for a bare indicator dot.
  */
-export type BadgeProps = BadgeIconProps | BadgeCountProps | BadgeTextProps | BadgeDotProps;
+export type BadgeProps =
+  | BadgeIconProps
+  | BadgeCountProps
+  | BadgeTextProps
+  | BadgeSquareProps
+  | BadgeDotProps;
 
 // The content props live on the union arms; widen once internally so the body
 // can read them without narrowing on each access.
@@ -75,20 +95,35 @@ type BadgeAllProps = BadgeBaseProps & {
   count?: number;
   max?: number;
   text?: string;
+  square?: boolean;
 };
 
 /**
  * Badge — a small "component" element type: a filled indicator that shows an
- * `icon`, a `count` (capped by `max`), `text`, or — with none of those — a bare
- * dot. Shares the colour scheme/recipe with `Chip`/`Button`, so
- * `<Badge intent="negative" saliency="high">` matches those with the same props;
- * a fully-rounded silhouette and a per-`size` box come from its own recipe.
+ * `icon`, a `count` (capped by `max`), `text`, a content-less square colour
+ * `square` swatch, or — with none of those — a bare dot. Shares the colour
+ * scheme/recipe with `Chip`/`Button`, so `<Badge intent="negative" saliency="high">`
+ * matches those with the same props; a fully-rounded silhouette and a per-`size`
+ * box come from its own recipe.
  */
 export function Badge(props: BadgeProps) {
-  const { intent, saliency, size, render, className, ref, icon, count, max, text, ...htmlProps } =
-    props as BadgeAllProps;
+  const {
+    intent,
+    saliency,
+    size,
+    render,
+    className,
+    ref,
+    icon,
+    count,
+    max,
+    text,
+    square,
+    ...htmlProps
+  } = props as BadgeAllProps;
 
-  // Exactly one content shape wins, in priority order; none of them means a dot.
+  // Exactly one content shape wins, in priority order; none of them means a
+  // dot, unless `square` opts into the content-less swatch instead.
   let content: React.ReactNode = null;
   if (icon != null) {
     content = icon;
@@ -97,7 +132,8 @@ export function Badge(props: BadgeProps) {
   } else if (text != null) {
     content = text;
   }
-  const dot = content == null;
+  const swatch = content == null && square === true;
+  const dot = content == null && !swatch;
 
   return useRender({
     render,
@@ -106,7 +142,7 @@ export function Badge(props: BadgeProps) {
       ref,
       className: cx(
         componentIntentRecipe({ intent, saliency }),
-        badgeRecipe({ size, dot }),
+        badgeRecipe({ size, dot, square: swatch }),
         className,
       ),
       children: content,

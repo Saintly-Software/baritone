@@ -33,7 +33,7 @@ type Story = StoryObj<typeof Badge>;
 
 export const Playground: Story = {};
 
-/** A badge takes one of four shapes: a count, text, an icon, or a bare dot. */
+/** A badge takes one of five shapes: a count, text, an icon, a square swatch, or a bare dot. */
 export const Shapes: Story = {
   render: () => {
     const shapes = [
@@ -51,6 +51,11 @@ export const Shapes: Story = {
         kind: "Icon",
         description: "A glyph.",
         badge: <Badge intent="primary" saliency="high" icon={<BellGlyph />} />,
+      },
+      {
+        kind: "Square",
+        description: "A content-less colour swatch.",
+        badge: <Badge intent="primary" saliency="high" square />,
       },
       {
         kind: "Dot",
@@ -103,6 +108,7 @@ export const Sizes: Story = {
           <Badge intent="primary" saliency="high" size={size} count={8} />
           <Badge intent="primary" saliency="high" size={size} text="NEW" />
           <Badge intent="primary" saliency="high" size={size} icon={<BellGlyph />} />
+          <Badge intent="primary" saliency="high" size={size} square />
           <Badge intent="primary" saliency="high" size={size} />
         </div>
       ))}
@@ -131,6 +137,20 @@ export const Dot: Story = {
     <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
       {INTENTS.map((intent) => (
         <Badge key={intent} intent={intent} saliency="high" />
+      ))}
+    </div>
+  ),
+};
+
+/**
+ * A square is a content-less colour swatch — a lightly-rounded block of colour,
+ * one per intent, for palette chips and legends.
+ */
+export const Square: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+      {INTENTS.map((intent) => (
+        <Badge key={intent} intent={intent} saliency="high" square />
       ))}
     </div>
   ),
