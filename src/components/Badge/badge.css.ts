@@ -16,8 +16,8 @@ const inlineSize = {
   lg: { height: "1.5rem", fontSize: "0.875rem", paddingInline: vars.space[2] },
 } as const;
 
-/** Per-size diameter for the content-less dot. */
-const dotSize = {
+/** Per-size diameter for the content-less blank badge. */
+const blankSize = {
   sm: "0.5rem",
   md: "0.625rem",
   lg: "0.75rem",
@@ -26,12 +26,15 @@ const dotSize = {
 /**
  * Badge box/shape recipe. Pairs with `componentIntentRecipe` (colour + border,
  * shared with Chip/Button) the way `chipSizeRecipe` does: that recipe owns the
- * palette, this one owns the fully-rounded silhouette and the per-size sizing.
+ * palette, this one owns the silhouette and the per-size sizing.
  *
- * The `dot` variant is the content-less badge — a small circle with no padding,
- * sized by `dotSize` — selected by the component when no `icon`/`count`/`text`
- * is supplied. Otherwise the `size` variant lays out a circular-to-pill box that
- * hugs its content.
+ * Two orthogonal axes drive the box:
+ *   - `shape` — `round` (fully-rounded pill/circle) or `square` (softly-rounded
+ *     rectangle) — sets the corner radius and applies to every content kind.
+ *   - `blank` — the content-less badge (a small dot when round), a bare indicator
+ *     with no padding sized by `blankSize`, selected by the component when no
+ *     `icon`/`count`/`text` is supplied. Otherwise the `size` variant lays out a
+ *     square-to-pill box that hugs its content.
  */
 export const badgeRecipe = recipe({
   base: {
@@ -43,7 +46,6 @@ export const badgeRecipe = recipe({
     fontFamily: vars.font.sans,
     fontWeight: "600",
     lineHeight: "1",
-    borderRadius: vars.radius.full,
     whiteSpace: "nowrap",
     userSelect: "none",
   },
@@ -53,23 +55,29 @@ export const badgeRecipe = recipe({
       md: { ...inlineSize.md, minWidth: inlineSize.md.height },
       lg: { ...inlineSize.lg, minWidth: inlineSize.lg.height },
     },
-    // A content-less dot; the concrete diameter comes from the size compound.
-    dot: {
+    // Corner radius: a fully-rounded pill/circle, or a softly-rounded square.
+    shape: {
+      round: { borderRadius: vars.radius.full },
+      square: { borderRadius: vars.radius.sm },
+    },
+    // A content-less badge; the concrete diameter comes from the size compound.
+    blank: {
       true: { paddingInline: 0 },
       false: {},
     },
   },
   compoundVariants: SIZES.map((size) => ({
-    variants: { size, dot: true as const },
+    variants: { size, blank: true as const },
     style: {
-      width: dotSize[size],
-      height: dotSize[size],
-      minWidth: dotSize[size],
+      width: blankSize[size],
+      height: blankSize[size],
+      minWidth: blankSize[size],
     },
   })),
   defaultVariants: {
     size: "md",
-    dot: false,
+    shape: "round",
+    blank: false,
   },
 });
 
