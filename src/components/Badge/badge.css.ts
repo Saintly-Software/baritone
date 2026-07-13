@@ -24,14 +24,26 @@ const dotSize = {
 } as const;
 
 /**
+ * Per-size edge for the content-less square swatch. A touch larger than the dot
+ * — a swatch is meant to read as a block of colour, not a pinpoint indicator.
+ */
+const swatchSize = {
+  sm: "0.75rem",
+  md: "1rem",
+  lg: "1.25rem",
+} as const;
+
+/**
  * Badge box/shape recipe. Pairs with `componentIntentRecipe` (colour + border,
  * shared with Chip/Button) the way `chipSizeRecipe` does: that recipe owns the
  * palette, this one owns the fully-rounded silhouette and the per-size sizing.
  *
  * The `dot` variant is the content-less badge — a small circle with no padding,
  * sized by `dotSize` — selected by the component when no `icon`/`count`/`text`
- * is supplied. Otherwise the `size` variant lays out a circular-to-pill box that
- * hugs its content.
+ * is supplied. The `square` variant is a content-less colour swatch: a small
+ * square (lightly rounded, sized by `swatchSize`) selected by the component when
+ * `square` is passed. Otherwise the `size` variant lays out a circular-to-pill
+ * box that hugs its content.
  */
 export const badgeRecipe = recipe({
   base: {
@@ -58,18 +70,35 @@ export const badgeRecipe = recipe({
       true: { paddingInline: 0 },
       false: {},
     },
-  },
-  compoundVariants: SIZES.map((size) => ({
-    variants: { size, dot: true as const },
-    style: {
-      width: dotSize[size],
-      height: dotSize[size],
-      minWidth: dotSize[size],
+    // A content-less square swatch; the concrete edge comes from the size
+    // compound. Trades the fully-rounded silhouette for a lightly-rounded square.
+    square: {
+      true: { paddingInline: 0, borderRadius: vars.radius.sm },
+      false: {},
     },
-  })),
+  },
+  compoundVariants: [
+    ...SIZES.map((size) => ({
+      variants: { size, dot: true as const },
+      style: {
+        width: dotSize[size],
+        height: dotSize[size],
+        minWidth: dotSize[size],
+      },
+    })),
+    ...SIZES.map((size) => ({
+      variants: { size, square: true as const },
+      style: {
+        width: swatchSize[size],
+        height: swatchSize[size],
+        minWidth: swatchSize[size],
+      },
+    })),
+  ],
   defaultVariants: {
     size: "md",
     dot: false,
+    square: false,
   },
 });
 
