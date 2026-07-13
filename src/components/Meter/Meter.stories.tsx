@@ -133,6 +133,20 @@ export const CustomValueNode: Story = {
   },
 };
 
+/**
+ * `slotProps.bar.color` is the escape hatch: paint the indicator any CSS colour,
+ * overriding `intent` × `saliency`. Reach for it only when you need a colour
+ * outside the system palette.
+ */
+export const CustomColor: Story = {
+  args: {
+    label: "Brand health",
+    value: 58,
+    showValue: true,
+    slotProps: { bar: { color: "#8b5cf6" } },
+  },
+};
+
 /** No visible label — named for assistive tech via `aria-label`. */
 export const AriaLabelOnly: Story = {
   // Kept as a test, hidden from the sidebar so the showcase stays focused.

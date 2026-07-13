@@ -5,7 +5,10 @@ import { vars } from "../../theme/contract.css";
 
 // The indicator's fill colour, funnelled through a local var so the recipe base
 // stays flat and each intent×saliency compound variant just swaps the value.
-const fill = createVar();
+// Exported so the `color` escape hatch can override it inline (an inline custom
+// property declaration wins over the recipe's class-based one).
+export const meterFillVar = createVar();
+const fill = meterFillVar;
 
 /**
  * Meter root — a vertical stack with the optional label sat above the track.
