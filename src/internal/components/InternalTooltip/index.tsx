@@ -84,11 +84,7 @@ export function InternalTooltip({
     >
       <Tooltip.Trigger render={children} delay={delay} closeDelay={closeDelay} />
       <Tooltip.Portal>
-        <Tooltip.Positioner
-          side={side}
-          align={align}
-          sideOffset={sideOffset}
-        >
+        <Tooltip.Positioner side={side} align={align} sideOffset={sideOffset}>
           <Tooltip.Popup className={cx(tooltipPopup, className)}>
             <Tooltip.Arrow className={tooltipArrow} />
             {content}

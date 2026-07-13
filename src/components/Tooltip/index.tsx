@@ -128,11 +128,7 @@ function TooltipRoot({
       >
         {children}
         <BaseTooltip.Portal>
-          <BaseTooltip.Positioner
-            side={side}
-            align={align}
-            sideOffset={sideOffset}
-          >
+          <BaseTooltip.Positioner side={side} align={align} sideOffset={sideOffset}>
             <BaseTooltip.Popup
               ref={ref}
               id={descriptionId}

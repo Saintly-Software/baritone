@@ -9,12 +9,7 @@ import { InternalButton } from "../../internal/components/InternalButton";
 import type { ButtonProps } from "../Button";
 import { Heading } from "../Heading";
 import { Text } from "../Text";
-import {
-  popoverFooter,
-  popoverHeader,
-  popoverHeaderText,
-  popoverPopup,
-} from "./popover.css";
+import { popoverFooter, popoverHeader, popoverHeaderText, popoverPopup } from "./popover.css";
 
 type RootProps = React.ComponentProps<typeof BasePopover.Root>;
 type PositionerProps = React.ComponentProps<typeof BasePopover.Positioner>;
@@ -113,11 +108,7 @@ function PopoverRoot({
     >
       {trigger}
       <BasePopover.Portal>
-        <BasePopover.Positioner
-          side={side}
-          align={align}
-          sideOffset={sideOffset}
-        >
+        <BasePopover.Positioner side={side} align={align} sideOffset={sideOffset}>
           <BasePopover.Popup
             ref={ref}
             className={cx(
