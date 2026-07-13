@@ -1,10 +1,11 @@
 "use client";
 import { Meter as BaseMeter } from "@base-ui/react/meter";
+import { assignInlineVars } from "@vanilla-extract/dynamic";
 import * as React from "react";
 import type { Intent, Saliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { Text, type TextProps } from "../Text";
-import { meterHeader, meterIndicator, meterRoot, meterTrack } from "./meter.css";
+import { meterFillVar, meterHeader, meterIndicator, meterRoot, meterTrack } from "./meter.css";
 
 /**
  * Per-slot overrides for the meter's three `Text` pieces. Every field is
@@ -28,6 +29,14 @@ export interface MeterProps {
   intent?: Intent;
   /** Prominence of the indicator's fill within its intent. Default `high`. */
   saliency?: Saliency;
+  /**
+   * Escape hatch: paint the indicator any CSS colour, overriding `intent` ×
+   * `saliency`. Accepts anything a CSS `color` takes (a hex/rgb value, a custom
+   * property, `currentColor`). Prefer `intent` / `saliency` so the bar stays on
+   * the system palette — reach for this only when you genuinely need a colour
+   * outside it, and mind contrast against the track.
+   */
+  color?: React.CSSProperties["color"];
   /**
    * Visible label rendered above the track. base-ui wires it up as the meter's
    * accessible name (`aria-labelledby`). To name the meter *without* a visible
@@ -103,6 +112,7 @@ export interface MeterProps {
 export function Meter({
   intent = "primary",
   saliency = "high",
+  color,
   label,
   description,
   showValue = false,
@@ -162,7 +172,10 @@ export function Meter({
         </div>
       )}
       <BaseMeter.Track className={meterTrack}>
-        <BaseMeter.Indicator className={meterIndicator({ intent, saliency })} />
+        <BaseMeter.Indicator
+          className={meterIndicator({ intent, saliency })}
+          style={color != null ? assignInlineVars({ [meterFillVar]: color }) : undefined}
+        />
       </BaseMeter.Track>
       {description != null && (
         <Text id={descriptionId} variant="sm" saliency="low" {...slotProps?.description}>
