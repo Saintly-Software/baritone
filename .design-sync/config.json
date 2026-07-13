@@ -1,0 +1,94 @@
+{
+  "projectId": "0fb986d9-b914-47ef-86e0-630c5908b230",
+  "shape": "storybook",
+  "pkg": "@saintly-software/baritone",
+  "storybookConfigDir": ".storybook",
+  "storybookStatic": ".design-sync/sb-reference",
+  "buildCmd": "pnpm build",
+  "readmeHeader": ".design-sync/conventions.md",
+  "provider": {
+    "component": "PreviewRoot"
+  },
+  "extraEntries": ["./.design-sync/preview-provider.tsx"],
+  "storyImports": {
+    "shim": ["src/theme/index"]
+  },
+  "titleMap": {
+    "InternalButton": null,
+    "InternalCheckbox": null,
+    "InternalGenericButtonAnchor": null,
+    "InternalSpinner": null,
+    "InternalSwitch": null,
+    "InternalTooltip": null
+  },
+  "overrides": {
+    "BaritoneTheme": { "cardMode": "column" },
+    "Badge": { "cardMode": "column" },
+    "Link": { "cardMode": "column" },
+    "ToggleGroup": { "cardMode": "column" },
+    "Box": { "cardMode": "column" },
+    "Flex": { "cardMode": "column" },
+    "ScrollArea": {
+      "cardMode": "column",
+      "skip": [
+        "interaction-tests-scrollarea--vertical",
+        "interaction-tests-scrollarea--horizontal",
+        "interaction-tests-scrollarea--both"
+      ]
+    },
+    "Card": {
+      "skip": [
+        "interaction-tests-card--clickable-activates",
+        "interaction-tests-card--collapsible-toggles"
+      ]
+    },
+    "Meter": { "cardMode": "single", "primaryStory": "Basic" },
+    "Combobox": { "cardMode": "single", "primaryStory": "Playground" },
+    "Select": {
+      "cardMode": "single",
+      "primaryStory": "Single",
+      "skip": [
+        "interaction-tests-select--single-select-picks-option",
+        "interaction-tests-select--multi-select-hover-selected-option"
+      ]
+    },
+    "ConfirmationModal": { "cardMode": "single", "primaryStory": "Controlled" },
+    "Drawer": { "cardMode": "single", "primaryStory": "KitchenSink" },
+    "Menu": {
+      "cardMode": "single",
+      "primaryStory": "KitchenSink",
+      "skip": [
+        "surfaces-menu--opens-and-highlights-item",
+        "surfaces-menu--keep-open-stays-open",
+        "surfaces-menu--side-top",
+        "surfaces-menu--side-bottom",
+        "surfaces-menu--side-left",
+        "surfaces-menu--side-right"
+      ]
+    },
+    "Modal": { "cardMode": "single", "primaryStory": "Medium" },
+    "Popover": {
+      "cardMode": "single",
+      "primaryStory": "KitchenSink",
+      "skip": [
+        "interaction-tests-popover--kitchen-sink",
+        "interaction-tests-popover--side-top",
+        "interaction-tests-popover--side-right",
+        "interaction-tests-popover--side-bottom",
+        "interaction-tests-popover--side-left"
+      ]
+    },
+    "Tooltip": {
+      "cardMode": "single",
+      "primaryStory": "Basic",
+      "skip": [
+        "interaction-tests-tooltip--opens-on-focus",
+        "interaction-tests-tooltip--long-content",
+        "interaction-tests-tooltip--side-top",
+        "interaction-tests-tooltip--side-right",
+        "interaction-tests-tooltip--side-bottom",
+        "interaction-tests-tooltip--side-left"
+      ]
+    }
+  }
+}
