@@ -115,7 +115,13 @@ export const Sizes: Story = {
             <div key={size} style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <Badge intent="primary" saliency="high" size={size} shape={shape} count={8} />
               <Badge intent="primary" saliency="high" size={size} shape={shape} text="NEW" />
-              <Badge intent="primary" saliency="high" size={size} shape={shape} icon={<BellGlyph />} />
+              <Badge
+                intent="primary"
+                saliency="high"
+                size={size}
+                shape={shape}
+                icon={<BellGlyph />}
+              />
               <Badge intent="primary" saliency="high" size={size} shape={shape} />
             </div>
           ))}
