@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { type FormState, SIZES } from "../../theme/constants";
-import { Select, type SelectOption } from "./index";
+import { Select, type SelectOption, type SelectOptionGroup } from "./index";
 
 const FRUITS: SelectOption[] = [
   { label: "Apple", value: "apple" },
@@ -10,6 +10,33 @@ const FRUITS: SelectOption[] = [
   { label: "Dragonfruit", value: "dragonfruit" },
   { label: "Elderberry (out of stock)", value: "elderberry", disabled: true },
   { label: "Fig", value: "fig" },
+];
+
+const GROUPED_FRUITS: SelectOptionGroup[] = [
+  {
+    label: "Citrus",
+    options: [
+      { label: "Lemon", value: "lemon" },
+      { label: "Lime", value: "lime" },
+      { label: "Orange", value: "orange" },
+    ],
+  },
+  {
+    label: "Berries",
+    options: [
+      { label: "Strawberry", value: "strawberry" },
+      { label: "Blueberry", value: "blueberry" },
+      { label: "Raspberry", value: "raspberry" },
+    ],
+  },
+  {
+    label: "Stone fruit",
+    options: [
+      { label: "Peach", value: "peach" },
+      { label: "Plum", value: "plum" },
+      { label: "Apricot (out of stock)", value: "apricot", disabled: true },
+    ],
+  },
 ];
 
 const meta: Meta<typeof Select> = {
@@ -57,6 +84,23 @@ export const Multiple: Story = {
         value={value}
         onChange={setValue}
         options={FRUITS}
+      />
+    );
+  },
+};
+
+/** Options organised into titled groups, each rendered under a heading. */
+export const Grouped: Story = {
+  render: () => {
+    const [value, setValue] = React.useState<string | null>(null);
+    return (
+      <Select
+        label="Favourite fruit"
+        placeholder="Pick one"
+        description="Options grouped under headings."
+        value={value}
+        onChange={setValue}
+        options={GROUPED_FRUITS}
       />
     );
   },

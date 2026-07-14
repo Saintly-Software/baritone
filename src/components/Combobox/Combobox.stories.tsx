@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
-import { Combobox, type ComboboxOption } from "./index";
+import { Combobox, type ComboboxOption, type ComboboxOptionGroup } from "./index";
 
 const FRUITS: ComboboxOption[] = [
   { value: "apple", label: "Apple" },
@@ -14,6 +14,33 @@ const FRUITS: ComboboxOption[] = [
   { value: "kiwi", label: "Kiwi", disabled: true },
   { value: "lemon", label: "Lemon" },
   { value: "mango", label: "Mango" },
+];
+
+const GROUPED_FRUITS: ComboboxOptionGroup[] = [
+  {
+    label: "Citrus",
+    options: [
+      { value: "lemon", label: "Lemon" },
+      { value: "lime", label: "Lime" },
+      { value: "orange", label: "Orange" },
+    ],
+  },
+  {
+    label: "Berries",
+    options: [
+      { value: "strawberry", label: "Strawberry" },
+      { value: "blueberry", label: "Blueberry" },
+      { value: "raspberry", label: "Raspberry" },
+    ],
+  },
+  {
+    label: "Stone fruit",
+    options: [
+      { value: "peach", label: "Peach" },
+      { value: "plum", label: "Plum" },
+      { value: "apricot", label: "Apricot", disabled: true },
+    ],
+  },
 ];
 
 const meta: Meta<typeof Combobox> = {
@@ -140,6 +167,26 @@ export const FreeText: Story = {
     freeText: true,
     placeholder: "Pick or type a tag…",
     description: 'Type something not in the list to see the "Add …" option.',
+  },
+};
+
+/** Options organised into titled groups; typeahead filters within each group and hides empty ones. */
+export const Grouped: Story = {
+  args: {
+    label: "Fruit",
+    placeholder: "Search fruit…",
+    options: GROUPED_FRUITS,
+  },
+};
+
+/** Grouped options with `multiple` — selections still surface as chips in the control. */
+export const GroupedMultiple: Story = {
+  args: {
+    label: "Fruits",
+    multiple: true,
+    options: GROUPED_FRUITS,
+    defaultValue: ["lemon", "strawberry"],
+    placeholder: "Add more…",
   },
 };
 

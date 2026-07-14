@@ -185,6 +185,34 @@ export const list = style({
   flexDirection: "column",
 });
 
+/**
+ * A group of related options (base-ui's `Combobox.Group`). Just a vertical stack;
+ * the heading is `groupLabel` and the options render beneath it. Consecutive
+ * groups get a little space above their heading (the first sits flush).
+ */
+export const group = style({
+  display: "flex",
+  flexDirection: "column",
+  selectors: {
+    "& + &": { marginTop: vars.space[1] },
+  },
+});
+
+/**
+ * The group heading (base-ui's `Combobox.GroupLabel`). A small, muted, semibold
+ * eyebrow, inset to line up with the option rows so it reads as a section header
+ * rather than a selectable row.
+ */
+export const groupLabel = style({
+  paddingInline: vars.space[2],
+  paddingBlock: vars.space[1],
+  fontFamily: vars.font.sans,
+  fontSize: vars.text.variant.body.xs.fontSize,
+  fontWeight: vars.text.weight.semibold,
+  lineHeight: vars.text.variant.body.xs.lineHeight,
+  color: vars.text.color.neutral.low,
+});
+
 const itemHover = createVar();
 const itemActive = createVar();
 

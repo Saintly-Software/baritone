@@ -17,6 +17,8 @@ import {
   chipsContainer,
   control,
   createPrefix,
+  group as groupClass,
+  groupLabel as groupLabelClass,
   input,
   item as itemClass,
   itemIndicator,
@@ -53,9 +55,39 @@ export interface ComboboxOption {
   disabled?: boolean;
 }
 
+/** A titled group of options, rendered under a heading in the popup. */
+export interface ComboboxOptionGroup {
+  /** The group heading, shown above the options and associated as their label. */
+  label: string;
+  /** The options within this group. */
+  options: ComboboxOption[];
+}
+
 /** Internal shape — the free-text "Add …" affordance is a synthetic option flagged with `create`. */
 interface InternalOption extends ComboboxOption {
   create?: boolean;
+}
+
+/** base-ui's group shape (`items`, not `options`); `label` drives the heading. */
+interface InternalGroup {
+  label?: string;
+  items: InternalOption[];
+}
+
+/** `options` / `search.results` accept a flat list or an array of groups; this narrows which. */
+function isGrouped(
+  items: readonly ComboboxOption[] | readonly ComboboxOptionGroup[],
+): items is readonly ComboboxOptionGroup[] {
+  const first = items[0];
+  return first != null && "options" in first;
+}
+
+/** Flatten a (possibly grouped, possibly absent) source into a single option list. */
+function flattenOptions(
+  src: readonly ComboboxOption[] | readonly ComboboxOptionGroup[] | undefined,
+): ComboboxOption[] {
+  if (src == null) return [];
+  return isGrouped(src) ? src.flatMap((g) => g.options) : (src as ComboboxOption[]);
 }
 
 /** Copy for the async popup states. Each falls back to a sensible default. */
@@ -82,8 +114,8 @@ export interface ComboboxSearch {
   error?: string;
   /** Override the default loading / empty / error copy. */
   copy?: ComboboxSearchCopy;
-  /** The current async results to render. */
-  results?: ComboboxOption[];
+  /** The current async results to render. Pass groups to render them under headings. */
+  results?: ComboboxOption[] | ComboboxOptionGroup[];
   /** Called with the query on each input change. Debounce / abort in here. */
   onSearch?: (query: string) => void;
 }
@@ -92,8 +124,12 @@ interface ComboboxBaseProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   "size" | "value" | "defaultValue" | "onChange" | "children" | "prefix"
 > {
-  /** The choices (sync mode). In async mode, provide `search.results` instead. */
-  options?: ComboboxOption[];
+  /**
+   * The choices (sync mode). In async mode, provide `search.results` instead.
+   * Pass an array of `{ label, options }` groups to render options under headings
+   * (ignored — flattened — when `virtualized`).
+   */
+  options?: ComboboxOption[] | ComboboxOptionGroup[];
   label?: React.ReactNode;
   description?: React.ReactNode;
   /** Shown (and announced) when `state` is `invalid`. */
@@ -237,8 +273,8 @@ export function Combobox(props: ComboboxProps) {
   // selections) so a selected value's label still resolves after the async list
   // has moved on. Populating during render is idempotent and safe.
   const cacheRef = React.useRef<Map<string, ComboboxOption>>(new Map());
-  for (const o of options ?? []) cacheRef.current.set(o.value, o);
-  for (const o of search?.results ?? []) cacheRef.current.set(o.value, o);
+  for (const o of flattenOptions(options)) cacheRef.current.set(o.value, o);
+  for (const o of flattenOptions(search?.results)) cacheRef.current.set(o.value, o);
   const toOption = React.useCallback(
     (v: string): ComboboxOption => cacheRef.current.get(v) ?? { value: v, label: v },
     [],
@@ -247,18 +283,37 @@ export function Combobox(props: ComboboxProps) {
   const [query, setQuery] = React.useState("");
 
   const isAsync = search != null;
-  const baseItems: ComboboxOption[] = isAsync ? (search.results ?? []) : (options ?? []);
+  // The active source — flat or grouped, sync `options` or async `search.results`.
+  const source: readonly ComboboxOption[] | readonly ComboboxOptionGroup[] = isAsync
+    ? (search.results ?? [])
+    : (options ?? []);
+  // Groups are supported everywhere except the virtualized window, whose row math
+  // assumes a flat list — there, a grouped source is flattened and headings drop.
+  const useGroups = !virtualized && isGrouped(source);
+  const flatOptions = flattenOptions(source);
 
   // Free-text "Add …" affordance: a synthetic option for the current query when
   // it doesn't already match a known option (by label or value).
   const trimmed = query.trim();
-  const hasExactMatch = baseItems.some(
+  const hasExactMatch = flatOptions.some(
     (o) => o.label.toLowerCase() === trimmed.toLowerCase() || o.value === trimmed,
   );
-  const items: InternalOption[] =
-    freeText && trimmed !== "" && !hasExactMatch
-      ? [...baseItems, { value: trimmed, label: trimmed, create: true }]
-      : baseItems;
+  const showCreate = freeText && trimmed !== "" && !hasExactMatch;
+  const createOption: InternalOption = { value: trimmed, label: trimmed, create: true };
+
+  // What base-ui receives as `items`: a flat option list, or (when grouping)
+  // its `{ label, items }` group shape. The free-text row is appended either as a
+  // trailing flat option or as its own headerless group.
+  const rootItems: readonly InternalOption[] | readonly InternalGroup[] = useGroups
+    ? [
+        ...(source as readonly ComboboxOptionGroup[]).map(
+          (g): InternalGroup => ({ label: g.label, items: g.options }),
+        ),
+        ...(showCreate ? [{ items: [createOption] } satisfies InternalGroup] : []),
+      ]
+    : showCreate
+      ? [...flatOptions, createOption]
+      : flatOptions;
 
   const rootValue =
     value === undefined
@@ -350,6 +405,20 @@ export function Combobox(props: ComboboxProps) {
     </BaseCombobox.Item>
   );
 
+  // A group section: a heading (base-ui associates it with the group) followed by
+  // a `Collection` that renders the group's filtered items. The headerless group
+  // carrying the free-text "Add …" row has no `label`, so no heading is shown.
+  const renderGroup = (grp: InternalGroup) => (
+    <BaseCombobox.Group key={grp.label ?? "__create"} items={grp.items} className={groupClass}>
+      {grp.label != null && (
+        <BaseCombobox.GroupLabel className={groupLabelClass}>{grp.label}</BaseCombobox.GroupLabel>
+      )}
+      <BaseCombobox.Collection>
+        {(option: InternalOption) => renderOption(option)}
+      </BaseCombobox.Collection>
+    </BaseCombobox.Group>
+  );
+
   const inputEl = (
     <BaseCombobox.Input
       ref={ref}
@@ -366,7 +435,7 @@ export function Combobox(props: ComboboxProps) {
     <Field.Root className={wrapper} invalid={state === "invalid"}>
       {label != null && <Field.Label className={labelClass}>{label}</Field.Label>}
       <BaseCombobox.Root
-        items={items}
+        items={rootItems as never}
         multiple={multiple}
         value={rootValue as never}
         defaultValue={rootDefaultValue as never}
@@ -459,6 +528,10 @@ export function Combobox(props: ComboboxProps) {
               {virtualized ? (
                 <BaseCombobox.List className={list}>
                   <VirtualList scrollRef={virtualScrollRef} renderOption={renderOption} />
+                </BaseCombobox.List>
+              ) : useGroups ? (
+                <BaseCombobox.List className={list}>
+                  {(grp: InternalGroup) => renderGroup(grp)}
                 </BaseCombobox.List>
               ) : (
                 <BaseCombobox.List className={list}>

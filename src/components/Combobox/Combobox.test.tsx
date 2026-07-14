@@ -1,12 +1,29 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { Combobox, type ComboboxOption } from "./index";
+import { Combobox, type ComboboxOption, type ComboboxOptionGroup } from "./index";
 
 const FRUITS: ComboboxOption[] = [
   { value: "apple", label: "Apple" },
   { value: "banana", label: "Banana" },
   { value: "cherry", label: "Cherry" },
+];
+
+const GROUPED: ComboboxOptionGroup[] = [
+  {
+    label: "Citrus",
+    options: [
+      { value: "lemon", label: "Lemon" },
+      { value: "lime", label: "Lime" },
+    ],
+  },
+  {
+    label: "Berries",
+    options: [
+      { value: "strawberry", label: "Strawberry" },
+      { value: "blueberry", label: "Blueberry" },
+    ],
+  },
 ];
 
 describe("Combobox", () => {
@@ -197,6 +214,56 @@ describe("Combobox", () => {
     );
     expect(screen.getByText("Please pick a fruit")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Fruit" })).toHaveAttribute("aria-invalid", "true");
+  });
+
+  describe("grouped options", () => {
+    it("renders options under labelled group headings", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Fruit" options={GROUPED} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Fruit" }));
+
+      expect(await screen.findByRole("group", { name: "Citrus" })).toBeInTheDocument();
+      expect(screen.getByRole("group", { name: "Berries" })).toBeInTheDocument();
+      // Every option across every group is listed.
+      expect(screen.getAllByRole("option")).toHaveLength(4);
+    });
+
+    it("scopes each option to its group", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Fruit" options={GROUPED} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Fruit" }));
+
+      const citrus = await screen.findByRole("group", { name: "Citrus" });
+      expect(within(citrus).getByRole("option", { name: "Lemon" })).toBeInTheDocument();
+      expect(within(citrus).queryByRole("option", { name: "Strawberry" })).not.toBeInTheDocument();
+    });
+
+    it("filters within groups and drops groups with no matches", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Fruit" options={GROUPED} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Fruit" }));
+      await user.keyboard("straw");
+
+      expect(await screen.findByRole("group", { name: "Berries" })).toBeInTheDocument();
+      expect(screen.queryByRole("group", { name: "Citrus" })).not.toBeInTheDocument();
+      const options = screen.getAllByRole("option");
+      expect(options).toHaveLength(1);
+      expect(options[0]).toHaveTextContent("Strawberry");
+    });
+
+    it("reports the selected option's value from a group", async () => {
+      const user = userEvent.setup();
+      const onValueChange = vi.fn();
+      render(<Combobox label="Fruit" options={GROUPED} onValueChange={onValueChange} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Fruit" }));
+      await user.click(await screen.findByRole("option", { name: "Lime" }));
+
+      expect(onValueChange).toHaveBeenCalledWith("lime");
+    });
   });
 
   it("virtualizes long lists, mounting only a window of options", async () => {
