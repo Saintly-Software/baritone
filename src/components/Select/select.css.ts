@@ -170,6 +170,36 @@ export const selectList = style({
 });
 
 /**
+ * A group of related options (base-ui's `Select.Group`). Purely a layout
+ * wrapper; the visible heading is `selectGroupLabel` and the options render as
+ * usual inside it. Consecutive groups get a little breathing room above their
+ * heading (the first one sits flush with the popup's own padding).
+ */
+export const selectGroup = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: "2px",
+  selectors: {
+    "& + &": { marginTop: vars.space[1] },
+  },
+});
+
+/**
+ * The group heading (base-ui's `Select.GroupLabel`). A small, muted, semibold
+ * eyebrow above the group's options; aligned to the same inline padding as an
+ * option row so it reads as a section header rather than a selectable row.
+ */
+export const selectGroupLabel = style({
+  paddingInline: vars.space[3],
+  paddingBlock: vars.space[1],
+  fontFamily: vars.font.sans,
+  fontSize: vars.text.variant.body.xs.fontSize,
+  fontWeight: vars.text.weight.semibold,
+  lineHeight: vars.text.variant.body.xs.lineHeight,
+  color: vars.text.color.neutral.low,
+});
+
+/**
  * One option row. Highlighted (keyboard/pointer) and selected rows take the
  * washed neutral surface; disabled rows dim and go inert. `size` scales the
  * font and padding in step with the trigger.

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Combobox, type ComboboxOption } from "./index";
+import { Combobox, type ComboboxOption, type ComboboxOptionGroup } from "./index";
 
 const FRUITS: ComboboxOption[] = [
   { value: "apple", label: "Apple" },
@@ -9,6 +9,23 @@ const FRUITS: ComboboxOption[] = [
   { value: "cherry", label: "Cherry" },
   { value: "date", label: "Date" },
   { value: "elderberry", label: "Elderberry" },
+];
+
+const GROUPED: ComboboxOptionGroup[] = [
+  {
+    label: "Citrus",
+    options: [
+      { value: "lemon", label: "Lemon" },
+      { value: "lime", label: "Lime" },
+    ],
+  },
+  {
+    label: "Berries",
+    options: [
+      { value: "strawberry", label: "Strawberry" },
+      { value: "blueberry", label: "Blueberry" },
+    ],
+  },
 ];
 
 /**
@@ -53,6 +70,34 @@ export const MultiSelectHighlight: Story = {
     await waitFor(() => expect(banana).toHaveAttribute("data-highlighted"));
     // Highlighting a different row must not disturb the existing selection.
     expect(apple).toHaveAttribute("aria-selected", "true");
+  },
+};
+
+/**
+ * Grouped options render under labelled headings; typing filters within each
+ * group and drops groups with no remaining matches.
+ */
+export const GroupedFiltering: Story = {
+  name: "Grouped filtering",
+  render: () => <Combobox label="Fruit" options={GROUPED} placeholder="Search fruit…" />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(document.body);
+    await userEvent.click(canvas.getByRole("combobox", { name: "Fruit" }));
+
+    // Both groups show initially, each a labelled role="group".
+    expect(await body.findByRole("group", { name: "Citrus" })).toBeInTheDocument();
+    expect(body.getByRole("group", { name: "Berries" })).toBeInTheDocument();
+
+    // Filtering to a berry drops the empty Citrus group.
+    await userEvent.keyboard("straw");
+    await waitFor(() =>
+      expect(body.queryByRole("group", { name: "Citrus" })).not.toBeInTheDocument(),
+    );
+    expect(body.getByRole("group", { name: "Berries" })).toBeInTheDocument();
+    const options = body.getAllByRole("option");
+    expect(options).toHaveLength(1);
+    expect(options[0]).toHaveTextContent("Strawberry");
   },
 };
 

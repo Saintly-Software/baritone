@@ -15,6 +15,8 @@ import {
   selectClearButton,
   selectClearSlot,
   selectEndAdornments,
+  selectGroup,
+  selectGroupLabel,
   selectIcon,
   selectItem,
   selectItemIndicator,
@@ -52,6 +54,25 @@ export interface SelectOption {
   disabled?: boolean;
 }
 
+/** A titled group of options, rendered under a heading in the popup. */
+export interface SelectOptionGroup {
+  /** The group heading, shown above the options and associated as their label. */
+  label: string;
+  /** The options within this group. */
+  options: ReadonlyArray<SelectOption>;
+}
+
+/**
+ * `options` accepts either a flat list or an array of `{ label, options }`
+ * groups; this narrows which one you passed.
+ */
+function isGrouped(
+  options: ReadonlyArray<SelectOption> | ReadonlyArray<SelectOptionGroup>,
+): options is ReadonlyArray<SelectOptionGroup> {
+  const first = options[0];
+  return first != null && "options" in first;
+}
+
 /**
  * Props common to both the single- and multi-select variants. The
  * `value`/`onChange`/`multiple` triad is intentionally *not* here — it's split
@@ -62,8 +83,11 @@ interface SelectBaseProps extends Omit<
   React.HTMLAttributes<HTMLButtonElement>,
   "color" | "defaultValue" | "value" | "onChange"
 > {
-  /** The options to choose from. */
-  options: ReadonlyArray<SelectOption>;
+  /**
+   * The options to choose from. Pass a flat `SelectOption[]`, or an array of
+   * `{ label, options }` groups to render options under headings.
+   */
+  options: ReadonlyArray<SelectOption> | ReadonlyArray<SelectOptionGroup>;
   /** Visible field label; also becomes the trigger's accessible name (via `Field`). */
   label?: React.ReactNode;
   /** Supplementary text beneath the control, wired as its accessible description. */
@@ -248,6 +272,34 @@ export function Select(props: SelectProps) {
   // `readOnly` vetoes commits while `aria-disabled` carries the semantics.
   const locked = disabled || loading;
 
+  // `options` may be flat or grouped. base-ui's `items` prop only needs the flat
+  // set (it maps a value back to its label for the trigger), so flatten for that;
+  // the grouped structure drives the rendered `Group`/`GroupLabel` sections.
+  const flatOptions = isGrouped(options) ? options.flatMap((group) => group.options) : options;
+
+  const renderItem = (option: SelectOption) => (
+    <BaseSelect.Item
+      key={option.value}
+      value={option.value}
+      disabled={option.disabled}
+      className={selectItem({ size })}
+    >
+      {multiple && (
+        <InternalCheckbox
+          checked={(value as string[]).includes(option.value)}
+          size={size}
+          aria-hidden
+        />
+      )}
+      <BaseSelect.ItemText className={selectItemText}>{option.label}</BaseSelect.ItemText>
+      {!multiple && (
+        <BaseSelect.ItemIndicator className={selectItemIndicator}>
+          <CheckGlyph />
+        </BaseSelect.ItemIndicator>
+      )}
+    </BaseSelect.Item>
+  );
+
   return (
     // No `disabled` on `Field.Root`: base-ui would propagate it down to the
     // trigger as the native `disabled` attribute, dropping it from the tab order.
@@ -258,7 +310,7 @@ export function Select(props: SelectProps) {
         multiple={multiple as never}
         value={value as never}
         onValueChange={handleValueChange as never}
-        items={options as never}
+        items={flatOptions as never}
         readOnly={locked}
         required={required}
         name={name}
@@ -316,30 +368,16 @@ export function Select(props: SelectProps) {
               )}
             >
               <BaseSelect.List className={selectList}>
-                {options.map((option) => (
-                  <BaseSelect.Item
-                    key={option.value}
-                    value={option.value}
-                    disabled={option.disabled}
-                    className={selectItem({ size })}
-                  >
-                    {multiple && (
-                      <InternalCheckbox
-                        checked={(value as string[]).includes(option.value)}
-                        size={size}
-                        aria-hidden
-                      />
-                    )}
-                    <BaseSelect.ItemText className={selectItemText}>
-                      {option.label}
-                    </BaseSelect.ItemText>
-                    {!multiple && (
-                      <BaseSelect.ItemIndicator className={selectItemIndicator}>
-                        <CheckGlyph />
-                      </BaseSelect.ItemIndicator>
-                    )}
-                  </BaseSelect.Item>
-                ))}
+                {isGrouped(options)
+                  ? options.map((group) => (
+                      <BaseSelect.Group key={group.label} className={selectGroup}>
+                        <BaseSelect.GroupLabel className={selectGroupLabel}>
+                          {group.label}
+                        </BaseSelect.GroupLabel>
+                        {group.options.map(renderItem)}
+                      </BaseSelect.Group>
+                    ))
+                  : options.map(renderItem)}
               </BaseSelect.List>
             </BaseSelect.Popup>
           </BaseSelect.Positioner>

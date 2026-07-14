@@ -1,13 +1,30 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Select, type SelectOption } from "./index";
+import { Select, type SelectOption, type SelectOptionGroup } from "./index";
 
 const FRUITS: SelectOption[] = [
   { label: "Apple", value: "apple" },
   { label: "Banana", value: "banana" },
   { label: "Cherry", value: "cherry" },
   { label: "Dragonfruit", value: "dragonfruit" },
+];
+
+const GROUPED: SelectOptionGroup[] = [
+  {
+    label: "Citrus",
+    options: [
+      { label: "Lemon", value: "lemon" },
+      { label: "Lime", value: "lime" },
+    ],
+  },
+  {
+    label: "Berries",
+    options: [
+      { label: "Strawberry", value: "strawberry" },
+      { label: "Blueberry", value: "blueberry" },
+    ],
+  },
 ];
 
 /**
@@ -56,6 +73,39 @@ export const SingleSelectPicksOption: Story = {
     await waitFor(() =>
       expect(within(document.body).queryByRole("listbox")).not.toBeInTheDocument(),
     );
+  },
+};
+
+/**
+ * Grouped options render under labelled headings; selecting one from a group
+ * commits its value and closes the listbox.
+ */
+export const GroupedSelection: Story = {
+  render: () => {
+    const [value, setValue] = React.useState<string | null>(null);
+    return (
+      <Select
+        label="Favourite fruit"
+        placeholder="Pick one"
+        value={value}
+        onChange={setValue}
+        options={GROUPED}
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(document.body);
+    const trigger = canvas.getByRole("combobox", { name: "Favourite fruit" });
+
+    await userEvent.click(trigger);
+    // Each group is a labelled role="group" in the portaled listbox.
+    expect(await body.findByRole("group", { name: "Citrus" })).toBeInTheDocument();
+    const berries = body.getByRole("group", { name: "Berries" });
+
+    await userEvent.click(within(berries).getByRole("option", { name: "Blueberry" }));
+    expect(trigger).toHaveTextContent("Blueberry");
+    await waitFor(() => expect(body.queryByRole("listbox")).not.toBeInTheDocument());
   },
 };
 

@@ -113,6 +113,7 @@ export {
   Combobox,
   type ComboboxProps,
   type ComboboxOption,
+  type ComboboxOptionGroup,
   type ComboboxSearch,
   type ComboboxSearchCopy,
 } from "./components/Combobox";
@@ -143,6 +144,7 @@ export {
   type SingleSelectProps,
   type MultipleSelectProps,
   type SelectOption,
+  type SelectOptionGroup,
 } from "./components/Select";
 export { Tabs, type TabsProps, type TabsItemProps, type TabsPanelProps } from "./components/Tabs";
 export {

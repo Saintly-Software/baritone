@@ -2,13 +2,30 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { Select, type SelectOption } from "./index";
+import { Select, type SelectOption, type SelectOptionGroup } from "./index";
 
 const OPTIONS: SelectOption[] = [
   { label: "Apple", value: "apple" },
   { label: "Banana", value: "banana" },
   { label: "Cherry", value: "cherry" },
   { label: "Elderberry", value: "elderberry", disabled: true },
+];
+
+const GROUPED: SelectOptionGroup[] = [
+  {
+    label: "Citrus",
+    options: [
+      { label: "Lemon", value: "lemon" },
+      { label: "Lime", value: "lime" },
+    ],
+  },
+  {
+    label: "Berries",
+    options: [
+      { label: "Strawberry", value: "strawberry" },
+      { label: "Blueberry", value: "blueberry" },
+    ],
+  },
 ];
 
 // Controlled single-select host, mirroring documented usage.
@@ -183,5 +200,57 @@ describe("Select", () => {
   it("marks the trigger busy while loading", () => {
     render(<SingleHost loading />);
     expect(screen.getByRole("combobox", { name: "Fruit" })).toHaveAttribute("aria-busy", "true");
+  });
+
+  describe("grouped options", () => {
+    function GroupedHost({ onChange }: { onChange?: (value: string | null) => void }) {
+      const [value, setValue] = React.useState<string | null>(null);
+      return (
+        <Select
+          label="Fruit"
+          placeholder="Pick one"
+          options={GROUPED}
+          value={value}
+          onChange={(next) => {
+            setValue(next);
+            onChange?.(next);
+          }}
+        />
+      );
+    }
+
+    it("renders each group under a labelled heading with all its options", async () => {
+      const user = userEvent.setup();
+      render(<GroupedHost />);
+
+      await user.click(screen.getByRole("combobox", { name: "Fruit" }));
+
+      expect(await screen.findByRole("group", { name: "Citrus" })).toBeInTheDocument();
+      expect(screen.getByRole("group", { name: "Berries" })).toBeInTheDocument();
+      expect(screen.getAllByRole("option")).toHaveLength(4);
+    });
+
+    it("scopes each option to its group", async () => {
+      const user = userEvent.setup();
+      render(<GroupedHost />);
+
+      await user.click(screen.getByRole("combobox", { name: "Fruit" }));
+
+      const citrus = await screen.findByRole("group", { name: "Citrus" });
+      expect(within(citrus).getByRole("option", { name: "Lemon" })).toBeInTheDocument();
+      expect(within(citrus).queryByRole("option", { name: "Strawberry" })).not.toBeInTheDocument();
+    });
+
+    it("selects an option from a group, committing its value", async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(<GroupedHost onChange={onChange} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Fruit" }));
+      await user.click(await screen.findByRole("option", { name: "Strawberry" }));
+
+      expect(onChange).toHaveBeenCalledWith("strawberry");
+      expect(screen.getByRole("combobox", { name: "Fruit" })).toHaveTextContent("Strawberry");
+    });
   });
 });
