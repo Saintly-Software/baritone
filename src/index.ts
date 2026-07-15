@@ -67,6 +67,13 @@ export {
   type GridAreas,
 } from "./components/Grid";
 export { Box, type BoxProps, type BoxElement } from "./components/Box";
+export {
+  Divider,
+  type DividerProps,
+  type DividerSlotProps,
+  type DividerOrientation,
+  type DividerLabelPosition,
+} from "./components/Divider";
 export { SrOnly, type SrOnlyProps } from "./components/SrOnly";
 export {
   Lockup,
