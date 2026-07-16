@@ -151,8 +151,6 @@ interface CheckboxGroupBaseProps<T> {
   orientation?: CheckboxGroupOrientation;
   /** Inline help under the options, wired to the group's `aria-describedby`. */
   helpText?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
   labelPosition?: LabelPosition;
   /** Per-slot overrides for the label / help-text pieces. */
@@ -216,7 +214,6 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     "aria-labelledby": ariaLabelledby,
     "aria-describedby": ariaDescribedby,
     helpText,
-    errorMessage,
     labelPosition = "top",
     slotProps,
     required = false,
@@ -256,7 +253,6 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     <Field
       {...(nameProps as FieldLabellingProps)}
       helpText={helpText}
-      errorMessage={errorMessage}
       state={state}
       required={required}
       labelPosition={labelPosition}

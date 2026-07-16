@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Fieldset } from "../Fieldset";
 import { Field } from "./index";
 
@@ -30,39 +30,49 @@ describe("Field", () => {
       expect(screen.getByLabelText("Search").tagName).toBe("INPUT");
     });
 
-    it("warns when label and aria-label are both passed", () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      render(
-        // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
-        <Field label="Email" aria-label="Email address">
-          {null}
-        </Field>,
-      );
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining("mutually exclusive"));
-      warn.mockRestore();
+    // A control that shows one name and announces another is an a11y bug, not a
+    // condition to degrade through — so this throws rather than warning.
+    it("throws when label and aria-label are both passed", () => {
+      expect(() =>
+        render(
+          // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
+          <Field label="Email" aria-label="Email address">
+            {null}
+          </Field>,
+        ),
+      ).toThrow(/mutually exclusive/);
     });
 
-    it("warns when label and aria-labelledby are both passed", () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      render(
-        // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
-        <Field label="Email" aria-labelledby="other">
-          {null}
-        </Field>,
-      );
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining("mutually exclusive"));
-      warn.mockRestore();
+    it("throws when label and aria-labelledby are both passed", () => {
+      expect(() =>
+        render(
+          // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
+          <Field label="Email" aria-labelledby="other">
+            {null}
+          </Field>,
+        ),
+      ).toThrow(/mutually exclusive/);
     });
 
-    it("does not warn when exactly one naming prop is passed", () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      render(
-        <Field label="Email">
-          <Field.Control />
-        </Field>,
-      );
-      expect(warn).not.toHaveBeenCalled();
-      warn.mockRestore();
+    it("names the offending component and props in the error", () => {
+      expect(() =>
+        render(
+          // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
+          <Field label="Email" aria-label="Email address">
+            {null}
+          </Field>,
+        ),
+      ).toThrow(/Field: `label`, `aria-label`/);
+    });
+
+    it("does not throw when exactly one naming prop is passed", () => {
+      expect(() =>
+        render(
+          <Field label="Email">
+            <Field.Control />
+          </Field>,
+        ),
+      ).not.toThrow();
     });
   });
 
@@ -114,25 +124,50 @@ describe("Field", () => {
     });
   });
 
+  // There is one message slot, not two: `helpText` *is* the error line when
+  // `state="invalid"`. It stays in `aria-describedby` across every state —
+  // it changes colour rather than leaving and re-entering the description.
   describe("validation", () => {
-    it("announces both helpText and errorMessage when invalid", () => {
+    it("renders the helpText as an error when invalid", () => {
       render(
-        <Field label="Age" helpText="Your age" state="invalid" errorMessage="Must be a number">
+        <Field label="Age" helpText="Must be a number" state="invalid">
           <Field.Control />
         </Field>,
       );
       const input = screen.getByLabelText("Age");
       expect(input).toHaveAttribute("aria-invalid", "true");
-      expect(describedByText(input)).toEqual(["Your age", "Must be a number"]);
+      expect(describedByText(input)).toEqual(["Must be a number"]);
+      // HelpText's automatic warning glyph marks it as the error.
+      expect(screen.getByText("Must be a number").querySelector("svg")).not.toBeNull();
     });
 
-    it("does not render the error message outside the invalid state", () => {
-      render(
-        <Field label="Age" state="warning" errorMessage="Hidden">
+    it("keeps the same helpText line wired in every state", () => {
+      const { rerender } = render(
+        <Field label="Age" helpText="Your age" state="neutral">
           <Field.Control />
         </Field>,
       );
-      expect(screen.queryByText("Hidden")).not.toBeInTheDocument();
+      expect(describedByText(screen.getByLabelText("Age"))).toEqual(["Your age"]);
+      // Neutral: no glyph.
+      expect(screen.getByText("Your age").querySelector("svg")).toBeNull();
+
+      rerender(
+        <Field label="Age" helpText="Your age" state="invalid">
+          <Field.Control />
+        </Field>,
+      );
+      // Still one description, same id — only the presentation moved.
+      expect(describedByText(screen.getByLabelText("Age"))).toEqual(["Your age"]);
+      expect(screen.getByText("Your age").querySelector("svg")).not.toBeNull();
+    });
+
+    it("does not mark the control invalid outside the invalid state", () => {
+      render(
+        <Field label="Age" state="warning" helpText="Unusual">
+          <Field.Control />
+        </Field>,
+      );
+      expect(screen.getByLabelText("Age")).not.toHaveAttribute("aria-invalid");
     });
   });
 

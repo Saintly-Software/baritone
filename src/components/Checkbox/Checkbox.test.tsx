@@ -167,9 +167,16 @@ describe("Checkbox", () => {
     expect(screen.getByRole("checkbox", { name: "External label" })).toBeInTheDocument();
   });
 
-  it("prefers the visible label over aria-label", () => {
-    render(<Subscribe aria-label="Ignored" />);
-    expect(screen.getByRole("checkbox", { name: "Subscribe" })).toBeInTheDocument();
+  // `label` used to silently win over `aria-label`. They're mutually exclusive
+  // now — the box would show one name and announce another — so the pair is a
+  // type error, and a JS caller that gets past the types gets a thrown error.
+  it("throws when label and aria-label are both passed", () => {
+    expect(() =>
+      render(
+        // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
+        <Checkbox label="Subscribe" aria-label="Ignored" value={false} onChange={() => {}} />,
+      ),
+    ).toThrow(/mutually exclusive/);
   });
 
   it("describes the box with its helpText", () => {
@@ -179,11 +186,15 @@ describe("Checkbox", () => {
     );
   });
 
-  it("shows the error message only when invalid", () => {
-    const { rerender } = render(<Subscribe errorMessage="Required" />);
-    expect(screen.queryByText("Required")).not.toBeInTheDocument();
+  // One message slot: the same line stays put and changes *presentation* with
+  // `state`, rather than a separate error line appearing.
+  it("renders the helpText as an error when invalid", () => {
+    const { rerender } = render(<Subscribe helpText="Required" />);
+    // Neutral: the line is there, with no warning glyph.
+    expect(screen.getByText("Required").querySelector("svg")).toBeNull();
 
-    rerender(<Subscribe state="invalid" errorMessage="Required" />);
-    expect(screen.getByText("Required")).toBeInTheDocument();
+    rerender(<Subscribe state="invalid" helpText="Required" />);
+    // Invalid: the same line, now carrying HelpText's warning glyph.
+    expect(screen.getByText("Required").querySelector("svg")).not.toBeNull();
   });
 });

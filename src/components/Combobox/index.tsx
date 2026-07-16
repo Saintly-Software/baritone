@@ -130,8 +130,6 @@ interface ComboboxBaseProps extends Omit<
   options?: ComboboxOption[] | ComboboxOptionGroup[];
   /** Inline help under the control, wired to its `aria-describedby`. */
   helpText?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /** Validation state. `invalid` maps to negative, `valid` to positive. */
   state?: FormState;
   /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
@@ -250,7 +248,6 @@ export function Combobox(props: ComboboxProps) {
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
     helpText,
-    errorMessage,
     state = "neutral",
     labelPosition = "top",
     slotProps,
@@ -462,7 +459,6 @@ export function Combobox(props: ComboboxProps) {
     <Field
       {...(nameProps as FieldLabellingProps)}
       helpText={helpText}
-      errorMessage={errorMessage}
       state={state}
       required={required}
       labelPosition={labelPosition}

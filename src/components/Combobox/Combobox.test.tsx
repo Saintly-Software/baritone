@@ -205,12 +205,7 @@ describe("Combobox", () => {
 
   it("shows the error message and marks the field invalid in the invalid state", () => {
     render(
-      <Combobox
-        label="Fruit"
-        options={FRUITS}
-        state="invalid"
-        errorMessage="Please pick a fruit"
-      />,
+      <Combobox label="Fruit" options={FRUITS} state="invalid" helpText="Please pick a fruit" />,
     );
     expect(screen.getByText("Please pick a fruit")).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "Fruit" })).toHaveAttribute("aria-invalid", "true");

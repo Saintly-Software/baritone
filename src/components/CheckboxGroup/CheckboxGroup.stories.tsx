@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { CSSProperties } from "react";
 import * as React from "react";
-import { FORM_STATES, SIZES } from "../../theme/constants";
+import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
 import type { DistributiveOmit } from "../../utils/types";
 import { CheckboxGroup } from "./index";
 
@@ -77,6 +77,15 @@ export const Sizes: Story = {
   ),
 };
 
+// One message slot now: the copy changes with the state, rather than a help
+// line and an error line coexisting.
+const STATE_MESSAGE: Record<FormState, string | undefined> = {
+  neutral: undefined,
+  warning: "Double-check these choices.",
+  invalid: "Pick at least one topic.",
+  valid: undefined,
+};
+
 const thStyle: CSSProperties = {
   fontSize: 12,
   fontWeight: 600,
@@ -114,8 +123,7 @@ export const States: Story = {
                 <Subscriptions
                   label="Email me about"
                   state={state}
-                  helpText={state === "warning" ? "Double-check these choices." : undefined}
-                  errorMessage={state === "invalid" ? "Pick at least one topic." : undefined}
+                  helpText={STATE_MESSAGE[state]}
                 />
               </div>
             </td>

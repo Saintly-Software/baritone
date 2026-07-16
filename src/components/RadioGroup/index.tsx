@@ -7,9 +7,10 @@ import type { FormState, LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import {
   Field,
+  type FieldControlInput,
   type FieldLabellingInput,
   type FieldLabellingProps,
-  fieldNameAttrs,
+  fieldControlAttrs,
   type FieldSlotProps,
 } from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
@@ -122,8 +123,6 @@ interface RadioGroupBaseProps<T> {
   orientation?: RadioGroupOrientation;
   /** Inline help under the options, wired to the group's `aria-describedby`. */
   helpText?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
   labelPosition?: LabelPosition;
   /** Per-slot overrides for the label / help-text pieces. */
@@ -183,7 +182,6 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
     "aria-labelledby": ariaLabelledby,
     "aria-describedby": ariaDescribedby,
     helpText,
-    errorMessage,
     labelPosition = "top",
     slotProps,
     required = false,
@@ -195,10 +193,13 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
-  const nameProps: FieldLabellingInput = {
+  // Everything the control's focusable element needs from the field, in one
+  // object — see `fieldControlAttrs`.
+  const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
   };
   const itemContext = React.useMemo<RadioGroupItemContextValue>(
     () => ({ size, state }),
@@ -207,9 +208,8 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
 
   return (
     <Field
-      {...(nameProps as FieldLabellingProps)}
+      {...(controlProps as FieldLabellingProps)}
       helpText={helpText}
-      errorMessage={errorMessage}
       state={state}
       required={required}
       labelPosition={labelPosition}
@@ -227,13 +227,9 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
           readOnly={disabled}
           aria-disabled={disabled || undefined}
           name={name}
-          // Only spread `aria-describedby` when it's actually set: passing
-          // `undefined` through base-ui's prop merge clobbers the `helpText` id
-          // coming from the field context. base-ui appends ours to it.
-          {...(ariaDescribedby != null && { "aria-describedby": ariaDescribedby })}
           // base-ui's `Field.Label` already names the group, so this only emits an
           // attribute for the label-less arms.
-          {...fieldNameAttrs(nameProps)}
+          {...fieldControlAttrs(controlProps)}
           className={cx(radioGroupRoot({ orientation }), disabled && radioGroupDisabled, className)}
         >
           {children({

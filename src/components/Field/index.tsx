@@ -30,10 +30,7 @@ const labelClass = cx(
 export interface FieldSlotProps {
   /** Props for the `<label>` above (or beside) the control. */
   label?: React.ComponentPropsWithoutRef<typeof BaseField.Label>;
-  /**
-   * Props for the `HelpText` under the control. Applies to the `errorMessage`
-   * line too — it is the same component, already forced to `invalid`.
-   */
+  /** Props for the `HelpText` under the control, in every `state`. */
   helpText?: Partial<HelpTextProps>;
   /**
    * Props for the label's `InfoButton` (only rendered when `info` is set). Use it
@@ -83,15 +80,22 @@ const isDev = (): boolean =>
   typeof process === "undefined" || process.env.NODE_ENV !== "production";
 
 /**
- * Enforce the labelling props' mutual exclusivity at runtime, for JS callers the
- * type-level union can't reach. Dev-only: a name conflict is a bug to fix, not a
- * condition to handle, so it warns rather than throws.
+ * Enforce the labelling props' mutual exclusivity at runtime, for the JS callers
+ * the type-level union can't reach. **Throws** — a control that shows one name
+ * and announces another is an accessibility bug, not a condition to degrade
+ * through, and a `console.warn` is too easy to scroll past.
+ *
+ * Dev/test only, matching `warnOnContrastIssues`: the check is deterministic on
+ * props, so any render in dev, a test, or CI trips it long before production —
+ * while in production a mislabelled control still beats a white screen for the
+ * assistive-tech user this rule exists to protect. (It also lets the whole check
+ * dead-code-eliminate out of the bundle.)
  *
  * `Field` calls this for every control that hands it the labelling props. A
  * control that renders its *own* label instead (`Checkbox` / `Switch`, whose
  * label lives inside the clickable row) has to call it directly.
  */
-export function warnOnConflictingNames(props: FieldLabellingInput, component: string): void {
+export function assertExclusiveNames(props: FieldLabellingInput, component: string): void {
   if (!isDev()) return;
   const passed = [
     props.label != null && "label",
@@ -99,7 +103,7 @@ export function warnOnConflictingNames(props: FieldLabellingInput, component: st
     props["aria-labelledby"] != null && "aria-labelledby",
   ].filter((v): v is string => typeof v === "string");
   if (passed.length > 1) {
-    console.warn(
+    throw new Error(
       `[baritone] ${component}: \`${passed.join("`, `")}\` are mutually exclusive — pass exactly ` +
         `one. \`aria-label\`/\`aria-labelledby\` override the visible \`label\` in the accessible ` +
         `name, so the control would show one name and announce another.`,
@@ -133,6 +137,47 @@ export function fieldNameAttrs(
   return {};
 }
 
+/** The labelling props plus the caller's own description pointer. */
+export interface FieldControlInput extends FieldLabellingInput {
+  "aria-describedby"?: string;
+}
+
+/**
+ * Every ARIA attribute a form control's focusable element needs from its field,
+ * in one spread:
+ *
+ * ```tsx
+ * <BaseSwitch.Root {...fieldControlAttrs(props, labelId)} />
+ * ```
+ *
+ * That is {@link fieldNameAttrs} plus the caller's `aria-describedby`. Both have
+ * the same hazard, which is the whole reason this exists: base-ui's `mergeProps`
+ * copies an explicit `undefined` over the value the field context already put
+ * there, so `aria-describedby={undefined}` silently unwires the `helpText` and
+ * `aria-label={undefined}` silently unlabels the control. Only keys that are
+ * actually set come back, so spreading the result is always safe.
+ *
+ * Note base-ui *appends* the field's own `helpText` id to whatever
+ * `aria-describedby` this emits, rather than replacing it — so a caller's
+ * description and the field's help text are both announced. For a control
+ * base-ui can't reach, combine the ids yourself with {@link joinIds} instead.
+ *
+ * It's a plain function, not a hook: there's no state, and the controls call it
+ * from their own bodies — outside the `Field`'s provider, since `Field` only
+ * renders them as `children` — so a context-reading hook couldn't see the field
+ * anyway.
+ */
+export function fieldControlAttrs(
+  props: FieldControlInput,
+  labelId?: string,
+): { "aria-label"?: string; "aria-labelledby"?: string; "aria-describedby"?: string } {
+  const describedby = props["aria-describedby"];
+  return {
+    ...fieldNameAttrs(props, labelId),
+    ...(describedby != null && { "aria-describedby": describedby }),
+  };
+}
+
 /**
  * Join id lists for an `aria-labelledby` / `aria-describedby`, dropping the empty
  * ones and collapsing "nothing to point at" to `undefined` (an empty string would
@@ -160,8 +205,8 @@ export interface FieldWiring {
    */
   nameAttrs: { "aria-label"?: string; "aria-labelledby"?: string };
   /**
-   * The ids of the rendered `helpText` / `errorMessage`, for the control's
-   * `aria-describedby`. `undefined` when there's nothing to describe it with.
+   * The id of the rendered `helpText`, for the control's `aria-describedby`.
+   * `undefined` when there's no help text to describe it with.
    * Combine it with any caller-supplied `aria-describedby` via {@link joinIds}.
    */
   describedBy: string | undefined;
@@ -192,14 +237,22 @@ interface FieldBaseProps {
    */
   children: React.ReactNode | ((wiring: FieldWiring) => React.ReactNode);
   /**
-   * Inline help under the control, rendered as a `HelpText` and wired to the
-   * control's `aria-describedby`. It *combines* with any `aria-describedby` you
-   * put on the control — base-ui appends rather than replaces — so an external
+   * The field's one message line, under the control: inline help, or the
+   * validation error, depending on `state`. Rendered as a `HelpText` and wired to
+   * the control's `aria-describedby` — it *combines* with any `aria-describedby`
+   * you put on the control (base-ui appends rather than replaces), so an external
    * description and this one are both announced.
+   *
+   * `state="invalid"` renders it negative, with `HelpText`'s warning glyph. There
+   * is deliberately no separate `errorMessage`: one slot means one line to read
+   * and no question about which of two messages wins. Swap the copy yourself when
+   * the error needs different words:
+   *
+   * ```tsx
+   * <TextInput state={error ? "invalid" : "neutral"} helpText={error ?? "We'll never share it."} />
+   * ```
    */
   helpText?: React.ReactNode;
-  /** Shown (and announced) under the control when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /**
    * Extra explanation surfaced in an `InfoButton` (the "i" affordance) beside the
    * `label`. It sits *next to* the label rather than inside it, so it never
@@ -220,7 +273,7 @@ interface FieldBaseProps {
    * both.
    */
   required?: boolean;
-  /** Validation state. `invalid` reveals `errorMessage` and sets `aria-invalid`. */
+  /** Validation state. `invalid` reddens the `helpText` and sets `aria-invalid`. */
   state?: FormState;
   /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
   labelPosition?: LabelPosition;
@@ -256,8 +309,9 @@ export type FieldProps = FieldBaseProps & FieldLabellingProps;
  * 2. **Description.** `helpText` renders a `HelpText` wired to the control's
  *    `aria-describedby`, *combining* with any `aria-describedby` the caller set
  *    rather than replacing it.
- * 3. **Validation.** `state="invalid"` reveals `errorMessage` (as a negative
- *    `HelpText`) and marks the control `aria-invalid`.
+ * 3. **Validation.** `state="invalid"` renders the `helpText` negative (with
+ *    `HelpText`'s warning glyph) and marks the control `aria-invalid`. One
+ *    message slot, not two — see `helpText`.
  * 4. **Layout.** `labelPosition` puts the label above (default) or inline, and
  *    `fit` decides whether the field claims the line or shrink-wraps. An `info`
  *    node hangs an `InfoButton` beside the label, and `required` marks it.
@@ -284,7 +338,7 @@ export type FieldProps = FieldBaseProps & FieldLabellingProps;
  *
  * @example
  * // Invalid, with the label inline.
- * <Field label="Age" labelPosition="start" state="invalid" errorMessage="Must be a number">
+ * <Field label="Age" labelPosition="start" state="invalid" helpText="Must be a number">
  *   <Field.Control render={<input />} />
  * </Field>
  */
@@ -296,7 +350,6 @@ export function Field(props: FieldProps) {
     children,
     label,
     helpText,
-    errorMessage,
     info,
     required = false,
     state = "neutral",
@@ -307,7 +360,7 @@ export function Field(props: FieldProps) {
     className,
   } = props as FieldBaseProps & FieldLabellingInput;
 
-  warnOnConflictingNames(nameProps, "Field");
+  assertExclusiveNames(nameProps, "Field");
 
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
@@ -319,8 +372,6 @@ export function Field(props: FieldProps) {
   const { className: labelSlotClass, ...labelSlotProps } = slotProps?.label ?? {};
   const helpTextSlotProps = slotProps?.helpText;
 
-  const showError = state === "invalid" && errorMessage != null;
-
   // Own the part ids rather than letting base-ui generate them: base-ui only
   // hands its generated ids to its *own* components, so a control it can't reach
   // would have nothing to point `aria-describedby` at. Setting them explicitly
@@ -328,9 +379,8 @@ export function Field(props: FieldProps) {
   // custom control by hand.
   const generatedLabelId = React.useId();
   const helpTextId = React.useId();
-  const errorId = React.useId();
   const labelId = label != null ? generatedLabelId : undefined;
-  const describedBy = joinIds(helpText != null && helpTextId, showError && errorId);
+  const describedBy = helpText != null ? helpTextId : undefined;
 
   const labelEl = label != null && (
     <BaseField.Label
@@ -381,22 +431,20 @@ export function Field(props: FieldProps) {
           ? children({ nameAttrs: fieldNameAttrs(nameProps, labelId), describedBy, labelId })
           : children}
         {helpText != null && (
+          // Always a `Description`, never base-ui's `Error`: one line whose
+          // *presentation* tracks `state`, so it stays wired to
+          // `aria-describedby` in every state instead of appearing and
+          // disappearing from it.
           <BaseField.Description
             id={helpTextId}
             render={
-              <HelpText variant="xs" disabled={disabled} {...helpTextSlotProps}>
+              <HelpText
+                variant="xs"
+                invalid={state === "invalid"}
+                disabled={disabled}
+                {...helpTextSlotProps}
+              >
                 {helpText}
-              </HelpText>
-            }
-          />
-        )}
-        {showError && (
-          <BaseField.Error
-            match
-            id={errorId}
-            render={
-              <HelpText variant="xs" invalid disabled={disabled} {...helpTextSlotProps}>
-                {errorMessage}
               </HelpText>
             }
           />

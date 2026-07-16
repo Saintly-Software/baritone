@@ -6,11 +6,12 @@ import type { FormState, LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import {
   Field,
+  type FieldControlInput,
   type FieldLabellingInput,
   type FieldLabellingProps,
-  fieldNameAttrs,
+  fieldControlAttrs,
   type FieldSlotProps,
-  warnOnConflictingNames,
+  assertExclusiveNames,
 } from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
 import { checkboxLabelDisabled, checkboxRow, checkboxRowDisabled } from "./checkbox.css";
@@ -47,8 +48,6 @@ interface CheckboxBaseProps {
   state?: FormState;
   /** Inline help beneath the box (wired as the control's `aria-describedby`). */
   helpText?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /** Box + label size. Default `md`. */
   size?: Size;
   /** Identifies the field when submitted as part of a form. */
@@ -80,8 +79,8 @@ export type CheckboxProps = CheckboxBaseProps & FieldLabellingProps;
  *
  * `value` stays a single `boolean` (the checked state); `indeterminate` layers a
  * "mixed" presentation on top for a parent-of-a-set summary. Validation follows
- * the shared `state` model, with an optional `helpText` / `errorMessage` line
- * beneath the box — matching `TextInput`, `RadioGroup`, and `CheckboxGroup`.
+ * the shared `state` model, with an optional `helpText` line beneath the box
+ * (reddened when invalid) — matching `TextInput`, `RadioGroup`, `CheckboxGroup`.
  *
  * @example
  * const [agreed, setAgreed] = React.useState(false);
@@ -102,7 +101,6 @@ export function Checkbox(props: CheckboxProps) {
     required = false,
     state = "neutral",
     helpText,
-    errorMessage,
     size = "md",
     name,
     className,
@@ -114,18 +112,20 @@ export function Checkbox(props: CheckboxProps) {
   const disabled = disabledProp || inheritedDisabled;
 
   // The label lives inside the clickable row rather than in the `Field`, so the
-  // exclusivity check that `Field` runs for other controls has to happen here.
-  const nameProps: FieldLabellingInput = {
+  // exclusivity check `Field` runs for other controls has to happen here.
+  // Everything the control's focusable element needs from the field, in one
+  // object — see `fieldControlAttrs`.
+  const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
   };
-  warnOnConflictingNames(nameProps, "Checkbox");
+  assertExclusiveNames(controlProps, "Checkbox");
 
   return (
     <Field
       helpText={helpText}
-      errorMessage={errorMessage}
       state={state}
       required={required}
       // Shrink-wrap around the row instead of spanning the line.
@@ -146,11 +146,8 @@ export function Checkbox(props: CheckboxProps) {
           required={required}
           name={name}
           // Name the box explicitly: base-ui's hidden `<input>` is `aria-hidden`,
-          // so the wrapping `<label>` would name *that*, not the box. Only the
-          // attributes that are actually set get spread — an `aria-*={undefined}`
-          // through base-ui's prop merge clobbers the field context's wiring.
-          {...fieldNameAttrs(nameProps, labelId)}
-          {...(ariaDescribedby != null && { "aria-describedby": ariaDescribedby })}
+          // so the wrapping `<label>` would name *that*, not the box.
+          {...fieldControlAttrs(controlProps, labelId)}
           render={
             <InternalCheckbox
               checked={indeterminate ? "indeterminate" : value}

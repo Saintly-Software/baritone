@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { FORM_STATES, SIZES } from "../../theme/constants";
+import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
 import type { DistributiveOmit } from "../../utils/types";
 import { RadioGroup } from "./index";
 
@@ -75,6 +75,15 @@ export const Sizes: Story = {
   ),
 };
 
+// One message slot now: the copy changes with the state, rather than a help
+// line and an error line coexisting.
+const STATE_MESSAGE: Record<FormState, string | undefined> = {
+  neutral: undefined,
+  warning: "Double-check this choice.",
+  invalid: "Pick a theme to continue.",
+  valid: undefined,
+};
+
 const thStyle: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 600,
@@ -109,12 +118,7 @@ export const States: Story = {
             </th>
             <td style={cellStyle}>
               <div style={{ maxWidth: 320 }}>
-                <ThemeSwitcher
-                  label="Theme"
-                  state={state}
-                  helpText={state === "warning" ? "Double-check this choice." : undefined}
-                  errorMessage={state === "invalid" ? "Pick a theme to continue." : undefined}
-                />
+                <ThemeSwitcher label="Theme" state={state} helpText={STATE_MESSAGE[state]} />
               </div>
             </td>
           </tr>

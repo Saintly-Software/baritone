@@ -127,14 +127,14 @@ interface StateRow {
   label: string;
   disabled?: boolean;
   state?: FormState;
-  errorMessage?: string;
+  helpText?: string;
 }
 
 // Disabled and invalid, folded into one table alongside the default.
 const stateRows: StateRow[] = [
   { label: "default" },
   { label: "disabled", disabled: true },
-  { label: "invalid", state: "invalid", errorMessage: "Pick a default view to continue." },
+  { label: "invalid", state: "invalid", helpText: "Pick a default view to continue." },
 ];
 
 /** Every state (rows) against the rendered control (right column). */
@@ -159,7 +159,6 @@ export const States: Story = {
                 required
                 disabled={row.disabled}
                 state={row.state}
-                errorMessage={row.errorMessage}
               />
             </td>
           </tr>

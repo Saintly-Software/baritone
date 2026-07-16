@@ -43,8 +43,10 @@ Every form control is built on the **`Field`** primitive, which owns the label /
 help / error layout and the ARIA wiring — so they all share one contract:
 `label` / `aria-label` / `aria-labelledby` (mutually exclusive — pass exactly
 one), `helpText` (wired to `aria-describedby`, and combined with any you set
-yourself), `errorMessage`, `state`, `required`, `disabled`, `labelPosition`, and
-`slotProps.label` / `slotProps.helpText`. Compose it directly to build your own:
+yourself), `state`, `required`, `disabled`, `labelPosition`, and
+`slotProps.label` / `slotProps.helpText`. There's one message slot rather than
+two — `state="invalid"` reddens the `helpText` instead of revealing a separate
+error line. Compose it directly to build your own:
 
 ```tsx
 <Field label="Email" helpText="We'll never share it.">

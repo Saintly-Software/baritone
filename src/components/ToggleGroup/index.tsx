@@ -144,11 +144,9 @@ interface ToggleGroupBaseProps<T extends string> {
   disabled?: boolean;
   /** Inline help shown under the group and wired via `aria-describedby`. */
   helpText?: React.ReactNode;
-  /** Shown (and announced) under the group when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /**
-   * Validation state. `invalid` flags the group `aria-invalid` and reveals the
-   * `errorMessage`; the toolbar `intent`/`saliency` still own the segment colours.
+   * Validation state. `invalid` flags the group `aria-invalid` and reddens the
+   * `helpText`; the toolbar `intent`/`saliency` still own the segment colours.
    * Default `neutral`.
    */
   state?: FormState;
@@ -195,7 +193,7 @@ export type ToggleGroupProps<T extends string> = ToggleGroupBaseProps<T> & Field
  * change its value.
  *
  * It doubles as a **labelled form control**: pass `label` (plus optional
- * `description` / `errorMessage`, a validation `state`, or `required`) and the
+ * `helpText`, a validation `state`, or `required`) and the
  * group renders field semantics — a named group with inline help / error text
  * wired through `aria-describedby` — while keeping the same toolbar look.
  *
@@ -215,7 +213,7 @@ export type ToggleGroupProps<T extends string> = ToggleGroupBaseProps<T> & Field
  *
  * @example
  * // Form-control mode: labelled, required, with inline help.
- * <ToggleGroup label="Default view" required description="Applies to new boards." value={view} onChange={setView}>
+ * <ToggleGroup label="Default view" required helpText="Applies to new boards." value={view} onChange={setView}>
  *   {({ ToggleGroupItem }) => (
  *     <>
  *       <ToggleGroupItem value="list">List</ToggleGroupItem>
@@ -238,7 +236,6 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
     "aria-labelledby": ariaLabelledby,
     "aria-describedby": ariaDescribedby,
     helpText,
-    errorMessage,
     state = "neutral",
     labelPosition = "top",
     slotProps,
@@ -270,7 +267,6 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
     <Field
       {...(nameProps as FieldLabellingProps)}
       helpText={helpText}
-      errorMessage={errorMessage}
       state={state}
       required={required}
       labelPosition={labelPosition}

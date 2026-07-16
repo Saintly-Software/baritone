@@ -65,15 +65,15 @@ export const Basic: Story = {
 };
 
 /**
- * `state="invalid"` reveals the `errorMessage` and marks the control
- * `aria-invalid`. The help text stays — both are announced, help first.
+ * `state="invalid"` renders the one `helpText` line negative, with `HelpText`'s
+ * warning glyph, and marks the control `aria-invalid`. There's no separate
+ * `errorMessage` — swap the copy for the error case yourself.
  */
 export const Invalid: Story = {
   args: {
     label: "Email",
-    helpText: "We'll never share it.",
     state: "invalid",
-    errorMessage: "That doesn't look like an email address.",
+    helpText: "That doesn't look like an email address.",
   },
 };
 
@@ -113,6 +113,15 @@ export const Required: Story = {
   },
 };
 
+// One message slot now: the copy changes with the state, rather than a help
+// line and an error line coexisting.
+const STATE_MESSAGE: Record<FormState, string | undefined> = {
+  neutral: undefined,
+  warning: "This address looks unusual.",
+  invalid: "This field is required.",
+  valid: undefined,
+};
+
 const thStyle: CSSProperties = {
   fontSize: 12,
   fontWeight: 600,
@@ -147,12 +156,7 @@ export const States: Story = {
             </th>
             <td style={cellStyle}>
               <div style={{ maxWidth: 320 }}>
-                <Field
-                  label="Email"
-                  state={state}
-                  helpText={state === "warning" ? "This address looks unusual." : undefined}
-                  errorMessage={state === "invalid" ? "This field is required." : undefined}
-                >
+                <Field label="Email" state={state} helpText={STATE_MESSAGE[state]}>
                   <Field.Control className={controlClassFor(state)} placeholder="you@example.com" />
                 </Field>
               </div>

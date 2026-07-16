@@ -168,9 +168,11 @@ describe("CheckboxGroup", () => {
     expect(onChange).toHaveBeenCalledWith(["billing"]);
   });
 
-  it("announces an error message when invalid", () => {
-    render(<Subscriptions state="invalid" errorMessage="Pick at least one topic" />);
-    expect(screen.getByText("Pick at least one topic")).toBeInTheDocument();
+  it("renders the helpText as an error when invalid", () => {
+    render(<Subscriptions state="invalid" helpText="Pick at least one topic" />);
+    const line = screen.getByText("Pick at least one topic");
+    expect(line).toBeInTheDocument();
+    expect(line.querySelector("svg")).not.toBeNull();
   });
 
   // The group is a bare `<div role="group">`, so base-ui's field context can't
@@ -188,18 +190,11 @@ describe("CheckboxGroup", () => {
       expect(describedByText(screen.getByRole("group"))).toEqual(["Pick any that apply"]);
     });
 
-    it("wires helpText and the error message together when invalid", () => {
-      render(
-        <Subscriptions
-          helpText="Pick any that apply"
-          state="invalid"
-          errorMessage="Pick at least one topic"
-        />,
-      );
-      expect(describedByText(screen.getByRole("group"))).toEqual([
-        "Pick any that apply",
-        "Pick at least one topic",
-      ]);
+    it("keeps helpText wired when the state turns invalid", () => {
+      render(<Subscriptions helpText="Pick any that apply" state="invalid" />);
+      // The one line stays in `aria-describedby` across states — it changes
+      // colour, it doesn't leave and re-enter the description.
+      expect(describedByText(screen.getByRole("group"))).toEqual(["Pick any that apply"]);
     });
 
     it("combines helpText with a caller's aria-describedby rather than replacing it", () => {

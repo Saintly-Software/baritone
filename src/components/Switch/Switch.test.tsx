@@ -175,11 +175,16 @@ describe("Switch", () => {
     expect(screen.getByRole("switch", { name: "Wi-Fi" })).toBeInTheDocument();
   });
 
-  it("prefers a visible label over aria-label", () => {
-    render(<Notifications aria-label="ignored" />);
-    // aria-labelledby (the visible label) wins, so aria-label is not applied.
-    const toggle = screen.getByRole("switch", { name: "Notifications" });
-    expect(toggle).not.toHaveAttribute("aria-label");
+  // `label` used to silently win over `aria-label`. They're mutually exclusive
+  // now — the track would show one name and announce another — so the pair is a
+  // type error, and a JS caller that gets past the types gets a thrown error.
+  it("throws when label and aria-label are both passed", () => {
+    expect(() =>
+      render(
+        // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
+        <Switch label="Notifications" aria-label="ignored" value={false} onChange={() => {}} />,
+      ),
+    ).toThrow(/mutually exclusive/);
   });
 
   it("points at an external label via aria-labelledby", () => {
@@ -198,12 +203,14 @@ describe("Switch", () => {
     expect(toggle).toHaveAccessibleDescription("We'll only ping you about outages.");
   });
 
-  it("shows the error message only when invalid", () => {
-    const { rerender } = render(<Notifications errorMessage="Required" />);
-    expect(screen.queryByText("Required")).toBeNull();
+  // One message slot: the same line stays put and changes *presentation* with
+  // `state`, rather than a separate error line appearing.
+  it("renders the helpText as an error when invalid", () => {
+    const { rerender } = render(<Notifications helpText="Required" />);
+    expect(screen.getByText("Required").querySelector("svg")).toBeNull();
 
-    rerender(<Notifications state="invalid" errorMessage="Required" />);
-    expect(screen.getByText("Required")).toBeInTheDocument();
+    rerender(<Notifications state="invalid" helpText="Required" />);
+    expect(screen.getByText("Required").querySelector("svg")).not.toBeNull();
   });
 
   it("keeps the accessible name stable across label positions", () => {

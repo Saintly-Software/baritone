@@ -106,7 +106,6 @@ interface StateRow {
   disabled?: boolean;
   defaultValue?: string;
   helpText?: string;
-  errorMessage?: string;
 }
 
 // Every validation state plus disabled — the combinations that used to be their
@@ -114,7 +113,7 @@ interface StateRow {
 const stateRows: StateRow[] = [
   { label: "neutral" },
   { label: "warning", state: "warning", helpText: "Double-check this choice." },
-  { label: "invalid", state: "invalid", errorMessage: "Please pick a fruit." },
+  { label: "invalid", state: "invalid", helpText: "Please pick a fruit." },
   { label: "valid", state: "valid", defaultValue: "apple" },
   {
     label: "disabled",
@@ -149,7 +148,6 @@ export const States: Story = {
                   disabled={row.disabled}
                   defaultValue={row.defaultValue}
                   helpText={row.helpText}
-                  errorMessage={row.errorMessage}
                 />
               </div>
             </td>

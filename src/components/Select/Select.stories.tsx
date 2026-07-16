@@ -128,7 +128,6 @@ interface StateRow {
   disabled?: boolean;
   loading?: boolean;
   helpText?: string;
-  errorMessage?: string;
 }
 
 // Every validation state plus disabled / loading — the combinations that used to
@@ -136,7 +135,7 @@ interface StateRow {
 const stateRows: StateRow[] = [
   { label: "neutral" },
   { label: "warning", state: "warning", helpText: "This choice seems unusual." },
-  { label: "invalid", state: "invalid", errorMessage: "Please choose a fruit." },
+  { label: "invalid", state: "invalid", helpText: "Please choose a fruit." },
   { label: "valid", state: "valid" },
   {
     label: "disabled",
@@ -160,7 +159,6 @@ function StateSelect(row: StateRow) {
       disabled={row.disabled}
       loading={row.loading}
       helpText={row.helpText}
-      errorMessage={row.errorMessage}
     />
   );
 }

@@ -51,20 +51,28 @@ Notes for the form controls specifically:
 gets the shared contract for free:
 
 ```tsx
-<Field label={label} helpText={helpText} errorMessage={errorMessage} state={state}>
-  <Field.Control render={<input />} />
+<Field label={label} helpText={helpText} state={state} required={required}>
+  <Field.Control render={<input />} {...fieldControlAttrs(controlProps)} />
 </Field>
 ```
+
+There is **one message slot**, not two: `helpText` _is_ the error line when
+`state="invalid"` (`HelpText` reddens it and adds the warning glyph). Don't add
+an `errorMessage` prop back — one slot means one line to read, and no question
+about which of two messages wins.
 
 - **Naming is a union, not a precedence order.** Take `FieldLabellingProps` by
   intersection (`type MyProps = MyBaseProps & FieldLabellingProps`) so `label` /
   `aria-label` / `aria-labelledby` stay mutually exclusive. Never re-add an
   `aria-label?: string` of your own — `Omit` it off any HTML attributes you
   extend, or the union can't own it.
-- **Spread `fieldNameAttrs(...)`, never bare `aria-*={undefined}`.** base-ui's
+- **Spread `fieldControlAttrs(...)`, never bare `aria-*={undefined}`.** base-ui's
   `mergeProps` treats an explicit `undefined` as a value and clobbers the name /
-  description coming from the field context, silently unlabelling the control.
-  Same for `aria-describedby`: `{...(x != null && { "aria-describedby": x })}`.
+  description coming from the field context, silently unlabelling the control (or
+  unwiring its help text). That one helper returns every naming + description
+  attribute, and only the keys that are actually set — so spreading it is always
+  safe. (`fieldNameAttrs` is the naming-only half, for when there's no
+  `aria-describedby` to forward.)
 - **base-ui wires its own components** (`Field.Control`, `Select`, `RadioGroup`,
   `Checkbox`, `Switch`) through the field context. A control it _can't_ see — a
   bare `<div role="group">`, a toolbar — must take `nameAttrs` / `describedBy`
@@ -90,8 +98,11 @@ gets the shared contract for free:
 - `src/test/field-composition.test.ts` fails if anything other than
   `src/components/Field` imports base-ui's `Field` directly.
 - The labelling exclusivity is enforced by `pnpm typecheck` (the union makes a
-  conflicting pair a compile error); `Field` also warns at runtime in dev for JS
-  callers, and `Checkbox` / `Switch` call `warnOnConflictingNames` themselves
+  conflicting pair a compile error). `Field` also calls `assertExclusiveNames`,
+  which **throws** in dev/test for the JS callers the types can't reach — a
+  control that shows one name and announces another is an a11y bug, not a
+  condition to degrade through. It's dev-gated so a mislabelled control never
+  becomes a white screen in production. `Checkbox` / `Switch` call it themselves,
   because their label lives inside the clickable row rather than in the `Field`.
 
 ## Other conventions

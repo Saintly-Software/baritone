@@ -126,11 +126,17 @@ export {
 } from "./components/Combobox";
 export {
   Field,
+  // The toolkit for building a form control on `Field` — see AGENTS.md.
+  fieldControlAttrs,
   fieldNameAttrs,
+  joinIds,
+  assertExclusiveNames,
   type FieldProps,
   type FieldSlotProps,
+  type FieldWiring,
   type FieldLabellingProps,
   type FieldLabellingInput,
+  type FieldControlInput,
 } from "./components/Field";
 export {
   Fieldset,

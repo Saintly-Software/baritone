@@ -152,9 +152,11 @@ describe("RadioGroup", () => {
     expect(onChange).toHaveBeenCalledWith("light");
   });
 
-  it("announces an error message when invalid", () => {
-    render(<ThemeSwitcher state="invalid" errorMessage="Pick a theme" />);
-    expect(screen.getByText("Pick a theme")).toBeInTheDocument();
+  it("renders the helpText as an error when invalid", () => {
+    render(<ThemeSwitcher state="invalid" helpText="Pick a theme" />);
+    const line = screen.getByText("Pick a theme");
+    expect(line).toBeInTheDocument();
+    expect(line.querySelector("svg")).not.toBeNull();
   });
 
   it("works with a numeric enum, not just strings", async () => {

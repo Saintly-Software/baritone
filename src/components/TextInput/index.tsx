@@ -27,8 +27,6 @@ interface TextInputBaseProps {
   state?: FormState;
   /** Inline help under the control, wired to its `aria-describedby`. */
   helpText?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /**
    * Extra explanation surfaced in an `InfoButton` (the "i" affordance) next to the
    * `label`. Rendered only when there's a visible `label`. Give the button an
@@ -139,7 +137,6 @@ export function TextInput(props: TextInputProps) {
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
     helpText,
-    errorMessage,
     info,
     labelPosition = "top",
     slotProps,
@@ -170,7 +167,6 @@ export function TextInput(props: TextInputProps) {
         "aria-labelledby": ariaLabelledby,
       } as FieldLabellingProps)}
       helpText={helpText}
-      errorMessage={errorMessage}
       info={info}
       state={state}
       required={required}

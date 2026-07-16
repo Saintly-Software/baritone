@@ -181,23 +181,22 @@ describe("ToggleGroup", () => {
 
     // `label` and `aria-label` used to coexist, with `label` silently winning.
     // They're mutually exclusive now: the type union rejects the pair outright,
-    // and JS callers who get past the types are warned rather than left with a
+    // and a JS caller who gets past the types gets a thrown error rather than a
     // control that shows one name and announces another.
-    it("warns when label and aria-label are both passed", () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      render(
-        // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
-        <ToggleGroup<View>
-          aria-label="ignored"
-          label="Default view"
-          value="list"
-          onChange={() => {}}
-        >
-          {({ ToggleGroupItem }) => <ToggleGroupItem value="list">List</ToggleGroupItem>}
-        </ToggleGroup>,
-      );
-      expect(warn).toHaveBeenCalledWith(expect.stringContaining("mutually exclusive"));
-      warn.mockRestore();
+    it("throws when label and aria-label are both passed", () => {
+      expect(() =>
+        render(
+          // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
+          <ToggleGroup<View>
+            aria-label="ignored"
+            label="Default view"
+            value="list"
+            onChange={() => {}}
+          >
+            {({ ToggleGroupItem }) => <ToggleGroupItem value="list">List</ToggleGroupItem>}
+          </ToggleGroup>,
+        ),
+      ).toThrow(/mutually exclusive/);
     });
 
     it("wires inline help to the group via aria-describedby", () => {
@@ -217,12 +216,12 @@ describe("ToggleGroup", () => {
       expect(screen.getByText("Applies to new boards.")).toHaveAttribute("id", describedBy);
     });
 
-    it("flags the group invalid and reveals the error message when state is invalid", () => {
+    it("flags the group invalid and reddens the helpText when state is invalid", () => {
       render(
         <ToggleGroup<View>
           label="Default view"
           state="invalid"
-          errorMessage="Pick a view."
+          helpText="Pick a view."
           value="list"
           onChange={() => {}}
         >
@@ -231,22 +230,24 @@ describe("ToggleGroup", () => {
       );
       const group = screen.getByRole("group", { name: "Default view" });
       expect(group).toHaveAttribute("aria-invalid", "true");
-      const error = screen.getByText("Pick a view.");
-      expect(group.getAttribute("aria-describedby")).toBe(error.getAttribute("id"));
+      const line = screen.getByText("Pick a view.");
+      expect(group.getAttribute("aria-describedby")).toBe(line.getAttribute("id"));
+      // One slot: the line is the error now, carrying HelpText's warning glyph.
+      expect(line.querySelector("svg")).not.toBeNull();
     });
 
-    it("hides the error message until the state is invalid", () => {
+    it("leaves the helpText neutral, and the group valid, outside the invalid state", () => {
       render(
         <ToggleGroup<View>
           label="Default view"
-          errorMessage="Pick a view."
+          helpText="Pick a view."
           value="list"
           onChange={() => {}}
         >
           {({ ToggleGroupItem }) => <ToggleGroupItem value="list">List</ToggleGroupItem>}
         </ToggleGroup>,
       );
-      expect(screen.queryByText("Pick a view.")).not.toBeInTheDocument();
+      expect(screen.getByText("Pick a view.").querySelector("svg")).toBeNull();
       expect(screen.getByRole("group")).not.toHaveAttribute("aria-invalid");
     });
 

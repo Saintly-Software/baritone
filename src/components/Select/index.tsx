@@ -81,8 +81,6 @@ interface SelectBaseProps extends Omit<
   options: ReadonlyArray<SelectOption> | ReadonlyArray<SelectOptionGroup>;
   /** Supplementary text beneath the control, wired as its accessible description. */
   helpText?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /** Validation state. `invalid` maps to negative, `valid` to positive. */
   state?: FormState;
   /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
@@ -240,7 +238,6 @@ export function Select(props: SelectProps) {
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
     helpText,
-    errorMessage,
     state = "neutral",
     labelPosition = "top",
     slotProps,
@@ -314,7 +311,6 @@ export function Select(props: SelectProps) {
     <Field
       {...(nameProps as FieldLabellingProps)}
       helpText={helpText}
-      errorMessage={errorMessage}
       state={state}
       required={required}
       labelPosition={labelPosition}

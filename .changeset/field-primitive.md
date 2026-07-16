@@ -16,12 +16,20 @@ re-derived per component.
 
 - **Naming is now mutually exclusive.** `label`, `aria-label`, and
   `aria-labelledby` are a union (`FieldLabellingProps`): passing more than one is
-  a compile error, and a runtime `console.warn` in dev catches JS callers. There
-  is no precedence order to remember any more — previously `label` silently beat
-  `aria-label` on some controls and `aria-labelledby` silently beat `label` on
-  others.
-- **`helpText` renders a `HelpText`** and combines with any `aria-describedby`
-  you set on the control rather than replacing it.
+  a compile error, and `assertExclusiveNames` **throws** in dev/test for the JS
+  callers the types can't reach (dev-gated, so a mislabelled control never becomes
+  a white screen in production). There is no precedence order to remember any
+  more — previously `label` silently beat `aria-label` on some controls and
+  `aria-labelledby` silently beat `label` on others.
+- **One message slot.** `helpText` renders a `HelpText`, wired to the control's
+  `aria-describedby` and combined with any you set yourself. `state="invalid"`
+  reddens _that_ line (with `HelpText`'s warning glyph) rather than revealing a
+  second one — so there's one line to read and no question about which of two
+  messages wins.
+- **`fieldControlAttrs(props, labelId?)`** returns every naming + description
+  attribute a control's focusable element needs, in one spread — and only the keys
+  that are actually set, which is what keeps base-ui's `mergeProps` from clobbering
+  the field context with an explicit `undefined`.
 - **`labelPosition`** (`top` — default — / `start` / `end`) inlines the label,
   reusing the existing `LABEL_POSITIONS` vocabulary. `start`/`end` are
   inline-logical and keep the help text aligned under the _control_.
@@ -55,6 +63,9 @@ re-derived per component.
   `description` — they aren't form controls.
 - `slotProps.description` → **`slotProps.helpText`** (`TextInput`);
   `slotProps.help` → **`slotProps.helpText`** (`FileUpload`).
+- **`errorMessage` is gone** from every control. `state="invalid"` now reddens the
+  single `helpText` line instead. Migrate by swapping the copy yourself:
+  `helpText={error ?? "We'll never share it."}`.
 - Passing more than one of `label` / `aria-label` / `aria-labelledby` no longer
   compiles. Drop the redundant one — it was already being ignored.
 - `Switch`'s and `FileUpload`'s `invalid?: boolean` → **`state?: FormState`**,
@@ -71,6 +82,8 @@ re-derived per component.
 
 - The label→control and control→help gaps are now a consistent 8px everywhere.
   `TextInput`, `Select`, `Combobox`, `Checkbox`, and `Switch` previously used 4px.
+- An invalid field shows one negative line, not a neutral help line plus a
+  negative error line.
 - A `required` field now shows an asterisk after its label. `RadioGroup` and
   `CheckboxGroup` gained a `required` prop (they had none).
 - `errorMessage` now renders through `HelpText`, so it picks up that component's

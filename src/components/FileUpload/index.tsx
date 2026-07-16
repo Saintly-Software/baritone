@@ -7,9 +7,10 @@ import type { FormState, LabelPosition } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import {
   Field,
+  type FieldControlInput,
   type FieldLabellingInput,
   type FieldLabellingProps,
-  fieldNameAttrs,
+  fieldControlAttrs,
   type FieldSlotProps,
 } from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
@@ -44,11 +45,9 @@ export type FileUploadSlotProps = FieldSlotProps;
 interface FileUploadBaseProps {
   /**
    * Validation state, driving the dropzone's border/background accent. `invalid`
-   * also sets `aria-invalid` on the input and reveals the `errorMessage`.
+   * also sets `aria-invalid` on the input and reddens the `helpText`.
    */
   state?: FormState;
-  /** Shown (and announced) under the dropzone when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /** Mark the field required — marks the label and the file `<input>`. */
   required?: boolean;
   /**
@@ -224,7 +223,6 @@ function UploadGlyph({ className }: { className?: string }) {
 export function FileUpload(props: FileUploadProps) {
   const {
     state = "neutral",
-    errorMessage,
     required = false,
     disabled: disabledProp = false,
     acceptedFileTypes,
@@ -244,10 +242,13 @@ export function FileUpload(props: FileUploadProps) {
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
-  const nameProps: FieldLabellingInput = {
+  // Everything the control's focusable element needs from the field, in one
+  // object — see `fieldControlAttrs`.
+  const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
   };
 
   const [dragging, setDragging] = React.useState(false);
@@ -312,9 +313,8 @@ export function FileUpload(props: FileUploadProps) {
     // the dropzone it describes, above the staged files rather than below them.
     <div className={wrapperClass}>
       <Field
-        {...(nameProps as FieldLabellingProps)}
+        {...(controlProps as FieldLabellingProps)}
         helpText={helpText}
-        errorMessage={errorMessage}
         info={info}
         state={state}
         required={required}
@@ -365,10 +365,9 @@ export function FileUpload(props: FileUploadProps) {
             // `aria-disabled` (never the native `disabled`, per AGENTS.md) keeps the
             // input in the tab order; the picker is vetoed in `handleClick`.
             aria-disabled={disabled || undefined}
-            // Only spread what's actually set: an explicit `undefined` would
-            // clobber the wiring base-ui's field context puts on the control.
-            {...fieldNameAttrs(nameProps)}
-            {...(ariaDescribedby != null && { "aria-describedby": ariaDescribedby })}
+            // base-ui's `Field.Label` already names the input, so this only emits
+            // an attribute for the label-less arms.
+            {...fieldControlAttrs(controlProps)}
             className={fileUploadInput}
             onChange={handleInputChange}
           />

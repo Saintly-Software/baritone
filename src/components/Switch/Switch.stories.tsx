@@ -173,7 +173,6 @@ export const WithErrorMessage: Story = {
     labelPosition: "top",
     required: true,
     state: "invalid",
-    errorMessage: "You must accept to continue.",
   },
 };
 

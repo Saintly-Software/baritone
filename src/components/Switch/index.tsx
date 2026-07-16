@@ -6,11 +6,12 @@ import type { FormState, LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import {
   Field,
+  type FieldControlInput,
   type FieldLabellingInput,
   type FieldLabellingProps,
-  fieldNameAttrs,
+  fieldControlAttrs,
   type FieldSlotProps,
-  warnOnConflictingNames,
+  assertExclusiveNames,
 } from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
 import { switchLabelDisabled, switchRow, switchRowDisabled } from "./switch.css";
@@ -29,8 +30,6 @@ interface SwitchBaseProps {
   labelPosition?: LabelPosition;
   /** Inline help shown under the row and wired via `aria-describedby`. */
   helpText?: React.ReactNode;
-  /** Shown (and announced) under the row when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
   /** Per-slot overrides for the help-text piece. */
   slotProps?: FieldSlotProps;
   /** Points the track at extra descriptive text; combines with `helpText`. */
@@ -102,8 +101,8 @@ export type SwitchProps = SwitchBaseProps & SwitchIconProps & FieldLabellingProp
  *
  * `labelPosition` places the visible label `end` (default), `start`, or `top`
  * relative to the track — RTL-safe, via flex direction only, so the DOM order
- * and accessible name never move. `helpText` / `errorMessage` add inline help
- * and validation text under the row (auto-wired through `Field`), and
+ * and accessible name never move. `helpText` adds an inline help / validation
+ * line under the row (auto-wired through `Field`), and
  * `aria-label` / `aria-labelledby` name the control when there is no visible
  * `label` (e.g. an icon-only switch) — exactly one of the three, they're
  * mutually exclusive.
@@ -143,7 +142,6 @@ export function Switch(props: SwitchProps) {
     label,
     labelPosition = "end",
     helpText,
-    errorMessage,
     slotProps,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
@@ -170,18 +168,20 @@ export function Switch(props: SwitchProps) {
   const offIcon = icon ?? inactiveIcon;
 
   // The label lives inside the clickable row rather than in the `Field`, so the
-  // exclusivity check that `Field` runs for other controls has to happen here.
-  const nameProps: FieldLabellingInput = {
+  // exclusivity check `Field` runs for other controls has to happen here.
+  // Everything the control's focusable element needs from the field, in one
+  // object — see `fieldControlAttrs`.
+  const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
   };
-  warnOnConflictingNames(nameProps, "Switch");
+  assertExclusiveNames(controlProps, "Switch");
 
   return (
     <Field
       helpText={helpText}
-      errorMessage={errorMessage}
       state={state}
       required={required}
       // Shrink-wrap around the row instead of spanning the line.
@@ -201,11 +201,8 @@ export function Switch(props: SwitchProps) {
           required={required}
           name={name}
           // Name the track explicitly: base-ui's hidden `<input>` is `aria-hidden`,
-          // so the wrapping `<label>` would name *that*, not the track. Only the
-          // attributes that are actually set get spread — an `aria-*={undefined}`
-          // through base-ui's prop merge clobbers the field context's wiring.
-          {...fieldNameAttrs(nameProps, labelId)}
-          {...(ariaDescribedby != null && { "aria-describedby": ariaDescribedby })}
+          // so the wrapping `<label>` would name *that*, not the track.
+          {...fieldControlAttrs(controlProps, labelId)}
           render={
             <InternalSwitch
               checked={value}
