@@ -183,6 +183,7 @@ export function Switch(props: SwitchProps) {
       helpText={helpText}
       errorMessage={errorMessage}
       state={state}
+      required={required}
       // Shrink-wrap around the row instead of spanning the line.
       fit="content"
       disabled={disabled}

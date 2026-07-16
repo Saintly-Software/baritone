@@ -3,7 +3,7 @@ import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
-import type { LabelPosition } from "../../theme/constants";
+import type { FormState, LabelPosition } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import {
   Field,
@@ -42,9 +42,14 @@ export type FileUploadSlotProps = FieldSlotProps;
  * is one `FileInfo | null`, a multiple's is a `FileInfo[]`).
  */
 interface FileUploadBaseProps {
-  /** Negative accent on the dropzone + `aria-invalid` on the input. */
-  invalid?: boolean;
-  /** Mark the field as required (sets `required` / `aria-required` on the input). */
+  /**
+   * Validation state, driving the dropzone's border/background accent. `invalid`
+   * also sets `aria-invalid` on the input and reveals the `errorMessage`.
+   */
+  state?: FormState;
+  /** Shown (and announced) under the dropzone when `state` is `invalid`. */
+  errorMessage?: React.ReactNode;
+  /** Mark the field required — marks the label and the file `<input>`. */
   required?: boolean;
   /**
    * Allowed file types, in the HTML `accept` grammar — extensions (`.pdf`),
@@ -186,8 +191,8 @@ function UploadGlyph({ className }: { className?: string }) {
  * Drag-and-drop is the native HTML5 API (no extra dependency): the input overlays
  * the zone transparently to own clicks + keyboard, while drops are intercepted on
  * the zone so they can be filtered against `acceptedFileTypes` (the native
- * `accept` only constrains the picker). Built on base-ui's `Field` for label
- * association + `invalid` → `aria-invalid` wiring, like `TextInput`.
+ * `accept` only constrains the picker). It composes `Field` for the label / help /
+ * error layout and ARIA wiring, and takes the shared `state`, like `TextInput`.
  *
  * @example
  * // Multiple
@@ -218,7 +223,8 @@ function UploadGlyph({ className }: { className?: string }) {
  */
 export function FileUpload(props: FileUploadProps) {
   const {
-    invalid = false,
+    state = "neutral",
+    errorMessage,
     required = false,
     disabled: disabledProp = false,
     acceptedFileTypes,
@@ -296,7 +302,6 @@ export function FileUpload(props: FileUploadProps) {
     addFiles(Array.from(event.dataTransfer.files));
   };
 
-  const state = invalid ? "invalid" : "neutral";
   const acceptAttr =
     acceptedFileTypes != null && acceptedFileTypes.length > 0
       ? acceptedFileTypes.join(",")
@@ -309,8 +314,10 @@ export function FileUpload(props: FileUploadProps) {
       <Field
         {...(nameProps as FieldLabellingProps)}
         helpText={helpText}
+        errorMessage={errorMessage}
         info={info}
         state={state}
+        required={required}
         labelPosition={labelPosition}
         disabled={disabled}
         slotProps={slotProps}

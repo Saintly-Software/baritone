@@ -149,6 +149,55 @@ describe("Field", () => {
     });
   });
 
+  describe("required", () => {
+    it("marks the label without disturbing the control's name", () => {
+      const { container } = render(
+        <Field label="Email" required>
+          <Field.Control required />
+        </Field>,
+      );
+      const marker = screen.getByText("*");
+      expect(marker).toBeInTheDocument();
+      // Decorative — the semantics live on the control, not the asterisk. (A real
+      // `<input>` gets the native `required`, which already implies them; base-ui
+      // uses `aria-required` for the controls that aren't native inputs.)
+      expect(marker).toHaveAttribute("aria-hidden", "true");
+      expect(screen.getByRole("textbox", { name: "Email" })).toBeRequired();
+
+      // The marker sits *beside* the `<label>`, not inside it, so the label's raw
+      // text is still exactly "Email". That's what keeps `getByLabelText("Email")`
+      // — which matches on textContent, not the accessible name — working for
+      // consumers who add `required`.
+      expect(container.querySelector("label")).toHaveTextContent(/^Email$/);
+      expect(screen.getByLabelText("Email").tagName).toBe("INPUT");
+    });
+
+    it("renders no marker when not required", () => {
+      render(
+        <Field label="Email">
+          <Field.Control />
+        </Field>,
+      );
+      expect(screen.queryByText("*")).not.toBeInTheDocument();
+    });
+
+    it("marks the label alongside an info button", () => {
+      render(
+        <Field
+          label="Email"
+          required
+          info="Why we need it"
+          slotProps={{ info: { "aria-label": "About" } }}
+        >
+          <Field.Control required />
+        </Field>,
+      );
+      expect(screen.getByText("*")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "About" })).toBeInTheDocument();
+      expect(screen.getByRole("textbox", { name: "Email" })).toBeInTheDocument();
+    });
+  });
+
   describe("disabled", () => {
     it("never puts the native disabled attribute on the control", () => {
       render(

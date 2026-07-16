@@ -26,17 +26,23 @@ const meta: Meta<typeof Field> = {
     state: "neutral",
     labelPosition: "top",
     fit: "fill",
+    required: false,
     disabled: false,
   },
   argTypes: {
     state: { control: "select", options: FORM_STATES },
+    required: { control: "boolean" },
     labelPosition: { control: "inline-radio", options: LABEL_POSITIONS },
     fit: { control: "inline-radio", options: ["fill", "content"] },
     disabled: { control: "boolean" },
   },
   render: (args) => (
     <Field {...args}>
-      <Field.Control className={controlClassFor(args.state)} placeholder="you@example.com" />
+      <Field.Control
+        required={args.required}
+        className={controlClassFor(args.state)}
+        placeholder="you@example.com"
+      />
     </Field>
   ),
   decorators: [
@@ -94,16 +100,17 @@ export const Inline: Story = {
 };
 
 /**
- * `required` belongs on the *control*, not the `Field` — the field doesn't own
- * the control, so it couldn't set `aria-required` on it. base-ui puts
- * `aria-required` on the control and marks the field's state.
+ * `required` marks the label with an asterisk. It's the *visible* half only — the
+ * marker is decorative and sits beside the `<label>`, never inside it, so the
+ * control still announces "Email", not "Email star". Pass `required` to the
+ * control too, for the announced half.
  */
 export const Required: Story = {
-  render: () => (
-    <Field label="Email" helpText="Required — we'll send your receipt here.">
-      <Field.Control required className={controlClass} placeholder="you@example.com" />
-    </Field>
-  ),
+  args: {
+    label: "Email",
+    required: true,
+    helpText: "We'll send your receipt here.",
+  },
 };
 
 const thStyle: CSSProperties = {

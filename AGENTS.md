@@ -74,8 +74,13 @@ gets the shared contract for free:
   It is _not_ forwarded to `BaseField.Root` — base-ui would turn it into the
   native attribute on the control. Model the real thing on the control, and OR in
   `useIsFieldDisabled()` so a wrapping `Fieldset` reaches you.
-- **`id` and `required` go on the control**, not the `Field`. An `id` on base-ui's
-  `Field.Root` doesn't reach the control, so `Field` deliberately has no such prop.
+- **`id` goes on the control**, not the `Field`. An `id` on base-ui's `Field.Root`
+  doesn't reach the control, so `Field` deliberately has no such prop.
+- **`required` goes on both.** `Field`'s `required` is the visible half (the
+  asterisk); the control carries the announced half (native `required` on a real
+  `<input>`, `aria-required` on base-ui's non-native controls). Keep the marker
+  _outside_ the `<label>` — an `aria-hidden` asterisk inside it would still break
+  `getByLabelText("Email")`, which matches raw `textContent`, not the accname.
 - **Re-typing a control's props** needs `DistributiveOmit` / `DistributivePartial`
   (`src/utils/types.ts`). The built-in `Omit`/`Partial` collapse a union into one
   object carrying every arm's keys, quietly destroying the exclusivity.

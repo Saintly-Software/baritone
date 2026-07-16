@@ -21,7 +21,7 @@ export const fieldRoot = recipe({
   },
   variants: {
     labelPosition: {
-      top: { flexDirection: "column", gap: vars.space[1] },
+      top: { flexDirection: "column", gap: vars.space[2] },
       start: { flexDirection: "row", alignItems: "baseline", gap: vars.space[2] },
       end: { flexDirection: "row-reverse", alignItems: "baseline", gap: vars.space[2] },
     },
@@ -51,7 +51,7 @@ export const fieldStack = recipe({
   base: {
     display: "flex",
     flexDirection: "column",
-    gap: vars.space[1],
+    gap: vars.space[2],
     minWidth: 0,
   },
   variants: {
@@ -78,6 +78,17 @@ export const fieldLabelRow = style({
   display: "flex",
   alignItems: "center",
   gap: vars.space[1],
+});
+
+/**
+ * The `required` marker beside the label text — negative-high, so it reads as the
+ * conventional red asterisk. It sits in `fieldLabelRow` next to the `<label>`
+ * rather than inside it (see the note in `Field`), and is decorative
+ * (`aria-hidden`): the control's `aria-required` carries the semantics, so this
+ * never has to be announced and can't leak "star" into the accessible name.
+ */
+export const fieldRequiredMarker = style({
+  color: vars.text.color.negative.high,
 });
 
 export type FieldRootVariants = NonNullable<RecipeVariants<typeof fieldRoot>>;

@@ -157,6 +157,8 @@ interface CheckboxGroupBaseProps<T> {
   labelPosition?: LabelPosition;
   /** Per-slot overrides for the label / help-text pieces. */
   slotProps?: FieldSlotProps;
+  /** Mark the group required — marks the label and sets the group `aria-required`. */
+  required?: boolean;
   /** Disable the whole group. */
   disabled?: boolean;
   /** Points the group at extra descriptive text; combines with `helpText`. */
@@ -217,6 +219,7 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     errorMessage,
     labelPosition = "top",
     slotProps,
+    required = false,
     disabled: disabledProp = false,
     className,
   } = props as CheckboxGroupBaseProps<T> & FieldLabellingInput;
@@ -255,6 +258,7 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
       helpText={helpText}
       errorMessage={errorMessage}
       state={state}
+      required={required}
       labelPosition={labelPosition}
       disabled={disabled}
       slotProps={slotProps}
@@ -270,6 +274,9 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
             role="group"
             {...nameAttrs}
             aria-describedby={joinIds(ariaDescribedby, describedBy)}
+            // The `Field` marks the label; the group carries the semantics. base-ui
+            // isn't involved here, so it's set by hand like the rest of the wiring.
+            aria-required={required || undefined}
             className={cx(checkboxGroupRoot({ orientation }), className)}
           >
             {children({

@@ -128,6 +128,8 @@ interface RadioGroupBaseProps<T> {
   labelPosition?: LabelPosition;
   /** Per-slot overrides for the label / help-text pieces. */
   slotProps?: FieldSlotProps;
+  /** Mark the group required — marks the label and sets the group `aria-required`. */
+  required?: boolean;
   /** Disable the whole group. */
   disabled?: boolean;
   /** Identifies the field when submitted as part of a form. */
@@ -184,6 +186,7 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
     errorMessage,
     labelPosition = "top",
     slotProps,
+    required = false,
     disabled: disabledProp = false,
     name,
     className,
@@ -208,6 +211,7 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
       helpText={helpText}
       errorMessage={errorMessage}
       state={state}
+      required={required}
       labelPosition={labelPosition}
       disabled={disabled}
       slotProps={slotProps}
@@ -216,6 +220,8 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
         <BaseRadioGroup
           value={value}
           onValueChange={(next) => onChange(next)}
+          // The `Field` marks the label; base-ui turns this into `aria-required`.
+          required={required}
           // Group-level disable also goes through `readOnly` (base-ui forwards it to
           // every radio) + `aria-disabled`, so the options stay keyboard-reachable.
           readOnly={disabled}

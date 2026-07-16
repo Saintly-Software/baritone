@@ -40,6 +40,8 @@ interface TextInputBaseProps {
   labelPosition?: LabelPosition;
   /** Per-slot overrides for the label / help-text / info pieces. */
   slotProps?: TextInputSlotProps;
+  /** Mark the field required — marks the label and the `<input>`/`<textarea>`. */
+  required?: boolean;
   /** Uses `aria-disabled` + `readOnly` (keeps the field keyboard-focusable). */
   disabled?: boolean;
 }
@@ -141,6 +143,7 @@ export function TextInput(props: TextInputProps) {
     info,
     labelPosition = "top",
     slotProps,
+    required = false,
     disabled: disabledProp,
     readOnly,
     className,
@@ -170,6 +173,7 @@ export function TextInput(props: TextInputProps) {
       errorMessage={errorMessage}
       info={info}
       state={state}
+      required={required}
       labelPosition={labelPosition}
       disabled={disabled}
       slotProps={slotProps}
@@ -178,6 +182,8 @@ export function TextInput(props: TextInputProps) {
         ref={ref}
         render={multiline ? <textarea rows={rows} /> : undefined}
         className={controlClass}
+        // The `Field` marks the label; base-ui turns this into `aria-required`.
+        required={required}
         aria-disabled={disabled || undefined}
         readOnly={disabled || readOnly}
         // base-ui's `Field.Label` already names `Field.Control`, so this only

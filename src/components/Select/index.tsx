@@ -316,6 +316,7 @@ export function Select(props: SelectProps) {
       helpText={helpText}
       errorMessage={errorMessage}
       state={state}
+      required={required}
       labelPosition={labelPosition}
       disabled={disabled}
       slotProps={slotProps}

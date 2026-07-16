@@ -1,7 +1,7 @@
 import { createVar, style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { focusRingColorVar, iconColorVar } from "../../styles/vars.css";
-import { FORM_STATE_INTENT } from "../../theme/constants";
+import { FORM_STATES, FORM_STATE_INTENT } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
 // Border + background are published as CSS vars so the one `base` reads them and
@@ -15,8 +15,8 @@ const bg = createVar();
  * a click anywhere opens the system picker and the control stays natively
  * keyboard-operable (the ring is drawn on this box via `:focus-within`).
  *
- * Token wiring mirrors `formControlRecipe`: a form `state` (neutral | invalid)
- * drives the border/background and publishes the focus-ring colour for the shared
+ * Token wiring mirrors `formControlRecipe`: the form `state` drives the
+ * border/background and publishes the focus-ring colour for the shared
  * `focusRingRecipe`. While a drag hovers it (`data-dragging`), the border switches
  * to the accent (focus) colour to signal it'll accept the drop.
  */
@@ -55,22 +55,24 @@ export const fileUploadDropzone = recipe({
     },
   },
   variants: {
-    state: {
-      neutral: {
-        vars: {
-          [bd]: vars.form.color.neutral.border,
-          [bg]: vars.form.color.neutral.background,
-          [focusRingColorVar]: vars.form.focus[FORM_STATE_INTENT.neutral],
-        },
-      },
-      invalid: {
-        vars: {
-          [bd]: vars.form.color.invalid.border,
-          [bg]: vars.form.color.invalid.background,
-          [focusRingColorVar]: vars.form.focus[FORM_STATE_INTENT.invalid],
-        },
-      },
-    },
+    // Generated from `FORM_STATES` rather than hand-listed, exactly like
+    // `formControlRecipe` — so the dropzone can never support a narrower set of
+    // states than the rest of the form controls.
+    state: Object.fromEntries(
+      FORM_STATES.map((state) => {
+        const c = vars.form.color[state];
+        return [
+          state,
+          {
+            vars: {
+              [bd]: c.border,
+              [bg]: c.background,
+              [focusRingColorVar]: vars.form.focus[FORM_STATE_INTENT[state]],
+            },
+          },
+        ];
+      }),
+    ) as Record<(typeof FORM_STATES)[number], { vars: Record<string, string> }>,
   },
   defaultVariants: { state: "neutral" },
 });

@@ -7,7 +7,13 @@ import { cx } from "../../utils/cx";
 import { useIsFieldDisabled } from "../Fieldset";
 import { HelpText, type HelpTextProps } from "../HelpText";
 import { InfoButton, type InfoButtonProps } from "../InfoButton";
-import { fieldLabelDisabled, fieldLabelRow, fieldRoot, fieldStack } from "./field.css";
+import {
+  fieldLabelDisabled,
+  fieldLabelRow,
+  fieldRequiredMarker,
+  fieldRoot,
+  fieldStack,
+} from "./field.css";
 
 const labelClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "high" }),
@@ -203,6 +209,17 @@ interface FieldBaseProps {
    * `slotProps.info["aria-label"]` (defaults to "More information").
    */
   info?: React.ReactNode;
+  /**
+   * Mark the field required — renders a marker (`*`) after the label text.
+   *
+   * The marker is *decorative* (`aria-hidden`), and sits beside the `<label>`
+   * rather than inside it, so it can't leak into the control's accessible name.
+   * The *semantics* come from the control — a native `<input>` takes the native
+   * `required`, and base-ui gives its non-native controls `aria-required` — so
+   * pass `required` to the control too. Every form control in this package does
+   * both.
+   */
+  required?: boolean;
   /** Validation state. `invalid` reveals `errorMessage` and sets `aria-invalid`. */
   state?: FormState;
   /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
@@ -243,7 +260,11 @@ export type FieldProps = FieldBaseProps & FieldLabellingProps;
  *    `HelpText`) and marks the control `aria-invalid`.
  * 4. **Layout.** `labelPosition` puts the label above (default) or inline, and
  *    `fit` decides whether the field claims the line or shrink-wraps. An `info`
- *    node hangs an `InfoButton` beside the label.
+ *    node hangs an `InfoButton` beside the label, and `required` marks it.
+ *
+ * `required` here is the *visible* half of required-ness (the marker beside the
+ * label); the announced half lives on the control, which the field can't reach.
+ * Pass `required` to both — every form control in this package does.
  *
  * There is deliberately no `id` prop: an `id` on base-ui's `Field.Root` doesn't
  * reach the control (base-ui generates one regardless), so it would be a lie.
@@ -277,6 +298,7 @@ export function Field(props: FieldProps) {
     helpText,
     errorMessage,
     info,
+    required = false,
     state = "neutral",
     labelPosition = "top",
     fit = "fill",
@@ -320,6 +342,16 @@ export function Field(props: FieldProps) {
     </BaseField.Label>
   );
 
+  // The required marker and the InfoButton both ride *beside* the label, never
+  // inside it, for two reasons. A button inside the `<label>` would join the
+  // control's accessible name and activate the control when clicked. And while an
+  // `aria-hidden` asterisk inside the label would keep the *real* accessible name
+  // right (the accname spec skips hidden subtrees), testing-library's
+  // `getByLabelText` matches the label's raw `textContent` — so it would quietly
+  // break every `getByLabelText("Email")` the moment someone added `required`.
+  // Outside, the label's text and its accessible name stay the same string.
+  const hasLabelAdornment = required || info != null;
+
   return (
     // No `disabled` on `Field.Root` — see the note in the component doc above.
     <BaseField.Root
@@ -327,15 +359,19 @@ export function Field(props: FieldProps) {
       className={cx(fieldRoot({ labelPosition, fit }), className)}
     >
       {labelEl &&
-        (info != null ? (
-          // The InfoButton rides *beside* the label, never inside it: a button
-          // within the `<label>` would join the control's accessible name and
-          // activate the control when clicked.
+        (hasLabelAdornment ? (
           <div className={fieldLabelRow}>
             {labelEl}
-            <InfoButton aria-label="More information" {...slotProps?.info}>
-              {info}
-            </InfoButton>
+            {required && (
+              <span aria-hidden="true" className={fieldRequiredMarker}>
+                *
+              </span>
+            )}
+            {info != null && (
+              <InfoButton aria-label="More information" {...slotProps?.info}>
+                {info}
+              </InfoButton>
+            )}
           </div>
         ) : (
           labelEl

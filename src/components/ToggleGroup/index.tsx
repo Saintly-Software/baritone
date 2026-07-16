@@ -272,6 +272,7 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
       helpText={helpText}
       errorMessage={errorMessage}
       state={state}
+      required={required}
       labelPosition={labelPosition}
       // Shrink-wrap around the segmented row instead of spanning the line.
       fit="content"

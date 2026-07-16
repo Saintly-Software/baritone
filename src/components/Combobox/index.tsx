@@ -464,6 +464,7 @@ export function Combobox(props: ComboboxProps) {
       helpText={helpText}
       errorMessage={errorMessage}
       state={state}
+      required={required}
       labelPosition={labelPosition}
       disabled={disabled}
       slotProps={slotProps}

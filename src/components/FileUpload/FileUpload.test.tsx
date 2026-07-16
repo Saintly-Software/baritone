@@ -278,7 +278,7 @@ describe("FileUpload", () => {
 
     it("sets aria-invalid on the input when invalid", () => {
       const { container } = render(
-        <FileUpload label="Files" invalid value={null} onChange={() => {}} />,
+        <FileUpload label="Files" state="invalid" value={null} onChange={() => {}} />,
       );
       expect(getInput(container)).toHaveAttribute("aria-invalid", "true");
     });

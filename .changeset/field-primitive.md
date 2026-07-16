@@ -26,6 +26,10 @@ re-derived per component.
   reusing the existing `LABEL_POSITIONS` vocabulary. `start`/`end` are
   inline-logical and keep the help text aligned under the _control_.
 - **`fit`** (`fill` — default — / `content`) claims the line or shrink-wraps.
+- **`required`** marks the label with an asterisk. The marker is decorative and
+  sits _beside_ the `<label>`, never inside it, so the control's accessible name
+  (and `getByLabelText`) stay exactly the label's text. The announced half lives
+  on the control, which every form control here sets too.
 - **`info`** hangs an `InfoButton` beside the label (moved off `TextInput` /
   `FileUpload`, which duplicated it).
 - **`slotProps`** re-tunes the `label` / `helpText` / `info` slots.
@@ -53,9 +57,11 @@ re-derived per component.
   `slotProps.help` → **`slotProps.helpText`** (`FileUpload`).
 - Passing more than one of `label` / `aria-label` / `aria-labelledby` no longer
   compiles. Drop the redundant one — it was already being ignored.
-- `Switch`'s `invalid?: boolean` → **`state?: FormState`**, matching `Checkbox`.
-  `invalid` becomes `state="invalid"`. (`FileUpload` keeps `invalid`: its
-  dropzone has no `warning`/`valid` look to select.)
+- `Switch`'s and `FileUpload`'s `invalid?: boolean` → **`state?: FormState`**,
+  matching `Checkbox`. `invalid` becomes `state="invalid"`. `FileUpload`'s
+  dropzone now renders all four states (its recipe is generated from
+  `FORM_STATES`, like `formControlRecipe`, so it can't fall behind again), and
+  gained the `errorMessage` the other controls have.
 - Re-typing a control's props needs the new **`DistributiveOmit`** /
   `DistributivePartial` helpers instead of the built-ins. `Omit`/`Partial` over a
   union collapse it into one object carrying every arm's keys, which breaks the
@@ -63,14 +69,15 @@ re-derived per component.
 
 **Visual**
 
-- The label→control and control→help gaps are now a consistent 4px everywhere.
-  `RadioGroup`, `CheckboxGroup`, `ToggleGroup`, and `FileUpload` previously used
-  8px.
+- The label→control and control→help gaps are now a consistent 8px everywhere.
+  `TextInput`, `Select`, `Combobox`, `Checkbox`, and `Switch` previously used 4px.
+- A `required` field now shows an asterisk after its label. `RadioGroup` and
+  `CheckboxGroup` gained a `required` prop (they had none).
 - `errorMessage` now renders through `HelpText`, so it picks up that component's
   automatic warning glyph.
 - A disabled field dims its label and help text (previously only `Checkbox` /
   `Switch` dimmed their row labels).
 
-`Field` deliberately has no `id` or `required` prop: neither can reach the
-control from the field (an `id` on base-ui's `Field.Root` doesn't propagate), so
-both belong on the control itself, where they already work.
+`Field` deliberately has no `id` prop: an `id` on base-ui's `Field.Root` doesn't
+reach the control (base-ui generates one regardless), so it would be a lie. Put
+`id` on the control, where it already works.

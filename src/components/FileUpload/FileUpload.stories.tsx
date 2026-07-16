@@ -1,14 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
+import { FORM_STATES } from "../../theme/constants";
 import { type FileInfo } from "../FileList";
 import { FileUpload } from "./index";
 
 const meta: Meta<typeof FileUpload> = {
   title: "Components/FileUpload",
   component: FileUpload,
-  args: { label: "Attachments", invalid: false, required: false, disabled: false },
+  args: { label: "Attachments", state: "neutral", required: false, disabled: false },
   argTypes: {
-    invalid: { control: "boolean" },
+    state: { control: "select", options: FORM_STATES },
     required: { control: "boolean" },
     disabled: { control: "boolean" },
     label: { control: "text" },
@@ -37,12 +38,12 @@ type Story = StoryObj<typeof FileUpload>;
 /** Multiple files: each new pick/drop appends; chips below remove on ×. */
 export const Multiple: Story = {
   args: { helpText: "PNG, JPG or PDF — up to 10MB each." },
-  render: ({ label, invalid, required, disabled, helpText }) => {
+  render: ({ label, state, required, disabled, helpText }) => {
     const [value, setValue] = React.useState<FileInfo[]>([]);
     return (
       <FileUpload
         label={label}
-        invalid={invalid}
+        state={state}
         required={required}
         disabled={disabled}
         helpText={helpText}
@@ -58,12 +59,12 @@ export const Multiple: Story = {
 /** Single file: a new pick/drop replaces the staged one. */
 export const Single: Story = {
   args: { label: "Avatar" },
-  render: ({ label, invalid, required, disabled, helpText }) => {
+  render: ({ label, state, required, disabled, helpText }) => {
     const [value, setValue] = React.useState<FileInfo | null>(null);
     return (
       <FileUpload
         label={label}
-        invalid={invalid}
+        state={state}
         required={required}
         disabled={disabled}
         helpText={helpText}
@@ -77,12 +78,12 @@ export const Single: Story = {
 
 /** No `acceptedFileTypes` → any file is allowed (no hint line). */
 export const AnyFileType: Story = {
-  render: ({ label, invalid, required, disabled, helpText }) => {
+  render: ({ label, state, required, disabled, helpText }) => {
     const [value, setValue] = React.useState<FileInfo[]>([]);
     return (
       <FileUpload
         label={label}
-        invalid={invalid}
+        state={state}
         required={required}
         disabled={disabled}
         helpText={helpText}
@@ -96,13 +97,13 @@ export const AnyFileType: Story = {
 
 /** Invalid + required: negative border + `aria-invalid` on the input. */
 export const Invalid: Story = {
-  args: { invalid: true, required: true },
-  render: ({ label, invalid, required, disabled, helpText }) => {
+  args: { state: "invalid", required: true },
+  render: ({ label, state, required, disabled, helpText }) => {
     const [value, setValue] = React.useState<FileInfo[]>([]);
     return (
       <FileUpload
         label={label}
-        invalid={invalid}
+        state={state}
         required={required}
         disabled={disabled}
         helpText={helpText}
@@ -125,7 +126,7 @@ export const Disabled: Story = {
     disabled: true,
     helpText: "Uploads are paused while your plan is being upgraded.",
   },
-  render: ({ label, invalid, required, disabled, helpText }) => {
+  render: ({ label, state, required, disabled, helpText }) => {
     const [value, setValue] = React.useState<FileInfo[]>(() => [
       { id: "1", file: new File([], "quarterly-report.pdf") },
       { id: "2", file: new File([], "hero-banner.png") },
@@ -133,7 +134,7 @@ export const Disabled: Story = {
     return (
       <FileUpload
         label={label}
-        invalid={invalid}
+        state={state}
         required={required}
         disabled={disabled}
         helpText={helpText}
@@ -153,13 +154,13 @@ export const WithInfo: Story = {
     info: "We accept your W-2 or the most recent 1099. Files are encrypted at rest.",
     helpText: "PDF only — up to 10MB.",
   },
-  render: ({ label, info, invalid, required, disabled, helpText }) => {
+  render: ({ label, info, state, required, disabled, helpText }) => {
     const [value, setValue] = React.useState<FileInfo[]>([]);
     return (
       <FileUpload
         label={label}
         info={info}
-        invalid={invalid}
+        state={state}
         required={required}
         disabled={disabled}
         helpText={helpText}
@@ -176,7 +177,7 @@ export const WithInfo: Story = {
 /** A `name`d field inside a `<form>`: the file shows up in `FormData` on submit. */
 export const NamedFieldInForm: Story = {
   args: { label: "Resume", helpText: "PDF, DOC or DOCX." },
-  render: ({ label, invalid, required, disabled, helpText }) => {
+  render: ({ label, state, required, disabled, helpText }) => {
     const [value, setValue] = React.useState<FileInfo | null>(null);
     const [submitted, setSubmitted] = React.useState<string | null>(null);
     return (
@@ -192,7 +193,7 @@ export const NamedFieldInForm: Story = {
         <FileUpload
           label={label}
           name="resume"
-          invalid={invalid}
+          state={state}
           required={required}
           disabled={disabled}
           helpText={helpText}
