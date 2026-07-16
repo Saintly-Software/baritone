@@ -7,7 +7,7 @@ import { ButtonGroup } from "../ButtonGroup";
 import { Icon } from "../Icon";
 import { Modal } from "../Modal";
 import { Text } from "../Text";
-import { Drawer } from "./index";
+import { Drawer, type DrawerProps, type DrawerWidth } from "./index";
 
 // Throwaway glyphs so the action demos have something to render.
 const EditGlyph = () => (
@@ -44,6 +44,7 @@ const meta: Meta<typeof Drawer> = {
     saliency: "low",
     padding: "md",
     side: "right",
+    width: "md",
     loading: false,
     disabled: false,
   },
@@ -51,6 +52,7 @@ const meta: Meta<typeof Drawer> = {
     saliency: { control: "select", options: SURFACE_SALIENCIES },
     padding: { control: "select", options: ["none", "sm", "md", "lg"] },
     side: { control: "inline-radio", options: ["left", "right"] },
+    width: { control: "select", options: ["xs", "sm", "md", "lg", "xl"] },
     loading: { control: "boolean" },
     disabled: { control: "boolean" },
   },
@@ -58,7 +60,7 @@ const meta: Meta<typeof Drawer> = {
     docs: {
       description: {
         component:
-          "A panel that slides in from the edge of the screen. It composes `header` / `footer` / `trigger` props around its content (the same pattern as Popover / Modal) and takes `saliency` / `padding` surface knobs. Built on base-ui's Drawer, so it is modal with an always-rendered backdrop and supports swipe-to-dismiss. Clicking outside never closes it; `disabled` additionally vetoes Escape / the close button / swipe, and `loading` overlays a spinner on the body.",
+          "A panel that slides in from the edge of the screen. It composes `header` / `footer` / `trigger` props around its content (the same pattern as Popover / Modal) and takes `saliency` / `padding` / `width` surface knobs. Built on base-ui's Drawer, so it is modal with an always-rendered backdrop and supports swipe-to-dismiss. Clicking outside never closes it; `disabled` additionally vetoes Escape / the close button / swipe, and `loading` overlays a spinner on the body.",
       },
     },
   },
@@ -71,8 +73,8 @@ type Story = StoryObj<typeof Drawer>;
  * Every region at once — a header carrying an overflow-actions `Menu`, a
  * scrolling body, and a footer whose primary actions render as a joined
  * `ButtonGroup` — all driven by the toolbar controls (`saliency`, `padding`,
- * `side`, `loading`, `disabled`). Opens by default so the panel is visible on
- * load.
+ * `side`, `width`, `loading`, `disabled`). Opens by default so the panel is
+ * visible on load.
  */
 export const KitchenSink: Story = {
   args: { defaultOpen: true },
@@ -135,6 +137,61 @@ export const Sides: Story = {
       <Text render={<p />}>This drawer slides in from the {args.side ?? "left"} edge.</Text>
     </Drawer>
   ),
+};
+
+/**
+ * Renders a single drawer at a given `width`, opened from a trigger. Shared by the
+ * per-width stories below so each one only differs in its `width` arg.
+ */
+function widthDrawer(width: DrawerWidth) {
+  return (args: DrawerProps) => (
+    <Drawer
+      {...args}
+      header={<Drawer.Header title={`Width ${width}`} subtitle="Only the panel width changes" />}
+      trigger={<Drawer.Trigger>Open {width} drawer</Drawer.Trigger>}
+      footer={
+        <Drawer.Footer>
+          <Drawer.Close>Close</Drawer.Close>
+        </Drawer.Footer>
+      }
+    >
+      <Text render={<p />}>This drawer uses the {width} width.</Text>
+    </Drawer>
+  );
+}
+
+/** The `xs` (narrowest) width. Opens by default so the panel is visible on load. */
+export const ExtraSmall: Story = {
+  args: { width: "xs", defaultOpen: true },
+  render: widthDrawer("xs"),
+};
+
+/** The `sm` width. Opens by default so the panel is visible on load. */
+export const Small: Story = {
+  args: { width: "sm", defaultOpen: true },
+  render: widthDrawer("sm"),
+};
+
+/** The `md` (default) width. Opens by default so the panel is visible on load. */
+export const Medium: Story = {
+  args: { width: "md", defaultOpen: true },
+  render: widthDrawer("md"),
+};
+
+/** The `lg` width. Opens by default so the panel is visible on load. */
+export const Large: Story = {
+  args: { width: "lg", defaultOpen: true },
+  render: widthDrawer("lg"),
+};
+
+/**
+ * The `xl` (widest) width. Like every step it stays capped to the viewport, so it
+ * shrinks to fit on narrow screens. Opens by default so the panel is visible on
+ * load.
+ */
+export const ExtraLarge: Story = {
+  args: { width: "xl", defaultOpen: true },
+  render: widthDrawer("xl"),
 };
 
 /**
