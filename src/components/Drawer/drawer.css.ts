@@ -63,7 +63,8 @@ export const drawerViewport = recipe({
  *
  * `width` only changes the panel's width; every step stays capped by the same
  * `maxWidth`, so on narrow viewports the panel shrinks to fit rather than
- * overflowing.
+ * overflowing. The wider steps rely on that cap — `xl` is 1024px, so it only
+ * reaches its full width on a desktop-sized viewport.
  */
 export const drawerPopup = recipe({
   base: {
@@ -90,11 +91,11 @@ export const drawerPopup = recipe({
   },
   variants: {
     width: {
-      xs: { width: "15rem" },
-      sm: { width: "18rem" },
-      md: { width: "22rem" },
-      lg: { width: "28rem" },
-      xl: { width: "36rem" },
+      xs: { width: "14rem" },
+      sm: { width: "26rem" },
+      md: { width: "38rem" },
+      lg: { width: "52rem" },
+      xl: { width: "64rem" },
     },
     side: {
       left: {

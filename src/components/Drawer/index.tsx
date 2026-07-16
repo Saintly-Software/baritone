@@ -71,9 +71,10 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   /** Edge the drawer slides in from. Default `right`. */
   side?: DrawerSide;
   /**
-   * Width of the panel: `xs` (15rem), `sm` (18rem), `md` (default, 22rem),
-   * `lg` (28rem), or `xl` (36rem). Every step is capped to the viewport, so a
-   * wide drawer shrinks to fit on small screens rather than overflowing.
+   * Width of the panel: `xs` (14rem / 224px), `sm` (26rem / 416px), `md`
+   * (default, 38rem / 608px), `lg` (52rem / 832px), or `xl` (64rem / 1024px).
+   * Every step is capped to the viewport, so a wide drawer shrinks to fit on
+   * small screens rather than overflowing.
    */
   width?: DrawerWidth;
   /**
