@@ -41,8 +41,6 @@ export const componentIntentRecipe = recipe({
     color: fg,
     vars: { [iconColorVar]: fg, [textColorVar]: fg },
     selectors: {
-      '&:hover:not([aria-disabled="true"])': { background: bgcHover },
-      '&:active:not([aria-disabled="true"])': { background: bgcActive },
       '&[aria-disabled="true"]': {
         background: bgcDisabled,
         color: fgDisabled,
@@ -53,6 +51,24 @@ export const componentIntentRecipe = recipe({
     },
   },
   variants: {
+    /**
+     * Who gets the hover/active background — see `componentTypographyRecipe`'s
+     * matching variant, which owns the cursor half of the same question.
+     */
+    interactive: {
+      control: {
+        selectors: {
+          '&:hover:not([aria-disabled="true"])': { background: bgcHover },
+          '&:active:not([aria-disabled="true"])': { background: bgcActive },
+        },
+      },
+      auto: {
+        selectors: {
+          '&:is(a, button):hover:not([aria-disabled="true"])': { background: bgcHover },
+          '&:is(a, button):active:not([aria-disabled="true"])': { background: bgcActive },
+        },
+      },
+    },
     intent: Object.fromEntries(
       INTENTS.map((intent) => [
         intent,
@@ -89,6 +105,7 @@ export const componentIntentRecipe = recipe({
     }),
   ),
   defaultVariants: {
+    interactive: "control",
     intent: "neutral",
     saliency: "mid",
   },
@@ -116,8 +133,6 @@ export const componentTypographyRecipe = recipe({
     lineHeight: vars.text.variant.body.sm.lineHeight,
     textDecoration: "none",
     whiteSpace: "nowrap",
-    cursor: "pointer",
-    userSelect: "none",
     borderRadius: vars.component.borderRadius,
     transitionProperty: "background-color, color, border-color, outline-color",
     transitionDuration: vars.motion.duration.fast,
@@ -127,6 +142,25 @@ export const componentTypographyRecipe = recipe({
     },
   },
   variants: {
+    /**
+     * Who gets the control affordances — the pointer cursor and the unselectable
+     * label (`componentIntentRecipe`'s matching variant owns the hover/active
+     * background half).
+     *
+     *   - `control` (default) — always. For the components that *are* a control:
+     *     Button, Tabs, a Notice's action.
+     *   - `auto` — leave both to the element itself. For a polymorphic root that
+     *     is usually inert: a Chip is a static tag until `render` makes it a
+     *     link, and a tag that shows a pointer is advertising a click that does
+     *     nothing (its own text is also worth being able to select). Declaring
+     *     nothing is what makes this work in both directions — a `<span>` keeps
+     *     the default arrow, while an `<a href>` still gets its pointer from the
+     *     UA stylesheet.
+     */
+    interactive: {
+      control: { cursor: "pointer", userSelect: "none" },
+      auto: {},
+    },
     size: {
       sm: {
         height: sizes.sm.height,
@@ -146,6 +180,7 @@ export const componentTypographyRecipe = recipe({
     },
   },
   defaultVariants: {
+    interactive: "control",
     size: "md",
   },
 });

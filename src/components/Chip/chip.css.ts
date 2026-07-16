@@ -2,17 +2,25 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
 /**
- * Chip-specific height override. The shared `componentTypographyRecipe` sizes a
- * Chip's font and inline padding, but a Chip sits shorter than the Button/Tabs
- * controls that share that recipe, so this layers a tighter per-size height on
- * top (applied after `componentTypographyRecipe({ size })`).
+ * Chip-specific box override. The shared `componentTypographyRecipe` sizes a
+ * Chip's font, inline padding, and gap for a Button-sized control; a Chip is a
+ * denser thing, so this layers its own per-size box on top (applied after
+ * `componentTypographyRecipe({ size })`).
+ *
+ * The heights are authored here as fixed rems rather than pulled from a scale —
+ * same reasoning as `badgeRecipe`'s: they're control metrics, not spacing. Each
+ * one must clear the label's line box (the shared `lineHeight: 1.5` over the
+ * per-size font gives 18/21/24px) plus the 1px border on each edge, or the label
+ * overflows the chip it sits in. That leaves the chip a step shorter than the
+ * Button sizes it shares a recipe with (24/32/40) and a step taller than a Badge
+ * (16/20/24), which is the intended order: badge < chip < button.
  */
 export const chipSizeRecipe = recipe({
   variants: {
     size: {
-      sm: { height: "0.75rem" },
-      md: { height: "1rem" },
-      lg: { height: "1.25rem" },
+      sm: { height: "1.25rem", paddingInline: vars.space[2], gap: vars.space[1] },
+      md: { height: "1.5rem", paddingInline: vars.space[2], gap: vars.space[1] },
+      lg: { height: "1.75rem", paddingInline: vars.space[3], gap: vars.space[2] },
     },
   },
   defaultVariants: {

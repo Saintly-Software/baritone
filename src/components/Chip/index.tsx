@@ -18,11 +18,13 @@ import { chipAdornmentRecipe } from "./chipAdornment.css";
  * What a Chip publishes to its adornments. The adornment never needs the chip's
  * *intent* (it inherits the chip's colour via `--iconColor`, or overrides it
  * with its own `intent`), but it does need the chip's `saliency` to tint an
- * override at the right shade, and the chip's `disabled` so a clickable
- * adornment goes inert with the chip.
+ * override at the right shade, the chip's `size` to scale its glyph to the box
+ * it sits in, and the chip's `disabled` so a clickable adornment goes inert with
+ * the chip.
  */
 interface ChipAdornmentContextValue {
   saliency?: Saliency;
+  size?: Size;
   disabled?: boolean;
 }
 
@@ -213,8 +215,11 @@ function ChipCopyAdornment({ content }: { content: string }) {
  */
 function ChipAdornment(props: ChipAdornmentProps) {
   const { icon, intent, label, onClick, href, disabled, render } = props;
-  const { saliency = "mid", disabled: chipDisabled = false } =
-    React.useContext(ChipAdornmentContext);
+  const {
+    saliency = "mid",
+    size = "md",
+    disabled: chipDisabled = false,
+  } = React.useContext(ChipAdornmentContext);
 
   const interactive = href != null || onClick != null;
   const overriding = intent != null;
@@ -224,6 +229,7 @@ function ChipAdornment(props: ChipAdornmentProps) {
   const className = cx(
     chipAdornmentRecipe({
       interactive,
+      size,
       // Pass intent+saliency only to override; omitting both inherits the chip's.
       intent: overriding ? intent : undefined,
       saliency: overriding ? saliency : undefined,
@@ -365,6 +371,14 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
  * et al., so `<Chip intent="negative" saliency="high">` matches a Button with
  * the same props. Hover/active states are derived from tokens at use-site.
  *
+ * Unlike a Button, though, a Chip is a *tag* by default, not a control: its hit
+ * targets are the label (given `onClick` / `popover`) and the adornments, each
+ * carrying its own affordances. So the chip body itself takes no pointer cursor
+ * and no hover — it would be promising a click that does nothing — and its text
+ * stays selectable. Passing a `render` that makes the chip a link restores both,
+ * off the rendered element rather than a prop (see the `interactive` variants in
+ * `component.css.ts`).
+ *
  * Decorate it with `Chip.Adornment`s via `leadAdornments` / `trailAdornments`
  * (icons that can also be a `<button>` or an `<a>`); they inherit the chip's
  * colour and disabled state, and the chip's flex layout spaces them around the
@@ -393,8 +407,8 @@ function ChipRoot({
   ...rest
 }: ChipProps) {
   const adornmentContext = React.useMemo<ChipAdornmentContextValue>(
-    () => ({ saliency, disabled }),
-    [saliency, disabled],
+    () => ({ saliency, size, disabled }),
+    [saliency, size, disabled],
   );
 
   // A clickable label is a real `<button>`; a disabled chip keeps it focusable
@@ -482,11 +496,15 @@ function ChipRoot({
     props: {
       ref,
       className: cx(
-        componentTypographyRecipe({ size }),
+        // `interactive: "auto"` — the chip's own hit targets are the label
+        // button and the adornments, which carry their own affordances; the root
+        // is an inert `<span>` tag unless `render` makes it a link, and only then
+        // should it take a pointer and light up under the cursor.
+        componentTypographyRecipe({ size, interactive: "auto" }),
         chipSizeRecipe({ size }),
         chipShapeRecipe({ shape }),
         chipWidthRecipe({ width }),
-        componentIntentRecipe({ intent, saliency }),
+        componentIntentRecipe({ intent, saliency, interactive: "auto" }),
         focusRingRecipe({ type: "visible" }),
         className,
       ),
