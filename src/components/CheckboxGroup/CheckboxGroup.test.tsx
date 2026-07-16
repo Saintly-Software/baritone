@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
+import type { DistributiveOmit } from "../../utils/types";
 import { CheckboxGroup } from "./index";
 
 type Topic = "product" | "billing" | "security";
@@ -15,7 +16,12 @@ function Subscriptions({
 }: {
   value?: Topic[];
   onChange?: (value: Topic[]) => void;
-} & Partial<React.ComponentProps<typeof CheckboxGroup<Topic>>>) {
+} & Partial<
+  DistributiveOmit<
+    React.ComponentProps<typeof CheckboxGroup<Topic>>,
+    "label" | "aria-label" | "aria-labelledby" | "value" | "onChange" | "children"
+  >
+>) {
   const [value, setValue] = React.useState<Topic[]>(initial);
   return (
     <CheckboxGroup
@@ -165,6 +171,49 @@ describe("CheckboxGroup", () => {
   it("announces an error message when invalid", () => {
     render(<Subscriptions state="invalid" errorMessage="Pick at least one topic" />);
     expect(screen.getByText("Pick at least one topic")).toBeInTheDocument();
+  });
+
+  // The group is a bare `<div role="group">`, so base-ui's field context can't
+  // reach it — its help / error text used to render but point at nothing.
+  describe("aria-describedby", () => {
+    /** Resolve the group's `aria-describedby` to the text it announces. */
+    const describedByText = (el: HTMLElement) =>
+      (el.getAttribute("aria-describedby") ?? "")
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((id) => document.getElementById(id)?.textContent ?? `<missing:${id}>`);
+
+    it("wires helpText to the group", () => {
+      render(<Subscriptions helpText="Pick any that apply" />);
+      expect(describedByText(screen.getByRole("group"))).toEqual(["Pick any that apply"]);
+    });
+
+    it("wires helpText and the error message together when invalid", () => {
+      render(
+        <Subscriptions
+          helpText="Pick any that apply"
+          state="invalid"
+          errorMessage="Pick at least one topic"
+        />,
+      );
+      expect(describedByText(screen.getByRole("group"))).toEqual([
+        "Pick any that apply",
+        "Pick at least one topic",
+      ]);
+    });
+
+    it("combines helpText with a caller's aria-describedby rather than replacing it", () => {
+      render(
+        <>
+          <span id="ext">From elsewhere</span>
+          <Subscriptions helpText="Pick any that apply" aria-describedby="ext" />
+        </>,
+      );
+      expect(describedByText(screen.getByRole("group"))).toEqual([
+        "From elsewhere",
+        "Pick any that apply",
+      ]);
+    });
   });
 
   it("works with a numeric enum, not just strings", async () => {

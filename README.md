@@ -39,6 +39,19 @@ Instead of "colours", components take an **intent** (the semantic role) and a
 Form controls take a `state` instead: `neutral | warning | invalid | valid`
 (`invalid` → negative, `valid` → positive).
 
+Every form control is built on the **`Field`** primitive, which owns the label /
+help / error layout and the ARIA wiring — so they all share one contract:
+`label` / `aria-label` / `aria-labelledby` (mutually exclusive — pass exactly
+one), `helpText` (wired to `aria-describedby`, and combined with any you set
+yourself), `errorMessage`, `state`, `disabled`, `labelPosition`, and
+`slotProps.label` / `slotProps.helpText`. Compose it directly to build your own:
+
+```tsx
+<Field label="Email" helpText="We'll never share it.">
+  <Field.Control render={<input />} />
+</Field>
+```
+
 ### Interaction states via oklch
 
 Hover/active are **not** tokens. The `default` colour lives in a CSS variable and

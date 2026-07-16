@@ -69,7 +69,7 @@ export const States: Story = {
                   label="Email"
                   placeholder="Type here"
                   state={state}
-                  description={state === "warning" ? "This value seems unusual." : undefined}
+                  helpText={state === "warning" ? "This value seems unusual." : undefined}
                   errorMessage={state === "invalid" ? "This field is required." : undefined}
                   defaultValue={state === "valid" ? "looks good" : undefined}
                 />
@@ -96,7 +96,7 @@ export const Disabled: Story = {
   args: {
     label: "Disabled (still focusable)",
     disabled: true,
-    description: "Uses aria-disabled so it stays keyboard-reachable.",
+    helpText: "Uses aria-disabled so it stays keyboard-reachable.",
     defaultValue: "cannot edit",
   },
 };
@@ -108,7 +108,7 @@ export const Multiline: Story = {
         multiline
         label="Notes"
         placeholder="Anything we should know?"
-        description="Drag the corner to make it taller."
+        helpText="Drag the corner to make it taller."
       />
       <TextInput
         multiline

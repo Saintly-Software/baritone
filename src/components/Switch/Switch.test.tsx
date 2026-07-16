@@ -2,11 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
+import type { DistributiveOmit } from "../../utils/types";
 import { Switch } from "./index";
-
-// Distribute the omit across each member of `SwitchProps`' icon union so the
-// discriminant survives — see the note in Switch.stories.tsx.
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 // A tiny controlled host mirroring the documented usage, so the tests exercise
 // the component exactly as a consumer would wire it.
@@ -14,7 +11,10 @@ function Notifications({
   value: initial = false,
   onChange,
   ...rest
-}: DistributiveOmit<React.ComponentProps<typeof Switch>, "value" | "onChange" | "label"> & {
+}: DistributiveOmit<
+  React.ComponentProps<typeof Switch>,
+  "value" | "onChange" | "label" | "aria-label" | "aria-labelledby"
+> & {
   value?: boolean;
   onChange?: (value: boolean) => void;
 }) {
@@ -123,7 +123,7 @@ describe("Switch", () => {
   });
 
   it("reflects an invalid state", () => {
-    render(<Notifications invalid />);
+    render(<Notifications state="invalid" />);
     expect(screen.getByRole("switch", { name: "Notifications" })).toHaveAttribute("data-invalid");
   });
 
@@ -193,7 +193,7 @@ describe("Switch", () => {
   });
 
   it("wires description text via aria-describedby", () => {
-    render(<Notifications description="We'll only ping you about outages." />);
+    render(<Notifications helpText="We'll only ping you about outages." />);
     const toggle = screen.getByRole("switch", { name: "Notifications" });
     expect(toggle).toHaveAccessibleDescription("We'll only ping you about outages.");
   });
@@ -202,7 +202,7 @@ describe("Switch", () => {
     const { rerender } = render(<Notifications errorMessage="Required" />);
     expect(screen.queryByText("Required")).toBeNull();
 
-    rerender(<Notifications invalid errorMessage="Required" />);
+    rerender(<Notifications state="invalid" errorMessage="Required" />);
     expect(screen.getByText("Required")).toBeInTheDocument();
   });
 

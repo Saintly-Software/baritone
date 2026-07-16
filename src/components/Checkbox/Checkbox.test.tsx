@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
+import type { DistributiveOmit } from "../../utils/types";
 import { Checkbox } from "./index";
 
 // A tiny controlled host mirroring the documented usage, so the tests exercise
@@ -13,7 +14,12 @@ function Subscribe({
 }: {
   value?: boolean;
   onChange?: (value: boolean) => void;
-} & Partial<React.ComponentProps<typeof Checkbox>>) {
+} & Partial<
+  DistributiveOmit<
+    React.ComponentProps<typeof Checkbox>,
+    "value" | "onChange" | "label" | "aria-label" | "aria-labelledby"
+  >
+>) {
   const [value, setValue] = React.useState(initial);
   return (
     <Checkbox

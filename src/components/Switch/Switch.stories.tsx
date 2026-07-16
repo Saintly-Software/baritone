@@ -1,12 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { LABEL_POSITIONS, SIZES } from "../../theme/constants";
+import { FORM_STATES, type FormState, LABEL_POSITIONS, SIZES } from "../../theme/constants";
+import type { DistributiveOmit } from "../../utils/types";
 import { Switch } from "./index";
-
-// Distribute the omit across each member of `SwitchProps`' icon union so the
-// discriminant survives (a plain `Omit<Union, …>` would collapse the three
-// branches into one where every icon prop is loosely optional).
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 // Switch is controlled, so the stories drive it from local state — the same
 // shape a consumer would use.
@@ -26,14 +22,14 @@ const meta: Meta<typeof ControlledSwitch> = {
     labelPosition: "end",
     disabled: false,
     required: false,
-    invalid: false,
+    state: "neutral",
   },
   argTypes: {
     size: { control: "select", options: SIZES },
     labelPosition: { control: "inline-radio", options: LABEL_POSITIONS },
     disabled: { control: "boolean" },
     required: { control: "boolean" },
-    invalid: { control: "boolean" },
+    state: { control: "select", options: FORM_STATES },
   },
   decorators: [
     (Story) => (
@@ -68,7 +64,7 @@ interface StateRow {
   label: string;
   value?: boolean;
   disabled?: boolean;
-  invalid?: boolean;
+  state?: FormState;
 }
 
 // Every meaningful switch state, including the invalid × checked × disabled
@@ -78,10 +74,10 @@ const stateRows: StateRow[] = [
   { label: "On", value: true },
   { label: "Disabled", disabled: true },
   { label: "Disabled + on", disabled: true, value: true },
-  { label: "Invalid", invalid: true },
-  { label: "On + invalid", invalid: true, value: true },
-  { label: "Disabled + invalid", disabled: true, invalid: true },
-  { label: "Disabled + on + invalid", disabled: true, value: true, invalid: true },
+  { label: "Invalid", state: "invalid" },
+  { label: "On + invalid", state: "invalid", value: true },
+  { label: "Disabled + invalid", disabled: true, state: "invalid" },
+  { label: "Disabled + on + invalid", disabled: true, value: true, state: "invalid" },
 ];
 
 /** Every state (rows) against the rendered control (right column). */
@@ -105,7 +101,7 @@ export const States: Story = {
                 aria-label={row.label}
                 value={row.value ?? false}
                 disabled={row.disabled}
-                invalid={row.invalid}
+                state={row.state}
                 onChange={() => {}}
               />
             </td>
@@ -166,7 +162,7 @@ export const WithDescription: Story = {
   args: {
     label: "Notifications",
     labelPosition: "top",
-    description: "We'll only ping you about outages, never marketing.",
+    helpText: "We'll only ping you about outages, never marketing.",
   },
 };
 
@@ -176,7 +172,7 @@ export const WithErrorMessage: Story = {
     label: "Accept tracking",
     labelPosition: "top",
     required: true,
-    invalid: true,
+    state: "invalid",
     errorMessage: "You must accept to continue.",
   },
 };

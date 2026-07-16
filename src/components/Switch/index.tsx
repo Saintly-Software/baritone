@@ -1,33 +1,19 @@
 "use client";
-import { Field } from "@base-ui/react/field";
 import { Switch as BaseSwitch } from "@base-ui/react/switch";
 import * as React from "react";
 import { InternalSwitch } from "../../internal/components/InternalSwitch";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
-import { atoms } from "../../styles/sprinkles.css";
-import type { LabelPosition, Size } from "../../theme/constants";
+import type { FormState, LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import {
+  Field,
+  type FieldLabellingInput,
+  type FieldLabellingProps,
+  fieldNameAttrs,
+  type FieldSlotProps,
+  warnOnConflictingNames,
+} from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
 import { switchLabelDisabled, switchRow, switchRowDisabled } from "./switch.css";
-
-// Field.Root defaults to a block `<div>`; shrink-wrap it into a column so the
-// clickable row plus any help / error text stack tightly, not across the line.
-const wrapperClass = atoms({
-  display: "inline-flex",
-  flexDirection: "column",
-  alignItems: "flex-start",
-  gap: "1",
-});
-// Inline help + error text, matching TextInput / RadioGroup: low-saliency for
-// help, negative for the error, both a step below the label.
-const descriptionClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "low" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
-const errorClass = cx(
-  textIntentRecipe({ intent: "negative", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
 
 interface SwitchBaseProps {
   /**
@@ -39,24 +25,16 @@ interface SwitchBaseProps {
   value: boolean;
   /** Called with the next checked state when the user toggles the switch. */
   onChange: (value: boolean) => void;
-  /** Visible label beside the track; also becomes the control's accessible name. */
-  label?: React.ReactNode;
   /** Where the label sits relative to the track. Default `end`. */
   labelPosition?: LabelPosition;
   /** Inline help shown under the row and wired via `aria-describedby`. */
-  description?: React.ReactNode;
-  /** Shown (and announced) under the row when `invalid`. */
+  helpText?: React.ReactNode;
+  /** Shown (and announced) under the row when `state` is `invalid`. */
   errorMessage?: React.ReactNode;
-  /**
-   * Accessible name when there is no visible `label` (e.g. an icon-only switch).
-   * Ignored if `aria-labelledby` or a visible `label` is present.
-   */
-  "aria-label"?: string;
-  /**
-   * Point the control at an external label element. Takes precedence over the
-   * visible `label`'s generated id.
-   */
-  "aria-labelledby"?: string;
+  /** Per-slot overrides for the help-text piece. */
+  slotProps?: FieldSlotProps;
+  /** Points the track at extra descriptive text; combines with `helpText`. */
+  "aria-describedby"?: string;
   /**
    * Dim + lock the control. Modelled with `aria-disabled` + `readOnly` (not the
    * `disabled` attribute), so the track stays keyboard-focusable — e.g. it can
@@ -65,8 +43,8 @@ interface SwitchBaseProps {
   disabled?: boolean;
   /** Mark the field as required (sets `aria-required`). */
   required?: boolean;
-  /** Flag the field invalid — negative accent on the track + `aria-invalid` wiring. */
-  invalid?: boolean;
+  /** Validation state, drives the accent + focus-ring colour. Default `neutral`. */
+  state?: FormState;
   /** Track + label size. Default `md`. */
   size?: Size;
   /** Identifies the field when submitted as part of a form. */
@@ -94,7 +72,12 @@ type SwitchIconProps =
   | { icon: React.ReactNode; activeIcon?: undefined; inactiveIcon?: undefined }
   | { icon?: undefined; activeIcon: React.ReactNode; inactiveIcon: React.ReactNode };
 
-export type SwitchProps = SwitchBaseProps & SwitchIconProps;
+/**
+ * The visible `label` sits beside the track (and is part of the click target).
+ * Name the track with exactly one of `label` / `aria-label` / `aria-labelledby` —
+ * they're mutually exclusive (see `FieldLabellingProps`).
+ */
+export type SwitchProps = SwitchBaseProps & SwitchIconProps & FieldLabellingProps;
 
 /**
  * Switch — a single boolean "form control", built on base-ui's `Switch` for
@@ -110,8 +93,8 @@ export type SwitchProps = SwitchBaseProps & SwitchIconProps;
  * explicitly with `aria-labelledby` pointing at the visible label.
  *
  * A switch and a checkbox are the same shape of control (one boolean), so the
- * API is deliberately identical: `value` is a `boolean` and validation is a
- * plain `invalid` flag rather than the full `FormState`.
+ * API is deliberately identical: `value` is a `boolean` and validation follows
+ * the shared `state` model.
  *
  * An optional glyph can ride inside the thumb: `icon` reuses one glyph for both
  * states, or `activeIcon` + `inactiveIcon` show a different glyph per state (the
@@ -119,10 +102,11 @@ export type SwitchProps = SwitchBaseProps & SwitchIconProps;
  *
  * `labelPosition` places the visible label `end` (default), `start`, or `top`
  * relative to the track — RTL-safe, via flex direction only, so the DOM order
- * and accessible name never move. `description` / `errorMessage` add inline help
+ * and accessible name never move. `helpText` / `errorMessage` add inline help
  * and validation text under the row (auto-wired through `Field`), and
  * `aria-label` / `aria-labelledby` name the control when there is no visible
- * `label` (e.g. an icon-only switch).
+ * `label` (e.g. an icon-only switch) — exactly one of the three, they're
+ * mutually exclusive.
  *
  * @example
  * const [enabled, setEnabled] = React.useState(false);
@@ -152,25 +136,29 @@ export type SwitchProps = SwitchBaseProps & SwitchIconProps;
  *   inactiveIcon={<CrossSvg />}
  * />
  */
-export function Switch({
-  value,
-  onChange,
-  label,
-  labelPosition = "end",
-  description,
-  errorMessage,
-  "aria-label": ariaLabel,
-  "aria-labelledby": ariaLabelledby,
-  disabled: disabledProp = false,
-  required = false,
-  invalid = false,
-  size = "md",
-  name,
-  className,
-  icon,
-  activeIcon,
-  inactiveIcon,
-}: SwitchProps) {
+export function Switch(props: SwitchProps) {
+  const {
+    value,
+    onChange,
+    label,
+    labelPosition = "end",
+    helpText,
+    errorMessage,
+    slotProps,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
+    disabled: disabledProp = false,
+    required = false,
+    state = "neutral",
+    size = "md",
+    name,
+    className,
+    icon,
+    activeIcon,
+    inactiveIcon,
+  } = props as SwitchBaseProps & SwitchIconProps & FieldLabellingInput;
+
   const labelId = React.useId();
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
@@ -181,17 +169,25 @@ export function Switch({
   const onIcon = icon ?? activeIcon;
   const offIcon = icon ?? inactiveIcon;
 
-  // Naming precedence: an explicit `aria-labelledby` wins, then the visible
-  // label's generated id, then fall back to `aria-label`. Only surface
-  // `aria-label` when nothing is naming the control by reference.
-  const labelledby = ariaLabelledby ?? (label != null ? labelId : undefined);
-  const ariaLabelToApply = labelledby == null ? ariaLabel : undefined;
+  // The label lives inside the clickable row rather than in the `Field`, so the
+  // exclusivity check that `Field` runs for other controls has to happen here.
+  const nameProps: FieldLabellingInput = {
+    label,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+  };
+  warnOnConflictingNames(nameProps, "Switch");
 
   return (
-    // No `disabled` on `Field.Root`: base-ui propagates it down as the native
-    // `disabled` attribute on the control, which would drop it from the tab
-    // order. Disabled is modelled per-control with `aria-disabled` + `readOnly`.
-    <Field.Root className={wrapperClass} invalid={invalid}>
+    <Field
+      helpText={helpText}
+      errorMessage={errorMessage}
+      state={state}
+      // Shrink-wrap around the row instead of spanning the line.
+      fit="content"
+      disabled={disabled}
+      slotProps={slotProps}
+    >
       <label className={cx(switchRow({ size, labelPosition }), disabled && switchRowDisabled)}>
         <BaseSwitch.Root
           checked={value}
@@ -203,15 +199,19 @@ export function Switch({
           aria-disabled={disabled || undefined}
           required={required}
           name={name}
-          aria-labelledby={labelledby}
-          aria-label={ariaLabelToApply}
+          // Name the track explicitly: base-ui's hidden `<input>` is `aria-hidden`,
+          // so the wrapping `<label>` would name *that*, not the track. Only the
+          // attributes that are actually set get spread — an `aria-*={undefined}`
+          // through base-ui's prop merge clobbers the field context's wiring.
+          {...fieldNameAttrs(nameProps, labelId)}
+          {...(ariaDescribedby != null && { "aria-describedby": ariaDescribedby })}
           render={
             <InternalSwitch
               checked={value}
               // base-ui now reports `data-readonly`, not `data-disabled`, so the
               // track's dim is driven explicitly from the prop.
               disabled={disabled}
-              state={invalid ? "invalid" : "neutral"}
+              state={state}
               size={size}
               activeIcon={onIcon}
               inactiveIcon={offIcon}
@@ -225,14 +225,6 @@ export function Switch({
           </span>
         )}
       </label>
-      {description != null && (
-        <Field.Description className={descriptionClass}>{description}</Field.Description>
-      )}
-      {invalid && errorMessage != null && (
-        <Field.Error className={errorClass} match>
-          {errorMessage}
-        </Field.Error>
-      )}
-    </Field.Root>
+    </Field>
   );
 }

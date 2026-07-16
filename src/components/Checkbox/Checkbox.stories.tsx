@@ -2,12 +2,13 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { CSSProperties } from "react";
 import * as React from "react";
 import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
+import type { DistributiveOmit } from "../../utils/types";
 import { Checkbox } from "./index";
 
 // Checkbox is controlled, so the stories drive it from local state — the same
 // shape a consumer would use.
 function ControlledCheckbox(
-  props: Omit<React.ComponentProps<typeof Checkbox>, "value" | "onChange">,
+  props: DistributiveOmit<React.ComponentProps<typeof Checkbox>, "value" | "onChange">,
 ) {
   const [value, setValue] = React.useState(false);
   return <Checkbox value={value} onChange={setValue} {...props} />;

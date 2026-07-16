@@ -2,18 +2,30 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { type FormState, INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
+import type { DistributiveOmit } from "../../utils/types";
 import { ToggleGroup } from "./index";
 
 type View = "list" | "board" | "calendar";
 
+// The knobs both hosts forward, minus the naming: each host below picks exactly
+// one naming prop for itself, since they're mutually exclusive. `DistributiveOmit`
+// (not the built-in `Omit`) is what keeps those arms apart while stripping them —
+// a plain `Omit` over a union collapses it into one object with every arm's keys.
+type ViewToggleKnobs = DistributiveOmit<
+  React.ComponentProps<typeof ToggleGroup<View>>,
+  "value" | "onChange" | "children" | "label" | "aria-label" | "aria-labelledby"
+>;
+
 // ToggleGroup is controlled, so the stories drive it from local state — the same
-// shape a consumer would use.
-function ViewToggle(
-  props: Omit<React.ComponentProps<typeof ToggleGroup<View>>, "value" | "onChange" | "children">,
-) {
+// shape a consumer would use. This is the *toolbar* host: no visible label, so it
+// names itself with `aria-label`.
+function ViewToggle({
+  "aria-label": ariaLabel = "View",
+  ...props
+}: ViewToggleKnobs & { "aria-label"?: string }) {
   const [value, setValue] = React.useState<View>("board");
   return (
-    <ToggleGroup aria-label="View" value={value} onChange={setValue} {...props}>
+    <ToggleGroup aria-label={ariaLabel} value={value} onChange={setValue} {...props}>
       {({ ToggleGroupItem }) => (
         <>
           <ToggleGroupItem value="list">List</ToggleGroupItem>
@@ -72,13 +84,12 @@ export const Sizes: Story = {
 };
 
 // A labelled form-control host: same segmented control, now with a group label,
-// inline help, and validation wiring — the form-control mode from DES-40.
-function LabelledViewToggle(
-  props: Omit<React.ComponentProps<typeof ToggleGroup<View>>, "value" | "onChange" | "children">,
-) {
+// inline help, and validation wiring — the form-control mode from DES-40. Named
+// by a visible `label` instead of `aria-label`.
+function LabelledViewToggle({ label, ...props }: ViewToggleKnobs & { label: React.ReactNode }) {
   const [value, setValue] = React.useState<View>("board");
   return (
-    <ToggleGroup value={value} onChange={setValue} {...props}>
+    <ToggleGroup label={label} value={value} onChange={setValue} {...props}>
       {({ ToggleGroupItem }) => (
         <>
           <ToggleGroupItem value="list">List</ToggleGroupItem>
@@ -92,11 +103,7 @@ function LabelledViewToggle(
 
 export const FormControl: Story = {
   render: () => (
-    <LabelledViewToggle
-      label="Default view"
-      required
-      description="Applies to newly created boards."
-    />
+    <LabelledViewToggle label="Default view" required helpText="Applies to newly created boards." />
   ),
 };
 

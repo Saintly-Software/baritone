@@ -125,6 +125,14 @@ export {
   type ComboboxSearchCopy,
 } from "./components/Combobox";
 export {
+  Field,
+  fieldNameAttrs,
+  type FieldProps,
+  type FieldSlotProps,
+  type FieldLabellingProps,
+  type FieldLabellingInput,
+} from "./components/Field";
+export {
   Fieldset,
   FieldsetLegend,
   useIsFieldDisabled,
@@ -295,6 +303,8 @@ export { focusRingRecipe, type FocusRingVariants } from "./styles/recipes/focusR
 // Polymorphism helpers
 export { useRender, composeRefs, type RenderProp } from "./utils/render";
 export { cx } from "./utils/cx";
+// Type helpers for re-typing the mutually-exclusive prop unions (see `Field`).
+export type { DistributiveOmit, DistributivePartial } from "./utils/types";
 export {
   useOverlayHandle,
   type OverlayHandle,

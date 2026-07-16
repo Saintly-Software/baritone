@@ -62,7 +62,7 @@ export const Single: Story = {
       <Select
         label="Favourite fruit"
         placeholder="Pick one"
-        description="Single selection."
+        helpText="Single selection."
         value={value}
         onChange={setValue}
         options={FRUITS}
@@ -80,7 +80,7 @@ export const Multiple: Story = {
         multiple
         label="Fruit basket"
         placeholder="Pick some"
-        description="Multiple selection."
+        helpText="Multiple selection."
         value={value}
         onChange={setValue}
         options={FRUITS}
@@ -97,7 +97,7 @@ export const Grouped: Story = {
       <Select
         label="Favourite fruit"
         placeholder="Pick one"
-        description="Options grouped under headings."
+        helpText="Options grouped under headings."
         value={value}
         onChange={setValue}
         options={GROUPED_FRUITS}
@@ -127,7 +127,7 @@ interface StateRow {
   state?: FormState;
   disabled?: boolean;
   loading?: boolean;
-  description?: string;
+  helpText?: string;
   errorMessage?: string;
 }
 
@@ -135,13 +135,13 @@ interface StateRow {
 // be their own stories, folded into one table.
 const stateRows: StateRow[] = [
   { label: "neutral" },
-  { label: "warning", state: "warning", description: "This choice seems unusual." },
+  { label: "warning", state: "warning", helpText: "This choice seems unusual." },
   { label: "invalid", state: "invalid", errorMessage: "Please choose a fruit." },
   { label: "valid", state: "valid" },
   {
     label: "disabled",
     disabled: true,
-    description: "Uses aria-disabled so it stays keyboard-reachable.",
+    helpText: "Uses aria-disabled so it stays keyboard-reachable.",
   },
   { label: "loading", loading: true },
 ];
@@ -159,7 +159,7 @@ function StateSelect(row: StateRow) {
       state={row.state}
       disabled={row.disabled}
       loading={row.loading}
-      description={row.description}
+      helpText={row.helpText}
       errorMessage={row.errorMessage}
     />
   );

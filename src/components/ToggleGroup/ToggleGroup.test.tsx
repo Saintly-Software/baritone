@@ -163,14 +163,9 @@ describe("ToggleGroup", () => {
   });
 
   describe("form-control mode", () => {
-    it("names the group from the visible label (taking precedence over aria-label)", () => {
+    it("names the group from the visible label", () => {
       render(
-        <ToggleGroup<View>
-          aria-label="ignored"
-          label="Default view"
-          value="list"
-          onChange={() => {}}
-        >
+        <ToggleGroup<View> label="Default view" value="list" onChange={() => {}}>
           {({ ToggleGroupItem }) => (
             <>
               <ToggleGroupItem value="list">List</ToggleGroupItem>
@@ -184,11 +179,32 @@ describe("ToggleGroup", () => {
       expect(group).not.toHaveAttribute("aria-label");
     });
 
+    // `label` and `aria-label` used to coexist, with `label` silently winning.
+    // They're mutually exclusive now: the type union rejects the pair outright,
+    // and JS callers who get past the types are warned rather than left with a
+    // control that shows one name and announces another.
+    it("warns when label and aria-label are both passed", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      render(
+        // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
+        <ToggleGroup<View>
+          aria-label="ignored"
+          label="Default view"
+          value="list"
+          onChange={() => {}}
+        >
+          {({ ToggleGroupItem }) => <ToggleGroupItem value="list">List</ToggleGroupItem>}
+        </ToggleGroup>,
+      );
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining("mutually exclusive"));
+      warn.mockRestore();
+    });
+
     it("wires inline help to the group via aria-describedby", () => {
       render(
         <ToggleGroup<View>
           label="Default view"
-          description="Applies to new boards."
+          helpText="Applies to new boards."
           value="list"
           onChange={() => {}}
         >

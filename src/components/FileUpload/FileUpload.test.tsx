@@ -363,12 +363,12 @@ describe("FileUpload", () => {
       expect(label.className.split(" ").length).toBeGreaterThan(1);
     });
 
-    it("merges a help slot className onto the description", () => {
+    it("merges a helpText slot className onto the help text", () => {
       render(
         <FileUpload
           label="Files"
           helpText="Up to 5MB"
-          slotProps={{ help: { className: "custom-help" } }}
+          slotProps={{ helpText: { className: "custom-help" } }}
           value={null}
           onChange={() => {}}
         />,

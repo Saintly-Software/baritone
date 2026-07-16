@@ -57,6 +57,16 @@ const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
  *   flight; it never reaches an element as an attribute), and `Modal.Close`
  *   forwards its `disabled` through `InternalButton`, which models it as
  *   `aria-disabled` (focusable). `ConfirmationModal` composes both.
+ * - `Field` — *our* `Field` primitive (base-ui's is always aliased to `BaseField`,
+ *   so a bare `Field` here is never the base-ui one). Its `disabled` is
+ *   presentational: it dims the label and help text and nothing else. It is
+ *   pointedly *not* forwarded to `BaseField.Root`, which would propagate the
+ *   native attribute down to the control — the `Field` doc and AGENTS.md both
+ *   spell this out. A `<BaseField.Root disabled>` still trips the guard, which is
+ *   the case that actually matters.
+ * - `HelpText` — a line of text, not a control. Its `disabled` only picks the
+ *   dimmed colour (see its `intent`/`saliency` resolution); there's no element
+ *   under it that could leave the tab order.
  */
 function mayReceiveDisabled(tag: string): boolean {
   return (
@@ -69,7 +79,9 @@ function mayReceiveDisabled(tag: string): boolean {
     tag === "Chip" ||
     tag === "BaseCombobox.Item" ||
     tag === "Modal" ||
-    tag === "Modal.Close"
+    tag === "Modal.Close" ||
+    tag === "Field" ||
+    tag === "HelpText"
   );
 }
 

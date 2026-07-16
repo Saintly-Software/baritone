@@ -82,17 +82,17 @@ describe("TextInput", () => {
       expect(screen.getByText("Email")).toHaveClass("custom-label");
     });
 
-    it("merges a slot className onto the built-in description class", () => {
+    it("merges a slot className onto the built-in help text class", () => {
       render(
         <TextInput
           label="Email"
-          description="Help"
-          slotProps={{ description: { className: "custom-desc" } }}
+          helpText="Help"
+          slotProps={{ helpText: { className: "custom-desc" } }}
         />,
       );
       const desc = screen.getByText("Help");
       expect(desc).toHaveClass("custom-desc");
-      // The built-in description class is still present (merged, not replaced).
+      // The built-in help text class is still present (merged, not replaced).
       expect(desc.className).not.toBe("custom-desc");
     });
   });
