@@ -111,6 +111,43 @@ export const IconOnly: Story = {
   },
 };
 
+/**
+ * `width` stretches or shrinks the button's box within its container. A button
+ * is `inline-flex` and hugs its label by default (`fit`-like); `fill` takes the
+ * container's full width — the full-width form submit or mobile CTA — keeping
+ * the label centred.
+ */
+export const Width: Story = {
+  render: () => (
+    // `align-items: flex-start` so the *container* never stretches its children —
+    // otherwise (a default grid/stretch parent) an unset button fills the column
+    // on its own and `width` looks like it does nothing.
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: 16,
+        width: 320,
+        border: "1px dashed #ccc",
+        padding: 12,
+      }}
+    >
+      <Button width="fill">fill — spans the container</Button>
+      <Button width="fit">fit — hugs the label</Button>
+      <Button>unset — hugs the label</Button>
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The same `width` shorthand `Box`/`Flex` take. Only on the labelled `solid` button: the icon-only arm pins a 1:1 `aspect-ratio` (so `fill` would inflate it into a giant square), and `appearance="text"` is underlined (so `fill` would drag the underline across the whole row) — both reject `width` at the type level.',
+      },
+    },
+  },
+};
+
 export const States: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>

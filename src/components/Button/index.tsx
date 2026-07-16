@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { InternalButton } from "../../internal/components/InternalButton";
+import type { WidthShorthand } from "../../styles/layoutProps";
 import type { BodySize, Intent, Saliency, Size } from "../../theme/constants";
 
 /**
@@ -79,6 +80,13 @@ export interface SolidButtonProps extends ButtonBaseProps {
    * disabled tooltip is suppressed while loading.
    */
   loading?: boolean;
+  /**
+   * `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit` — the
+   * same knob `Box`/`Flex` take. A button is `inline-flex` and hugs its label by
+   * default; `fill` stretches it to its container, for the full-width submit or
+   * mobile CTA. The label stays centred (the recipe's `justify-content`).
+   */
+  width?: WidthShorthand;
   /** Unsupported on the default appearance — `variant` is a text-appearance knob. */
   variant?: never;
 }
@@ -102,6 +110,13 @@ export interface TextButtonProps extends ButtonBaseProps {
   size?: never;
   /** Unsupported on the text appearance — there's no chrome to overlay a spinner. */
   loading?: never;
+  /**
+   * Unsupported on the text appearance: the underline spans the element's full
+   * width, so a filled text button drags its underline across the whole row with
+   * the label stranded at one end — it reads as a broken rule, not a link. Wrap
+   * it in a `Box`/`Flex` if you need to position it.
+   */
+  width?: never;
 }
 
 /**
@@ -147,6 +162,13 @@ export interface IconButtonProps extends ButtonCommonProps {
   endIcon?: never;
   /** Unsupported on the icon-only arm — it's always the filled `solid` look. */
   variant?: never;
+  /**
+   * Unsupported on the icon-only arm: the square treatment pins a 1:1
+   * `aspect-ratio`, so `width="fill"` wouldn't widen the button — it would
+   * inflate it into a container-sized square. Use a labelled button if you need
+   * a full-width control.
+   */
+  width?: never;
 }
 
 /**
