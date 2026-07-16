@@ -51,6 +51,9 @@ export type DrawerSide = "left" | "right";
 /** Internal padding from the spacing scale (mirrors `Popover`'s `padding`). */
 export type DrawerPadding = "none" | "sm" | "md" | "lg";
 
+/** Width of the panel. Default `md`. */
+export type DrawerWidth = "xs" | "sm" | "md" | "lg" | "xl";
+
 export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   /**
    * The element that opens the drawer — typically a `<Drawer.Trigger>`, which
@@ -67,6 +70,13 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   padding?: DrawerPadding;
   /** Edge the drawer slides in from. Default `right`. */
   side?: DrawerSide;
+  /**
+   * Width of the panel: `xs` (14rem / 224px), `sm` (26rem / 416px), `md`
+   * (default, 38rem / 608px), `lg` (52rem / 832px), or `xl` (64rem / 1024px).
+   * Every step is capped to the viewport, so a wide drawer shrinks to fit on
+   * small screens rather than overflowing.
+   */
+  width?: DrawerWidth;
   /**
    * Loading state: overlays a spinner on the body content (the header and footer
    * stay visible and interactive, so the drawer can still be closed) and marks
@@ -114,7 +124,7 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
  * Drawer — a "surface" element type shown in a panel that slides in from the edge
  * of the screen. Like `Popover` / `Modal`, it composes `header` / `footer` props
  * (or `<Drawer.Header>` / `<Drawer.Footer>` children) around its content, and takes
- * `saliency` / `padding` surface knobs.
+ * `saliency` / `padding` / `width` surface knobs.
  *
  * Built on base-ui's `Drawer`, so the ARIA wiring, focus management, and
  * swipe-to-dismiss are handled for you. It opens from a `<Drawer.Trigger>` (a
@@ -130,6 +140,7 @@ function DrawerRoot({
   saliency,
   padding,
   side = "right",
+  width = "md",
   loading = false,
   disabled = false,
   open,
@@ -179,7 +190,7 @@ function DrawerRoot({
             className={cx(
               surfaceRecipe({ saliency, padding }),
               focusRingRecipe({ type: "visible" }),
-              drawerPopup({ side }),
+              drawerPopup({ side, width }),
               className,
             )}
             initialFocus={initialFocus}

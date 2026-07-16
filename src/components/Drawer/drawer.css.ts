@@ -60,6 +60,11 @@ export const drawerViewport = recipe({
  * `data-starting-style` / `data-ending-style` frames push the panel fully off its
  * edge so it slides in and out. The trailing (screen-edge) corners are squared so
  * the panel reads as attached to the edge.
+ *
+ * `width` only changes the panel's width; every step stays capped by the same
+ * `maxWidth`, so on narrow viewports the panel shrinks to fit rather than
+ * overflowing. The wider steps rely on that cap — `xl` is 1024px, so it only
+ * reaches its full width on a desktop-sized viewport.
  */
 export const drawerPopup = recipe({
   base: {
@@ -68,7 +73,6 @@ export const drawerPopup = recipe({
     display: "flex",
     flexDirection: "column",
     gap: vars.space[4],
-    width: "22rem",
     maxWidth: "calc(100vw - 3rem)",
     height: "100%",
     maxHeight: "100%",
@@ -86,6 +90,13 @@ export const drawerPopup = recipe({
     },
   },
   variants: {
+    width: {
+      xs: { width: "14rem" },
+      sm: { width: "26rem" },
+      md: { width: "38rem" },
+      lg: { width: "52rem" },
+      xl: { width: "64rem" },
+    },
     side: {
       left: {
         borderTopLeftRadius: 0,
@@ -107,7 +118,7 @@ export const drawerPopup = recipe({
       },
     },
   },
-  defaultVariants: { side: "right" },
+  defaultVariants: { side: "right", width: "md" },
 });
 
 export type DrawerViewportVariants = NonNullable<RecipeVariants<typeof drawerViewport>>;

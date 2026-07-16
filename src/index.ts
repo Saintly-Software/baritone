@@ -205,6 +205,7 @@ export {
   type DrawerProps,
   type DrawerSide,
   type DrawerPadding,
+  type DrawerWidth,
   type DrawerTriggerProps,
   type DrawerCloseProps,
   type DrawerHeaderProps,
