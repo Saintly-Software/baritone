@@ -81,6 +81,8 @@ export interface FlexProps
   height?: Atoms["height"];
   /** `max-width`, from the atoms sizing scale. */
   maxWidth?: Atoms["maxWidth"];
+  /** `min-width`, from the atoms sizing scale. */
+  minWidth?: Atoms["minWidth"];
   /** `min-height`, from the atoms sizing scale. */
   minHeight?: Atoms["minHeight"];
   /**
@@ -119,6 +121,7 @@ function FlexRoot({
   width,
   height,
   maxWidth,
+  minWidth,
   minHeight,
   hideOn,
   showOn,
@@ -161,6 +164,7 @@ function FlexRoot({
           width: resolveWidth(width),
           height,
           maxWidth,
+          minWidth,
           minHeight,
           m,
           mx,
