@@ -8,17 +8,28 @@ import {
 } from "../../internal/components/InternalGenericButtonAnchor";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
-import type { Intent } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { mergeProps, type RenderProp } from "../../utils/render";
 import type { ButtonProps } from "../Button";
-import { menuItemIcon, menuItemRecipe, menuPopup, menuPositioner } from "./menu.css";
+import {
+  MENU_ITEM_INTENTS,
+  menuItemIcon,
+  menuItemRecipe,
+  menuPopup,
+  menuPositioner,
+} from "./menu.css";
 
 type RootProps = React.ComponentProps<typeof BaseMenu.Root>;
 type PositionerProps = React.ComponentProps<typeof BaseMenu.Positioner>;
 
-/** `Menu.Item`'s colour intent — the neutral default plus the accent intents (matches `Chip`/`Button`). */
-export type MenuItemIntent = Extract<Intent, "neutral" | "secondary" | "warning" | "negative">;
+/**
+ * `Menu.Item`'s colour intent — the `neutral` default plus the accent intents.
+ * Derived from the recipe's own list, so the type and the styles can't drift.
+ *
+ * Narrower than `Chip`/`Button`'s full `Intent`: `primary` is the call-to-action
+ * colour, and a row in a list of peers isn't a CTA.
+ */
+export type MenuItemIntent = (typeof MENU_ITEM_INTENTS)[number];
 
 export interface MenuItemProps {
   /** Colour intent for the row's icon/text and its highlight wash. Default `neutral`. */
