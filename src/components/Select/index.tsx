@@ -1,5 +1,4 @@
 "use client";
-import { Field } from "@base-ui/react/field";
 import { Select as BaseSelect } from "@base-ui/react/select";
 import * as React from "react";
 import { InternalCheckbox } from "../../internal/components/InternalCheckbox";
@@ -7,10 +6,16 @@ import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { formControlRecipe } from "../../styles/recipes/formControl.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
-import { atoms } from "../../styles/sprinkles.css";
-import type { FormState, Size } from "../../theme/constants";
+import type { FormState, LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import {
+  Field,
+  type FieldLabellingInput,
+  type FieldLabellingProps,
+  fieldNameAttrs,
+  type FieldSlotProps,
+} from "../Field";
+import { useIsFieldDisabled } from "../Fieldset";
 import {
   selectClearButton,
   selectClearSlot,
@@ -28,20 +33,6 @@ import {
   selectTriggerRow,
   selectValue,
 } from "./select.css";
-
-const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "1" });
-const labelClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "sm" }),
-);
-const descriptionClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "low" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
-const errorClass = cx(
-  textIntentRecipe({ intent: "negative", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
 
 /** One selectable option. */
 export interface SelectOption {
@@ -81,21 +72,21 @@ function isGrouped(
  */
 interface SelectBaseProps extends Omit<
   React.HTMLAttributes<HTMLButtonElement>,
-  "color" | "defaultValue" | "value" | "onChange"
+  "color" | "defaultValue" | "value" | "onChange" | "aria-label" | "aria-labelledby"
 > {
   /**
    * The options to choose from. Pass a flat `SelectOption[]`, or an array of
    * `{ label, options }` groups to render options under headings.
    */
   options: ReadonlyArray<SelectOption> | ReadonlyArray<SelectOptionGroup>;
-  /** Visible field label; also becomes the trigger's accessible name (via `Field`). */
-  label?: React.ReactNode;
   /** Supplementary text beneath the control, wired as its accessible description. */
-  description?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
+  helpText?: React.ReactNode;
   /** Validation state. `invalid` maps to negative, `valid` to positive. */
   state?: FormState;
+  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+  labelPosition?: LabelPosition;
+  /** Per-slot overrides for the label / help-text pieces. */
+  slotProps?: FieldSlotProps;
   /** Control size. Default `md`. */
   size?: Size;
   /** Text shown on the trigger when nothing is selected. */
@@ -143,8 +134,10 @@ export interface MultipleSelectProps extends SelectBaseProps {
  * Discriminated on `multiple`, so `value` and `onChange` stay in lockstep:
  * `multiple` ⇒ arrays, otherwise a lone `string | null`. TypeScript narrows both
  * from the single `multiple` flag, so a mismatched pair is a compile error.
+ * Intersected with `FieldLabellingProps`, so exactly one of `label` /
+ * `aria-label` / `aria-labelledby` may name the trigger.
  */
-export type SelectProps = SingleSelectProps | MultipleSelectProps;
+export type SelectProps = (SingleSelectProps | MultipleSelectProps) & FieldLabellingProps;
 
 /** Decorative disclosure chevron; the trigger carries the a11y semantics. */
 function ChevronGlyph() {
@@ -209,9 +202,10 @@ function CheckGlyph() {
 /**
  * Select — a "form control" element type for picking from a list, built on
  * base-ui's `Select` (listbox semantics, keyboard navigation, typeahead, focus
- * management) and wrapped in a `Field` for label / description / error
- * association, like `TextInput` and `RadioGroup`. It takes a `state`, not
- * intent/saliency.
+ * management) and composing `Field` for the label / help / error layout and ARIA
+ * wiring, like `TextInput` and `RadioGroup`. It takes a `state`, not
+ * intent/saliency, and is named by exactly one of `label` / `aria-label` /
+ * `aria-labelledby` (they're mutually exclusive — see `FieldLabellingProps`).
  *
  * It's discriminated on `multiple`: a single select commits one `string | null`;
  * a multi select commits a `string[]` and renders each option with a composed
@@ -241,12 +235,15 @@ export function Select(props: SelectProps) {
     onChange,
     options,
     label,
-    description,
-    errorMessage,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    helpText,
     state = "neutral",
+    labelPosition = "top",
+    slotProps,
     size = "md",
     placeholder,
-    disabled = false,
+    disabled: disabledProp = false,
     required = false,
     name,
     loading = false,
@@ -254,10 +251,20 @@ export function Select(props: SelectProps) {
     className,
     ref,
     ...rest
-  } = props as SelectBaseProps & {
-    multiple?: boolean;
-    value: string | string[] | null;
-    onChange: (value: never) => void;
+  } = props as SelectBaseProps &
+    FieldLabellingInput & {
+      multiple?: boolean;
+      value: string | string[] | null;
+      onChange: (value: never) => void;
+    };
+
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
+  const nameProps: FieldLabellingInput = {
+    label,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
   };
 
   // The union is collapsed to a single runtime handler; the casts are safe
@@ -301,10 +308,15 @@ export function Select(props: SelectProps) {
   );
 
   return (
-    // No `disabled` on `Field.Root`: base-ui would propagate it down to the
-    // trigger as the native `disabled` attribute, dropping it from the tab order.
-    <Field.Root className={wrapperClass} invalid={state === "invalid"}>
-      {label != null && <Field.Label className={labelClass}>{label}</Field.Label>}
+    <Field
+      {...(nameProps as FieldLabellingProps)}
+      helpText={helpText}
+      state={state}
+      required={required}
+      labelPosition={labelPosition}
+      disabled={disabled}
+      slotProps={slotProps}
+    >
       <BaseSelect.Root
         // base-ui's generic value; our discriminated public API is the source of truth.
         multiple={multiple as never}
@@ -326,6 +338,9 @@ export function Select(props: SelectProps) {
             )}
             aria-disabled={disabled || undefined}
             aria-busy={loading || undefined}
+            // base-ui's `Field.Label` already names the trigger, so this only
+            // emits an attribute for the label-less arms.
+            {...fieldNameAttrs(nameProps)}
             {...rest}
           >
             <BaseSelect.Value className={selectValue} placeholder={placeholder} />
@@ -383,14 +398,6 @@ export function Select(props: SelectProps) {
           </BaseSelect.Positioner>
         </BaseSelect.Portal>
       </BaseSelect.Root>
-      {description != null && (
-        <Field.Description className={descriptionClass}>{description}</Field.Description>
-      )}
-      {state === "invalid" && errorMessage != null && (
-        <Field.Error className={errorClass} match>
-          {errorMessage}
-        </Field.Error>
-      )}
-    </Field.Root>
+    </Field>
   );
 }

@@ -278,7 +278,7 @@ describe("FileUpload", () => {
 
     it("sets aria-invalid on the input when invalid", () => {
       const { container } = render(
-        <FileUpload label="Files" invalid value={null} onChange={() => {}} />,
+        <FileUpload label="Files" state="invalid" value={null} onChange={() => {}} />,
       );
       expect(getInput(container)).toHaveAttribute("aria-invalid", "true");
     });
@@ -363,12 +363,12 @@ describe("FileUpload", () => {
       expect(label.className.split(" ").length).toBeGreaterThan(1);
     });
 
-    it("merges a help slot className onto the description", () => {
+    it("merges a helpText slot className onto the help text", () => {
       render(
         <FileUpload
           label="Files"
           helpText="Up to 5MB"
-          slotProps={{ help: { className: "custom-help" } }}
+          slotProps={{ helpText: { className: "custom-help" } }}
           value={null}
           onChange={() => {}}
         />,

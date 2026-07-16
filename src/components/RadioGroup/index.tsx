@@ -1,13 +1,18 @@
 "use client";
-import { Field } from "@base-ui/react/field";
 import { Radio } from "@base-ui/react/radio";
 import { RadioGroup as BaseRadioGroup } from "@base-ui/react/radio-group";
 import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
-import { atoms } from "../../styles/sprinkles.css";
-import type { FormState, Size } from "../../theme/constants";
+import type { FormState, LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import {
+  Field,
+  type FieldControlInput,
+  type FieldLabellingInput,
+  type FieldLabellingProps,
+  fieldControlAttrs,
+  type FieldSlotProps,
+} from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
 import {
   radioControl,
@@ -17,20 +22,6 @@ import {
   radioItem,
   radioItemDisabled,
 } from "./radioGroup.css";
-
-const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "2" });
-const labelClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "sm" }),
-);
-const descriptionClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "low" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
-const errorClass = cx(
-  textIntentRecipe({ intent: "negative", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
 
 /** Layout direction of the option list. */
 export type RadioGroupOrientation = "vertical" | "horizontal";
@@ -111,7 +102,7 @@ function RadioGroupItem<T>({
   );
 }
 
-export interface RadioGroupProps<T> {
+interface RadioGroupBaseProps<T> {
   /** The currently selected value (controlled). */
   value: T;
   /** Called with the newly selected value. */
@@ -130,24 +121,35 @@ export interface RadioGroupProps<T> {
   size?: Size;
   /** Lay the options out in a column (default) or a row. */
   orientation?: RadioGroupOrientation;
-  /** Group label (also becomes the group's accessible name). */
-  label?: React.ReactNode;
-  description?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
+  /** Inline help under the options, wired to the group's `aria-describedby`. */
+  helpText?: React.ReactNode;
+  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+  labelPosition?: LabelPosition;
+  /** Per-slot overrides for the label / help-text pieces. */
+  slotProps?: FieldSlotProps;
+  /** Mark the group required — marks the label and sets the group `aria-required`. */
+  required?: boolean;
   /** Disable the whole group. */
   disabled?: boolean;
   /** Identifies the field when submitted as part of a form. */
   name?: string;
+  /** Points the group at extra descriptive text; combines with `helpText`. */
+  "aria-describedby"?: string;
   /** Extra className merged onto the radiogroup element. */
   className?: string;
 }
 
 /**
+ * Named by exactly one of `label` / `aria-label` / `aria-labelledby` — they're
+ * mutually exclusive (see `FieldLabellingProps`).
+ */
+export type RadioGroupProps<T> = RadioGroupBaseProps<T> & FieldLabellingProps;
+
+/**
  * RadioGroup — a "form control" element type for picking one value from a small
  * set. Built on base-ui's `RadioGroup` (roving focus, arrow-key navigation, ARIA
- * `radiogroup` wiring) and wrapped in a `Field` for label / description / error
- * association, like `TextInput`.
+ * `radiogroup` wiring) and composing `Field` for the label / help / error layout
+ * and ARIA wiring, like `TextInput`.
  *
  * It's a **type-safe compound component**: the group is generic over the value
  * type `T` (inferred from `value`), and hands the render-prop a `RadioGroupItem`
@@ -167,42 +169,67 @@ export interface RadioGroupProps<T> {
  *   )}
  * </RadioGroup>
  */
-export function RadioGroup<T>({
-  value,
-  onChange,
-  children,
-  state = "neutral",
-  size = "md",
-  orientation = "vertical",
-  label,
-  description,
-  errorMessage,
-  disabled: disabledProp = false,
-  name,
-  className,
-}: RadioGroupProps<T>) {
+export function RadioGroup<T>(props: RadioGroupProps<T>) {
+  const {
+    value,
+    onChange,
+    children,
+    state = "neutral",
+    size = "md",
+    orientation = "vertical",
+    label,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
+    helpText,
+    labelPosition = "top",
+    slotProps,
+    required = false,
+    disabled: disabledProp = false,
+    name,
+    className,
+  } = props as RadioGroupBaseProps<T> & FieldLabellingInput;
+
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
+  // Everything the control's focusable element needs from the field, in one
+  // object — see `fieldControlAttrs`.
+  const controlProps: FieldControlInput = {
+    label,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
+  };
   const itemContext = React.useMemo<RadioGroupItemContextValue>(
     () => ({ size, state }),
     [size, state],
   );
 
   return (
-    // No `disabled` on `Field.Root`: base-ui would propagate it down as the native
-    // `disabled` attribute on every radio, dropping the group from the tab order.
-    <Field.Root className={wrapperClass} invalid={state === "invalid"}>
-      {label != null && <Field.Label className={labelClass}>{label}</Field.Label>}
+    <Field
+      {...(controlProps as FieldLabellingProps)}
+      helpText={helpText}
+      state={state}
+      required={required}
+      labelPosition={labelPosition}
+      disabled={disabled}
+      slotProps={slotProps}
+    >
       <RadioGroupItemContext.Provider value={itemContext}>
         <BaseRadioGroup
           value={value}
           onValueChange={(next) => onChange(next)}
+          // The `Field` marks the label; base-ui turns this into `aria-required`.
+          required={required}
           // Group-level disable also goes through `readOnly` (base-ui forwards it to
           // every radio) + `aria-disabled`, so the options stay keyboard-reachable.
           readOnly={disabled}
           aria-disabled={disabled || undefined}
           name={name}
+          // base-ui's `Field.Label` already names the group, so this only emits an
+          // attribute for the label-less arms.
+          {...fieldControlAttrs(controlProps)}
           className={cx(radioGroupRoot({ orientation }), disabled && radioGroupDisabled, className)}
         >
           {children({
@@ -212,14 +239,6 @@ export function RadioGroup<T>({
           })}
         </BaseRadioGroup>
       </RadioGroupItemContext.Provider>
-      {description != null && (
-        <Field.Description className={descriptionClass}>{description}</Field.Description>
-      )}
-      {state === "invalid" && errorMessage != null && (
-        <Field.Error className={errorClass} match>
-          {errorMessage}
-        </Field.Error>
-      )}
-    </Field.Root>
+    </Field>
   );
 }

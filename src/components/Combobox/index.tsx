@@ -1,13 +1,18 @@
 "use client";
 import { Combobox as BaseCombobox } from "@base-ui/react/combobox";
-import { Field } from "@base-ui/react/field";
 import * as React from "react";
 import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
-import type { FormState, Size } from "../../theme/constants";
+import type { FormState, LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import {
+  Field,
+  type FieldLabellingInput,
+  type FieldLabellingProps,
+  fieldNameAttrs,
+  type FieldSlotProps,
+} from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
 import {
   adornment,
@@ -31,21 +36,7 @@ import {
   virtualItem,
   virtualSizer,
   virtualViewport,
-  wrapper,
 } from "./combobox.css";
-
-const labelClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "sm" }),
-);
-const descriptionClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "low" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
-const errorClass = cx(
-  textIntentRecipe({ intent: "negative", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
 
 /** A single choice. `value` is what the form submits and `onValueChange` reports; `label` is what's shown. */
 export interface ComboboxOption {
@@ -122,7 +113,14 @@ export interface ComboboxSearch {
 
 interface ComboboxBaseProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
-  "size" | "value" | "defaultValue" | "onChange" | "children" | "prefix"
+  | "size"
+  | "value"
+  | "defaultValue"
+  | "onChange"
+  | "children"
+  | "prefix"
+  | "aria-label"
+  | "aria-labelledby"
 > {
   /**
    * The choices (sync mode). In async mode, provide `search.results` instead.
@@ -130,12 +128,14 @@ interface ComboboxBaseProps extends Omit<
    * (ignored — flattened — when `virtualized`).
    */
   options?: ComboboxOption[] | ComboboxOptionGroup[];
-  label?: React.ReactNode;
-  description?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
+  /** Inline help under the control, wired to its `aria-describedby`. */
+  helpText?: React.ReactNode;
   /** Validation state. `invalid` maps to negative, `valid` to positive. */
   state?: FormState;
+  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+  labelPosition?: LabelPosition;
+  /** Per-slot overrides for the label / help-text pieces. */
+  slotProps?: FieldSlotProps;
   /** Control size. Default `md`. */
   size?: Size;
   placeholder?: string;
@@ -174,7 +174,13 @@ interface ComboboxMultipleProps {
   onValueChange?: (value: string[]) => void;
 }
 
-export type ComboboxProps = ComboboxBaseProps & (ComboboxSingleProps | ComboboxMultipleProps);
+/**
+ * Named by exactly one of `label` / `aria-label` / `aria-labelledby` — they're
+ * mutually exclusive (see `FieldLabellingProps`).
+ */
+export type ComboboxProps = ComboboxBaseProps &
+  (ComboboxSingleProps | ComboboxMultipleProps) &
+  FieldLabellingProps;
 
 // Rough per-row height (px) for the virtualized window — matches the item's
 // vertical padding + line box. Rows are given this exact height when virtualized.
@@ -231,17 +237,20 @@ function CheckIcon() {
  * async search (spinner / empty / error states in the popup), free-text entry,
  * and windowed virtualization for long lists.
  *
- * Like the other form controls it takes a `state` (not intent/saliency), wires
- * its label / description / error through base-ui's `Field`, and models disabled
+ * Like the other form controls it takes a `state` (not intent/saliency), composes
+ * `Field` for its label / help / error layout and ARIA wiring, and models disabled
  * with `aria-disabled` + `readOnly` so it stays keyboard-focusable.
  */
 export function Combobox(props: ComboboxProps) {
   const {
     options,
     label,
-    description,
-    errorMessage,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    helpText,
     state = "neutral",
+    labelPosition = "top",
+    slotProps,
     size = "md",
     placeholder,
     disabled: disabledProp,
@@ -262,11 +271,23 @@ export function Combobox(props: ComboboxProps) {
     id,
     ref,
     ...rest
-  } = props;
+  } = props as ComboboxBaseProps &
+    FieldLabellingInput & {
+      multiple?: boolean;
+      value?: unknown;
+      defaultValue?: unknown;
+      onValueChange?: unknown;
+      ref?: React.Ref<HTMLInputElement>;
+    };
 
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
+  const nameProps: FieldLabellingInput = {
+    label,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+  };
 
   // Value <-> option registry. Public values are strings; base-ui items are the
   // option objects. We remember every option we've seen (props + async results +
@@ -427,13 +448,23 @@ export function Combobox(props: ComboboxProps) {
       placeholder={placeholder}
       aria-disabled={disabled || undefined}
       readOnly={disabled || readOnly}
+      // base-ui's `Field.Label` already names the input, so this only emits an
+      // attribute for the label-less arms.
+      {...fieldNameAttrs(nameProps)}
       {...rest}
     />
   );
 
   return (
-    <Field.Root className={wrapper} invalid={state === "invalid"}>
-      {label != null && <Field.Label className={labelClass}>{label}</Field.Label>}
+    <Field
+      {...(nameProps as FieldLabellingProps)}
+      helpText={helpText}
+      state={state}
+      required={required}
+      labelPosition={labelPosition}
+      disabled={disabled}
+      slotProps={slotProps}
+    >
       <BaseCombobox.Root
         items={rootItems as never}
         multiple={multiple}
@@ -542,15 +573,7 @@ export function Combobox(props: ComboboxProps) {
           </BaseCombobox.Positioner>
         </BaseCombobox.Portal>
       </BaseCombobox.Root>
-      {description != null && (
-        <Field.Description className={descriptionClass}>{description}</Field.Description>
-      )}
-      {state === "invalid" && errorMessage != null && (
-        <Field.Error className={errorClass} match>
-          {errorMessage}
-        </Field.Error>
-      )}
-    </Field.Root>
+    </Field>
   );
 }
 

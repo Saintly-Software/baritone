@@ -1,15 +1,22 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { CSSProperties } from "react";
 import * as React from "react";
-import { FORM_STATES, SIZES } from "../../theme/constants";
+import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
+import type { DistributiveOmit } from "../../utils/types";
 import { CheckboxGroup } from "./index";
 
 type Topic = "product" | "billing" | "security";
 
 // CheckboxGroup is controlled, so the stories drive it from local state — the
 // same shape a consumer would use.
+// `DistributiveOmit` (not the built-in `Omit`) keeps the mutually-exclusive
+// labelling arms apart — a plain `Omit` over a union collapses it into one
+// object carrying every arm's keys at once.
 function Subscriptions(
-  props: Omit<React.ComponentProps<typeof CheckboxGroup<Topic>>, "value" | "onChange" | "children">,
+  props: DistributiveOmit<
+    React.ComponentProps<typeof CheckboxGroup<Topic>>,
+    "value" | "onChange" | "children"
+  >,
 ) {
   const [value, setValue] = React.useState<Topic[]>(["product"]);
   return (
@@ -56,7 +63,7 @@ type Story = StoryObj<typeof Subscriptions>;
 // "WithDescription" story.
 export const Basic: Story = {
   args: {
-    description: "Pick any topics you'd like to hear about.",
+    helpText: "Pick any topics you'd like to hear about.",
   },
 };
 
@@ -68,6 +75,15 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
+};
+
+// One message slot now: the copy changes with the state, rather than a help
+// line and an error line coexisting.
+const STATE_MESSAGE: Record<FormState, string | undefined> = {
+  neutral: undefined,
+  warning: "Double-check these choices.",
+  invalid: "Pick at least one topic.",
+  valid: undefined,
 };
 
 const thStyle: CSSProperties = {
@@ -107,8 +123,7 @@ export const States: Story = {
                 <Subscriptions
                   label="Email me about"
                   state={state}
-                  description={state === "warning" ? "Double-check these choices." : undefined}
-                  errorMessage={state === "invalid" ? "Pick at least one topic." : undefined}
+                  helpText={STATE_MESSAGE[state]}
                 />
               </div>
             </td>

@@ -105,22 +105,21 @@ interface StateRow {
   state?: FormState;
   disabled?: boolean;
   defaultValue?: string;
-  description?: string;
-  errorMessage?: string;
+  helpText?: string;
 }
 
 // Every validation state plus disabled — the combinations that used to be their
 // own stories, folded into one table.
 const stateRows: StateRow[] = [
   { label: "neutral" },
-  { label: "warning", state: "warning", description: "Double-check this choice." },
-  { label: "invalid", state: "invalid", errorMessage: "Please pick a fruit." },
+  { label: "warning", state: "warning", helpText: "Double-check this choice." },
+  { label: "invalid", state: "invalid", helpText: "Please pick a fruit." },
   { label: "valid", state: "valid", defaultValue: "apple" },
   {
     label: "disabled",
     disabled: true,
     defaultValue: "apple",
-    description: "Uses aria-disabled so it stays keyboard-reachable.",
+    helpText: "Uses aria-disabled so it stays keyboard-reachable.",
   },
 ];
 
@@ -148,8 +147,7 @@ export const States: Story = {
                   state={row.state}
                   disabled={row.disabled}
                   defaultValue={row.defaultValue}
-                  description={row.description}
-                  errorMessage={row.errorMessage}
+                  helpText={row.helpText}
                 />
               </div>
             </td>
@@ -166,7 +164,7 @@ export const FreeText: Story = {
     label: "Tag",
     freeText: true,
     placeholder: "Pick or type a tag…",
-    description: 'Type something not in the list to see the "Add …" option.',
+    helpText: 'Type something not in the list to see the "Add …" option.',
   },
 };
 
@@ -288,7 +286,7 @@ function AsyncExample() {
     <Combobox
       label="City"
       placeholder="Search cities…"
-      description='Try "a", or "xyz" for the error state.'
+      helpText='Try "a", or "xyz" for the error state.'
       search={{ loading, error, results, onSearch }}
     />
   );

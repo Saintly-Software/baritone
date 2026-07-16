@@ -2,12 +2,16 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
+import type { DistributiveOmit } from "../../utils/types";
 import { RadioGroup } from "./index";
 
 type ThemeValue = "system" | "light" | "dark";
 
 // A tiny controlled host mirroring the documented usage, so the type-safe
-// render-prop pattern is exercised exactly as a consumer would write it.
+// render-prop pattern is exercised exactly as a consumer would write it. The
+// host owns the naming (`label="Theme"` below), so the labelling props are
+// stripped from what it forwards — they're mutually exclusive, and a `rest` that
+// could smuggle in an `aria-label` would conflict with that `label`.
 function ThemeSwitcher({
   value: initial = "system",
   onChange,
@@ -15,7 +19,12 @@ function ThemeSwitcher({
 }: {
   value?: ThemeValue;
   onChange?: (value: ThemeValue) => void;
-} & Partial<React.ComponentProps<typeof RadioGroup<ThemeValue>>>) {
+} & Partial<
+  DistributiveOmit<
+    React.ComponentProps<typeof RadioGroup<ThemeValue>>,
+    "label" | "aria-label" | "aria-labelledby" | "value" | "onChange" | "children"
+  >
+>) {
   const [value, setValue] = React.useState<ThemeValue>(initial);
   return (
     <RadioGroup
@@ -143,9 +152,11 @@ describe("RadioGroup", () => {
     expect(onChange).toHaveBeenCalledWith("light");
   });
 
-  it("announces an error message when invalid", () => {
-    render(<ThemeSwitcher state="invalid" errorMessage="Pick a theme" />);
-    expect(screen.getByText("Pick a theme")).toBeInTheDocument();
+  it("renders the helpText as an error when invalid", () => {
+    render(<ThemeSwitcher state="invalid" helpText="Pick a theme" />);
+    const line = screen.getByText("Pick a theme");
+    expect(line).toBeInTheDocument();
+    expect(line.querySelector("svg")).not.toBeNull();
   });
 
   it("works with a numeric enum, not just strings", async () => {

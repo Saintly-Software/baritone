@@ -1,29 +1,19 @@
 "use client";
 import { Checkbox as BaseCheckbox } from "@base-ui/react/checkbox";
-import { Field } from "@base-ui/react/field";
 import * as React from "react";
 import { InternalCheckbox } from "../../internal/components/InternalCheckbox";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
-import { atoms } from "../../styles/sprinkles.css";
-import type { FormState, Size } from "../../theme/constants";
+import type { FormState, LabelPosition, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { checkboxLabelDisabled, checkboxRow, checkboxRowDisabled } from "../Checkbox/checkbox.css";
+import {
+  Field,
+  type FieldLabellingInput,
+  type FieldLabellingProps,
+  type FieldSlotProps,
+  joinIds,
+} from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
 import { checkboxGroupRoot } from "./checkboxGroup.css";
-
-const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "2" });
-const labelClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "sm" }),
-);
-const descriptionClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "low" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
-const errorClass = cx(
-  textIntentRecipe({ intent: "negative", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
 
 /** Layout direction of the option list. */
 export type CheckboxGroupOrientation = "vertical" | "horizontal";
@@ -140,7 +130,7 @@ function CheckboxGroupItem<T>({
   );
 }
 
-export interface CheckboxGroupProps<T> {
+interface CheckboxGroupBaseProps<T> {
   /** The currently selected values (controlled). Order is not significant. */
   value: T[];
   /** Called with the next selection whenever an option is ticked or unticked. */
@@ -159,23 +149,34 @@ export interface CheckboxGroupProps<T> {
   size?: Size;
   /** Lay the options out in a column (default) or a row. */
   orientation?: CheckboxGroupOrientation;
-  /** Group label (also becomes the group's accessible name). */
-  label?: React.ReactNode;
-  description?: React.ReactNode;
-  /** Shown (and announced) when `state` is `invalid`. */
-  errorMessage?: React.ReactNode;
+  /** Inline help under the options, wired to the group's `aria-describedby`. */
+  helpText?: React.ReactNode;
+  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+  labelPosition?: LabelPosition;
+  /** Per-slot overrides for the label / help-text pieces. */
+  slotProps?: FieldSlotProps;
+  /** Mark the group required — marks the label and sets the group `aria-required`. */
+  required?: boolean;
   /** Disable the whole group. */
   disabled?: boolean;
+  /** Points the group at extra descriptive text; combines with `helpText`. */
+  "aria-describedby"?: string;
   /** Extra className merged onto the group element. */
   className?: string;
 }
 
 /**
+ * Named by exactly one of `label` / `aria-label` / `aria-labelledby` — they're
+ * mutually exclusive (see `FieldLabellingProps`).
+ */
+export type CheckboxGroupProps<T> = CheckboxGroupBaseProps<T> & FieldLabellingProps;
+
+/**
  * CheckboxGroup — a "form control" element type for picking *any number* of
  * values from a small set. It's the multi-select sibling of `RadioGroup`: same
- * `Field`-wrapped label / description / error layout, same type-safe compound
- * API, but the selection is an *array* and each option is an independent
- * checkbox (no roving focus — every box is its own tab stop).
+ * `Field`-composed label / help / error layout, same type-safe compound API, but
+ * the selection is an *array* and each option is an independent checkbox (no
+ * roving focus — every box is its own tab stop).
  *
  * It's a **type-safe compound component**: the group is generic over the value
  * type `T` (inferred from `value`), and hands the render-prop a
@@ -200,23 +201,34 @@ export interface CheckboxGroupProps<T> {
  *   )}
  * </CheckboxGroup>
  */
-export function CheckboxGroup<T>({
-  value,
-  onChange,
-  children,
-  state = "neutral",
-  size = "md",
-  orientation = "vertical",
-  label,
-  description,
-  errorMessage,
-  disabled: disabledProp = false,
-  className,
-}: CheckboxGroupProps<T>) {
-  const labelId = React.useId();
+export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
+  const {
+    value,
+    onChange,
+    children,
+    state = "neutral",
+    size = "md",
+    orientation = "vertical",
+    label,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
+    helpText,
+    labelPosition = "top",
+    slotProps,
+    required = false,
+    disabled: disabledProp = false,
+    className,
+  } = props as CheckboxGroupBaseProps<T> & FieldLabellingInput;
+
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
+  const nameProps: FieldLabellingInput = {
+    label,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+  };
 
   // `onChange` is referenced from `toggle` below; keep the latest in a ref so the
   // memoised context value doesn't have to change identity on every `onChange`.
@@ -238,39 +250,41 @@ export function CheckboxGroup<T>({
   );
 
   return (
-    // No `disabled` on `Field.Root`: base-ui propagates it through the field
-    // context as the native `disabled` attribute on every box, dropping them from
-    // the tab order. Each item handles disable via `aria-disabled` + `readOnly`
-    // (group disable flows to items through `CheckboxGroupItemContext`).
-    <Field.Root className={wrapperClass} invalid={state === "invalid"}>
-      {label != null && (
-        <Field.Label id={labelId} className={labelClass}>
-          {label}
-        </Field.Label>
+    <Field
+      {...(nameProps as FieldLabellingProps)}
+      helpText={helpText}
+      state={state}
+      required={required}
+      labelPosition={labelPosition}
+      disabled={disabled}
+      slotProps={slotProps}
+    >
+      {/*
+        The group is a bare `<div role="group">`, which base-ui's field context
+        can't see — so, unlike `RadioGroup`, it takes its naming and description
+        wiring from the render prop by hand.
+      */}
+      {({ nameAttrs, describedBy }) => (
+        <CheckboxGroupItemContext.Provider value={itemContext}>
+          <div
+            role="group"
+            {...nameAttrs}
+            aria-describedby={joinIds(ariaDescribedby, describedBy)}
+            // The `Field` marks the label; the group carries the semantics. base-ui
+            // isn't involved here, so it's set by hand like the rest of the wiring.
+            aria-required={required || undefined}
+            className={cx(checkboxGroupRoot({ orientation }), className)}
+          >
+            {children({
+              // The stable generic item, narrowed to this group's `T`. The cast is
+              // purely a type-level instantiation — the runtime function is the same.
+              CheckboxGroupItem: CheckboxGroupItem as (
+                props: CheckboxGroupItemProps<T>,
+              ) => React.ReactNode,
+            })}
+          </div>
+        </CheckboxGroupItemContext.Provider>
       )}
-      <CheckboxGroupItemContext.Provider value={itemContext}>
-        <div
-          role="group"
-          aria-labelledby={label != null ? labelId : undefined}
-          className={cx(checkboxGroupRoot({ orientation }), className)}
-        >
-          {children({
-            // The stable generic item, narrowed to this group's `T`. The cast is
-            // purely a type-level instantiation — the runtime function is the same.
-            CheckboxGroupItem: CheckboxGroupItem as (
-              props: CheckboxGroupItemProps<T>,
-            ) => React.ReactNode,
-          })}
-        </div>
-      </CheckboxGroupItemContext.Provider>
-      {description != null && (
-        <Field.Description className={descriptionClass}>{description}</Field.Description>
-      )}
-      {state === "invalid" && errorMessage != null && (
-        <Field.Error className={errorClass} match>
-          {errorMessage}
-        </Field.Error>
-      )}
-    </Field.Root>
+    </Field>
   );
 }

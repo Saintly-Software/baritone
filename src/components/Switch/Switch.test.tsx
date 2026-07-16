@@ -2,11 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
+import type { DistributiveOmit } from "../../utils/types";
 import { Switch } from "./index";
-
-// Distribute the omit across each member of `SwitchProps`' icon union so the
-// discriminant survives — see the note in Switch.stories.tsx.
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 // A tiny controlled host mirroring the documented usage, so the tests exercise
 // the component exactly as a consumer would wire it.
@@ -14,7 +11,10 @@ function Notifications({
   value: initial = false,
   onChange,
   ...rest
-}: DistributiveOmit<React.ComponentProps<typeof Switch>, "value" | "onChange" | "label"> & {
+}: DistributiveOmit<
+  React.ComponentProps<typeof Switch>,
+  "value" | "onChange" | "label" | "aria-label" | "aria-labelledby"
+> & {
   value?: boolean;
   onChange?: (value: boolean) => void;
 }) {
@@ -123,7 +123,7 @@ describe("Switch", () => {
   });
 
   it("reflects an invalid state", () => {
-    render(<Notifications invalid />);
+    render(<Notifications state="invalid" />);
     expect(screen.getByRole("switch", { name: "Notifications" })).toHaveAttribute("data-invalid");
   });
 
@@ -175,11 +175,16 @@ describe("Switch", () => {
     expect(screen.getByRole("switch", { name: "Wi-Fi" })).toBeInTheDocument();
   });
 
-  it("prefers a visible label over aria-label", () => {
-    render(<Notifications aria-label="ignored" />);
-    // aria-labelledby (the visible label) wins, so aria-label is not applied.
-    const toggle = screen.getByRole("switch", { name: "Notifications" });
-    expect(toggle).not.toHaveAttribute("aria-label");
+  // `label` used to silently win over `aria-label`. They're mutually exclusive
+  // now — the track would show one name and announce another — so the pair is a
+  // type error, and a JS caller that gets past the types gets a thrown error.
+  it("throws when label and aria-label are both passed", () => {
+    expect(() =>
+      render(
+        // @ts-expect-error — mutually exclusive: the union rejects this at compile time.
+        <Switch label="Notifications" aria-label="ignored" value={false} onChange={() => {}} />,
+      ),
+    ).toThrow(/mutually exclusive/);
   });
 
   it("points at an external label via aria-labelledby", () => {
@@ -193,17 +198,19 @@ describe("Switch", () => {
   });
 
   it("wires description text via aria-describedby", () => {
-    render(<Notifications description="We'll only ping you about outages." />);
+    render(<Notifications helpText="We'll only ping you about outages." />);
     const toggle = screen.getByRole("switch", { name: "Notifications" });
     expect(toggle).toHaveAccessibleDescription("We'll only ping you about outages.");
   });
 
-  it("shows the error message only when invalid", () => {
-    const { rerender } = render(<Notifications errorMessage="Required" />);
-    expect(screen.queryByText("Required")).toBeNull();
+  // One message slot: the same line stays put and changes *presentation* with
+  // `state`, rather than a separate error line appearing.
+  it("renders the helpText as an error when invalid", () => {
+    const { rerender } = render(<Notifications helpText="Required" />);
+    expect(screen.getByText("Required").querySelector("svg")).toBeNull();
 
-    rerender(<Notifications invalid errorMessage="Required" />);
-    expect(screen.getByText("Required")).toBeInTheDocument();
+    rerender(<Notifications state="invalid" helpText="Required" />);
+    expect(screen.getByText("Required").querySelector("svg")).not.toBeNull();
   });
 
   it("keeps the accessible name stable across label positions", () => {

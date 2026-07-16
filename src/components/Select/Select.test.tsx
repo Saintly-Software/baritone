@@ -165,12 +165,14 @@ describe("Select", () => {
     expect(screen.getByRole("listbox")).toBeInTheDocument();
   });
 
-  it("shows the error message only when invalid", () => {
-    const { rerender } = render(<SingleHost state="neutral" errorMessage="Required" />);
-    expect(screen.queryByText("Required")).not.toBeInTheDocument();
+  // One message slot: the same line stays put and changes *presentation* with
+  // `state`, rather than a separate error line appearing.
+  it("renders the helpText as an error when invalid", () => {
+    const { rerender } = render(<SingleHost state="neutral" helpText="Required" />);
+    expect(screen.getByText("Required").querySelector("svg")).toBeNull();
 
-    rerender(<SingleHost state="invalid" errorMessage="Required" />);
-    expect(screen.getByText("Required")).toBeInTheDocument();
+    rerender(<SingleHost state="invalid" helpText="Required" />);
+    expect(screen.getByText("Required").querySelector("svg")).not.toBeNull();
   });
 
   it("uses aria-disabled (not the disabled attribute) so it stays tabbable", async () => {

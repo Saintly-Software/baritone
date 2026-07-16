@@ -18,15 +18,19 @@ describe("TextInput", () => {
     expect(input).not.toBeDisabled();
   });
 
-  it("shows the error message and marks the field invalid in the invalid state", () => {
-    render(<TextInput label="Age" state="invalid" errorMessage="Must be a number" />);
-    expect(screen.getByText("Must be a number")).toBeInTheDocument();
+  it("renders the helpText as an error and marks the field invalid in the invalid state", () => {
+    render(<TextInput label="Age" state="invalid" helpText="Must be a number" />);
+    const line = screen.getByText("Must be a number");
+    expect(line).toBeInTheDocument();
+    // One slot: `state` drives the presentation — HelpText's warning glyph.
+    expect(line.querySelector("svg")).not.toBeNull();
     expect(screen.getByLabelText("Age")).toHaveAttribute("aria-invalid", "true");
   });
 
-  it("does not render an error message outside the invalid state", () => {
-    render(<TextInput label="Age" state="warning" errorMessage="Hidden" />);
-    expect(screen.queryByText("Hidden")).not.toBeInTheDocument();
+  it("leaves the helpText neutral outside the invalid state", () => {
+    render(<TextInput label="Age" state="warning" helpText="Unusual value" />);
+    expect(screen.getByText("Unusual value")).toBeInTheDocument();
+    expect(screen.getByLabelText("Age")).not.toHaveAttribute("aria-invalid");
   });
 
   describe("multiline", () => {
@@ -82,17 +86,17 @@ describe("TextInput", () => {
       expect(screen.getByText("Email")).toHaveClass("custom-label");
     });
 
-    it("merges a slot className onto the built-in description class", () => {
+    it("merges a slot className onto the built-in help text class", () => {
       render(
         <TextInput
           label="Email"
-          description="Help"
-          slotProps={{ description: { className: "custom-desc" } }}
+          helpText="Help"
+          slotProps={{ helpText: { className: "custom-desc" } }}
         />,
       );
       const desc = screen.getByText("Help");
       expect(desc).toHaveClass("custom-desc");
-      // The built-in description class is still present (merged, not replaced).
+      // The built-in help text class is still present (merged, not replaced).
       expect(desc.className).not.toBe("custom-desc");
     });
   });

@@ -1,12 +1,20 @@
 "use client";
-import { Field } from "@base-ui/react/field";
 import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
+import type { FormState, LabelPosition } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import {
+  Field,
+  type FieldControlInput,
+  type FieldLabellingInput,
+  type FieldLabellingProps,
+  fieldControlAttrs,
+  type FieldSlotProps,
+} from "../Field";
+import { useIsFieldDisabled } from "../Fieldset";
 import { FileList, type FileInfo } from "../FileList";
-import { InfoButton, type InfoButtonProps } from "../InfoButton";
 import {
   fileUploadContent,
   fileUploadDropzone,
@@ -14,13 +22,8 @@ import {
   fileUploadInput,
 } from "./fileUpload.css";
 
+// The `Field` (label + dropzone + help) and the staged `FileList` beneath it.
 const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "2" });
-// Puts the `info` InfoButton on the same baseline as the label text.
-const labelRowClass = atoms({ display: "flex", alignItems: "center", gap: "1" });
-const labelClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "sm" }),
-);
 const promptClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "high" }),
   textVariantRecipe({ family: "body", size: "sm" }),
@@ -29,29 +32,9 @@ const hintClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "low" }),
   textVariantRecipe({ family: "body", size: "xs" }),
 );
-const descriptionClass = cx(
-  textIntentRecipe({ intent: "neutral", saliency: "low" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
-);
 
-/**
- * Per-slot overrides for the label / help-text / info pieces. Every field is
- * partial — you're layering props onto the slot's own defaults, so
- * `slotProps={{ label: { className: "…" }, info: { side: "right" } }}` re-tunes
- * just those pieces. A `className` set here merges onto (doesn't replace) the
- * slot's built-in class.
- */
-export interface FileUploadSlotProps {
-  /** Props for the `Field.Label` above the dropzone. */
-  label?: React.ComponentPropsWithoutRef<typeof Field.Label>;
-  /** Props for the `Field.Description` (help text) below the dropzone. */
-  help?: React.ComponentPropsWithoutRef<typeof Field.Description>;
-  /**
-   * Props for the label's `InfoButton` (only rendered when `info` is set). Use it
-   * to override the default `aria-label`, or to tune `side` / `intent` / etc.
-   */
-  info?: Partial<InfoButtonProps>;
-}
+/** Per-slot overrides for the label / help-text / info pieces. */
+export type FileUploadSlotProps = FieldSlotProps;
 
 /**
  * Props every `FileUpload` takes, regardless of `multiple`. The `value` /
@@ -60,9 +43,12 @@ export interface FileUploadSlotProps {
  * is one `FileInfo | null`, a multiple's is a `FileInfo[]`).
  */
 interface FileUploadBaseProps {
-  /** Negative accent on the dropzone + `aria-invalid` on the input. */
-  invalid?: boolean;
-  /** Mark the field as required (sets `required` / `aria-required` on the input). */
+  /**
+   * Validation state, driving the dropzone's border/background accent. `invalid`
+   * also sets `aria-invalid` on the input and reddens the `helpText`.
+   */
+  state?: FormState;
+  /** Mark the field required — marks the label and the file `<input>`. */
   required?: boolean;
   /**
    * Allowed file types, in the HTML `accept` grammar — extensions (`.pdf`),
@@ -80,8 +66,6 @@ interface FileUploadBaseProps {
    * remove buttons stay focusable.
    */
   disabled?: boolean;
-  /** Visible field label; also the input's accessible name (via base-ui `Field`). */
-  label?: React.ReactNode;
   /**
    * Extra explanation surfaced in an `InfoButton` next to the `label` (the "i"
    * affordance). Rendered only when there's a visible `label`. Give the button an
@@ -89,6 +73,8 @@ interface FileUploadBaseProps {
    * information").
    */
   info?: React.ReactNode;
+  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+  labelPosition?: LabelPosition;
   /**
    * Native form field `name` for the underlying file `<input>`, so the control
    * participates in `<form>` submission / `FormData`.
@@ -101,10 +87,8 @@ interface FileUploadBaseProps {
   helpText?: React.ReactNode;
   /** Per-slot overrides for the label / help-text / info pieces. */
   slotProps?: FileUploadSlotProps;
-  /** Accessible name when there's no visible `label`. */
-  "aria-label"?: string;
-  /** Accessible name by reference when the label lives elsewhere. */
-  "aria-labelledby"?: string;
+  /** Points the input at extra descriptive text; combines with `helpText`. */
+  "aria-describedby"?: string;
   /** Extra className merged onto the dropzone. */
   className?: string;
   /** Ref to the underlying file `<input>`. */
@@ -133,8 +117,12 @@ export interface MultipleFileUploadProps extends FileUploadBaseProps {
  * Discriminated on `multiple`, so `value` and `onChange` are always in lockstep:
  * `multiple` ⇒ arrays, otherwise a lone `FileInfo | null`. TypeScript narrows
  * both from the single `multiple` flag, so a mismatched pair is a compile error.
+ * Intersected with `FieldLabellingProps`, so exactly one of `label` /
+ * `aria-label` / `aria-labelledby` may name the input — they're mutually
+ * exclusive.
  */
-export type FileUploadProps = SingleFileUploadProps | MultipleFileUploadProps;
+export type FileUploadProps = (SingleFileUploadProps | MultipleFileUploadProps) &
+  FieldLabellingProps;
 
 /**
  * Whether a dropped/selected `File` satisfies `acceptedFileTypes`, using the same
@@ -154,18 +142,6 @@ export function matchesAccept(file: File, acceptedFileTypes?: string[]): boolean
     if (token.endsWith("/*")) return type.startsWith(token.slice(0, -1));
     return type === token;
   });
-}
-
-/**
- * Fold a slot's caller-supplied `className` (base-ui's `string | (state) => …`
- * form) together with the built-in `base` class, returning the function form
- * base-ui always accepts. Keeps our base class and lets the caller add to it.
- */
-function mergeSlotClass<S>(
-  base: string,
-  slot: string | ((state: S) => string | undefined) | undefined,
-) {
-  return (state: S) => cx(base, typeof slot === "function" ? slot(state) : slot);
 }
 
 // Monotonic id so each accepted `File` becomes a `FileInfo` with a stable, unique
@@ -214,8 +190,8 @@ function UploadGlyph({ className }: { className?: string }) {
  * Drag-and-drop is the native HTML5 API (no extra dependency): the input overlays
  * the zone transparently to own clicks + keyboard, while drops are intercepted on
  * the zone so they can be filtered against `acceptedFileTypes` (the native
- * `accept` only constrains the picker). Built on base-ui's `Field` for label
- * association + `invalid` → `aria-invalid` wiring, like `TextInput`.
+ * `accept` only constrains the picker). It composes `Field` for the label / help /
+ * error layout and ARIA wiring, and takes the shared `state`, like `TextInput`.
  *
  * @example
  * // Multiple
@@ -246,12 +222,13 @@ function UploadGlyph({ className }: { className?: string }) {
  */
 export function FileUpload(props: FileUploadProps) {
   const {
-    invalid = false,
+    state = "neutral",
     required = false,
-    disabled = false,
+    disabled: disabledProp = false,
     acceptedFileTypes,
     label,
     info,
+    labelPosition = "top",
     name,
     helpText,
     slotProps,
@@ -259,15 +236,20 @@ export function FileUpload(props: FileUploadProps) {
     ref,
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
-  } = props;
+    "aria-describedby": ariaDescribedby,
+  } = props as FileUploadBaseProps & FieldLabellingInput;
 
-  // Split each slot's own `className` out so it merges *onto* the built-in class
-  // instead of clobbering it when the rest of the slot props spread. base-ui's
-  // Field parts accept a `string` or a `(state) => string` for `className`;
-  // `mergeSlotClass` folds either form together with our base class into the
-  // function form base-ui always accepts.
-  const { className: labelSlotClass, ...labelSlotProps } = slotProps?.label ?? {};
-  const { className: helpSlotClass, ...helpSlotProps } = slotProps?.help ?? {};
+  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  const inheritedDisabled = useIsFieldDisabled();
+  const disabled = disabledProp || inheritedDisabled;
+  // Everything the control's focusable element needs from the field, in one
+  // object — see `fieldControlAttrs`.
+  const controlProps: FieldControlInput = {
+    label,
+    "aria-label": ariaLabel,
+    "aria-labelledby": ariaLabelledby,
+    "aria-describedby": ariaDescribedby,
+  };
 
   const [dragging, setDragging] = React.useState(false);
 
@@ -321,93 +303,76 @@ export function FileUpload(props: FileUploadProps) {
     addFiles(Array.from(event.dataTransfer.files));
   };
 
-  const state = invalid ? "invalid" : "neutral";
   const acceptAttr =
     acceptedFileTypes != null && acceptedFileTypes.length > 0
       ? acceptedFileTypes.join(",")
       : undefined;
 
-  // Only forward the aria-* names the consumer actually set. base-ui's Field
-  // auto-points the control's `aria-labelledby` at the `Field.Label`; passing an
-  // explicit `undefined` here would overwrite (clobber) that association, so the
-  // visible `label` would stop naming the input.
-  const ariaProps: { "aria-label"?: string; "aria-labelledby"?: string } = {};
-  if (ariaLabel != null) ariaProps["aria-label"] = ariaLabel;
-  if (ariaLabelledby != null) ariaProps["aria-labelledby"] = ariaLabelledby;
-
   return (
-    <Field.Root className={wrapperClass} invalid={invalid}>
-      {label != null &&
-        (info != null ? (
-          <div className={labelRowClass}>
-            <Field.Label className={mergeSlotClass(labelClass, labelSlotClass)} {...labelSlotProps}>
-              {label}
-            </Field.Label>
-            <InfoButton aria-label="More information" {...slotProps?.info}>
-              {info}
-            </InfoButton>
-          </div>
-        ) : (
-          <Field.Label className={mergeSlotClass(labelClass, labelSlotClass)} {...labelSlotProps}>
-            {label}
-          </Field.Label>
-        ))}
-      {/* The drop target. Decorative content is inert; the overlaid input owns
-          clicks + keyboard, and drops are caught here so they can be filtered. */}
-      <div
-        className={cx(
-          fileUploadDropzone({ state }),
-          focusRingRecipe({ type: "within", offset: "sm" }),
-          className,
-        )}
-        aria-disabled={disabled || undefined}
-        data-dragging={dragging || undefined}
-        onClick={handleClick}
-        onDragEnter={(event) => {
-          if (disabled) return;
-          event.preventDefault();
-          setDragging(true);
-        }}
-        onDragOver={handleDragOver}
-        onDragLeave={(event) => {
-          if (disabled) return;
-          event.preventDefault();
-          setDragging(false);
-        }}
-        onDrop={handleDrop}
+    // The `FileList` sits outside the `Field` so the help text stays attached to
+    // the dropzone it describes, above the staged files rather than below them.
+    <div className={wrapperClass}>
+      <Field
+        {...(controlProps as FieldLabellingProps)}
+        helpText={helpText}
+        info={info}
+        state={state}
+        required={required}
+        labelPosition={labelPosition}
+        disabled={disabled}
+        slotProps={slotProps}
       >
-        <UploadGlyph className={fileUploadIcon} />
-        <div className={fileUploadContent}>
-          <span className={promptClass}>
-            <strong>Click to upload</strong> or drag and drop
-          </span>
-          {acceptedFileTypes != null && acceptedFileTypes.length > 0 && (
-            <span className={hintClass}>{acceptedFileTypes.join(", ")}</span>
+        {/* The drop target. Decorative content is inert; the overlaid input owns
+            clicks + keyboard, and drops are caught here so they can be filtered. */}
+        <div
+          className={cx(
+            fileUploadDropzone({ state }),
+            focusRingRecipe({ type: "within", offset: "sm" }),
+            className,
           )}
-        </div>
-        <Field.Control
-          ref={ref}
-          type="file"
-          name={name}
-          multiple={multiple}
-          accept={acceptAttr}
-          required={required}
-          // `aria-disabled` (never the native `disabled`, per AGENTS.md) keeps the
-          // input in the tab order; the picker is vetoed in `handleClick`.
           aria-disabled={disabled || undefined}
-          {...ariaProps}
-          className={fileUploadInput}
-          onChange={handleInputChange}
-        />
-      </div>
-      {helpText != null && (
-        <Field.Description
-          className={mergeSlotClass(descriptionClass, helpSlotClass)}
-          {...helpSlotProps}
+          data-dragging={dragging || undefined}
+          onClick={handleClick}
+          onDragEnter={(event) => {
+            if (disabled) return;
+            event.preventDefault();
+            setDragging(true);
+          }}
+          onDragOver={handleDragOver}
+          onDragLeave={(event) => {
+            if (disabled) return;
+            event.preventDefault();
+            setDragging(false);
+          }}
+          onDrop={handleDrop}
         >
-          {helpText}
-        </Field.Description>
-      )}
+          <UploadGlyph className={fileUploadIcon} />
+          <div className={fileUploadContent}>
+            <span className={promptClass}>
+              <strong>Click to upload</strong> or drag and drop
+            </span>
+            {acceptedFileTypes != null && acceptedFileTypes.length > 0 && (
+              <span className={hintClass}>{acceptedFileTypes.join(", ")}</span>
+            )}
+          </div>
+          <Field.Control
+            ref={ref}
+            type="file"
+            name={name}
+            multiple={multiple}
+            accept={acceptAttr}
+            required={required}
+            // `aria-disabled` (never the native `disabled`, per AGENTS.md) keeps the
+            // input in the tab order; the picker is vetoed in `handleClick`.
+            aria-disabled={disabled || undefined}
+            // base-ui's `Field.Label` already names the input, so this only emits
+            // an attribute for the label-less arms.
+            {...fieldControlAttrs(controlProps)}
+            className={fileUploadInput}
+            onChange={handleInputChange}
+          />
+        </div>
+      </Field>
       {items.length > 0 && (
         <FileList
           items={items}
@@ -415,6 +380,6 @@ export function FileUpload(props: FileUploadProps) {
           onRemove={(id) => emit(items.filter((file) => file.id !== id))}
         />
       )}
-    </Field.Root>
+    </div>
   );
 }

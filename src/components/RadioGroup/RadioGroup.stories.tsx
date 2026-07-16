@@ -1,14 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { FORM_STATES, SIZES } from "../../theme/constants";
+import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
+import type { DistributiveOmit } from "../../utils/types";
 import { RadioGroup } from "./index";
 
 type ThemeValue = "system" | "light" | "dark";
 
 // RadioGroup is controlled, so the stories drive it from local state — the same
-// shape a consumer would use.
+// shape a consumer would use. `DistributiveOmit` (not the built-in `Omit`) keeps
+// the mutually-exclusive labelling arms apart — a plain `Omit` over a union
+// collapses it into one object carrying every arm's keys at once.
 function ThemeSwitcher(
-  props: Omit<
+  props: DistributiveOmit<
     React.ComponentProps<typeof RadioGroup<ThemeValue>>,
     "value" | "onChange" | "children"
   >,
@@ -58,7 +61,7 @@ type Story = StoryObj<typeof ThemeSwitcher>;
 // "WithDescription" story.
 export const Basic: Story = {
   args: {
-    description: "Affects the appearance across the whole app.",
+    helpText: "Affects the appearance across the whole app.",
   },
 };
 
@@ -70,6 +73,15 @@ export const Sizes: Story = {
       ))}
     </div>
   ),
+};
+
+// One message slot now: the copy changes with the state, rather than a help
+// line and an error line coexisting.
+const STATE_MESSAGE: Record<FormState, string | undefined> = {
+  neutral: undefined,
+  warning: "Double-check this choice.",
+  invalid: "Pick a theme to continue.",
+  valid: undefined,
 };
 
 const thStyle: React.CSSProperties = {
@@ -106,12 +118,7 @@ export const States: Story = {
             </th>
             <td style={cellStyle}>
               <div style={{ maxWidth: 320 }}>
-                <ThemeSwitcher
-                  label="Theme"
-                  state={state}
-                  description={state === "warning" ? "Double-check this choice." : undefined}
-                  errorMessage={state === "invalid" ? "Pick a theme to continue." : undefined}
-                />
+                <ThemeSwitcher label="Theme" state={state} helpText={STATE_MESSAGE[state]} />
               </div>
             </td>
           </tr>

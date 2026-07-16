@@ -125,6 +125,20 @@ export {
   type ComboboxSearchCopy,
 } from "./components/Combobox";
 export {
+  Field,
+  // The toolkit for building a form control on `Field` — see AGENTS.md.
+  fieldControlAttrs,
+  fieldNameAttrs,
+  joinIds,
+  assertExclusiveNames,
+  type FieldProps,
+  type FieldSlotProps,
+  type FieldWiring,
+  type FieldLabellingProps,
+  type FieldLabellingInput,
+  type FieldControlInput,
+} from "./components/Field";
+export {
   Fieldset,
   FieldsetLegend,
   useIsFieldDisabled,
@@ -295,6 +309,8 @@ export { focusRingRecipe, type FocusRingVariants } from "./styles/recipes/focusR
 // Polymorphism helpers
 export { useRender, composeRefs, type RenderProp } from "./utils/render";
 export { cx } from "./utils/cx";
+// Type helpers for re-typing the mutually-exclusive prop unions (see `Field`).
+export type { DistributiveOmit, DistributivePartial } from "./utils/types";
 export {
   useOverlayHandle,
   type OverlayHandle,
