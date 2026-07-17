@@ -1,23 +1,23 @@
 "use client";
+import { assignInlineVars } from "@vanilla-extract/dynamic";
 import * as React from "react";
 import { componentIntentRecipe } from "../../styles/recipes/component.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
-import { badgeRecipe } from "./badge.css";
+import { badgeColorVar, badgeCustomColor, badgeRecipe } from "./badge.css";
 
 /** The badge silhouette: a fully-rounded pill/circle, or a softly-rounded square. */
 export type BadgeShape = "round" | "square";
 
 /**
- * Props shared by every badge kind. Colour comes from `intent`/`saliency` (not
- * `color`), and the content is carried by the kind-specific props below rather
- * than `children`, so both are removed from the underlying span attributes. The
- * `shape` axis is orthogonal to the content kind — any kind can be `square`.
+ * Props shared by every badge kind. The content is carried by the kind-specific
+ * props below rather than `children`, so `children` is removed from the
+ * underlying span attributes (as is the native `color` attribute, which the
+ * escape hatch below redefines). The `shape` axis is orthogonal to the content
+ * kind — any kind can be `square`.
  */
 interface BadgeBaseProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "color" | "children"> {
-  intent?: Intent;
-  saliency?: Saliency;
   size?: Size;
   /** Corner treatment: `round` (default) or `square`. Applies to every kind. */
   shape?: BadgeShape;
@@ -25,6 +25,55 @@ interface BadgeBaseProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "co
   render?: RenderProp;
   ref?: React.Ref<HTMLSpanElement>;
 }
+
+/** The default: colour from the system palette, shared with `Chip`/`Button`. */
+export interface BadgeIntentColourProps {
+  intent?: Intent;
+  saliency?: Saliency;
+  /** Unsupported alongside `intent`/`saliency` — see {@link BadgeCustomColourProps}. */
+  color?: never;
+}
+
+/**
+ * `<Badge color="#7c3aed" />` — the colour **escape hatch**, for a badge whose
+ * fill is data rather than a design decision: a per-tag colour, a
+ * customer-chosen label colour, a language/category swatch. These are values the
+ * palette can't enumerate, because they aren't the system's to choose.
+ *
+ * Prefer `intent`/`saliency`. Everything the palette *can* express should go
+ * through it: an `intent` badge re-themes with the rest of the system, this one
+ * is frozen at whatever you pass. Reach here only when the colour genuinely
+ * isn't the system's to pick.
+ *
+ * Mutually exclusive with `intent`/`saliency` rather than overriding them: this
+ * replaces the token-driven colour scheme outright, so accepting both would
+ * leave one silently doing nothing.
+ *
+ * The text/icon colour is derived from the fill (black or white, whichever
+ * survives on it) — you supply the fill, not the pair. Note the fill is used
+ * as-is: it can't respond to a theme change, and nothing checks it against the
+ * surface *behind* the badge.
+ */
+export interface BadgeCustomColourProps {
+  /**
+   * Paint the badge any CSS colour, replacing `intent` × `saliency`. Takes
+   * anything CSS `color` does — a hex/rgb/oklch value, a custom property,
+   * `currentColor`. The foreground is derived for contrast.
+   */
+  color: NonNullable<React.CSSProperties["color"]>;
+  /** Unsupported alongside `color` — the custom fill replaces the palette scheme. */
+  intent?: never;
+  /** Unsupported alongside `color` — the custom fill replaces the palette scheme. */
+  saliency?: never;
+}
+
+/**
+ * How a badge gets its colour: from the palette ({@link BadgeIntentColourProps},
+ * the default) or from a caller-supplied CSS colour
+ * ({@link BadgeCustomColourProps}). Orthogonal to the content kind, so it's
+ * intersected with the four kinds rather than multiplying them out.
+ */
+export type BadgeColourProps = BadgeIntentColourProps | BadgeCustomColourProps;
 
 /** A badge whose content is a single icon — typically an `<Icon>` that inherits the badge's colour. */
 export interface BadgeIconProps extends BadgeBaseProps {
@@ -72,17 +121,24 @@ export interface BadgeBlankProps extends BadgeBaseProps {
  *   - **text** — pass `text`,
  *   - **blank** — pass none of them for a bare content-less indicator.
  *
- * Each kind is independently `round` (default) or `square` via `shape`.
+ * Each kind is independently `round` (default) or `square` via `shape`, and
+ * independently coloured by the palette or by a custom `color`
+ * ({@link BadgeColourProps}) — both axes are orthogonal to the content, so they
+ * intersect the four kinds instead of multiplying them into sixteen arms.
  */
-export type BadgeProps = BadgeIconProps | BadgeCountProps | BadgeTextProps | BadgeBlankProps;
+export type BadgeProps = (BadgeIconProps | BadgeCountProps | BadgeTextProps | BadgeBlankProps) &
+  BadgeColourProps;
 
-// The content props live on the union arms; widen once internally so the body
-// can read them without narrowing on each access.
+// The content and colour props live on the union arms; widen once internally so
+// the body can read them without narrowing on each access.
 type BadgeAllProps = BadgeBaseProps & {
   icon?: React.ReactNode;
   count?: number;
   max?: number;
   text?: string;
+  intent?: Intent;
+  saliency?: Saliency;
+  color?: React.CSSProperties["color"];
 };
 
 /**
@@ -96,10 +152,12 @@ export function Badge(props: BadgeProps) {
   const {
     intent,
     saliency,
+    color,
     size,
     shape,
     render,
     className,
+    style,
     ref,
     icon,
     count,
@@ -119,16 +177,24 @@ export function Badge(props: BadgeProps) {
   }
   const blank = content == null;
 
+  // The escape hatch replaces the palette scheme outright rather than layering
+  // over it (see `badgeCustomColor`). The types make the two exclusive, so this
+  // picks the one the caller asked for.
+  const custom = color != null;
+
   return useRender({
     render,
     defaultElement: "span",
     props: {
       ref,
       className: cx(
-        componentIntentRecipe({ intent, saliency }),
+        custom ? badgeCustomColor : componentIntentRecipe({ intent, saliency }),
         badgeRecipe({ size, shape, blank }),
         className,
       ),
+      // The consumer's own `style` is spread last so it still wins — this only
+      // adds the one custom property the escape hatch reads.
+      style: custom ? { ...assignInlineVars({ [badgeColorVar]: color }), ...style } : style,
       children: content,
       ...htmlProps,
     },

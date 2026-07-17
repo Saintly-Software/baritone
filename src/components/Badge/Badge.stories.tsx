@@ -179,3 +179,44 @@ export const Square: Story = {
     </div>
   ),
 };
+
+/**
+ * The `color` escape hatch, for a badge whose fill is *data* rather than a
+ * design decision — a per-tag colour, a customer-chosen label colour, a
+ * language swatch. These are values the palette can't enumerate, because they
+ * aren't the system's to choose.
+ *
+ * Prefer `intent`/`saliency` for everything the palette *can* express: those
+ * badges re-theme with the rest of the system, these are frozen at whatever you
+ * pass. `color` is mutually exclusive with `intent`/`saliency`.
+ */
+export const CustomColor: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+      <Badge color="#7c3aed" text="NEW" />
+      <Badge color="#7c3aed" count={8} />
+      <Badge color="#7c3aed" icon={<BellGlyph />} />
+      <Badge color="#7c3aed" shape="square" text="BETA" />
+      <Badge color="#7c3aed" />
+    </div>
+  ),
+};
+
+/**
+ * The foreground is derived from the fill, not asked for: a caller supplying a
+ * brand colour shouldn't also have to work out whether black or white text
+ * survives on it. Relative-colour syntax reads the fill's oklch lightness and
+ * snaps the text to whichever end stays legible — so these fills, running dark
+ * to light, flip from white text to black on their own.
+ */
+export const CustomColorContrast: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+      {["#0b1020", "#3730a3", "#7c3aed", "#e11d48", "#f59e0b", "#fde047", "#f8fafc"].map(
+        (color) => (
+          <Badge key={color} color={color} shape="square" size="lg" text={color} />
+        ),
+      )}
+    </div>
+  ),
+};
