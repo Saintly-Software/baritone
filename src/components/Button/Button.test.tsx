@@ -234,6 +234,42 @@ describe("Button", () => {
     });
   });
 
+  describe("width", () => {
+    it("adds a class for each width, and none when unset", () => {
+      const { rerender } = render(<Button>Save</Button>);
+      const base = screen.getByRole("button").className;
+
+      const seen = new Set<string>();
+      for (const width of ["fill", "fit", "inherit"] as const) {
+        rerender(<Button width={width}>Save</Button>);
+        const className = screen.getByRole("button").className;
+        expect(className).not.toBe(base);
+        seen.add(className);
+      }
+      // Each shorthand resolves to its own atoms class rather than collapsing.
+      expect(seen.size).toBe(3);
+    });
+
+    it("does not leak width to the DOM as an attribute", () => {
+      // `width` is a shorthand resolved to a class; it's invalid HTML on a
+      // <button>, so it must never be forwarded through `rest`.
+      render(<Button width="fill">Save</Button>);
+      expect(screen.getByRole("button")).not.toHaveAttribute("width");
+    });
+
+    it("rejects width on the arms whose box it would break", () => {
+      render(
+        // @ts-expect-error the underline would span the full width, reading as a broken rule.
+        <Button appearance="text" width="fill">
+          A
+        </Button>,
+      );
+      // @ts-expect-error aspect-ratio 1 would inflate it into a container-sized square.
+      render(<Button icon={<span />} aria-label="Add" width="fill" />);
+      expect(screen.getByRole("button", { name: "A" })).toBeInTheDocument();
+    });
+  });
+
   describe("disabled tooltip", () => {
     it("shows the disabledReason when a disabled button is focused", async () => {
       const user = userEvent.setup();

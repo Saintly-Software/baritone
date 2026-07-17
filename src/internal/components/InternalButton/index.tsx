@@ -6,8 +6,10 @@ import {
   componentIntentRecipe,
   componentTypographyRecipe,
 } from "../../../styles/recipes/component.css";
+import { resolveWidth } from "../../../styles/layoutProps";
 import { focusRingRecipe } from "../../../styles/recipes/focusRing.css";
 import { textVariantRecipe } from "../../../styles/recipes/text.css";
+import { atoms } from "../../../styles/sprinkles.css";
 import { cx } from "../../../utils/cx";
 import { mergeProps, type RenderProp } from "../../../utils/render";
 import {
@@ -92,6 +94,10 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     saliency,
     size,
     variant,
+    // Destructured out of `rest` so it never reaches the DOM: `width` is a
+    // shorthand resolved to an atoms class below, not an HTML attribute (and
+    // `width` on a `<button>`/`<a>` is invalid HTML anyway).
+    width,
     children,
     disabled: disabledProp = false,
     loading = false,
@@ -170,7 +176,14 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     ref,
     type,
     disabled: isDisabled,
-    className: cx(appearanceClassName, focusRingRecipe({ type: "visible" }), className),
+    className: cx(
+      appearanceClassName,
+      focusRingRecipe({ type: "visible" }),
+      // Layered after the recipe so it wins the `width`, and only emitted when
+      // asked for — an unset `width` leaves the button hugging its label.
+      width && atoms({ width: resolveWidth(width) }),
+      className,
+    ),
     "aria-busy": isLoading || undefined,
     // The icon-only arm has no visible text, so its required `aria-label` is the
     // accessible name and is forwarded here. Labelled buttons never reach this
