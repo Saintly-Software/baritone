@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { InternalButton } from "../../internal/components/InternalButton";
+import type { WidthShorthand } from "../../styles/layoutProps";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
@@ -76,6 +77,12 @@ export interface ButtonLinkProps extends Omit<
   startIcon?: React.ReactNode;
   /** Icon placed after the label. Typically an `<Icon>`; inherits text colour. */
   endIcon?: React.ReactNode;
+  /**
+   * `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit` — the
+   * same knob `Box`/`Flex` and a `solid` `Button` take. `fill` stretches the
+   * button-styled link to its container, for the full-width mobile CTA.
+   */
+  width?: WidthShorthand;
   /**
    * Router-link element for client-side navigation (base-ui `render` pattern),
    * e.g. `render={<NextLink href="/about" />}`. Omit and pass `href` for a plain

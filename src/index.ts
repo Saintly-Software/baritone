@@ -193,6 +193,9 @@ export {
   type BadgeTextProps,
   type BadgeBlankProps,
   type BadgeShape,
+  type BadgeColourProps,
+  type BadgeIntentColourProps,
+  type BadgeCustomColourProps,
 } from "./components/Badge";
 export {
   Notice,

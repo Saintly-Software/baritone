@@ -60,6 +60,25 @@ describe("Link", () => {
       expect(classes.length).toBeGreaterThan(1);
     });
 
+    it("applies the width shorthand without leaking it to the anchor", () => {
+      const { rerender } = render(
+        <Link appearance="button" href="/x">
+          Go
+        </Link>,
+      );
+      const base = screen.getByRole("link", { name: "Go" }).className;
+
+      rerender(
+        <Link appearance="button" href="/x" width="fill">
+          Go
+        </Link>,
+      );
+      const link = screen.getByRole("link", { name: "Go" });
+      expect(link.className).not.toBe(base);
+      // `width` is a shorthand resolved to a class, not an anchor attribute.
+      expect(link).not.toHaveAttribute("width");
+    });
+
     it("renders start and end icons alongside the label", () => {
       render(
         <Link

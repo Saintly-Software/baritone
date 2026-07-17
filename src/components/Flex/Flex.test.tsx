@@ -64,6 +64,7 @@ describe("Flex", () => {
       { width: "fill" as const },
       { height: "8" as const },
       { maxWidth: "12" as const },
+      { minWidth: "12" as const },
       { minHeight: "full" as const },
       { p: "2" as const },
       { mx: "auto" as const },

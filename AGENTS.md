@@ -111,8 +111,28 @@ about which of two messages wins.
   no `clsx`/`classnames` dependency.
 - **Variants are the source of truth:** every variant prop is backed by a
   vanilla-extract recipe variant. Add styles as recipe variants, not ad-hoc
-  `style` props (there's no token-bypassing `style` escape hatch on the colour
-  API).
+  `style` props.
+- **Colour escape hatches are deliberate, rare, and never a raw `style`:** the
+  colour API is closed by default — `intent` × `saliency`, resolved from tokens.
+  The exception is a fill that is _data_ rather than a design decision (a per-tag
+  colour, a customer-chosen label colour): the palette can't enumerate those,
+  because they aren't the system's to choose. Two components expose one today —
+  `Meter` (`slotProps.bar.color`) and `Badge` (`color`). A recipe variant can't
+  carry them: a recipe enumerates its values at build time, and these are
+  whatever the consumer passes.
+
+  If you add another, follow those two: a **named prop** (never a pass-through
+  `style`), whose value reaches CSS as **one dedicated `createVar`** set via
+  `assignInlineVars` — so the hatch is a single documented hole, not an open
+  door. Make it **mutually exclusive** with `intent`/`saliency` if it replaces
+  them (as `Badge`'s does), rather than silently winning over them. Prefer
+  swapping the token recipe out for a dedicated class over layering on top of it:
+  both are single classes, so layering makes the winner depend on
+  vanilla-extract's emission order rather than on `cx` order. And **derive what
+  you can** — `Badge` computes its own foreground from the fill via
+  relative-colour syntax, so a caller supplying a brand colour doesn't also have
+  to work out whether black or white text survives on it.
+
 - **Polymorphism:** use base-ui's `render` prop (no `asChild`).
 
 ## Before you push

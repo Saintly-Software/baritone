@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { componentIntentRecipe } from "../../styles/recipes/component.css";
+import { badgeCustomColor } from "./badge.css";
 import { Badge } from "./index";
 
 const classesOf = (element: Element) => element.className.split(/\s+/);
@@ -140,6 +141,69 @@ describe("Badge", () => {
         .split(/\s+/)
         .filter((cls) => !count.className.split(/\s+/).includes(cls));
       expect(extra.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("color escape hatch", () => {
+    it("sets the custom fill as an inline custom property", () => {
+      render(<Badge data-testid="badge" text="NEW" color="#7c3aed" />);
+      const badge = screen.getByTestId("badge");
+      // The value is arbitrary, so it can't be a recipe variant — it rides in on
+      // a custom property that the escape-hatch class reads.
+      expect(badge.getAttribute("style")).toContain("#7c3aed");
+      // …and never as the native `color` attribute.
+      expect(badge).not.toHaveAttribute("color");
+    });
+
+    it("swaps the palette scheme out rather than layering over it", () => {
+      render(<Badge data-testid="custom" text="NEW" color="#7c3aed" />);
+      const custom = screen.getByTestId("custom").className.split(/\s+/);
+
+      // Both schemes are single classes, so if both were applied the winner
+      // would come down to stylesheet emission order rather than to intent.
+      // The custom badge must carry the escape-hatch class and *none* of the
+      // token recipe's.
+      expect(custom).toContain(badgeCustomColor);
+      const intentClasses = componentIntentRecipe({ intent: "primary", saliency: "high" }).split(
+        /\s+/,
+      );
+      expect(custom.some((cls) => intentClasses.includes(cls))).toBe(false);
+    });
+
+    it("keeps the box identical to an intent badge of the same size and shape", () => {
+      render(
+        <>
+          <Badge data-testid="intent" text="NEW" size="lg" shape="square" />
+          <Badge data-testid="custom" text="NEW" size="lg" shape="square" color="#7c3aed" />
+        </>,
+      );
+      // Only the colour scheme differs — the size/shape classes are shared.
+      const intent = new Set(screen.getByTestId("intent").className.split(/\s+/));
+      const custom = new Set(screen.getByTestId("custom").className.split(/\s+/));
+      const shared = [...custom].filter((cls) => intent.has(cls));
+      expect(shared.length).toBeGreaterThan(0);
+    });
+
+    it("leaves an intent badge free of the inline custom property", () => {
+      render(<Badge data-testid="badge" text="NEW" intent="primary" />);
+      expect(screen.getByTestId("badge").getAttribute("style")).toBeNull();
+    });
+
+    it("keeps the consumer's own style prop", () => {
+      render(<Badge data-testid="badge" text="NEW" color="#7c3aed" style={{ marginLeft: 4 }} />);
+      const badge = screen.getByTestId("badge");
+      expect(badge).toHaveStyle({ marginLeft: "4px" });
+      expect(badge.getAttribute("style")).toContain("#7c3aed");
+    });
+
+    it("rejects color alongside intent/saliency", () => {
+      // The hatch replaces the token scheme outright, so accepting both would
+      // leave one silently doing nothing.
+      // @ts-expect-error `color` and `intent` are mutually exclusive.
+      render(<Badge text="A" color="#7c3aed" intent="primary" />);
+      // @ts-expect-error `color` and `saliency` are mutually exclusive.
+      render(<Badge text="B" color="#7c3aed" saliency="high" />);
+      expect(screen.getAllByText("A").length).toBeGreaterThan(0);
     });
   });
 
