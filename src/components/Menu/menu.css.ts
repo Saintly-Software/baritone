@@ -1,10 +1,28 @@
 import { style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
+import type { Intent } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { iconColorVar, textColorVar } from "../../styles/vars.css";
 
-/** `Menu.Item`'s supported intents — the neutral default plus the accent intents. */
-const MENU_ITEM_INTENTS = ["neutral", "secondary", "warning", "negative"] as const;
+/**
+ * `Menu.Item`'s supported intents — the `neutral` default plus the accent
+ * intents. `primary` is deliberately absent: it's the call-to-action colour, and
+ * a row in a list of peers isn't a CTA — a primary-coloured row would out-shout
+ * the menu's own trigger.
+ *
+ * Exported so `MenuItemIntent` can be derived from this one list rather than
+ * restated: the type and the recipe's variant keys are the same set by
+ * construction, so a new intent can't reach one and miss the other. `satisfies`
+ * keeps every member a real `Intent`, which is what makes the token lookups
+ * below total.
+ */
+export const MENU_ITEM_INTENTS = [
+  "neutral",
+  "secondary",
+  "warning",
+  "negative",
+  "positive",
+] as const satisfies readonly Intent[];
 
 /** base-ui portals the menu to the end of `<body>`, so it stacks above page
  * content by DOM order — no z-index needed (see `BaritoneTheme`'s `isolation`). */

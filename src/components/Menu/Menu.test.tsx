@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { Menu } from "./index";
+import { MENU_ITEM_INTENTS } from "./menu.css";
 
 describe("Menu", () => {
   it("keeps the items hidden until the trigger is pressed", async () => {
@@ -157,6 +158,26 @@ describe("Menu", () => {
     expect(await screen.findByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
     expect(screen.queryByRole("menuitem", { name: "Delete" })).not.toBeInTheDocument();
     expect(screen.getAllByRole("menuitem")).toHaveLength(1);
+  });
+
+  it("gives every supported intent its own class", async () => {
+    const user = userEvent.setup();
+    render(
+      <Menu
+        trigger={<Menu.Trigger>Open</Menu.Trigger>}
+        items={MENU_ITEM_INTENTS.map((intent) => ({ children: intent, intent }))}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open" }));
+    await screen.findByRole("menuitem", { name: MENU_ITEM_INTENTS[0] });
+
+    // A missing recipe variant silently falls back to the base class, so the
+    // intents would collide rather than throw — distinctness is what catches it.
+    const classNames = MENU_ITEM_INTENTS.map(
+      (intent) => screen.getByRole("menuitem", { name: intent }).className,
+    );
+    expect(new Set(classNames).size).toBe(MENU_ITEM_INTENTS.length);
   });
 
   it("opens a custom (non-Button) trigger and wires the popup attributes", async () => {

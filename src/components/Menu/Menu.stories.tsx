@@ -55,6 +55,7 @@ export const KitchenSink: Story = {
         { children: "View source", href: "https://example.com/source" },
         // One row per supported intent (neutral is covered by "Rename" above).
         { children: "Share", intent: "secondary", onClick: () => alert("Share") },
+        { children: "Publish", intent: "positive", onClick: () => alert("Publish") },
         { children: "Archive", intent: "warning", onClick: () => alert("Archive") },
         {
           children: "Delete",
