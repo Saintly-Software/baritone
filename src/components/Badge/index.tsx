@@ -147,6 +147,12 @@ type BadgeAllProps = BadgeBaseProps & {
  * blank indicator. Shares the colour scheme/recipe with `Chip`/`Button`, so
  * `<Badge intent="negative" saliency="high">` matches those with the same props;
  * a per-`size` box and a `round`/`square` silhouette come from its own recipe.
+ *
+ * A badge is an indicator, not a control: it renders a static `<span>` that is
+ * not a hit target, so it takes no hover/active background — that would advertise
+ * a click it can't perform. A `render` that makes it a link or button restores
+ * them, off the rendered element rather than a prop (see the `interactive`
+ * variants in `component.css.ts`).
  */
 export function Badge(props: BadgeProps) {
   const {
@@ -188,7 +194,14 @@ export function Badge(props: BadgeProps) {
     props: {
       ref,
       className: cx(
-        custom ? badgeCustomColor : componentIntentRecipe({ intent, saliency }),
+        // The custom-colour scheme is a static style with no hover/active, so
+        // only the intent recipe needs guarding. `interactive: "auto"` — a badge
+        // is an indicator, not a hit target, so the inert `<span>` it renders by
+        // default must not light up under the cursor; only a `render` that makes
+        // it a link/button earns that.
+        custom
+          ? badgeCustomColor
+          : componentIntentRecipe({ intent, saliency, interactive: "auto" }),
         badgeRecipe({ size, shape, blank }),
         className,
       ),

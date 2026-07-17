@@ -4,6 +4,21 @@ import { componentIntentRecipe } from "../../styles/recipes/component.css";
 import { badgeCustomColor } from "./badge.css";
 import { Badge } from "./index";
 
+const classesOf = (element: Element) => element.className.split(/\s+/);
+
+/**
+ * The classes that mark each `interactive` variant, diffed out of the recipe
+ * itself rather than hardcoded — the hashes move whenever the recipe does. The
+ * `control` variant hovers/actives unconditionally; `auto` defers to the
+ * rendered element.
+ */
+const variantMarkers = (variant: "control" | "auto") => {
+  const other = variant === "control" ? "auto" : "control";
+  const mine = componentIntentRecipe({ interactive: variant }).split(/\s+/);
+  const theirs = componentIntentRecipe({ interactive: other }).split(/\s+/);
+  return mine.filter((cls) => !theirs.includes(cls));
+};
+
 describe("Badge", () => {
   it("renders as a span by default", () => {
     render(<Badge data-testid="badge" count={3} />);
@@ -21,6 +36,38 @@ describe("Badge", () => {
     expect(link).toHaveAttribute("href", "/x");
     expect(link.className).toContain("mine");
     expect(link).toHaveTextContent("2");
+  });
+
+  // A badge is an indicator, not a hit target, so it must not take the shared
+  // recipe's control affordances — a hover/active background on a static span
+  // advertises a click it can't perform. jsdom applies no stylesheet, so these
+  // assert the variant carried on the element; the hover colours themselves are
+  // verified against real computed styles in the browser.
+  describe("affordances", () => {
+    it("does not take a control's hover background", () => {
+      render(<Badge data-testid="badge" text="NEW" />);
+      const classes = classesOf(screen.getByTestId("badge"));
+      for (const marker of variantMarkers("control")) {
+        expect(classes).not.toContain(marker);
+      }
+    });
+
+    it("resolves its affordances from the rendered element", () => {
+      // `auto` is what keeps a badge that `render`s as a link lighting up while
+      // the default span stays inert, so both kinds carry it.
+      render(
+        <>
+          <Badge data-testid="span" text="NEW" />
+          <Badge data-testid="link" text="NEW" render={<a href="/releases" />} />
+        </>,
+      );
+      const markers = variantMarkers("auto");
+      expect(markers.length).toBeGreaterThan(0);
+      for (const marker of markers) {
+        expect(classesOf(screen.getByTestId("span"))).toContain(marker);
+        expect(classesOf(screen.getByTestId("link"))).toContain(marker);
+      }
+    });
   });
 
   describe("count", () => {
