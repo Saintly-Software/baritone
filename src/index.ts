@@ -195,6 +195,12 @@ export {
   type ScrollAreaProps,
   type ScrollAreaOrientation,
 } from "./components/ScrollArea";
+export {
+  Overflow,
+  type OverflowProps,
+  type OverflowOrientation,
+  type OverflowScrollMode,
+} from "./components/Overflow";
 export { Icon, type IconProps } from "./components/Icon";
 export {
   Badge,
