@@ -26,6 +26,33 @@ const GROUPED: ComboboxOptionGroup[] = [
   },
 ];
 
+// Six short labels — a clean 3-column × 2-row grid.
+const COLORS: ComboboxOption[] = [
+  { value: "red", label: "Red" },
+  { value: "orange", label: "Orange" },
+  { value: "amber", label: "Amber" },
+  { value: "green", label: "Green" },
+  { value: "blue", label: "Blue" },
+  { value: "violet", label: "Violet" },
+];
+
+const GROUPED_COLORS: ComboboxOptionGroup[] = [
+  {
+    label: "Warm",
+    options: [
+      { value: "red", label: "Red" },
+      { value: "orange", label: "Orange" },
+    ],
+  },
+  {
+    label: "Cool",
+    options: [
+      { value: "green", label: "Green" },
+      { value: "blue", label: "Blue" },
+    ],
+  },
+];
+
 describe("Combobox", () => {
   it("associates its label with the input", () => {
     render(<Combobox label="Fruit" options={FRUITS} placeholder="Pick one" />);
@@ -258,6 +285,101 @@ describe("Combobox", () => {
       await user.click(await screen.findByRole("option", { name: "Lime" }));
 
       expect(onValueChange).toHaveBeenCalledWith("lime");
+    });
+  });
+
+  describe("grid", () => {
+    it("renders a grid of rows and gridcells instead of a listbox", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Colour" options={COLORS} columns={3} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Colour" }));
+
+      const grid = await screen.findByRole("grid");
+      // A grid, not a listbox of options.
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+      expect(within(grid).queryAllByRole("option")).toHaveLength(0);
+      // Six colours tile into two rows of three gridcells.
+      expect(within(grid).getAllByRole("row")).toHaveLength(2);
+      expect(within(grid).getAllByRole("gridcell")).toHaveLength(6);
+      expect(within(grid).getByRole("gridcell", { name: "Red" })).toBeInTheDocument();
+    });
+
+    it("filters the grid as the user types, re-tiling the rows", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Colour" options={COLORS} columns={3} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Colour" }));
+      await user.keyboard("red");
+
+      const grid = await screen.findByRole("grid");
+      const cells = within(grid).getAllByRole("gridcell");
+      expect(cells).toHaveLength(1);
+      expect(cells[0]).toHaveTextContent("Red");
+      expect(within(grid).getAllByRole("row")).toHaveLength(1);
+    });
+
+    it("selects a gridcell and reports its value", async () => {
+      const user = userEvent.setup();
+      const onValueChange = vi.fn();
+      render(
+        <Combobox label="Colour" options={COLORS} columns={3} onValueChange={onValueChange} />,
+      );
+
+      await user.click(screen.getByRole("combobox", { name: "Colour" }));
+      await user.click(await screen.findByRole("gridcell", { name: "Blue" }));
+
+      expect(onValueChange).toHaveBeenCalledWith("blue");
+    });
+
+    it("marks the selected gridcell aria-selected", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Colour" options={COLORS} columns={3} defaultValue="green" />);
+
+      await user.click(screen.getByRole("combobox", { name: "Colour" }));
+
+      expect(await screen.findByRole("gridcell", { name: "Green" })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(screen.getByRole("gridcell", { name: "Red" })).not.toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+    });
+
+    it("keeps group headings in a grouped grid", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Colour" options={GROUPED_COLORS} columns={2} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Colour" }));
+
+      await screen.findByRole("grid");
+      expect(screen.getByRole("group", { name: "Warm" })).toBeInTheDocument();
+      expect(screen.getByRole("group", { name: "Cool" })).toBeInTheDocument();
+      expect(screen.getAllByRole("gridcell")).toHaveLength(4);
+    });
+
+    it("falls back to a list when columns is less than 2", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Colour" options={COLORS} columns={1} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Colour" }));
+
+      expect(await screen.findByRole("listbox")).toBeInTheDocument();
+      expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+      expect(screen.getAllByRole("option")).toHaveLength(6);
+    });
+
+    it("takes precedence over virtualized, tiling every option", async () => {
+      const user = userEvent.setup();
+      render(<Combobox label="Colour" options={COLORS} columns={3} virtualized />);
+
+      await user.click(screen.getByRole("combobox", { name: "Colour" }));
+
+      const grid = await screen.findByRole("grid");
+      // Grid wins over windowing: every colour is mounted.
+      expect(within(grid).getAllByRole("gridcell")).toHaveLength(6);
     });
   });
 

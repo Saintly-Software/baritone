@@ -28,6 +28,19 @@ const GROUPED: ComboboxOptionGroup[] = [
   },
 ];
 
+// Nine short labels — a clean 3×3 grid, so vertical arrow moves are unambiguous.
+const COLORS: ComboboxOption[] = [
+  { value: "red", label: "Red" },
+  { value: "orange", label: "Orange" },
+  { value: "amber", label: "Amber" },
+  { value: "green", label: "Green" },
+  { value: "teal", label: "Teal" },
+  { value: "blue", label: "Blue" },
+  { value: "indigo", label: "Indigo" },
+  { value: "violet", label: "Violet" },
+  { value: "pink", label: "Pink" },
+];
+
 /**
  * Interaction coverage for `Combobox`. The `play` functions open the popup and
  * exercise multi-select highlighting, list virtualization, the free-text "Add"
@@ -70,6 +83,43 @@ export const MultiSelectHighlight: Story = {
     await waitFor(() => expect(banana).toHaveAttribute("data-highlighted"));
     // Highlighting a different row must not disturb the existing selection.
     expect(apple).toHaveAttribute("aria-selected", "true");
+  },
+};
+
+/**
+ * The grid view lays options out as a 2-D grid: `ArrowDown` steps a whole row down
+ * (not to the next item), and `Enter` selects the highlighted cell.
+ */
+export const GridNavigation: Story = {
+  name: "Grid navigation",
+  render: () => (
+    <Combobox label="Colour" options={COLORS} columns={3} placeholder="Search colours…" />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(document.body);
+    const input = canvas.getByRole("combobox", { name: "Colour" });
+    await userEvent.click(input);
+
+    // Nine colours tile into a 3×3 grid of gridcells (not a listbox of options).
+    const grid = await body.findByRole("grid");
+    expect(within(grid).getAllByRole("row")).toHaveLength(3);
+    expect(within(grid).getAllByRole("gridcell")).toHaveLength(9);
+
+    // First ArrowDown highlights the first cell…
+    await userEvent.keyboard("{ArrowDown}");
+    const red = within(grid).getByRole("gridcell", { name: "Red" });
+    await waitFor(() => expect(red).toHaveAttribute("data-highlighted"));
+
+    // …and a second ArrowDown drops a whole row (to Green), not to the next item.
+    await userEvent.keyboard("{ArrowDown}");
+    const green = within(grid).getByRole("gridcell", { name: "Green" });
+    await waitFor(() => expect(green).toHaveAttribute("data-highlighted"));
+    expect(red).not.toHaveAttribute("data-highlighted");
+
+    // Enter commits the highlighted cell, which surfaces in the input.
+    await userEvent.keyboard("{Enter}");
+    await waitFor(() => expect(input).toHaveValue("Green"));
   },
 };
 

@@ -16,6 +16,45 @@ const FRUITS: ComboboxOption[] = [
   { value: "mango", label: "Mango" },
 ];
 
+// Short, tile-like labels that suit the grid view.
+const COLORS: ComboboxOption[] = [
+  { value: "red", label: "Red" },
+  { value: "orange", label: "Orange" },
+  { value: "amber", label: "Amber" },
+  { value: "yellow", label: "Yellow" },
+  { value: "lime", label: "Lime" },
+  { value: "green", label: "Green" },
+  { value: "teal", label: "Teal" },
+  { value: "cyan", label: "Cyan" },
+  { value: "blue", label: "Blue" },
+  { value: "indigo", label: "Indigo" },
+  { value: "violet", label: "Violet" },
+  { value: "pink", label: "Pink" },
+];
+
+const GROUPED_COLORS: ComboboxOptionGroup[] = [
+  {
+    label: "Warm",
+    options: [
+      { value: "red", label: "Red" },
+      { value: "orange", label: "Orange" },
+      { value: "amber", label: "Amber" },
+      { value: "yellow", label: "Yellow" },
+      { value: "pink", label: "Pink" },
+    ],
+  },
+  {
+    label: "Cool",
+    options: [
+      { value: "green", label: "Green" },
+      { value: "teal", label: "Teal" },
+      { value: "blue", label: "Blue" },
+      { value: "indigo", label: "Indigo" },
+      { value: "violet", label: "Violet" },
+    ],
+  },
+];
+
 const GROUPED_FRUITS: ComboboxOptionGroup[] = [
   {
     label: "Citrus",
@@ -56,6 +95,7 @@ const meta: Meta<typeof Combobox> = {
   argTypes: {
     state: { control: "select", options: FORM_STATES },
     size: { control: "select", options: SIZES },
+    columns: { control: { type: "number", min: 1, max: 6 } },
     options: { control: false },
     search: { control: false },
   },
@@ -184,6 +224,42 @@ export const GroupedMultiple: Story = {
     multiple: true,
     options: GROUPED_FRUITS,
     defaultValue: ["lemon", "strawberry"],
+    placeholder: "Add more…",
+  },
+};
+
+/**
+ * `columns` lays the options out as a grid instead of a single column — arrow keys
+ * then move in two dimensions. Best for short, tile-like options (colours, icons,
+ * emoji). Typing still filters, re-tiling the rows as the list narrows.
+ */
+export const Grid: Story = {
+  args: {
+    label: "Colour",
+    placeholder: "Search colours…",
+    options: COLORS,
+    columns: 4,
+  },
+};
+
+/** A grid that keeps its group headings — each group tiles under its own label. */
+export const GridGrouped: Story = {
+  args: {
+    label: "Colour",
+    placeholder: "Search colours…",
+    options: GROUPED_COLORS,
+    columns: 3,
+  },
+};
+
+/** A grid with `multiple` — chosen tiles show a check and surface as chips in the control. */
+export const GridMultiple: Story = {
+  args: {
+    label: "Colours",
+    multiple: true,
+    options: COLORS,
+    columns: 4,
+    defaultValue: ["red", "blue"],
     placeholder: "Add more…",
   },
 };

@@ -1,5 +1,6 @@
 "use client";
 import { Combobox as BaseCombobox } from "@base-ui/react/combobox";
+import { assignInlineVars } from "@vanilla-extract/dynamic";
 import * as React from "react";
 import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
@@ -20,9 +21,17 @@ import {
   chipLabel,
   chipRemove,
   chipsContainer,
+  colsVar,
   control,
   createPrefix,
   group as groupClass,
+  gridItem as gridItemClass,
+  gridItemIndicator,
+  gridItemLabel,
+  gridItemSpan,
+  gridList,
+  gridRow,
+  gridSection,
   groupLabel as groupLabelClass,
   input,
   item as itemClass,
@@ -148,6 +157,13 @@ interface ComboboxBaseProps extends Omit<
   hideClearButton?: boolean;
   /** Allow committing values that aren't in the list (an "Add …" row appears). */
   freeText?: boolean;
+  /**
+   * Lay the options out as a grid of this many columns instead of a single
+   * column. Arrow keys then navigate in two dimensions. Best for short, tile-like
+   * options (icons, swatches, emoji). Ignored (falls back to a list) when `< 2`,
+   * and takes precedence over `virtualized`.
+   */
+  columns?: number;
   /** Window long lists (only the visible rows are mounted). */
   virtualized?: boolean;
   /** Async search config — see {@link ComboboxSearch}. */
@@ -235,7 +251,7 @@ function CheckIcon() {
  * `Combobox`. Single or multiple selection (discriminated on `multiple`), with a
  * string `value` / `onValueChange` shape. Supports synchronous options,
  * async search (spinner / empty / error states in the popup), free-text entry,
- * and windowed virtualization for long lists.
+ * a multi-column grid view (`columns`), and windowed virtualization for long lists.
  *
  * Like the other form controls it takes a `state` (not intent/saliency), composes
  * `Field` for its label / help / error layout and ARIA wiring, and models disabled
@@ -258,6 +274,7 @@ export function Combobox(props: ComboboxProps) {
     name,
     hideClearButton,
     freeText,
+    columns,
     virtualized,
     search,
     clearLabel = "Clear",
@@ -308,9 +325,16 @@ export function Combobox(props: ComboboxProps) {
   const source: readonly ComboboxOption[] | readonly ComboboxOptionGroup[] = isAsync
     ? (search.results ?? [])
     : (options ?? []);
+  // Grid view: a whole number of columns ≥ 2 lays the options out as a 2-D grid.
+  // It wins over `virtualized` (whose flat-row windowing can't tile), so windowing
+  // is off whenever the grid is on.
+  const gridColumns = columns != null ? Math.max(1, Math.floor(columns)) : undefined;
+  const isGrid = gridColumns != null && gridColumns >= 2;
+  const isVirtual = !!virtualized && !isGrid;
   // Groups are supported everywhere except the virtualized window, whose row math
   // assumes a flat list — there, a grouped source is flattened and headings drop.
-  const useGroups = !virtualized && isGrouped(source);
+  // The grid tiles each group under its own heading, so grouping survives there.
+  const useGroups = !isVirtual && isGrouped(source);
   const flatOptions = flattenOptions(source);
 
   // Free-text "Add …" affordance: a synthetic option for the current query when
@@ -440,6 +464,45 @@ export function Combobox(props: ComboboxProps) {
     </BaseCombobox.Group>
   );
 
+  // A grid cell (`role="gridcell"`). Centred label with the check tucked into the
+  // corner when selected; the free-text "Add …" cell spans its whole row. Cells are
+  // navigated by roving highlight, never tab stops, so base-ui's `disabled` sets
+  // `aria-disabled` here without harming focusability (allowlisted in
+  // aria-disabled-convention.test.ts).
+  const renderGridItem = (option: InternalOption) => (
+    <BaseCombobox.Item
+      key={option.value}
+      value={option}
+      disabled={option.disabled}
+      className={option.create ? cx(gridItemClass, gridItemSpan) : gridItemClass}
+    >
+      <span className={gridItemLabel}>
+        {option.create ? (
+          <>
+            <span className={createPrefix}>Add </span>“{option.label}”
+          </>
+        ) : (
+          option.label
+        )}
+      </span>
+      <BaseCombobox.ItemIndicator className={gridItemIndicator} render={<CheckIcon />} />
+    </BaseCombobox.Item>
+  );
+
+  // A grid group: the heading plus a presentation wrapper of the group's filtered
+  // items, tiled into `Row`s. `grp.items` arrives already query-filtered, so the
+  // rows re-chunk as the user types.
+  const renderGridGroup = (grp: InternalGroup) => (
+    <BaseCombobox.Group key={grp.label ?? "__create"} items={grp.items} className={groupClass}>
+      {grp.label != null && (
+        <BaseCombobox.GroupLabel className={groupLabelClass}>{grp.label}</BaseCombobox.GroupLabel>
+      )}
+      <div role="presentation" className={gridSection}>
+        {gridRowsFrom(grp.items, gridColumns ?? 1, renderGridItem)}
+      </div>
+    </BaseCombobox.Group>
+  );
+
   const inputEl = (
     <BaseCombobox.Input
       ref={ref}
@@ -476,8 +539,9 @@ export function Combobox(props: ComboboxProps) {
         itemToStringLabel={(o: ComboboxOption) => o.label}
         itemToStringValue={(o: ComboboxOption) => o.value}
         filter={isAsync ? null : undefined}
-        virtualized={virtualized || undefined}
-        onItemHighlighted={virtualized ? handleItemHighlighted : undefined}
+        grid={isGrid || undefined}
+        virtualized={isVirtual || undefined}
+        onItemHighlighted={isVirtual ? handleItemHighlighted : undefined}
         name={name}
         required={required}
         readOnly={disabled || readOnly}
@@ -556,9 +620,20 @@ export function Combobox(props: ComboboxProps) {
               {!busy && (
                 <BaseCombobox.Empty className={statusClass}>{copy.empty}</BaseCombobox.Empty>
               )}
-              {virtualized ? (
+              {isVirtual ? (
                 <BaseCombobox.List className={list}>
                   <VirtualList scrollRef={virtualScrollRef} renderOption={renderOption} />
+                </BaseCombobox.List>
+              ) : isGrid ? (
+                <BaseCombobox.List
+                  className={cx(list, gridList)}
+                  style={assignInlineVars({ [colsVar]: String(gridColumns ?? 1) })}
+                >
+                  {useGroups ? (
+                    (grp: InternalGroup) => renderGridGroup(grp)
+                  ) : (
+                    <GridList cols={gridColumns ?? 1} renderItem={renderGridItem} />
+                  )}
                 </BaseCombobox.List>
               ) : useGroups ? (
                 <BaseCombobox.List className={list}>
@@ -618,6 +693,51 @@ function VirtualList({ scrollRef, renderOption }: VirtualListProps) {
       </div>
     </div>
   );
+}
+
+/**
+ * Tile a filtered option list into `Combobox.Row`s of `cols` cells. The free-text
+ * "Add …" option (if present) is peeled onto its own trailing full-width row so it
+ * never lands mid-way through a partial row of real options. base-ui reads the
+ * resulting DOM rows to drive 2-D arrow-key navigation.
+ */
+function gridRowsFrom(
+  items: readonly InternalOption[],
+  cols: number,
+  renderItem: (option: InternalOption) => React.ReactNode,
+): React.ReactNode[] {
+  const options = items.filter((o) => !o.create);
+  const creates = items.filter((o) => o.create);
+  const rows: React.ReactNode[] = [];
+  for (let i = 0; i < options.length; i += cols) {
+    rows.push(
+      <BaseCombobox.Row key={`row-${i}`} className={gridRow}>
+        {options.slice(i, i + cols).map(renderItem)}
+      </BaseCombobox.Row>,
+    );
+  }
+  if (creates.length > 0) {
+    rows.push(
+      <BaseCombobox.Row key="row-create" className={gridRow}>
+        {creates.map(renderItem)}
+      </BaseCombobox.Row>,
+    );
+  }
+  return rows;
+}
+
+interface GridListProps {
+  cols: number;
+  renderItem: (option: InternalOption) => React.ReactNode;
+}
+
+/**
+ * The grid body for a flat (ungrouped) source. Reads the currently filtered items
+ * from base-ui and tiles them into rows, re-chunking as the query narrows the list.
+ */
+function GridList({ cols, renderItem }: GridListProps) {
+  const filtered = BaseCombobox.useFilteredItems<InternalOption>();
+  return <>{gridRowsFrom(filtered, cols, renderItem)}</>;
 }
 
 Combobox.displayName = "Combobox";
