@@ -247,6 +247,13 @@ export const item = style({
   },
 });
 
+/** A leading icon in a list row — never shrinks, follows the row's text colour. */
+export const itemIcon = style({
+  display: "inline-flex",
+  flexShrink: 0,
+  vars: { [iconColorVar]: "currentColor" },
+});
+
 /** The label text of an option — takes the remaining width, truncates. */
 export const itemLabel = style({
   flex: 1,
@@ -374,10 +381,12 @@ export const chipRemove = style({
  */
 export const colsVar = createVar();
 
-/** The row container in grid mode — the list of `Row`s, stacked with a little breathing room. */
-export const gridList = style({
-  gap: vars.space[1],
-});
+/**
+ * The row container in grid mode — the list of `Row`s, stacked with a little
+ * breathing room. Composes `list` so the combined result is deterministic at
+ * build time rather than depending on `cx` order at the call site.
+ */
+export const gridList = style([list, { gap: vars.space[1] }]);
 
 /**
  * A group's grid body (`role="presentation"`): the stack of `Row`s under a group
@@ -460,3 +469,32 @@ export const gridItemIndicator = style({
 export const gridItemSpan = style({
   gridColumn: "1 / -1",
 });
+
+/**
+ * A grid cell that carries an icon — stacks the icon above the label caption
+ * (the base cell centres a single line; here the two pieces column-stack). No
+ * property overlaps the base recipe, so it layers cleanly.
+ */
+export const gridItemWithIcon = style({
+  flexDirection: "column",
+  gap: vars.space[1],
+});
+
+/**
+ * The icon shown in a grid cell (above the caption). `--iconColor: currentColor`
+ * makes a passed `<Icon>` (or raw `<svg>`) follow the cell's text colour, so it
+ * keeps contrast against the highlight / select wash.
+ */
+export const gridItemIcon = style({
+  display: "inline-flex",
+  vars: { [iconColorVar]: "currentColor" },
+});
+
+/** The label under a grid-cell icon — the truncating label, shrunk to a quiet caption. */
+export const gridItemCaption = style([
+  gridItemLabel,
+  {
+    fontSize: vars.text.variant.body.sm.fontSize,
+    color: vars.text.color.neutral.low,
+  },
+]);

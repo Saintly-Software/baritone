@@ -310,9 +310,16 @@ describe("Combobox", () => {
       render(<Combobox label="Colour" options={COLORS} columns={3} />);
 
       await user.click(screen.getByRole("combobox", { name: "Colour" }));
-      await user.keyboard("red");
 
+      // "r" matches Red, Orange, Amber and Green — four cells re-tiled into two
+      // rows (the second partial), proving the rows re-chunk on the filtered set.
+      await user.keyboard("r");
       const grid = await screen.findByRole("grid");
+      expect(within(grid).getAllByRole("gridcell")).toHaveLength(4);
+      expect(within(grid).getAllByRole("row")).toHaveLength(2);
+
+      // Narrowing to "red" collapses to a single cell on a single row.
+      await user.keyboard("ed");
       const cells = within(grid).getAllByRole("gridcell");
       expect(cells).toHaveLength(1);
       expect(cells[0]).toHaveTextContent("Red");
@@ -381,6 +388,34 @@ describe("Combobox", () => {
       // Grid wins over windowing: every colour is mounted.
       expect(within(grid).getAllByRole("gridcell")).toHaveLength(6);
     });
+
+    it("renders a per-option icon in a grid cell, keeping the label as its name", async () => {
+      const user = userEvent.setup();
+      const withIcon: ComboboxOption[] = [
+        { value: "star", label: "Star", icon: <svg data-testid="star-glyph" /> },
+        { value: "heart", label: "Heart" },
+      ];
+      render(<Combobox label="Icon" options={withIcon} columns={2} />);
+
+      await user.click(screen.getByRole("combobox", { name: "Icon" }));
+
+      // The cell is still named by its label (the icon is decorative / aria-hidden).
+      const cell = await screen.findByRole("gridcell", { name: "Star" });
+      expect(within(cell).getByTestId("star-glyph")).toBeInTheDocument();
+    });
+  });
+
+  it("renders a per-option icon in a list row", async () => {
+    const user = userEvent.setup();
+    const withIcon: ComboboxOption[] = [
+      { value: "star", label: "Star", icon: <svg data-testid="star-glyph" /> },
+    ];
+    render(<Combobox label="Icon" options={withIcon} />);
+
+    await user.click(screen.getByRole("combobox", { name: "Icon" }));
+
+    const option = await screen.findByRole("option", { name: "Star" });
+    expect(within(option).getByTestId("star-glyph")).toBeInTheDocument();
   });
 
   it("virtualizes long lists, mounting only a window of options", async () => {

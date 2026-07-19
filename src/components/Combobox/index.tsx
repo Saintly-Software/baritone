@@ -26,15 +26,19 @@ import {
   createPrefix,
   group as groupClass,
   gridItem as gridItemClass,
+  gridItemCaption,
+  gridItemIcon,
   gridItemIndicator,
   gridItemLabel,
   gridItemSpan,
+  gridItemWithIcon,
   gridList,
   gridRow,
   gridSection,
   groupLabel as groupLabelClass,
   input,
   item as itemClass,
+  itemIcon,
   itemIndicator,
   itemLabel,
   list,
@@ -51,6 +55,12 @@ import {
 export interface ComboboxOption {
   value: string;
   label: string;
+  /**
+   * Optional glyph — typically an `<Icon>` — shown before the label in the list
+   * and above it (with the label as a caption) in the grid. Decorative: `label`
+   * stays the accessible name and the typeahead text, so search still works.
+   */
+  icon?: React.ReactNode;
   /** Renders the option but blocks selection (kept visible, `aria-disabled`). */
   disabled?: boolean;
 }
@@ -232,9 +242,12 @@ function XIcon() {
   );
 }
 
-function CheckIcon() {
+// Forwards props so the `className` base-ui's `ItemIndicator` passes through its
+// `render` prop actually lands on the svg (that's how the list check gets its
+// styling and the grid check its corner positioning).
+function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" aria-hidden>
+    <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" aria-hidden {...props}>
       <path
         d="m5 13 4 4L19 7"
         stroke="currentColor"
@@ -437,6 +450,11 @@ export function Combobox(props: ComboboxProps) {
           : { top: index * VIRTUAL_ITEM_HEIGHT, height: VIRTUAL_ITEM_HEIGHT }
       }
     >
+      {option.icon != null && !option.create && (
+        <span className={itemIcon} aria-hidden>
+          {option.icon}
+        </span>
+      )}
       <span className={itemLabel}>
         {option.create ? (
           <>
@@ -469,25 +487,33 @@ export function Combobox(props: ComboboxProps) {
   // navigated by roving highlight, never tab stops, so base-ui's `disabled` sets
   // `aria-disabled` here without harming focusability (allowlisted in
   // aria-disabled-convention.test.ts).
-  const renderGridItem = (option: InternalOption) => (
-    <BaseCombobox.Item
-      key={option.value}
-      value={option}
-      disabled={option.disabled}
-      className={option.create ? cx(gridItemClass, gridItemSpan) : gridItemClass}
-    >
-      <span className={gridItemLabel}>
-        {option.create ? (
-          <>
-            <span className={createPrefix}>Add </span>“{option.label}”
-          </>
-        ) : (
-          option.label
+  const renderGridItem = (option: InternalOption) => {
+    const hasIcon = option.icon != null && !option.create;
+    return (
+      <BaseCombobox.Item
+        key={option.value}
+        value={option}
+        disabled={option.disabled}
+        className={cx(gridItemClass, hasIcon && gridItemWithIcon, option.create && gridItemSpan)}
+      >
+        {hasIcon && (
+          <span className={gridItemIcon} aria-hidden>
+            {option.icon}
+          </span>
         )}
-      </span>
-      <BaseCombobox.ItemIndicator className={gridItemIndicator} render={<CheckIcon />} />
-    </BaseCombobox.Item>
-  );
+        <span className={hasIcon ? gridItemCaption : gridItemLabel}>
+          {option.create ? (
+            <>
+              <span className={createPrefix}>Add </span>“{option.label}”
+            </>
+          ) : (
+            option.label
+          )}
+        </span>
+        <BaseCombobox.ItemIndicator className={gridItemIndicator} render={<CheckIcon />} />
+      </BaseCombobox.Item>
+    );
+  };
 
   // A grid group: the heading plus a presentation wrapper of the group's filtered
   // items, tiled into `Row`s. `grp.items` arrives already query-filtered, so the
@@ -626,7 +652,7 @@ export function Combobox(props: ComboboxProps) {
                 </BaseCombobox.List>
               ) : isGrid ? (
                 <BaseCombobox.List
-                  className={cx(list, gridList)}
+                  className={gridList}
                   style={assignInlineVars({ [colsVar]: String(gridColumns ?? 1) })}
                 >
                   {useGroups ? (

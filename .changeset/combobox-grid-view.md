@@ -19,6 +19,12 @@ arrow keys then navigate in two dimensions. Best for short, tile-like options
 - Selected cells read without relying on colour alone: a border ring plus a
   corner check, on top of the shared `data-selected` wash.
 
+Also adds an optional **`icon`** to `ComboboxOption` (a `React.ReactNode`,
+typically an `<Icon>`) — mirroring `Menu`'s item icon. It shows above the label
+as a caption in the grid and as a leading glyph in the list; it's decorative, so
+`label` stays the accessible name and the typeahead text and search still works
+by name.
+
 Follows the system conventions: the column count is the one caller-chosen value
 a recipe can't enumerate, so it reaches CSS as a single dedicated `createVar`
 set inline via `assignInlineVars` — the same single-hole pattern the colour
