@@ -37,6 +37,8 @@ export interface HeadingProps
   weight?: TextTypographyVariants["weight"];
   /** Render the heading in italics. */
   italic?: TextTypographyVariants["italic"];
+  /** Render the heading in the monospace font family. */
+  mono?: TextTypographyVariants["mono"];
   /** Horizontal text alignment. */
   align?: TextTypographyVariants["align"];
   /** Whether the heading wraps onto multiple lines. */
@@ -53,7 +55,7 @@ export interface HeadingProps
  * Heading — titles. Takes a required semantic `level` (`1`–`6`, rendered as the
  * matching `h1`–`h6`) for the document outline and an optional visual `variant`
  * override. Defaults to high saliency. Shares `Text`'s token-backed typographic
- * knobs: `weight`, `italic`, `align`, `wrap`, and `wordBreak`.
+ * knobs: `weight`, `italic`, `mono`, `align`, `wrap`, and `wordBreak`.
  */
 export function Heading({
   level,
@@ -62,6 +64,7 @@ export function Heading({
   saliency = "high",
   weight,
   italic,
+  mono,
   align,
   wrap,
   wordBreak,
@@ -97,7 +100,7 @@ export function Heading({
       className: cx(
         textIntentRecipe({ intent, saliency }),
         textVariantRecipe({ family, size: visual }),
-        textTypographyRecipe({ weight, italic, align, wrap, wordBreak }),
+        textTypographyRecipe({ weight, italic, mono, align, wrap, wordBreak }),
         atoms({ m, mx, my, mt, mr, mb, ml, p, px, py, pt, pr, pb, pl }),
         className,
       ),
