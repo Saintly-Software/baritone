@@ -247,6 +247,13 @@ export const item = style({
   },
 });
 
+/** A leading icon in a list row — never shrinks, follows the row's text colour. */
+export const itemIcon = style({
+  display: "inline-flex",
+  flexShrink: 0,
+  vars: { [iconColorVar]: "currentColor" },
+});
+
 /** The label text of an option — takes the remaining width, truncates. */
 export const itemLabel = style({
   flex: 1,
@@ -365,3 +372,129 @@ export const chipRemove = style({
     "&:hover": { background: active(vars.component.color.neutral.low.default.bgc) },
   },
 });
+
+/**
+ * Grid view (`columns`). The column count is a caller-chosen layout value the
+ * recipe can't enumerate, so it reaches CSS as one dedicated custom property,
+ * set inline via `assignInlineVars` — the same single-hole pattern the colour
+ * escape hatches use. Rows read it through `gridTemplateColumns`.
+ */
+export const colsVar = createVar();
+
+/**
+ * The row container in grid mode — the list of `Row`s, stacked with a little
+ * breathing room. Composes `list` so the combined result is deterministic at
+ * build time rather than depending on `cx` order at the call site.
+ */
+export const gridList = style([list, { gap: vars.space[1] }]);
+
+/**
+ * A group's grid body (`role="presentation"`): the stack of `Row`s under a group
+ * heading. Mirrors `gridList`'s spacing so grouped and flat grids read the same.
+ */
+export const gridSection = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: vars.space[1],
+});
+
+/** A single grid row (base-ui's `Combobox.Row`): an N-column track sized by `--cols`. */
+export const gridRow = style({
+  display: "grid",
+  gridTemplateColumns: `repeat(${colsVar}, minmax(0, 1fr))`,
+  gap: vars.space[1],
+});
+
+/**
+ * A grid cell (base-ui's `Combobox.Item`, `role="gridcell"`). A centred, rounded
+ * tile that reuses the list item's oklch highlight/select washes; `data-selected`
+ * also gets a border ring so selection survives without relying on colour alone
+ * (the corner check is the other non-colour cue). Disabled cells dim and go inert.
+ */
+export const gridItem = style({
+  vars: {
+    [itemHover]: hover(vars.surface.color.neutral.low.default.bgc),
+    [itemActive]: active(vars.surface.color.neutral.low.default.bgc),
+  },
+  position: "relative",
+  boxSizing: "border-box",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: "2.5rem",
+  paddingInline: vars.space[2],
+  paddingBlock: vars.space[2],
+  borderStyle: "solid",
+  borderWidth: vars.borderWidth.thin,
+  borderColor: "transparent",
+  borderRadius: vars.form.borderRadius,
+  fontSize: vars.text.variant.body.base.fontSize,
+  color: vars.text.color.neutral.high,
+  textAlign: "center",
+  cursor: "pointer",
+  userSelect: "none",
+  scrollMarginBlock: vars.space[1],
+  selectors: {
+    "&[data-highlighted]": { background: itemHover },
+    "&[data-selected]": {
+      background: itemActive,
+      borderColor: vars.component.color.neutral.low.default.border,
+    },
+    '&[aria-disabled="true"], &[data-disabled]': {
+      opacity: 0.55,
+      cursor: "not-allowed",
+    },
+  },
+});
+
+/** The label text inside a grid cell — centred, single line, truncates. */
+export const gridItemLabel = style({
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
+
+/** The check badge on a selected grid cell, tucked into the top-end corner. */
+export const gridItemIndicator = style({
+  position: "absolute",
+  top: vars.space[1],
+  insetInlineEnd: vars.space[1],
+  display: "inline-flex",
+  fontSize: vars.text.variant.body.xs.fontSize,
+  color: iconColorVar,
+});
+
+/** The free-text "Add …" cell spans the full row so it never crowds a partial row of options. */
+export const gridItemSpan = style({
+  gridColumn: "1 / -1",
+});
+
+/**
+ * A grid cell that carries an icon — stacks the icon above the label caption
+ * (the base cell centres a single line; here the two pieces column-stack). No
+ * property overlaps the base recipe, so it layers cleanly.
+ */
+export const gridItemWithIcon = style({
+  flexDirection: "column",
+  gap: vars.space[1],
+});
+
+/**
+ * The icon shown in a grid cell (above the caption). `--iconColor: currentColor`
+ * makes a passed `<Icon>` (or raw `<svg>`) follow the cell's text colour, so it
+ * keeps contrast against the highlight / select wash.
+ */
+export const gridItemIcon = style({
+  display: "inline-flex",
+  vars: { [iconColorVar]: "currentColor" },
+});
+
+/** The label under a grid-cell icon — the truncating label, shrunk to a quiet caption. */
+export const gridItemCaption = style([
+  gridItemLabel,
+  {
+    fontSize: vars.text.variant.body.sm.fontSize,
+    color: vars.text.color.neutral.low,
+  },
+]);
