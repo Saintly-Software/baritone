@@ -32,6 +32,8 @@ interface TextOwnProps
   weight?: TextTypographyVariants["weight"];
   /** Render the text in italics. */
   italic?: TextTypographyVariants["italic"];
+  /** Render the text in the monospace font family. */
+  mono?: TextTypographyVariants["mono"];
   /** Horizontal text alignment. */
   align?: TextTypographyVariants["align"];
   /** Whether the text wraps onto multiple lines. */
@@ -73,8 +75,8 @@ export type TextProps = TextOwnProps &
  * and/or `saliency` to override. It also exposes its resolved colour to descendant
  * `Icon`s via `--iconColor`, so inline icons match the text.
  *
- * Typography can be tuned with token-backed knobs: `weight`, `italic`, `align`,
- * `wrap`, and `wordBreak`.
+ * Typography can be tuned with token-backed knobs: `weight`, `italic`, `mono`,
+ * `align`, `wrap`, and `wordBreak`.
  */
 export function Text(props: TextProps) {
   const {
@@ -83,6 +85,7 @@ export function Text(props: TextProps) {
     saliency,
     weight,
     italic,
+    mono,
     align,
     wrap,
     wordBreak,
@@ -120,7 +123,7 @@ export function Text(props: TextProps) {
       className: cx(
         textIntentRecipe({ intent, saliency }),
         textVariantRecipe({ family, size: variant }),
-        textTypographyRecipe({ weight, italic, align, wrap, wordBreak }),
+        textTypographyRecipe({ weight, italic, mono, align, wrap, wordBreak }),
         atoms({ m, mx, my, mt, mr, mb, ml, p, px, py, pt, pr, pb, pl }),
         className,
       ),

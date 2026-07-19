@@ -11,6 +11,7 @@ const meta: Meta<typeof Heading> = {
     variant: { control: "select", options: TEXT_SIZES },
     weight: { control: "select", options: TEXT_WEIGHTS },
     italic: { control: "boolean" },
+    mono: { control: "boolean" },
     align: { control: "inline-radio", options: ["start", "center"] },
     wrap: { control: "inline-radio", options: ["wrap", "nowrap"] },
     wordBreak: { control: "inline-radio", options: ["break-word", "normal"] },

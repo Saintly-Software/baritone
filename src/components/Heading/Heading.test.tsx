@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { textVariantRecipe } from "../../styles/recipes/text.css";
+import { textTypographyRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
 import { Heading } from "./index";
 
 describe("Heading", () => {
@@ -55,6 +55,17 @@ describe("Heading", () => {
     // stays exactly as it was before the prop existed.
     expect(weightedClasses).not.toBe(defaultClasses);
     expect(weightedClasses.split(" ").length).toBeGreaterThan(defaultClasses.split(" ").length);
+  });
+
+  it("applies the mono variant", () => {
+    render(
+      <Heading level={2} mono>
+        Code
+      </Heading>,
+    );
+    expect(screen.getByRole("heading", { level: 2 }).className).toContain(
+      textTypographyRecipe({ mono: true }),
+    );
   });
 
   it("adds a class for each of align, weight, and wrap when passed", () => {

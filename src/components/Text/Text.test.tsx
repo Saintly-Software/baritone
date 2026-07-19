@@ -40,6 +40,11 @@ describe("Text", () => {
     expect(screen.getByText("Slanted").className).toContain(textTypographyRecipe({ italic: true }));
   });
 
+  it("applies the mono variant", () => {
+    render(<Text mono>Code</Text>);
+    expect(screen.getByText("Code").className).toContain(textTypographyRecipe({ mono: true }));
+  });
+
   it("applies the align variant", () => {
     render(<Text align="center">Centred</Text>);
     expect(screen.getByText("Centred").className).toContain(

@@ -125,6 +125,9 @@ export const textTypographyRecipe = recipe({
     italic: {
       true: { fontStyle: "italic" },
     },
+    mono: {
+      true: { fontFamily: vars.font.mono },
+    },
     align: {
       start: { textAlign: "start" },
       center: { textAlign: "center" },
