@@ -29,9 +29,16 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, "../src/index.ts"),
+      // Two entries: the main barrel and a `DataTable`-only subpath. Keeping
+      // `DataTable` in its own entry means `@tanstack/react-table` (below) is
+      // only ever referenced from `datatable.js` — importing the main entry
+      // never touches the table engine.
+      entry: {
+        index: resolve(__dirname, "../src/index.ts"),
+        datatable: resolve(__dirname, "../src/datatable.ts"),
+      },
       formats: ["es"],
-      fileName: () => "index.js",
+      fileName: (_format, entryName) => `${entryName}.js`,
       cssFileName: "styles",
     },
     cssCodeSplit: false,
@@ -42,6 +49,10 @@ export default defineConfig({
         "react-dom",
         "react/jsx-runtime",
         /^@base-ui\/react/,
+        // `@tanstack/react-table` is a peer dependency (consumers install it),
+        // so leave it external instead of bundling it — bundling the peer is
+        // what dragged its CJS `require("react")` interop into the ESM output.
+        /^@tanstack\/react-table/,
         // The VE *compiler* is build-time only (used by createDesignSystemTheme
         // inside consumers' .css.ts). Keep it out of the runtime bundle; it's an
         // optional peer. The small VE *runtime* helpers (recipes/sprinkles/

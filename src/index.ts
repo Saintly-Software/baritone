@@ -100,17 +100,9 @@ export {
   type CardDividerProps,
 } from "./components/Card";
 export { CardList, type CardListProps } from "./components/CardList";
-export {
-  DataTable,
-  dataTableFeatures,
-  createDataTableColumnHelper,
-  type DataTableProps,
-  type DataTableBaseProps,
-  type DataTableName,
-  type DataTableColumn,
-  type DataTableColumnMeta,
-  type DataTableFeatures,
-} from "./components/DataTable";
+// `DataTable` is intentionally NOT re-exported here — it ships from its own entry
+// point (`@saintly-software/baritone/datatable`) so the main barrel never pulls in
+// the `@tanstack/react-table` peer dependency. See `src/datatable.ts`.
 export {
   MetricCard,
   type MetricCardProps,
