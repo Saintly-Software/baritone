@@ -83,6 +83,15 @@ export {
   type LockupSlots,
 } from "./components/Lockup";
 export { Meter, type MeterProps, type MeterSlotProps } from "./components/Meter";
+export {
+  SegmentedBar,
+  type SegmentedBarProps,
+  type SegmentedBarSegment,
+  type SegmentedBarSegmentBase,
+  type SegmentedBarSegmentIntentColour,
+  type SegmentedBarSegmentCustomColour,
+  type SegmentedBarSlotProps,
+} from "./components/SegmentedBar";
 export { LoadingIndicator, type LoadingIndicatorProps } from "./components/LoadingIndicator";
 export {
   Card,
