@@ -162,6 +162,11 @@ export const segmentedBarLegendRow = style({
 export const segmentedBarLegendLabel = style({
   flex: "1 1 auto",
   minWidth: 0,
+  // The truncation trio: a single-line box (`nowrap`) whose overflow is clipped
+  // (`hidden`) and marked with an ellipsis. Without `nowrap` a long label wraps
+  // onto more lines instead of truncating, and the ellipsis never engages — the
+  // legend `Text` sets no `white-space` of its own, so this is the only source.
+  whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
 });
