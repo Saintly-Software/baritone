@@ -1,6 +1,6 @@
 {
   "name": "@saintly-software/baritone",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "A whitelabel-first React design system built on vanilla-extract + base-ui, using an Intent/Saliency colour model with oklch relative-colour interaction states.",
   "keywords": [
     "base-ui",
