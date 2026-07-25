@@ -22,7 +22,9 @@ describe("Heading", () => {
         Small tag, big look
       </Heading>,
     );
-    expect(screen.getByRole("heading", { level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3 }).className).toContain(
+      textSizeRecipe({ size: "4xl" }),
+    );
   });
 
   it("supports any size from the shared scale (same scale as Text)", () => {

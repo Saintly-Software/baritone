@@ -29,6 +29,7 @@ export {
   SURFACE_SALIENCIES,
   FORM_STATES,
   TEXT_SIZES,
+  TEXT_WEIGHTS,
   SIZES,
   HEADING_LEVELS,
   FORM_STATE_INTENT,
@@ -39,6 +40,7 @@ export {
   type SurfaceSaliency,
   type FormState,
   type TextSize,
+  type TextWeight,
   type Size,
   type HeadingLevel,
 } from "./constants";

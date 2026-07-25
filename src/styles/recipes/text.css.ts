@@ -83,7 +83,7 @@ export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>
 
 /**
  * "text typography" recipe — optional typographic knobs layered on top of a
- * typography `variant`. Every value comes from a token or a fixed keyword (no
+ * typography `size`. Every value comes from a token or a fixed keyword (no
  * ad-hoc CSS): `weight` reads a `text.weight` token, the rest map a closed set
  * of keywords to the matching CSS property. Defined after `textSizeRecipe`
  * so `weight` wins over the size recipe's default weight. All variants are

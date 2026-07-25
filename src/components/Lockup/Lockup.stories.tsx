@@ -48,7 +48,7 @@ export const Sized: Story = {
       />
       <Lockup
         title="Large"
-        subtitle="base subtitle"
+        subtitle="md subtitle"
         icon={<DiamondGlyph />}
         slotProps={{
           title: { size: "xl" },
