@@ -153,7 +153,7 @@ export const SpacingAndLabelSlot: Story = {
     children: "Today",
     my: "8",
     intent: "primary",
-    slotProps: { label: { variant: "xs", weight: "bold", intent: "primary" } },
+    slotProps: { label: { size: "xs", weight: "bold", intent: "primary" } },
   },
   render: (args) => (
     <>

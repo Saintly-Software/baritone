@@ -201,7 +201,7 @@ export const WithPopover: Story = {
         saliency="mid"
         popover={
           <Popover header={<Popover.Header title="Build #1429" subtitle="Passed in 2m 14s" />}>
-            <Text variant="sm">All 312 checks green. Deployed to staging.</Text>
+            <Text size="sm">All 312 checks green. Deployed to staging.</Text>
           </Popover>
         }
       >
@@ -214,7 +214,7 @@ export const WithPopover: Story = {
         saliency="mid"
         popover={
           <Popover>
-            <Text variant="sm">Tagged by 4 people.</Text>
+            <Text size="sm">Tagged by 4 people.</Text>
           </Popover>
         }
         trailAdornments={[
@@ -231,7 +231,7 @@ export const WithPopover: Story = {
         disabled
         popover={
           <Popover>
-            <Text variant="sm">You won't see me.</Text>
+            <Text size="sm">You won't see me.</Text>
           </Popover>
         }
       >

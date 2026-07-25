@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { CSSProperties } from "react";
-import { BODY_SIZES, INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
+import { INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Text } from "./index";
 
 const meta: Meta<typeof Text> = {
   title: "Typography/Text",
   component: Text,
-  args: { children: "The quick brown fox", variant: "base", saliency: "mid" },
+  args: { children: "The quick brown fox", size: "md", saliency: "mid" },
   argTypes: {
-    variant: { control: "select", options: TEXT_SIZES },
+    size: { control: "select", options: TEXT_SIZES },
     intent: { control: "select", options: INTENTS },
     saliency: { control: "select", options: SALIENCIES },
     weight: { control: "select", options: TEXT_WEIGHTS },
@@ -45,18 +45,17 @@ const cellStyle: CSSProperties = {
 };
 
 /**
- * Every typography `variant` (rows, the full shared body + title scale) against
- * every `weight` (columns), each cell showing regular and italic. `Text` and
- * `Heading` render the same scale — sizes unique to the title scale (`2xl`+) take
- * title styling, so the larger rows read as display type.
+ * Every typography `size` (rows, the full shared scale) against every `weight`
+ * (columns), each cell showing regular and italic. `Text` and `Heading` render
+ * the same scale, so the larger rows read as display type.
  */
-export const Variants: Story = {
+export const Sizes: Story = {
   render: () => (
     <div style={{ overflowX: "auto" }}>
       <table style={{ borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th style={thStyle}>variant</th>
+            <th style={thStyle}>size</th>
             {TEXT_WEIGHTS.map((weight) => (
               <th key={weight} style={thStyle}>
                 {weight}
@@ -65,28 +64,25 @@ export const Variants: Story = {
           </tr>
         </thead>
         <tbody>
-          {TEXT_SIZES.map((size) => {
-            const family = (BODY_SIZES as readonly string[]).includes(size) ? "body" : "title";
-            return (
-              <tr key={size}>
-                <th scope="row" style={{ ...thStyle, ...cellStyle }}>
-                  {family}/{size}
-                </th>
-                {TEXT_WEIGHTS.map((weight) => (
-                  <td key={weight} style={cellStyle}>
-                    <div style={{ display: "grid", gap: 4 }}>
-                      <Text variant={size} weight={weight}>
-                        Baritone
-                      </Text>
-                      <Text variant={size} weight={weight} italic>
-                        Baritone
-                      </Text>
-                    </div>
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
+          {TEXT_SIZES.map((size) => (
+            <tr key={size}>
+              <th scope="row" style={{ ...thStyle, ...cellStyle }}>
+                {size}
+              </th>
+              {TEXT_WEIGHTS.map((weight) => (
+                <td key={weight} style={cellStyle}>
+                  <div style={{ display: "grid", gap: 4 }}>
+                    <Text size={size} weight={weight}>
+                      Baritone
+                    </Text>
+                    <Text size={size} weight={weight} italic>
+                      Baritone
+                    </Text>
+                  </div>
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

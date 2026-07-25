@@ -41,8 +41,8 @@ export const Sized: Story = {
         subtitle="xs subtitle"
         icon={<DiamondGlyph />}
         slotProps={{
-          title: { variant: "base" },
-          subtitle: { variant: "xs" },
+          title: { size: "md" },
+          subtitle: { size: "xs" },
           icon: { size: "md" },
         }}
       />
@@ -51,8 +51,8 @@ export const Sized: Story = {
         subtitle="base subtitle"
         icon={<DiamondGlyph />}
         slotProps={{
-          title: { variant: "xl" },
-          subtitle: { variant: "base" },
+          title: { size: "xl" },
+          subtitle: { size: "md" },
           icon: { size: "lg" },
         }}
       />

@@ -35,7 +35,7 @@ function RouterDemo() {
   return (
     <LinkProvider render={router.render}>
       <div style={{ display: "grid", gap: 16, maxWidth: "48ch" }}>
-        <Text variant="sm" saliency="low">
+        <Text size="sm" saliency="low">
           Client route (mock router): <code>{router.path}</code>
         </Text>
 

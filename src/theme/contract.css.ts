@@ -1,6 +1,5 @@
 import { createThemeContract } from "@vanilla-extract/css";
 import {
-  BODY_SIZES,
   BORDER_WIDTH_KEYS,
   FORM_STATES,
   INTENTS,
@@ -9,8 +8,8 @@ import {
   SHADOW_KEYS,
   SPACE_KEYS,
   SURFACE_SALIENCIES,
+  TEXT_SIZES,
   TEXT_WEIGHTS,
-  TITLE_SIZES,
 } from "./constants";
 
 function record<K extends string, V>(keys: readonly K[], make: (key: K) => V): Record<K, V> {
@@ -23,11 +22,6 @@ const s = (): string => "";
 
 const colorTriplet = () => ({ bgc: s(), text: s(), border: s() });
 const stateBlock = () => ({ default: colorTriplet(), disabled: colorTriplet() });
-const fontVariant = () => ({
-  fontSize: s(),
-  lineHeight: s(),
-  fontWeight: s(),
-});
 
 /**
  * The canonical token shape. This is the single source of truth for both the
@@ -56,12 +50,14 @@ export const tokenShape = {
   },
   text: {
     color: record(INTENTS, () => record(SALIENCIES, () => s())),
-    variant: {
-      body: record(BODY_SIZES, () => fontVariant()),
-      title: record(TITLE_SIZES, () => fontVariant()),
-    },
-    // Named `font-weight` steps selectable via `Text`'s `weight` prop, on top
-    // of the weight baked into each typography `variant`.
+    // Per-size typography tokens. `fontSize` is calc-derived from `fontStep`
+    // (see `defaultTokens`) but overridable per size; `lineHeight` is a concrete
+    // per-size token. Both are applied together whenever a `size` is selected.
+    size: record(TEXT_SIZES, () => ({ fontSize: s(), lineHeight: s() })),
+    // The two increment tokens that drive the font-size ramp: `lower` is the
+    // step across `xs`→`xl`, `upper` the step across `xl`→`9xl`.
+    fontStep: { lower: s(), upper: s() },
+    // Named `font-weight` steps selectable via the `weight` prop.
     weight: record(TEXT_WEIGHTS, () => s()),
   },
   font: {

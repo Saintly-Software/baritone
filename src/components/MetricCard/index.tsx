@@ -1,7 +1,11 @@
 "use client";
 import * as React from "react";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
-import type { Intent, TitleSize } from "../../theme/constants";
+import {
+  textIntentRecipe,
+  textSizeRecipe,
+  textTypographyRecipe,
+} from "../../styles/recipes/text.css";
+import type { Intent, TextSize } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 import { Card, type CardElement } from "../Card";
@@ -97,8 +101,8 @@ interface MetricCardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "o
    * good / bad number. The label and caption keep the neutral text ramp.
    */
   intent?: Intent;
-  /** Visual size of the value figure, from the title scale. Default `3xl`. */
-  valueSize?: TitleSize;
+  /** Visual size of the value figure, from the shared type scale. Default `3xl`. */
+  valueSize?: TextSize;
   /** Semantic element for the underlying `Card`. Default `div`. */
   as?: CardElement;
   /**
@@ -222,13 +226,14 @@ export function MetricCard(props: MetricCardProps) {
 
   const interactive = href != null || onClick != null;
 
-  // The value figure — big, high-saliency, and tinted by `intent`. Rendered on a
-  // plain `<span>` (via the title typography recipe, the same one `Heading` uses)
-  // so it *looks* like a title without being one in the document outline.
+  // The value figure — big, bold, high-saliency, and tinted by `intent`. Rendered
+  // on a plain `<span>` so it *looks* like a title without being one in the
+  // document outline. Weight is explicit now that it's independent of `size`.
   const valueNode = (
     <span
       className={cx(
-        textVariantRecipe({ family: "title", size: valueSize }),
+        textSizeRecipe({ size: valueSize }),
+        textTypographyRecipe({ weight: "bold" }),
         textIntentRecipe({ intent, saliency: "high" }),
       )}
     >
@@ -236,7 +241,7 @@ export function MetricCard(props: MetricCardProps) {
     </span>
   );
   const labelNode = (
-    <Text as="span" variant="base">
+    <Text as="span" size="md">
       {label}
     </Text>
   );
@@ -273,7 +278,7 @@ export function MetricCard(props: MetricCardProps) {
         {hero}
         {trend != null && <MetricTrendBadge trend={trend} />}
         {caption != null && (
-          <Text variant="sm" saliency="low">
+          <Text size="sm" saliency="low">
             {caption}
           </Text>
         )}
@@ -309,7 +314,7 @@ function MetricTrendBadge({ trend }: { trend: MetricTrend }) {
       aria-label={accessibleLabel}
       className={cx(
         metricTrend,
-        textVariantRecipe({ family: "body", size: "sm" }),
+        textSizeRecipe({ size: "sm" }),
         textIntentRecipe({ intent: sentiment ?? TREND_SENTIMENT[direction], saliency: "mid" }),
       )}
     >

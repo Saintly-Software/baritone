@@ -330,7 +330,7 @@ function CardRoot(props: CardProps) {
 
   // Body-level supporting copy, distinct from the header's `subheader`. Rendered
   // as its own paragraph beneath the header.
-  const descriptionNode = description != null ? <Text variant="base">{description}</Text> : null;
+  const descriptionNode = description != null ? <Text size="md">{description}</Text> : null;
 
   // A collapsible card is a self-contained disclosure (header + collapsing
   // panel), structurally unlike the flat surface, so it gets its own branch. The
@@ -535,14 +535,14 @@ function CardHeader({
         {hasText && (
           <div className={cardHeaderText}>
             {title != null && (
-              <Heading level={level} variant="lg" id={labelledByTitle ? titleId : undefined}>
+              <Heading level={level} size="lg" id={labelledByTitle ? titleId : undefined}>
                 {/* An interactive card turns the title into its one real control,
                     stretched over the whole surface (see the article). */}
                 {link != null ? <CardPrimaryLink link={link}>{title}</CardPrimaryLink> : title}
               </Heading>
             )}
             {subtitle != null && (
-              <Text variant="sm" saliency="low">
+              <Text size="sm" saliency="low">
                 {subtitle}
               </Text>
             )}
@@ -689,9 +689,9 @@ function CardRow(props: CardRowProps) {
     return (
       <div className={cardRowRecipe({ hoverable: false })}>
         <dt className={cardRowText}>
-          <Text variant="base">{title}</Text>
+          <Text size="md">{title}</Text>
           {subtitle != null && (
-            <Text variant="sm" saliency="low">
+            <Text size="sm" saliency="low">
               {subtitle}
             </Text>
           )}
@@ -704,10 +704,10 @@ function CardRow(props: CardRowProps) {
   // A plain term/value row has no action of its own, so it highlights on hover.
   return (
     <div className={cardRowRecipe({ hoverable: true })}>
-      <Text render={<dt className={cardRowTerm} />} variant="sm" saliency="low">
+      <Text render={<dt className={cardRowTerm} />} size="sm" saliency="low">
         {term}
       </Text>
-      <Text render={<dd className={cardRowDesc} />} variant="sm">
+      <Text render={<dd className={cardRowDesc} />} size="sm">
         {description}
       </Text>
     </div>
@@ -765,12 +765,12 @@ function CardLayout({
     <div ref={ref} className={cx(cardLayout, className)} {...rest}>
       <div className={cardLayoutText}>
         {title != null && (
-          <Heading level={level} variant="lg">
+          <Heading level={level} size="lg">
             {title}
           </Heading>
         )}
         {subtitle != null && (
-          <Text variant="sm" saliency="low">
+          <Text size="sm" saliency="low">
             {subtitle}
           </Text>
         )}

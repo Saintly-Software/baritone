@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import { textIntentRecipe, textSizeRecipe } from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
 import type { FormState, LabelPosition } from "../../theme/constants";
 import { cx } from "../../utils/cx";
@@ -26,11 +26,11 @@ import {
 const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "2" });
 const promptClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "sm" }),
+  textSizeRecipe({ size: "sm" }),
 );
 const hintClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "low" }),
-  textVariantRecipe({ family: "body", size: "xs" }),
+  textSizeRecipe({ size: "xs" }),
 );
 
 /** Per-slot overrides for the label / help-text / info pieces. */

@@ -23,7 +23,7 @@ type Story = StoryObj<typeof Link>;
  */
 export const InheritsTypography: Story = {
   render: () => (
-    <Text as="p" variant="lg" weight="bold">
+    <Text as="p" size="lg" weight="bold">
       Read the <Link href="/docs">documentation</Link> before you begin.
     </Text>
   ),

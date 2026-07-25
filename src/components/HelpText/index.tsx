@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import type { BodySize, Intent, Saliency, Size } from "../../theme/constants";
+import type { Intent, Saliency, Size, TextSize } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import type { RenderProp } from "../../utils/render";
 import { Icon } from "../Icon";
@@ -10,11 +10,11 @@ import { helpTextRecipe } from "./helptext.css";
 /** HelpText's own size scale — a subset of the body type ramp. Default `sm`. */
 export type HelpTextVariant = "xs" | "sm" | "md" | "lg";
 
-/** `variant` -> the `Text` body typography size it renders the message at. */
-const TEXT_VARIANT: Record<HelpTextVariant, BodySize> = {
+/** `variant` -> the `Text` typography size it renders the message at. */
+const TEXT_SIZE: Record<HelpTextVariant, TextSize> = {
   xs: "xs",
   sm: "sm",
-  md: "base",
+  md: "md",
   lg: "lg",
 };
 
@@ -129,7 +129,7 @@ export function HelpText({
       ref={ref}
       intent={resolvedIntent}
       saliency={resolvedSaliency}
-      variant={TEXT_VARIANT[variant]}
+      size={TEXT_SIZE[variant]}
       className={cx(helpTextRecipe({ variant }), className)}
       {...rest}
     >

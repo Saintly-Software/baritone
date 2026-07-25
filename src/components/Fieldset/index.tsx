@@ -1,13 +1,13 @@
 "use client";
 import { Fieldset as BaseFieldset } from "@base-ui/react/fieldset";
 import * as React from "react";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import { textIntentRecipe, textSizeRecipe } from "../../styles/recipes/text.css";
 import { cx } from "../../utils/cx";
 import { fieldsetLegend, fieldsetLegendDisabled, fieldsetRoot } from "./fieldset.css";
 
 const legendClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "sm" }),
+  textSizeRecipe({ size: "sm" }),
 );
 
 /**

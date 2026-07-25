@@ -328,8 +328,8 @@ export { surfaceRecipe, type SurfaceVariants } from "./styles/recipes/surface.cs
 export {
   textIntentRecipe,
   type TextIntentVariants,
-  textVariantRecipe,
-  type TextVariantVariants,
+  textSizeRecipe,
+  type TextSizeVariants,
 } from "./styles/recipes/text.css";
 export { formControlRecipe, type FormControlVariants } from "./styles/recipes/formControl.css";
 export { iconRecipe, type IconVariants } from "./styles/recipes/icon.css";

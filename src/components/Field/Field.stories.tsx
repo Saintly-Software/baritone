@@ -178,7 +178,7 @@ export const WithInfo: Story = {
     label: "API key",
     helpText: "Starts with sk-.",
     info: (
-      <Text render={<p />} variant="sm">
+      <Text render={<p />} size="sm">
         Find your key in Settings → Developer. It's shown only once.
       </Text>
     ),
@@ -204,7 +204,7 @@ export const Naming: Story = {
       </Field>
 
       <>
-        <Text render={<p />} id="external-label" variant="sm">
+        <Text render={<p />} id="external-label" size="sm">
           A label living elsewhere on the page
         </Text>
         <Field aria-labelledby="external-label" helpText="aria-labelledby — name by reference.">

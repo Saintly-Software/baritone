@@ -77,9 +77,9 @@ function AccordionItemHeader({
       <span className={accordionHeaderLeading}>
         {icon != null && <span className={accordionHeaderIcon}>{icon}</span>}
         <span className={accordionHeaderText}>
-          <Text variant="base">{title}</Text>
+          <Text size="md">{title}</Text>
           {subtitle != null && (
-            <Text variant="sm" saliency="low">
+            <Text size="sm" saliency="low">
               {subtitle}
             </Text>
           )}

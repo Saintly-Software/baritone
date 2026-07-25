@@ -24,18 +24,26 @@ export type SurfaceSaliency = (typeof SURFACE_SALIENCIES)[number];
 export const FORM_STATES = ["neutral", "warning", "invalid", "valid"] as const;
 export type FormState = (typeof FORM_STATES)[number];
 
-export const BODY_SIZES = ["xs", "sm", "base", "lg", "xl"] as const;
-export type BodySize = (typeof BODY_SIZES)[number];
-
-export const TITLE_SIZES = ["sm", "base", "lg", "xl", "2xl", "3xl", "3.5xl", "4xl"] as const;
-export type TitleSize = (typeof TITLE_SIZES)[number];
-
-// Every typography size a `variant` can take — the union of body + title sizes,
+// The full typography size scale a `size` prop can take — a Tailwind-style ramp
 // shared by `Text` and `Heading`. The two components differ only in semantics
-// (Heading renders `h1`–`h6` and defaults to the title family; Text renders body
-// tags and defaults to the body family), not in the sizes they can render. Mirrors
-// the keys of the `fontSize` scale.
-export const TEXT_SIZES = ["xs", "sm", "base", "lg", "xl", "2xl", "3xl", "3.5xl", "4xl"] as const;
+// (Heading renders `h1`–`h6` and defaults to high saliency; Text renders body
+// tags), not in the sizes they can render. Mirrors the keys of the `text.size`
+// token scale.
+export const TEXT_SIZES = [
+  "xs",
+  "sm",
+  "md",
+  "lg",
+  "xl",
+  "2xl",
+  "3xl",
+  "4xl",
+  "5xl",
+  "6xl",
+  "7xl",
+  "8xl",
+  "9xl",
+] as const;
 export type TextSize = (typeof TEXT_SIZES)[number];
 
 /** Named font-weight steps a `Text` can select via its `weight` prop. */
@@ -81,12 +89,26 @@ export const FORM_STATE_INTENT: Record<FormState, Intent> = {
   valid: "positive",
 };
 
-/** Default semantic heading level -> visual `title` variant. */
-export const HEADING_LEVEL_VARIANT: Record<HeadingLevel, TitleSize> = {
-  1: "3.5xl",
+/** Default semantic heading level -> visual `size`. */
+export const HEADING_LEVEL_SIZE: Record<HeadingLevel, TextSize> = {
+  1: "4xl",
   2: "3xl",
   3: "2xl",
   4: "xl",
   5: "lg",
-  6: "base",
+  6: "md",
+};
+
+/**
+ * Default `font-weight` per heading level. Weight is orthogonal to `size` now
+ * (there are no body/title families), so `Heading` applies this to keep each
+ * level's customary weight; consumers override it via the `weight` prop.
+ */
+export const HEADING_LEVEL_WEIGHT: Record<HeadingLevel, TextWeight> = {
+  1: "bold",
+  2: "bold",
+  3: "bold",
+  4: "semibold",
+  5: "semibold",
+  6: "semibold",
 };

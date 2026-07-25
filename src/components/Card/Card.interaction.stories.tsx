@@ -29,7 +29,7 @@ export const ClickableActivates: Story = {
           onClick={() => setCount((c) => c + 1)}
           header={<Card.Header title="Activate this card" />}
         >
-          <Text render={<p />} variant="sm" saliency="low">
+          <Text render={<p />} size="sm" saliency="low">
             Pressed {count} {count === 1 ? "time" : "times"}.
           </Text>
         </Card>

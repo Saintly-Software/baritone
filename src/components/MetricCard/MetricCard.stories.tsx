@@ -22,7 +22,7 @@ const meta: Meta<typeof MetricCard> = {
     intent: { control: "select", options: INTENTS },
     valueSize: {
       control: "select",
-      options: ["lg", "xl", "2xl", "3xl", "3.5xl", "4xl"],
+      options: ["lg", "xl", "2xl", "3xl", "4xl", "5xl"],
     },
     caption: { control: "text" },
   },

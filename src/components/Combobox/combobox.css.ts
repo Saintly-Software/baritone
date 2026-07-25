@@ -10,9 +10,9 @@ const bd = createVar();
 const placeholder = createVar();
 
 const sizes = {
-  sm: { minHeight: "2rem", px: vars.space[2], font: vars.text.variant.body.sm.fontSize },
-  md: { minHeight: "2.5rem", px: vars.space[3], font: vars.text.variant.body.base.fontSize },
-  lg: { minHeight: "3rem", px: vars.space[4], font: vars.text.variant.body.lg.fontSize },
+  sm: { minHeight: "2rem", px: vars.space[2], font: vars.text.size.sm.fontSize },
+  md: { minHeight: "2.5rem", px: vars.space[3], font: vars.text.size.md.fontSize },
+  lg: { minHeight: "3rem", px: vars.space[4], font: vars.text.size.lg.fontSize },
 } as const;
 
 /** Vertical stack: label, control, description/error — mirrors `TextInput`. */
@@ -207,9 +207,9 @@ export const groupLabel = style({
   paddingInline: vars.space[2],
   paddingBlock: vars.space[1],
   fontFamily: vars.font.sans,
-  fontSize: vars.text.variant.body.xs.fontSize,
+  fontSize: vars.text.size.xs.fontSize,
   fontWeight: vars.text.weight.semibold,
-  lineHeight: vars.text.variant.body.xs.lineHeight,
+  lineHeight: vars.text.size.xs.lineHeight,
   color: vars.text.color.neutral.low,
 });
 
@@ -232,7 +232,7 @@ export const item = style({
   paddingInline: vars.space[2],
   paddingBlock: vars.space[2],
   borderRadius: vars.form.borderRadius,
-  fontSize: vars.text.variant.body.base.fontSize,
+  fontSize: vars.text.size.md.fontSize,
   color: vars.text.color.neutral.high,
   cursor: "pointer",
   userSelect: "none",
@@ -285,7 +285,7 @@ export const status = style({
   gap: vars.space[2],
   paddingInline: vars.space[2],
   paddingBlock: vars.space[2],
-  fontSize: vars.text.variant.body.sm.fontSize,
+  fontSize: vars.text.size.sm.fontSize,
   color: vars.text.color.neutral.low,
 });
 
@@ -295,7 +295,7 @@ export const statusError = style({
 
 /** Inline spinner sizing for the loading status row. */
 export const statusSpinner = style({
-  fontSize: vars.text.variant.body.base.fontSize,
+  fontSize: vars.text.size.md.fontSize,
   color: vars.text.color.neutral.low,
 });
 
@@ -342,7 +342,7 @@ export const chip = style({
   borderRadius: vars.radius.full,
   background: vars.component.color.neutral.low.default.bgc,
   color: vars.component.color.neutral.low.default.text,
-  fontSize: vars.text.variant.body.sm.fontSize,
+  fontSize: vars.text.size.sm.fontSize,
   lineHeight: 1.2,
   maxWidth: "12rem",
 });
@@ -428,7 +428,7 @@ export const gridItem = style({
   borderWidth: vars.borderWidth.thin,
   borderColor: "transparent",
   borderRadius: vars.form.borderRadius,
-  fontSize: vars.text.variant.body.base.fontSize,
+  fontSize: vars.text.size.md.fontSize,
   color: vars.text.color.neutral.high,
   textAlign: "center",
   cursor: "pointer",
@@ -461,7 +461,7 @@ export const gridItemIndicator = style({
   top: vars.space[1],
   insetInlineEnd: vars.space[1],
   display: "inline-flex",
-  fontSize: vars.text.variant.body.xs.fontSize,
+  fontSize: vars.text.size.xs.fontSize,
   color: iconColorVar,
 });
 
@@ -494,7 +494,7 @@ export const gridItemIcon = style({
 export const gridItemCaption = style([
   gridItemLabel,
   {
-    fontSize: vars.text.variant.body.sm.fontSize,
+    fontSize: vars.text.size.sm.fontSize,
     color: vars.text.color.neutral.low,
   },
 ]);
