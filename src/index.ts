@@ -46,6 +46,14 @@ export {
   type InlineLinkProps,
   type ButtonLinkProps,
 } from "./components/Link";
+export {
+  LinkProvider,
+  useLinkRender,
+  isInternalHref,
+  type LinkProviderProps,
+  type LinkRenderProps,
+  type LinkRenderFn,
+} from "./components/LinkProvider";
 export { Text, type TextProps, type TextElement } from "./components/Text";
 export { HelpText, type HelpTextProps, type HelpTextVariant } from "./components/HelpText";
 export { Heading, type HeadingProps } from "./components/Heading";

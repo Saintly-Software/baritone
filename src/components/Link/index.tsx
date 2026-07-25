@@ -6,6 +6,7 @@ import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
+import { useLinkRender } from "../LinkProvider";
 import { linkBase } from "./link.css";
 
 /**
@@ -24,7 +25,11 @@ export interface InlineLinkProps extends Omit<
    * what makes the Link router-agnostic: pass your router's link component so it
    * keeps the system's styling while owning navigation, e.g.
    * `render={<NextLink href="/about" />}` or `render={<RouterLink to="/about" />}`.
-   * Renders a plain `<a>` when omitted.
+   *
+   * Usually you don't set this per link — wrap the app in a `LinkProvider` to
+   * point *every* internal `Link` at your router once. This prop then stays the
+   * escape hatch: it overrides the provider for a single link (bespoke router
+   * props, or forcing a plain element). Renders a plain `<a>` when neither is set.
    */
   render?: RenderProp;
   ref?: React.Ref<HTMLAnchorElement>;
@@ -86,7 +91,9 @@ export interface ButtonLinkProps extends Omit<
   /**
    * Router-link element for client-side navigation (base-ui `render` pattern),
    * e.g. `render={<NextLink href="/about" />}`. Omit and pass `href` for a plain
-   * external `<a>`.
+   * external `<a>` — or wrap the app in a `LinkProvider` to route every internal
+   * button-link through your router without setting this per link (this then
+   * overrides the provider for a single link).
    */
   render?: RenderProp;
   /** Required visible text label (also the accessible name). */
@@ -116,28 +123,46 @@ export type LinkProps = InlineLinkProps | ButtonLinkProps;
  * Button's recipe (same `intent`/`saliency`/`size`/`loading`/icon knobs) but
  * renders an anchor, so you get button styling on a real navigation control
  * without duplicating any styles.
+ *
+ * **Router integration.** Either pass `render` per link, or wrap the app in a
+ * `LinkProvider` to route every internal `Link` (both appearances) through your
+ * router at once — external / new-tab / `download` links still render a plain
+ * `<a>`, and a per-link `render` always overrides the provider.
  */
 export function Link(props: LinkProps) {
+  // Honour an enclosing `LinkProvider`: with no per-link `render`, an internal
+  // link resolves to the provider's router link (external / new-tab / download
+  // links resolve to `undefined` → a plain `<a>`). Read once, *before* the
+  // appearance branch, so the hook order stays stable across renders. `props`
+  // exposes `render`/`href`/`target`/`download` on both union arms (all anchor
+  // props), so it's safe to read them here.
+  const render = useLinkRender(props.render, props);
+
   if (props.appearance === "button") {
     // A button-styled link: hand the shared `InternalButton` the Button knobs plus
     // the anchor seam (`href`/`render`/…). `InternalGenericButtonAnchor` sees the
     // link seam and renders the button chrome onto an `<a>`/router link. The
     // `appearance` discriminant is Link's own and isn't part of Button's API, so
     // it's stripped here (InternalButton would treat it as the Button appearance).
+    // The consumer's own `render` is stripped too and replaced with the resolved
+    // one (so the provider is honoured); it's `undefined` for a plain/external
+    // link, which `InternalGenericButtonAnchor` renders as an `<a href>`.
     // The cast bridges the ref/attribute variance across the internal boundary:
     // Button's props type `ref` as `Ref<HTMLButtonElement>`, but a button-link's
     // rendered element is an anchor (or an inert element when disabled), so this
     // arm's `ref` is the wider `Ref<HTMLElement>`, and it carries anchor-only
     // attributes (`download`, `hrefLang`, …) that flow straight through to the `<a>`.
-    const { appearance: _appearance, ...buttonProps } = props;
+    const { appearance: _appearance, render: _render, ...buttonProps } = props;
     return (
       <InternalButton
-        consumerProps={buttonProps as React.ComponentProps<typeof InternalButton>["consumerProps"]}
+        consumerProps={
+          { ...buttonProps, render } as React.ComponentProps<typeof InternalButton>["consumerProps"]
+        }
       />
     );
   }
 
-  const { appearance: _appearance, render, className, children, ref, ...rest } = props;
+  const { appearance: _appearance, render: _render, className, children, ref, ...rest } = props;
   return useRender({
     render,
     defaultElement: "a",
