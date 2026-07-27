@@ -113,6 +113,12 @@ describe("Grid", () => {
       { gap: "4" as const },
       { align: "center" as const },
       { justify: "between" as const },
+      { placeItems: "center" as const },
+      { placeContent: "center" as const },
+      { minHeight: "screen" as const },
+      { maxHeight: "full" as const },
+      { position: "sticky" as const },
+      { top: "0" as const },
       { p: "2" as const },
       { mx: "auto" as const },
     ]) {
@@ -123,6 +129,20 @@ describe("Grid", () => {
       );
       expect(screen.getByTestId("grid").className).not.toBe(base);
     }
+  });
+
+  it("maps each placeItems value to a distinct class", () => {
+    const classes = (["start", "center", "end", "stretch"] as const).map((placeItems) => {
+      const { unmount } = render(
+        <Grid placeItems={placeItems} data-testid="grid">
+          x
+        </Grid>,
+      );
+      const className = screen.getByTestId("grid").className;
+      unmount();
+      return className;
+    });
+    expect(new Set(classes).size).toBe(4);
   });
 });
 

@@ -102,4 +102,57 @@ describe("Box", () => {
     );
     expect(screen.getByTestId("box").className).not.toBe(hidden);
   });
+
+  it("applies a class for each sizing / position knob", () => {
+    const { rerender } = render(<Box data-testid="box">x</Box>);
+    const base = screen.getByTestId("box").className;
+    for (const props of [
+      { minHeight: "screen" as const },
+      { height: "full" as const },
+      { maxHeight: "screen-l" as const },
+      { position: "sticky" as const },
+      { top: "0" as const },
+      { inset: "4" as const },
+      { bottom: "auto" as const },
+    ]) {
+      rerender(
+        <Box data-testid="box" {...props}>
+          x
+        </Box>,
+      );
+      expect(screen.getByTestId("box").className).not.toBe(base);
+    }
+  });
+
+  it("maps the viewport-fill height tokens to distinct classes", () => {
+    const classes = (["screen", "screen-s", "screen-l", "full"] as const).map((minHeight) => {
+      const { unmount } = render(
+        <Box minHeight={minHeight} data-testid="box">
+          x
+        </Box>,
+      );
+      const className = screen.getByTestId("box").className;
+      unmount();
+      return className;
+    });
+    expect(new Set(classes).size).toBe(4);
+  });
+
+  it("accepts a responsive minHeight object", () => {
+    const { rerender } = render(
+      <Box minHeight="screen" data-testid="box">
+        x
+      </Box>,
+    );
+    const flat = screen.getByTestId("box").className;
+    rerender(
+      <Box minHeight={{ mobile: "screen-s", md: "screen" }} data-testid="box">
+        x
+      </Box>,
+    );
+    const responsive = screen.getByTestId("box").className;
+    expect(responsive).not.toBe(flat);
+    // The md-breakpoint half emits its own class on top of the base one.
+    expect(responsive.split(" ").length).toBeGreaterThan(flat.split(" ").length);
+  });
 });

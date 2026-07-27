@@ -8,6 +8,24 @@ const meta: Meta<typeof Box> = {
   argTypes: {
     as: { control: "inline-radio", options: ["div", "span", "section", "article"] },
     width: { control: "inline-radio", options: [undefined, "fill", "fit", "inherit"] },
+    minHeight: {
+      control: "select",
+      options: [undefined, "screen", "screen-s", "screen-l", "full", "fit-content"],
+    },
+    height: {
+      control: "select",
+      options: [undefined, "screen", "screen-s", "screen-l", "full", "fit-content"],
+    },
+    maxHeight: {
+      control: "select",
+      options: [undefined, "screen", "screen-s", "screen-l", "full", "fit-content"],
+    },
+    position: {
+      control: "select",
+      options: [undefined, "static", "relative", "absolute", "sticky", "fixed"],
+    },
+    top: { control: "select", options: [undefined, ...SPACE_KEYS, "auto"] },
+    inset: { control: "select", options: [undefined, ...SPACE_KEYS, "auto"] },
     hideOn: { control: "check", options: ["mobile", "sm", "md", "lg", "xl"] },
     showOn: { control: "check", options: ["mobile", "sm", "md", "lg", "xl"] },
     p: { control: "select", options: SPACE_KEYS },
@@ -88,5 +106,45 @@ export const ResponsiveVisibility: Story = {
         Shown only from md up (≥768px)
       </Box>
     </>
+  ),
+};
+
+/**
+ * `minHeight="screen"` — the viewport-fill token. It maps to `100dvh` (the
+ * *dynamic* viewport unit), so a full-height region grows and shrinks with the
+ * mobile URL bar instead of overflowing the way a raw `100vh` does. `screen-s`
+ * (`100svh`) and `screen-l` (`100lvh`) pin to the small / large viewport when you
+ * want a height that ignores the URL bar entirely.
+ */
+export const ViewportFill: Story = {
+  render: () => (
+    <Box minHeight="screen" p="4" style={{ ...swatch, display: "grid", placeItems: "center" }}>
+      minHeight=&quot;screen&quot; — fills the viewport (100dvh)
+    </Box>
+  ),
+};
+
+/**
+ * `position="sticky"` with a `top` inset — the header sticks to the top of the
+ * scroll container as you scroll. No raw CSS needed; both `position` and `top`
+ * are atoms (and responsive-capable).
+ */
+export const Sticky: Story = {
+  render: () => (
+    <Box style={{ height: 200, overflow: "auto", border: "1px dashed #ccc" }} p="3">
+      <Box position="sticky" top="0" p="3" mb="3" style={{ ...swatch, zIndex: 1 }}>
+        Sticky header (position=&quot;sticky&quot; top=&quot;0&quot;)
+      </Box>
+      {Array.from({ length: 12 }, (_, i) => (
+        <Box
+          key={i}
+          p="2"
+          mb="2"
+          style={{ background: "var(--baritone-color-neutral-100, #f1f1f4)" }}
+        >
+          Scrolling row {i + 1}
+        </Box>
+      ))}
+    </Box>
   ),
 };

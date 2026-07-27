@@ -1,5 +1,7 @@
 "use client";
 import * as React from "react";
+import type { PositionProps } from "../../styles/positionProps";
+import type { SizingProps } from "../../styles/sizingProps";
 import { atoms, type Atoms } from "../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import { cx } from "../../utils/cx";
@@ -72,7 +74,12 @@ export function toGridTemplateAreas(areas: GridAreas): string {
 }
 
 export interface GridProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
+  extends
+    Omit<React.HTMLAttributes<HTMLElement>, "color">,
+    MarginProps,
+    PaddingProps,
+    SizingProps,
+    PositionProps {
   /** `grid-template-columns`. A number becomes that many equal columns. */
   columns?: GridTracks;
   /** `grid-template-rows`. A number becomes that many equal rows. */
@@ -87,6 +94,15 @@ export interface GridProps
   align?: GridAlign;
   /** `justify-content`. Omit to leave it at the grid default (`start`). */
   justify?: GridJustify;
+  /**
+   * `place-items` (both axes at once) — friendly `start` / `center` / `end` /
+   * `stretch` (responsive-capable). `placeItems="center"` is the one-prop way to
+   * center children on both axes. Shorthand for `align-items` + `justify-items`,
+   * so it overrides `align` for cross-axis alignment when both are set.
+   */
+  placeItems?: Atoms["placeItems"];
+  /** `place-content` (both axes at once) — friendly `start` / `center` / `end` / `stretch`. */
+  placeContent?: Atoms["placeContent"];
   /** Gap between tracks, from the spacing scale (responsive-capable). */
   gap?: Atoms["gap"];
   /** Render as `inline-grid` rather than block `grid`. */
@@ -105,9 +121,12 @@ export interface GridProps
  * accept a track count or any `grid-template-*` string, and `areas` takes the
  * friendly array/multi-line form and handles the per-row quoting that
  * `grid-template-areas` normally makes so easy to get wrong. `align` / `justify`
- * take friendly values mapped to the grid keywords, and the `gap`, margin
- * (`m` / `mx` / …) and padding (`p` / `px` / …) props are wired straight to the
- * spacing scale (each responsive-capable). Use `render` to change the element.
+ * take friendly values mapped to the grid keywords (or set both axes at once with
+ * `placeItems` — `placeItems="center"` centers children on both). The `gap`,
+ * height (`minHeight` / …, incl. the `screen` viewport-fill token), positioning
+ * (`position` / `top` / …), margin (`m` / `mx` / …) and padding (`p` / `px` / …)
+ * props are wired straight to the atoms scale (each responsive-capable). Use
+ * `render` to change the element.
  */
 export function Grid({
   columns,
@@ -115,8 +134,19 @@ export function Grid({
   areas,
   align,
   justify,
+  placeItems,
+  placeContent,
   gap,
   inline,
+  height,
+  minHeight,
+  maxHeight,
+  position,
+  inset,
+  top,
+  right,
+  bottom,
+  left,
   m,
   mx,
   my,
@@ -153,7 +183,18 @@ export function Grid({
           display: inline ? "inline-grid" : "grid",
           alignItems: align ? ALIGN[align] : undefined,
           justifyContent: justify ? JUSTIFY[justify] : undefined,
+          placeItems,
+          placeContent,
           gap,
+          height,
+          minHeight,
+          maxHeight,
+          position,
+          inset,
+          top,
+          right,
+          bottom,
+          left,
           m,
           mx,
           my,
