@@ -14,7 +14,9 @@ const meta: Meta<typeof Text> = {
     saliency: { control: "select", options: SALIENCIES },
     weight: { control: "select", options: TEXT_WEIGHTS },
     italic: { control: "boolean" },
-    mono: { control: "boolean" },
+    // `font` is open-ended (consumer-defined); the built-in `sans`/`mono` are the
+    // two always available without a theme that publishes more. See `CustomFonts`.
+    font: { control: "select", options: ["sans", "mono"] },
     textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
     whiteSpace: { control: "inline-radio", options: ["normal", "nowrap"] },
     overflowWrap: { control: "inline-radio", options: ["normal", "break-word"] },
@@ -85,6 +87,46 @@ export const Sizes: Story = {
           ))}
         </tbody>
       </table>
+    </div>
+  ),
+};
+
+/**
+ * The `font` prop's vocabulary is defined by the *consumer*, not Baritone. An app
+ * publishes families as `--font-<name>` custom properties (via the theme's `fonts`
+ * option) and, for autocompletion + type-safety, declares those names by augmenting
+ * the `FontRegistry` interface. `sans` and `mono` are always available.
+ *
+ * This story fakes a consumer by declaring a few `--font-*` vars on the wrapper, so
+ * `font="serif"` / `"slab"` / `"cursive"` resolve — exactly what a real theme would
+ * emit — while `font="mono"` uses the built-in.
+ */
+export const CustomFonts: Story = {
+  render: () => (
+    <div
+      style={
+        {
+          display: "grid",
+          gap: 12,
+          "--font-serif": 'Georgia, "Times New Roman", serif',
+          "--font-slab": '"Rockwell", "Roboto Slab", serif',
+          "--font-cursive": '"Segoe Script", "Brush Script MT", cursive',
+        } as CSSProperties
+      }
+    >
+      <Text size="xl">Default — inherits the theme&rsquo;s sans</Text>
+      <Text size="xl" font="mono">
+        font=&quot;mono&quot; — the built-in monospace
+      </Text>
+      <Text size="xl" font="serif">
+        font=&quot;serif&quot; — a consumer-defined --font-serif
+      </Text>
+      <Text size="xl" font="slab">
+        font=&quot;slab&quot; — a consumer-defined --font-slab
+      </Text>
+      <Text size="xl" font="cursive">
+        font=&quot;cursive&quot; — a consumer-defined --font-cursive
+      </Text>
     </div>
   ),
 };

@@ -7,6 +7,7 @@ import type {
 } from "../../styles/recipes/text.css";
 import type { MarginProps, PaddingProps, TypographyAtomProps } from "../../styles/spacingProps";
 import type { Intent, Saliency, TextSize } from "../../theme/constants";
+import type { FontName } from "../../theme/fonts";
 import type { RenderProp } from "../../utils/render";
 
 /** Element tags a `Text` can render as via the `as` shorthand. */
@@ -31,7 +32,14 @@ interface TextOwnProps
   weight?: TypographyWeightVariants["weight"];
   /** Render the text in italics. */
   italic?: TypographyDecorationVariants["italic"];
-  /** Render the text in the monospace font family. */
+  /**
+   * Font family, by name. `sans` (default) and `mono` are always available; other
+   * names are defined by the consuming app — it publishes families through the
+   * theme's `fonts` option and declares the names on `FontRegistry`. See
+   * {@link FontName}.
+   */
+  font?: FontName;
+  /** @deprecated Use `font="mono"` instead. */
   mono?: boolean;
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
@@ -69,8 +77,8 @@ export type TextProps = TextOwnProps &
  * inline icons match the text.
  *
  * `size` picks a font-size + line-height from the shared scale; typography can be
- * further tuned with `weight`, `italic`, and `mono`, plus the `textAlign`,
- * `whiteSpace`, and `overflowWrap` layout atoms.
+ * further tuned with `weight`, `italic`, and `font` (the family), plus the
+ * `textAlign`, `whiteSpace`, and `overflowWrap` layout atoms.
  */
 export function Text(props: TextProps) {
   const {
