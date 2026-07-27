@@ -181,8 +181,12 @@ export function Grid({
       className: cx(
         atoms({
           display: inline ? "inline-grid" : "grid",
-          alignItems: align ? ALIGN[align] : undefined,
-          justifyContent: justify ? JUSTIFY[justify] : undefined,
+          // `placeItems` / `placeContent` are shorthands that also own the
+          // `align-items` / `justify-content` longhands. When one is set it wins,
+          // so omit the conflicting longhand outright rather than emitting both and
+          // leaving the tie-break to vanilla-extract's class emission order.
+          alignItems: align && !placeItems ? ALIGN[align] : undefined,
+          justifyContent: justify && !placeContent ? JUSTIFY[justify] : undefined,
           placeItems,
           placeContent,
           gap,

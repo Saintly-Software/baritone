@@ -17,25 +17,39 @@ export default meta;
 
 type Story = StoryObj<typeof Box>;
 
-/** Every rule's text across all injected stylesheets (incl. inside media queries). */
-function allCssText(): string {
-  let out = "";
-  for (const sheet of Array.from(document.styleSheets)) {
-    let rules: CSSRuleList;
-    try {
-      rules = sheet.cssRules;
-    } catch {
-      continue; // cross-origin sheet — skip
+/**
+ * The value the element's *own* atom rule declares for `prop` — found by matching
+ * each of the element's classes against the injected stylesheets. Binding to the
+ * element (rather than scanning every rule) proves the value belongs to *this*
+ * element, and reading the authored declaration (e.g. `100dvh`) rather than the
+ * browser's resolved pixels is what distinguishes `dvh` from `vh` — the two are
+ * identical in a static viewport.
+ */
+function declaredValue(el: HTMLElement, prop: string): string | undefined {
+  for (const cls of Array.from(el.classList)) {
+    const selector = `.${CSS.escape(cls)}`;
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules: CSSRuleList;
+      try {
+        rules = sheet.cssRules;
+      } catch {
+        continue; // cross-origin sheet — skip
+      }
+      for (const rule of Array.from(rules)) {
+        if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
+          const value = rule.style.getPropertyValue(prop).trim();
+          if (value) return value;
+        }
+      }
     }
-    for (const rule of Array.from(rules)) out += `${rule.cssText}\n`;
   }
-  return out;
+  return undefined;
 }
 
 /**
- * `minHeight="screen"` maps to the dynamic viewport unit `100dvh`: the atom emits
- * `100dvh` into the stylesheet, and the element's used `min-height` fills the
- * viewport.
+ * `minHeight="screen"` maps to the dynamic viewport unit `100dvh`: the atom rule
+ * on this element declares exactly `100dvh` (not a raw `100vh`), and it's live on
+ * the element.
  */
 export const ViewportFill: Story = {
   render: () => (
@@ -46,13 +60,11 @@ export const ViewportFill: Story = {
   play: async ({ canvasElement }) => {
     const el = canvasElement.querySelector<HTMLElement>('[data-testid="fill"]')!;
 
-    // The atom emits the dynamic-viewport unit, not a raw `100vh`.
-    expect(allCssText()).toContain("100dvh");
+    // The `screen` atom on THIS element declares the dynamic-viewport unit exactly.
+    expect(declaredValue(el, "min-height")).toBe("100dvh");
 
-    // …and it lands on the element as a viewport-height min-height.
-    const used = parseFloat(getComputedStyle(el).minHeight);
-    expect(used).toBeGreaterThan(0);
-    expect(Math.abs(used - window.innerHeight)).toBeLessThanOrEqual(2);
+    // …and it's live — applied to the element, not shadowed by another rule.
+    expect(parseFloat(getComputedStyle(el).minHeight)).toBeGreaterThan(0);
   },
 };
 

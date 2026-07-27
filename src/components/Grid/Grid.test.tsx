@@ -144,6 +144,47 @@ describe("Grid", () => {
     });
     expect(new Set(classes).size).toBe(4);
   });
+
+  // `placeItems` / `placeContent` are shorthands that also own the `align-items` /
+  // `justify-content` longhands. Precedence is made explicit by omitting the
+  // conflicting longhand — not left to vanilla-extract's class emission order.
+  it("omits the align longhand when placeItems is set (explicit precedence)", () => {
+    const { rerender } = render(
+      <Grid placeItems="center" data-testid="grid">
+        x
+      </Grid>,
+    );
+    const placeOnly = screen.getByTestId("grid").className;
+    // `align` adds nothing on top of `placeItems`, so the two render identically…
+    rerender(
+      <Grid align="start" placeItems="center" data-testid="grid">
+        x
+      </Grid>,
+    );
+    expect(screen.getByTestId("grid").className).toBe(placeOnly);
+    // …but `align="start"` alone *does* emit a class (guards the assertion above).
+    rerender(
+      <Grid align="start" data-testid="grid">
+        x
+      </Grid>,
+    );
+    expect(screen.getByTestId("grid").className).not.toBe(placeOnly);
+  });
+
+  it("omits the justify longhand when placeContent is set (explicit precedence)", () => {
+    const { rerender } = render(
+      <Grid placeContent="center" data-testid="grid">
+        x
+      </Grid>,
+    );
+    const placeOnly = screen.getByTestId("grid").className;
+    rerender(
+      <Grid justify="between" placeContent="center" data-testid="grid">
+        x
+      </Grid>,
+    );
+    expect(screen.getByTestId("grid").className).toBe(placeOnly);
+  });
 });
 
 describe("toGridTemplateAreas", () => {
