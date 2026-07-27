@@ -68,6 +68,11 @@ describe("Text", () => {
     );
   });
 
+  it("applies the textTransform atom", () => {
+    render(<Text textTransform="uppercase">Shout</Text>);
+    expect(screen.getByText("Shout").className).toContain(atoms({ textTransform: "uppercase" }));
+  });
+
   it("applies the size recipe class", () => {
     render(<Text size="lg">Body</Text>);
     expect(screen.getByText("Body").className).toContain(textSizeRecipe({ size: "lg" }));

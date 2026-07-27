@@ -70,7 +70,7 @@ export type TextProps = TextOwnProps &
  *
  * `size` picks a font-size + line-height from the shared scale; typography can be
  * further tuned with `weight`, `italic`, and `mono`, plus the `textAlign`,
- * `whiteSpace`, and `overflowWrap` layout atoms.
+ * `whiteSpace`, `overflowWrap`, and `textTransform` layout atoms.
  */
 export function Text(props: TextProps) {
   const {

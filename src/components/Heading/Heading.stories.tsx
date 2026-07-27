@@ -15,6 +15,10 @@ const meta: Meta<typeof Heading> = {
     textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
     whiteSpace: { control: "inline-radio", options: ["normal", "nowrap"] },
     overflowWrap: { control: "inline-radio", options: ["normal", "break-word"] },
+    textTransform: {
+      control: "select",
+      options: ["none", "uppercase", "lowercase", "capitalize"],
+    },
   },
 };
 export default meta;
@@ -22,7 +26,7 @@ export default meta;
 type Story = StoryObj<typeof Heading>;
 
 // Interactive default — tune every knob (level, size, weight, italic, mono,
-// textAlign, whiteSpace, overflowWrap) from the controls panel.
+// textAlign, whiteSpace, overflowWrap, textTransform) from the controls panel.
 export const Basic: Story = {};
 
 export const Levels: Story = {

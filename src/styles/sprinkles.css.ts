@@ -78,6 +78,7 @@ const responsiveProperties = defineProperties({
     textAlign: ["start", "center", "end", "left", "right"],
     whiteSpace: ["normal", "nowrap"],
     overflowWrap: ["normal", "break-word"],
+    textTransform: ["none", "uppercase", "lowercase", "capitalize"],
   },
   shorthands: {
     p: ["padding"],
