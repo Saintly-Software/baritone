@@ -98,12 +98,12 @@ export const ResponsiveAutoFill: Story = {
 
 /**
  * `placeItems="center"` — the one-prop way to center children on both axes. Here
- * a single tile is centered in a tall grid. Pairs naturally with a viewport-fill
- * height (`minHeight="screen"`) for a classic centered splash/empty state.
+ * a single tile is centered in a viewport-fill grid (`minHeight="screen"`) — the
+ * classic centered splash/empty state.
  */
 export const PlaceItemsCenter: Story = {
   render: () => (
-    <Grid placeItems="center" minHeight="16" style={{ border: "1px dashed #ccc" }}>
+    <Grid placeItems="center" minHeight="screen" style={{ border: "1px dashed #ccc" }}>
       <Box>Centered on both axes</Box>
     </Grid>
   ),
