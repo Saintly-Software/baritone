@@ -54,7 +54,7 @@ export type TextIntentVariants = NonNullable<RecipeVariants<typeof textIntentRec
 /**
  * "text size" recipe — selects a typography size. `size` maps to a `text.size`
  * token, setting font-size and line-height together; the base sets the default
- * font-weight (overridden by the `weight` prop via `textTypographyRecipe`).
+ * font-weight (overridden by the `weight` prop via `typographyWeight`).
  * Colour-agnostic; pair with `textIntentRecipe`.
  */
 export const textSizeRecipe = recipe({
@@ -81,38 +81,47 @@ export const textSizeRecipe = recipe({
 
 export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>>;
 
+// The optional typographic knobs, split by concern. Each is defined after
+// `textSizeRecipe` so it wins over the defaults baked into the size recipe's base
+// (font-weight / font-family). Alignment and wrapping are NOT here — they're plain
+// CSS-property passthroughs and live in the sprinkles `atoms` instead.
+
 /**
- * "text typography" recipe — optional typographic knobs layered on top of a
- * typography `size`. Every value comes from a token or a fixed keyword (no
- * ad-hoc CSS): `weight` reads a `text.weight` token, the rest map a closed set
- * of keywords to the matching CSS property. Defined after `textSizeRecipe`
- * so `weight` wins over the size recipe's default weight. All variants are
- * optional — omitting a prop leaves the size recipe's own styling untouched.
+ * "typography weight" recipe — the `weight` knob. Reads a `text.weight` token and
+ * overrides the size recipe's default weight.
  */
-export const textTypographyRecipe = recipe({
+export const typographyWeight = recipe({
   variants: {
     weight: Object.fromEntries(
       TEXT_WEIGHTS.map((weight) => [weight, { fontWeight: vars.text.weight[weight] }]),
     ) as Record<(typeof TEXT_WEIGHTS)[number], { fontWeight: string }>,
+  },
+});
+
+export type TypographyWeightVariants = NonNullable<RecipeVariants<typeof typographyWeight>>;
+
+/** "typography decoration" recipe — italics (and future decorative styles). */
+export const typographyDecoration = recipe({
+  variants: {
     italic: {
       true: { fontStyle: "italic" },
-    },
-    mono: {
-      true: { fontFamily: vars.font.mono },
-    },
-    align: {
-      start: { textAlign: "start" },
-      center: { textAlign: "center" },
-    },
-    wrap: {
-      wrap: { whiteSpace: "normal" },
-      nowrap: { whiteSpace: "nowrap" },
-    },
-    wordBreak: {
-      "break-word": { overflowWrap: "break-word" },
-      normal: { overflowWrap: "normal" },
     },
   },
 });
 
-export type TextTypographyVariants = NonNullable<RecipeVariants<typeof textTypographyRecipe>>;
+export type TypographyDecorationVariants = NonNullable<RecipeVariants<typeof typographyDecoration>>;
+
+/**
+ * "typography font" recipe — swaps the font family. Overrides the default `sans`
+ * family from the size recipe; extend the `font` variant as more families land.
+ */
+export const typographyFont = recipe({
+  variants: {
+    font: {
+      sans: { fontFamily: vars.font.sans },
+      mono: { fontFamily: vars.font.mono },
+    },
+  },
+});
+
+export type TypographyFontVariants = NonNullable<RecipeVariants<typeof typographyFont>>;

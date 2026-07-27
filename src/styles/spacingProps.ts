@@ -35,3 +35,17 @@ export interface PaddingProps {
   pb?: Atoms["pb"];
   pl?: Atoms["pl"];
 }
+
+/**
+ * Text-layout atoms surfaced on the typography components. Each maps straight to
+ * a single CSS property via the sprinkles, so they behave like the other atoms
+ * props (responsive-capable) rather than a bespoke recipe.
+ */
+export interface TypographyAtomProps {
+  /** `text-align` — logical `start`/`center`/`end` (RTL-safe) or physical `left`/`right`. */
+  textAlign?: Atoms["textAlign"];
+  /** `white-space` — e.g. `nowrap` to keep text on a single line. */
+  whiteSpace?: Atoms["whiteSpace"];
+  /** `overflow-wrap` — `break-word` to break long unbroken tokens. */
+  overflowWrap?: Atoms["overflowWrap"];
+}

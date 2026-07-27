@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { textSizeRecipe, textTypographyRecipe } from "../../styles/recipes/text.css";
+import { textSizeRecipe, typographyFont, typographyWeight } from "../../styles/recipes/text.css";
 import { Heading } from "./index";
 
 describe("Heading", () => {
@@ -47,27 +47,25 @@ describe("Heading", () => {
       </Heading>,
     );
     // Weight is independent of size now; each level carries a customary default
-    // (level 2 is bold), applied via the shared typography recipe.
-    expect(screen.getByTestId("h").className).toContain(textTypographyRecipe({ weight: "bold" }));
+    // (level 2 is bold), applied via the `typographyWeight` recipe.
+    expect(screen.getByTestId("h").className).toContain(typographyWeight({ weight: "bold" }));
     rerender(
       <Heading level={2} data-testid="h" weight="superbold">
         Overridden
       </Heading>,
     );
-    expect(screen.getByTestId("h").className).toContain(
-      textTypographyRecipe({ weight: "superbold" }),
-    );
+    expect(screen.getByTestId("h").className).toContain(typographyWeight({ weight: "superbold" }));
   });
 
-  it("applies the mono variant", () => {
+  it("applies the mono font", () => {
     render(
       <Heading level={2} mono>
         Code
       </Heading>,
     );
-    // Heading always carries a default weight class, so assert the mono class
+    // Heading always carries a default weight class, so assert the mono font class
     // itself rather than the (base + mono) pair, which needn't be adjacent.
-    const monoClass = textTypographyRecipe({ mono: true }).split(" ")[1];
+    const monoClass = typographyFont({ font: "mono" }).split(" ")[1];
     expect(screen.getByRole("heading", { level: 2 }).className).toContain(monoClass);
   });
 
@@ -78,10 +76,10 @@ describe("Heading", () => {
       </Heading>,
     );
     // The plain heading already carries the level's default weight; `italic`,
-    // `align`, and `wrap` are each additive on top of it.
+    // `textAlign`, and `whiteSpace` are each additive on top of it.
     const base = screen.getByTestId("h").className.split(" ").length;
     rerender(
-      <Heading level={2} data-testid="h" italic align="center" wrap="nowrap">
+      <Heading level={2} data-testid="h" italic textAlign="center" whiteSpace="nowrap">
         Styled
       </Heading>,
     );

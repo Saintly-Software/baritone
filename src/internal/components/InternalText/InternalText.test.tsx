@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { textSizeRecipe, textTypographyRecipe } from "../../../styles/recipes/text.css";
+import { textSizeRecipe, typographyWeight } from "../../../styles/recipes/text.css";
 import { InternalText } from "./index";
 
 describe("InternalText", () => {
@@ -28,7 +28,7 @@ describe("InternalText", () => {
         Bold
       </InternalText>,
     );
-    expect(screen.getByText("Bold").className).toContain(textTypographyRecipe({ weight: "bold" }));
+    expect(screen.getByText("Bold").className).toContain(typographyWeight({ weight: "bold" }));
   });
 
   it("forwards arbitrary html attributes", () => {

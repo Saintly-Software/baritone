@@ -75,7 +75,9 @@ const responsiveProperties = defineProperties({
     maxWidth: dimensionValues,
     minWidth: dimensionValues,
     minHeight: dimensionValues,
-    textAlign: ["left", "center", "right"],
+    textAlign: ["start", "center", "end", "left", "right"],
+    whiteSpace: ["normal", "nowrap"],
+    overflowWrap: ["normal", "break-word"],
   },
   shorthands: {
     p: ["padding"],

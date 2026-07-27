@@ -1,8 +1,11 @@
 "use client";
 import * as React from "react";
 import { InternalText } from "../../internal/components/InternalText";
-import type { TextTypographyVariants } from "../../styles/recipes/text.css";
-import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
+import type {
+  TypographyDecorationVariants,
+  TypographyWeightVariants,
+} from "../../styles/recipes/text.css";
+import type { MarginProps, PaddingProps, TypographyAtomProps } from "../../styles/spacingProps";
 import type { Intent, Saliency, TextSize } from "../../theme/constants";
 import type { RenderProp } from "../../utils/render";
 
@@ -10,7 +13,11 @@ import type { RenderProp } from "../../utils/render";
 export type TextElement = "div" | "p" | "label" | "span";
 
 interface TextOwnProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
+  extends
+    Omit<React.HTMLAttributes<HTMLElement>, "color">,
+    MarginProps,
+    PaddingProps,
+    TypographyAtomProps {
   /**
    * Typography size. Accepts the full shared scale (`xs`–`9xl`) — `Text` and
    * `Heading` render the same sizes and differ only in semantics. Default `md`.
@@ -21,17 +28,11 @@ interface TextOwnProps
   /** Override the inherited colour at this saliency. Falls back to `mid` when standalone. */
   saliency?: Saliency;
   /** Font weight, from the `text.weight` tokens. Overrides the size's default weight. */
-  weight?: TextTypographyVariants["weight"];
+  weight?: TypographyWeightVariants["weight"];
   /** Render the text in italics. */
-  italic?: TextTypographyVariants["italic"];
+  italic?: TypographyDecorationVariants["italic"];
   /** Render the text in the monospace font family. */
-  mono?: TextTypographyVariants["mono"];
-  /** Horizontal text alignment. */
-  align?: TextTypographyVariants["align"];
-  /** Whether the text wraps onto multiple lines. */
-  wrap?: TextTypographyVariants["wrap"];
-  /** How the text breaks long words. */
-  wordBreak?: TextTypographyVariants["wordBreak"];
+  mono?: boolean;
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
 }
@@ -68,7 +69,8 @@ export type TextProps = TextOwnProps &
  * inline icons match the text.
  *
  * `size` picks a font-size + line-height from the shared scale; typography can be
- * further tuned with `weight`, `italic`, `mono`, `align`, `wrap`, and `wordBreak`.
+ * further tuned with `weight`, `italic`, and `mono`, plus the `textAlign`,
+ * `whiteSpace`, and `overflowWrap` layout atoms.
  */
 export function Text(props: TextProps) {
   const {

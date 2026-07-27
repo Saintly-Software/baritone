@@ -1,10 +1,6 @@
 "use client";
 import * as React from "react";
-import {
-  textIntentRecipe,
-  textSizeRecipe,
-  textTypographyRecipe,
-} from "../../styles/recipes/text.css";
+import { textIntentRecipe, textSizeRecipe, typographyWeight } from "../../styles/recipes/text.css";
 import type { Intent, TextSize } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
@@ -233,7 +229,7 @@ export function MetricCard(props: MetricCardProps) {
     <span
       className={cx(
         textSizeRecipe({ size: valueSize }),
-        textTypographyRecipe({ weight: "bold" }),
+        typographyWeight({ weight: "bold" }),
         textIntentRecipe({ intent, saliency: "high" }),
       )}
     >

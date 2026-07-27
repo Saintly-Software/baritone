@@ -12,17 +12,17 @@ const meta: Meta<typeof Heading> = {
     weight: { control: "select", options: TEXT_WEIGHTS },
     italic: { control: "boolean" },
     mono: { control: "boolean" },
-    align: { control: "inline-radio", options: ["start", "center"] },
-    wrap: { control: "inline-radio", options: ["wrap", "nowrap"] },
-    wordBreak: { control: "inline-radio", options: ["break-word", "normal"] },
+    textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
+    whiteSpace: { control: "inline-radio", options: ["normal", "nowrap"] },
+    overflowWrap: { control: "inline-radio", options: ["normal", "break-word"] },
   },
 };
 export default meta;
 
 type Story = StoryObj<typeof Heading>;
 
-// Interactive default — tune every knob (level, size, weight, italic, align,
-// wrap, wordBreak) from the controls panel. Renamed from "Playground".
+// Interactive default — tune every knob (level, size, weight, italic, mono,
+// textAlign, whiteSpace, overflowWrap) from the controls panel.
 export const Basic: Story = {};
 
 export const Levels: Story = {

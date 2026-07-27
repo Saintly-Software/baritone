@@ -1,8 +1,11 @@
 "use client";
 import * as React from "react";
 import { InternalText } from "../../internal/components/InternalText";
-import type { TextTypographyVariants } from "../../styles/recipes/text.css";
-import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
+import type {
+  TypographyDecorationVariants,
+  TypographyWeightVariants,
+} from "../../styles/recipes/text.css";
+import type { MarginProps, PaddingProps, TypographyAtomProps } from "../../styles/spacingProps";
 import {
   HEADING_LEVEL_SIZE,
   HEADING_LEVEL_WEIGHT,
@@ -14,7 +17,11 @@ import {
 import type { RenderProp } from "../../utils/render";
 
 export interface HeadingProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
+  extends
+    Omit<React.HTMLAttributes<HTMLElement>, "color">,
+    MarginProps,
+    PaddingProps,
+    TypographyAtomProps {
   /** Semantic document level `1`–`6` (drives the rendered `h1`–`h6` tag). Required. */
   level: HeadingLevel;
   /**
@@ -26,17 +33,11 @@ export interface HeadingProps
   /** Default `high` (headings are high saliency). */
   saliency?: Saliency;
   /** Font weight, from the `text.weight` tokens. Defaults to the level's customary weight. */
-  weight?: TextTypographyVariants["weight"];
+  weight?: TypographyWeightVariants["weight"];
   /** Render the heading in italics. */
-  italic?: TextTypographyVariants["italic"];
+  italic?: TypographyDecorationVariants["italic"];
   /** Render the heading in the monospace font family. */
-  mono?: TextTypographyVariants["mono"];
-  /** Horizontal text alignment. */
-  align?: TextTypographyVariants["align"];
-  /** Whether the heading wraps onto multiple lines. */
-  wrap?: TextTypographyVariants["wrap"];
-  /** How the heading breaks long words. */
-  wordBreak?: TextTypographyVariants["wordBreak"];
+  mono?: boolean;
   /** Render as a different element/component (base-ui `render` pattern). */
   render?: RenderProp;
   ref?: React.Ref<HTMLHeadingElement>;
@@ -48,8 +49,8 @@ export interface HeadingProps
  * matching `h1`–`h6`) for the document outline and an optional visual `size`
  * override. Defaults to high saliency and, per level, a customary bold/semibold
  * `weight` (weight is otherwise independent of `size`). Shares `Text`'s
- * token-backed typographic knobs: `weight`, `italic`, `mono`, `align`, `wrap`,
- * and `wordBreak`.
+ * token-backed typographic knobs (`weight`, `italic`, `mono`) and the
+ * `textAlign` / `whiteSpace` / `overflowWrap` layout atoms.
  */
 export function Heading(props: HeadingProps) {
   const {
