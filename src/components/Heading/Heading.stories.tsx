@@ -8,21 +8,21 @@ const meta: Meta<typeof Heading> = {
   args: { children: "The quick brown fox", level: 2 },
   argTypes: {
     level: { control: "select", options: HEADING_LEVELS },
-    variant: { control: "select", options: TEXT_SIZES },
+    size: { control: "select", options: TEXT_SIZES },
     weight: { control: "select", options: TEXT_WEIGHTS },
     italic: { control: "boolean" },
     mono: { control: "boolean" },
-    align: { control: "inline-radio", options: ["start", "center"] },
-    wrap: { control: "inline-radio", options: ["wrap", "nowrap"] },
-    wordBreak: { control: "inline-radio", options: ["break-word", "normal"] },
+    textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
+    whiteSpace: { control: "inline-radio", options: ["normal", "nowrap"] },
+    overflowWrap: { control: "inline-radio", options: ["normal", "break-word"] },
   },
 };
 export default meta;
 
 type Story = StoryObj<typeof Heading>;
 
-// Interactive default — tune every knob (level, variant, weight, italic, align,
-// wrap, wordBreak) from the controls panel. Renamed from "Playground".
+// Interactive default — tune every knob (level, size, weight, italic, mono,
+// textAlign, whiteSpace, overflowWrap) from the controls panel.
 export const Basic: Story = {};
 
 export const Levels: Story = {
@@ -30,7 +30,7 @@ export const Levels: Story = {
     <div style={{ display: "grid", gap: 12 }}>
       {HEADING_LEVELS.map((level) => (
         <Heading key={level} level={level}>
-          h{level} — default variant
+          h{level} — default size
         </Heading>
       ))}
     </div>

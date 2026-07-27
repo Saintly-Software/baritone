@@ -254,13 +254,13 @@ export function SegmentedBar({
       {(label != null || showTotal) && (
         <div className={segmentedBarHeader}>
           {label != null && (
-            <Text id={labelId} variant="sm" saliency="high" {...slotProps?.label}>
+            <Text id={labelId} size="sm" saliency="high" {...slotProps?.label}>
               {label}
             </Text>
           )}
           {showTotal && (
             <Text
-              variant="sm"
+              size="sm"
               saliency="low"
               {...slotProps?.total}
               className={cx(segmentedBarLegendNumeric, slotProps?.total?.className)}
@@ -310,7 +310,7 @@ export function SegmentedBar({
                 style={segmentFillStyle(segment)}
               />
               <Text
-                variant="sm"
+                size="sm"
                 {...slotProps?.segmentLabel}
                 className={cx(segmentedBarLegendLabel, slotProps?.segmentLabel?.className)}
               >
@@ -318,7 +318,7 @@ export function SegmentedBar({
               </Text>
               {showPercent && (
                 <Text
-                  variant="sm"
+                  size="sm"
                   saliency="low"
                   {...slotProps?.percent}
                   className={cx(segmentedBarLegendNumeric, slotProps?.percent?.className)}
@@ -328,7 +328,7 @@ export function SegmentedBar({
               )}
               {showValue && (
                 <Text
-                  variant="sm"
+                  size="sm"
                   weight="semibold"
                   {...slotProps?.value}
                   className={cx(segmentedBarLegendNumeric, slotProps?.value?.className)}

@@ -1,7 +1,7 @@
 "use client";
 import { Field as BaseField } from "@base-ui/react/field";
 import * as React from "react";
-import { textIntentRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import { textIntentRecipe, textSizeRecipe } from "../../styles/recipes/text.css";
 import type { FormState, LabelPosition } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useIsFieldDisabled } from "../Fieldset";
@@ -17,7 +17,7 @@ import {
 
 const labelClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "high" }),
-  textVariantRecipe({ family: "body", size: "sm" }),
+  textSizeRecipe({ size: "sm" }),
 );
 
 /**

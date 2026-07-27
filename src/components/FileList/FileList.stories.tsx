@@ -38,7 +38,7 @@ type Story = StoryObj<typeof FileList>;
 /** A captioned example, stacked label-over-content. */
 const Section = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-    <Text variant="sm" saliency="low">
+    <Text size="sm" saliency="low">
       {label}
     </Text>
     {children}

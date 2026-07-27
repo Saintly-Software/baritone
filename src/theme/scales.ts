@@ -3,16 +3,15 @@
 // spacing, radius etc. do not change between light/dark, so they live here and
 // are reused by both schemes in the default theme.
 
-export const fontSize = {
-  xs: "0.75rem",
-  sm: "0.875rem",
-  base: "1rem",
-  lg: "1.125rem",
-  xl: "1.25rem",
-  "2xl": "1.5rem",
-  "3xl": "1.875rem",
-  "3.5xl": "2rem",
-  "4xl": "2.25rem",
+// The font-size scale is defined by an anchor (the `md` step) plus two linear
+// increments — `lower` spans `xs`→`xl`, `upper` spans `xl`→`9xl`. The per-size
+// values are derived from these at token-build time (see `defaultTokens`). These
+// defaults reproduce Tailwind's font-sizes exactly for `xs`–`2xl`, then grow
+// linearly.
+export const fontSizeAnchor = "1rem"; // md
+export const fontStep = {
+  lower: "0.125rem", // xs → xl step
+  upper: "0.25rem", // xl → 9xl step
 } as const;
 
 export const fontWeight = {
@@ -23,10 +22,22 @@ export const fontWeight = {
   superbold: "800",
 } as const;
 
+// Per-size line-heights, defaulting to Tailwind's values. Small–display sizes
+// use an absolute length; the largest sizes use a unitless `1`.
 export const lineHeight = {
-  tight: "1.2",
-  normal: "1.5",
-  relaxed: "1.7",
+  xs: "1rem",
+  sm: "1.25rem",
+  md: "1.5rem",
+  lg: "1.75rem",
+  xl: "1.75rem",
+  "2xl": "2rem",
+  "3xl": "2.25rem",
+  "4xl": "2.5rem",
+  "5xl": "1",
+  "6xl": "1",
+  "7xl": "1",
+  "8xl": "1",
+  "9xl": "1",
 } as const;
 
 export const space = {

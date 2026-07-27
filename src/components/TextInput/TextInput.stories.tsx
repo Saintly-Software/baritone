@@ -140,7 +140,7 @@ export const WithInfo: Story = {
     label: "API key",
     placeholder: "sk-…",
     info: (
-      <Text render={<p />} variant="sm">
+      <Text render={<p />} size="sm">
         Find your key in Settings → Developer. It's shown only once.
       </Text>
     ),

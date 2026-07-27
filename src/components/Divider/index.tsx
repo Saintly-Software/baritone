@@ -21,7 +21,7 @@ export type DividerLabelPosition = "start" | "center" | "end";
 export interface DividerSlotProps {
   /**
    * Props for the label `Text`. Partial — you're layering onto the slot's own
-   * defaults, so `slotProps={{ label: { variant: "base" } }}` re-tunes just the
+   * defaults, so `slotProps={{ label: { size: "md" } }}` re-tunes just the
    * size and leaves the rest alone.
    */
   label?: Partial<TextProps>;
@@ -113,7 +113,7 @@ export function Divider({
       {...rest}
     >
       {labelled && (
-        <Text variant="sm" saliency="mid" {...slotProps?.label}>
+        <Text size="sm" saliency="mid" {...slotProps?.label}>
           {children}
         </Text>
       )}

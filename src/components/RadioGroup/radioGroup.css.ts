@@ -48,9 +48,9 @@ export const radioItem = recipe({
   },
   variants: {
     size: {
-      sm: { fontSize: vars.text.variant.body.sm.fontSize },
-      md: { fontSize: vars.text.variant.body.base.fontSize },
-      lg: { fontSize: vars.text.variant.body.lg.fontSize },
+      sm: { fontSize: vars.text.size.sm.fontSize },
+      md: { fontSize: vars.text.size.md.fontSize },
+      lg: { fontSize: vars.text.size.lg.fontSize },
     },
   },
   defaultVariants: { size: "md" },

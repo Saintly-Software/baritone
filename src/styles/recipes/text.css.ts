@@ -1,12 +1,8 @@
 import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
-import { BODY_SIZES, INTENTS, SALIENCIES, TEXT_WEIGHTS, TITLE_SIZES } from "../../theme/constants";
+import { INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { iconColorVar, textColorVar } from "../vars.css";
-
-const ALL_SIZES = Array.from(new Set<string>([...BODY_SIZES, ...TITLE_SIZES])) as Array<
-  (typeof BODY_SIZES)[number] | (typeof TITLE_SIZES)[number]
->;
 
 // The colour an explicit `intent`/`saliency` resolves to. Only set when a
 // variant is active, so the base style can fall through to the inherited
@@ -56,91 +52,76 @@ export const textIntentRecipe = recipe({
 export type TextIntentVariants = NonNullable<RecipeVariants<typeof textIntentRecipe>>;
 
 /**
- * "text variant" recipe — selects a typography bundle. `family` + `size` map to
- * a `text.variant` token (`body` for `Text`, `title` for `Heading`), setting
- * font-size / line-height / weight. Colour-agnostic; pair with `textIntentRecipe`.
+ * "text size" recipe — selects a typography size. `size` maps to a `text.size`
+ * token, setting font-size and line-height together; the base sets the default
+ * font-weight (overridden by the `weight` prop via `typographyWeight`).
+ * Colour-agnostic; pair with `textIntentRecipe`.
  */
-export const textVariantRecipe = recipe({
+export const textSizeRecipe = recipe({
   base: {
     margin: 0,
     fontFamily: vars.font.sans,
+    fontWeight: vars.text.weight.default,
   },
   variants: {
-    family: {
-      body: {},
-      title: {},
-    },
-    size: Object.fromEntries(ALL_SIZES.map((size) => [size, {}])) as Record<
-      (typeof ALL_SIZES)[number],
-      Record<string, never>
-    >,
+    size: Object.fromEntries(
+      TEXT_SIZES.map((size) => [
+        size,
+        {
+          fontSize: vars.text.size[size].fontSize,
+          lineHeight: vars.text.size[size].lineHeight,
+        },
+      ]),
+    ) as Record<(typeof TEXT_SIZES)[number], { fontSize: string; lineHeight: string }>,
   },
-  compoundVariants: [
-    // Typography: body sizes.
-    ...BODY_SIZES.map((size) => {
-      const v = vars.text.variant.body[size];
-      return {
-        variants: { family: "body" as const, size },
-        style: {
-          fontSize: v.fontSize,
-          lineHeight: v.lineHeight,
-          fontWeight: v.fontWeight,
-        },
-      };
-    }),
-    // Typography: title sizes.
-    ...TITLE_SIZES.map((size) => {
-      const v = vars.text.variant.title[size];
-      return {
-        variants: { family: "title" as const, size },
-        style: {
-          fontSize: v.fontSize,
-          lineHeight: v.lineHeight,
-          fontWeight: v.fontWeight,
-        },
-      };
-    }),
-  ],
   defaultVariants: {
-    family: "body",
-    size: "base",
+    size: "md",
   },
 });
 
-export type TextVariantVariants = NonNullable<RecipeVariants<typeof textVariantRecipe>>;
+export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>>;
+
+// The optional typographic knobs, split by concern. Each is defined after
+// `textSizeRecipe` so it wins over the defaults baked into the size recipe's base
+// (font-weight / font-family). Alignment and wrapping are NOT here — they're plain
+// CSS-property passthroughs and live in the sprinkles `atoms` instead.
 
 /**
- * "text typography" recipe — optional typographic knobs layered on top of a
- * typography `variant`. Every value comes from a token or a fixed keyword (no
- * ad-hoc CSS): `weight` reads a `text.weight` token, the rest map a closed set
- * of keywords to the matching CSS property. Defined after `textVariantRecipe`
- * so `weight` wins over the weight baked into the variant. All variants are
- * optional — omitting a prop leaves the variant's own styling untouched.
+ * "typography weight" recipe — the `weight` knob. Reads a `text.weight` token and
+ * overrides the size recipe's default weight.
  */
-export const textTypographyRecipe = recipe({
+export const typographyWeight = recipe({
   variants: {
     weight: Object.fromEntries(
       TEXT_WEIGHTS.map((weight) => [weight, { fontWeight: vars.text.weight[weight] }]),
     ) as Record<(typeof TEXT_WEIGHTS)[number], { fontWeight: string }>,
+  },
+});
+
+export type TypographyWeightVariants = NonNullable<RecipeVariants<typeof typographyWeight>>;
+
+/** "typography decoration" recipe — italics (and future decorative styles). */
+export const typographyDecoration = recipe({
+  variants: {
     italic: {
       true: { fontStyle: "italic" },
-    },
-    mono: {
-      true: { fontFamily: vars.font.mono },
-    },
-    align: {
-      start: { textAlign: "start" },
-      center: { textAlign: "center" },
-    },
-    wrap: {
-      wrap: { whiteSpace: "normal" },
-      nowrap: { whiteSpace: "nowrap" },
-    },
-    wordBreak: {
-      "break-word": { overflowWrap: "break-word" },
-      normal: { overflowWrap: "normal" },
     },
   },
 });
 
-export type TextTypographyVariants = NonNullable<RecipeVariants<typeof textTypographyRecipe>>;
+export type TypographyDecorationVariants = NonNullable<RecipeVariants<typeof typographyDecoration>>;
+
+/**
+ * "typography font" recipe — swaps the font family. Overrides the default `sans`
+ * family from the size recipe; extend the `font` variant as more families land.
+ */
+export const typographyFont = recipe({
+  variants: {
+    font: {
+      sans: { fontFamily: vars.font.sans },
+      mono: { fontFamily: vars.font.mono },
+    },
+  },
+});
+
+export type TypographyFontVariants = NonNullable<RecipeVariants<typeof typographyFont>>;

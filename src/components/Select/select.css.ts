@@ -193,9 +193,9 @@ export const selectGroupLabel = style({
   paddingInline: vars.space[3],
   paddingBlock: vars.space[1],
   fontFamily: vars.font.sans,
-  fontSize: vars.text.variant.body.xs.fontSize,
+  fontSize: vars.text.size.xs.fontSize,
   fontWeight: vars.text.weight.semibold,
-  lineHeight: vars.text.variant.body.xs.lineHeight,
+  lineHeight: vars.text.size.xs.lineHeight,
   color: vars.text.color.neutral.low,
 });
 
@@ -230,17 +230,17 @@ export const selectItem = recipe({
       sm: {
         paddingBlock: vars.space[1],
         paddingInline: vars.space[2],
-        fontSize: vars.text.variant.body.sm.fontSize,
+        fontSize: vars.text.size.sm.fontSize,
       },
       md: {
         paddingBlock: vars.space[2],
         paddingInline: vars.space[3],
-        fontSize: vars.text.variant.body.base.fontSize,
+        fontSize: vars.text.size.md.fontSize,
       },
       lg: {
         paddingBlock: vars.space[2],
         paddingInline: vars.space[3],
-        fontSize: vars.text.variant.body.lg.fontSize,
+        fontSize: vars.text.size.lg.fontSize,
       },
     },
   },

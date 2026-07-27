@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { textTypographyRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import {
+  textSizeRecipe,
+  typographyDecoration,
+  typographyFont,
+  typographyWeight,
+} from "../../styles/recipes/text.css";
+import { atoms } from "../../styles/sprinkles.css";
 import { TEXT_WEIGHTS } from "../../theme/constants";
 import { Text } from "./index";
 
@@ -30,62 +36,51 @@ describe("Text", () => {
     expect(screen.getByText("Styled").className.length).toBeGreaterThan(0);
   });
 
-  it.each(TEXT_WEIGHTS)("applies the %s weight variant", (weight) => {
+  it.each(TEXT_WEIGHTS)("applies the %s weight recipe", (weight) => {
     render(<Text weight={weight}>Weighted</Text>);
-    expect(screen.getByText("Weighted").className).toContain(textTypographyRecipe({ weight }));
+    expect(screen.getByText("Weighted").className).toContain(typographyWeight({ weight }));
   });
 
-  it("applies the italic variant", () => {
+  it("applies the italic decoration", () => {
     render(<Text italic>Slanted</Text>);
-    expect(screen.getByText("Slanted").className).toContain(textTypographyRecipe({ italic: true }));
+    expect(screen.getByText("Slanted").className).toContain(typographyDecoration({ italic: true }));
   });
 
-  it("applies the mono variant", () => {
+  it("applies the mono font", () => {
     render(<Text mono>Code</Text>);
-    expect(screen.getByText("Code").className).toContain(textTypographyRecipe({ mono: true }));
+    expect(screen.getByText("Code").className).toContain(typographyFont({ font: "mono" }));
   });
 
-  it("applies the align variant", () => {
-    render(<Text align="center">Centred</Text>);
-    expect(screen.getByText("Centred").className).toContain(
-      textTypographyRecipe({ align: "center" }),
-    );
+  it("applies the textAlign atom", () => {
+    render(<Text textAlign="center">Centred</Text>);
+    expect(screen.getByText("Centred").className).toContain(atoms({ textAlign: "center" }));
   });
 
-  it("applies the wrap variant", () => {
-    render(<Text wrap="nowrap">Single line</Text>);
-    expect(screen.getByText("Single line").className).toContain(
-      textTypographyRecipe({ wrap: "nowrap" }),
-    );
+  it("applies the whiteSpace atom", () => {
+    render(<Text whiteSpace="nowrap">Single line</Text>);
+    expect(screen.getByText("Single line").className).toContain(atoms({ whiteSpace: "nowrap" }));
   });
 
-  it("applies the wordBreak variant", () => {
-    render(<Text wordBreak="break-word">Breakable</Text>);
+  it("applies the overflowWrap atom", () => {
+    render(<Text overflowWrap="break-word">Breakable</Text>);
     expect(screen.getByText("Breakable").className).toContain(
-      textTypographyRecipe({ wordBreak: "break-word" }),
+      atoms({ overflowWrap: "break-word" }),
     );
   });
 
-  it("renders a body-scale variant with the body family", () => {
-    render(<Text variant="lg">Body</Text>);
-    expect(screen.getByText("Body").className).toContain(
-      textVariantRecipe({ family: "body", size: "lg" }),
-    );
+  it("applies the size recipe class", () => {
+    render(<Text size="lg">Body</Text>);
+    expect(screen.getByText("Body").className).toContain(textSizeRecipe({ size: "lg" }));
   });
 
-  it("renders a title-scale variant with title styling (shared scale with Heading)", () => {
-    // Sizes unique to the title scale (2xl+) are valid on Text and borrow title
-    // styling — Text and Heading differ only in semantics, not the sizes they render.
-    render(<Text variant="4xl">Display</Text>);
-    expect(screen.getByText("Display").className).toContain(
-      textVariantRecipe({ family: "title", size: "4xl" }),
-    );
+  it("renders any size from the shared scale (same scale as Heading)", () => {
+    // Text and Heading share the full scale; a large display size is valid on Text.
+    render(<Text size="4xl">Display</Text>);
+    expect(screen.getByText("Display").className).toContain(textSizeRecipe({ size: "4xl" }));
   });
 
-  it("omits a weight variant class when `weight` is not passed", () => {
+  it("omits a weight class when `weight` is not passed", () => {
     render(<Text>Plain</Text>);
-    expect(screen.getByText("Plain").className).not.toContain(
-      textTypographyRecipe({ weight: "bold" }),
-    );
+    expect(screen.getByText("Plain").className).not.toContain(typographyWeight({ weight: "bold" }));
   });
 });

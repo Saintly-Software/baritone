@@ -1,23 +1,22 @@
 import { contrastRatio } from "./color-math";
 import {
-  BODY_SIZES,
   INTENTS,
   SALIENCIES,
   SURFACE_SALIENCIES,
-  TITLE_SIZES,
-  type BodySize,
+  TEXT_SIZES,
   type BorderWidthKey,
   type Intent,
   type RadiusKey,
   type Saliency,
   type SpaceKey,
-  type TitleSize,
+  type TextSize,
 } from "./constants";
-import type { ThemeTokensInput } from "./contract.css";
+import { vars, type ThemeTokensInput } from "./contract.css";
 import {
   borderWidth,
   fontFamily,
-  fontSize,
+  fontSizeAnchor,
+  fontStep,
   fontWeight,
   lineHeight,
   motion,
@@ -110,6 +109,18 @@ export interface BrandSeed {
   space?: Partial<Record<SpaceKey, string>>;
   /** Border-width-scale overrides. */
   borderWidth?: Partial<Record<BorderWidthKey, string>>;
+  /**
+   * Typography-scale overrides. `anchor` is the `md` font-size; `stepLower` /
+   * `stepUpper` are the two increments (`xs`→`xl` and `xl`→`9xl`) that drive the
+   * font-size ramp. `sizes` / `lineHeight` override individual per-size values.
+   */
+  fontScale?: {
+    anchor?: string;
+    stepLower?: string;
+    stepUpper?: string;
+    sizes?: Partial<Record<TextSize, string>>;
+    lineHeight?: Partial<Record<TextSize, string>>;
+  };
 }
 
 /** Fully-resolved seed (defaults filled in) threaded through the colour math. */
@@ -347,25 +358,41 @@ function focusRings(seed: ResolvedSeed, isDark: boolean) {
 }
 
 // ---------------------------------------------------------------------------
-// Typography variants
+// Typography scale
 // ---------------------------------------------------------------------------
 
-function bodyVariant(size: BodySize) {
-  return {
-    fontSize: fontSize[size],
-    lineHeight: size === "xl" ? lineHeight.relaxed : lineHeight.normal,
-    fontWeight: fontWeight.regular,
-  };
-}
+// How many `lower`/`upper` increments each size sits from the `md` anchor:
+// fontSize(size) = md + lower·<lower step> + upper·<upper step>. The lower step
+// spans xs→xl, the upper step continues xl→9xl.
+const SIZE_STEPS: Record<TextSize, { lower: number; upper: number }> = {
+  xs: { lower: -2, upper: 0 },
+  sm: { lower: -1, upper: 0 },
+  md: { lower: 0, upper: 0 },
+  lg: { lower: 1, upper: 0 },
+  xl: { lower: 2, upper: 0 },
+  "2xl": { lower: 2, upper: 1 },
+  "3xl": { lower: 2, upper: 2 },
+  "4xl": { lower: 2, upper: 3 },
+  "5xl": { lower: 2, upper: 4 },
+  "6xl": { lower: 2, upper: 5 },
+  "7xl": { lower: 2, upper: 6 },
+  "8xl": { lower: 2, upper: 7 },
+  "9xl": { lower: 2, upper: 8 },
+};
 
-function titleVariant(size: TitleSize) {
-  const large = ["2xl", "3xl", "3.5xl", "4xl"].includes(size);
-  const tight = !["sm", "base"].includes(size);
-  return {
-    fontSize: fontSize[size],
-    lineHeight: tight ? lineHeight.tight : lineHeight.normal,
-    fontWeight: large ? fontWeight.bold : fontWeight.semibold,
-  };
+/**
+ * A per-size font-size as a `calc()` over the live anchor (`md`) + step tokens,
+ * so changing an increment reshapes the whole ramp at runtime. Not called for
+ * `md` itself, which stays the concrete anchor value.
+ */
+function sizeFontSize(size: TextSize): string {
+  const { lower, upper } = SIZE_STEPS[size];
+  const term = (coef: number, v: string) =>
+    coef === 0 ? "" : ` ${coef < 0 ? "-" : "+"} ${Math.abs(coef)} * ${v}`;
+  return `calc(${vars.text.size.md.fontSize}${term(lower, vars.text.fontStep.lower)}${term(
+    upper,
+    vars.text.fontStep.upper,
+  )})`;
 }
 
 function shadows(isDark: boolean) {
@@ -410,6 +437,13 @@ export function buildDefaultTokens(
   const radiusScale = { ...radius, ...brand.radius };
   const spaceScale = { ...space, ...brand.space };
   const borderWidthScale = { ...borderWidth, ...brand.borderWidth };
+  const fontScale = {
+    anchor: brand.fontScale?.anchor ?? fontSizeAnchor,
+    stepLower: brand.fontScale?.stepLower ?? fontStep.lower,
+    stepUpper: brand.fontScale?.stepUpper ?? fontStep.upper,
+    sizes: brand.fontScale?.sizes ?? {},
+    lineHeight: brand.fontScale?.lineHeight ?? {},
+  };
   return {
     surface: {
       color: surfaceColor(seed, isDark),
@@ -428,10 +462,11 @@ export function buildDefaultTokens(
     },
     text: {
       color: textColor(seed, isDark),
-      variant: {
-        body: record(BODY_SIZES, (size) => bodyVariant(size)),
-        title: record(TITLE_SIZES, (size) => titleVariant(size)),
-      },
+      size: record(TEXT_SIZES, (size) => ({
+        fontSize: fontScale.sizes[size] ?? (size === "md" ? fontScale.anchor : sizeFontSize(size)),
+        lineHeight: fontScale.lineHeight[size] ?? lineHeight[size],
+      })),
+      fontStep: { lower: fontScale.stepLower, upper: fontScale.stepUpper },
       weight: {
         default: fontWeight.regular,
         semibold: fontWeight.semibold,

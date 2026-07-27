@@ -408,12 +408,12 @@ function NoticeRoot({
           {iconNode}
           <div className={noticeBody}>
             <div className={noticeHeader}>
-              <Text variant="base" className={noticeTitle}>
+              <Text size="md" className={noticeTitle}>
                 {children}
               </Text>
               {chip}
             </div>
-            {description != null && <Text variant="sm">{description}</Text>}
+            {description != null && <Text size="sm">{description}</Text>}
             {actions != null &&
               actions.length > 0 && (
                 // `Children.toArray` assigns stable keys to the positional list.

@@ -17,9 +17,9 @@ const fgDisabled = createVar();
 const bdDisabled = createVar();
 
 const sizes = {
-  sm: { height: "1.5rem", px: vars.space[2], font: vars.text.variant.body.xs },
-  md: { height: "2rem", px: vars.space[3], font: vars.text.variant.body.sm },
-  lg: { height: "2.5rem", px: vars.space[4], font: vars.text.variant.body.base },
+  sm: { height: "1.5rem", px: vars.space[2], font: vars.text.size.xs },
+  md: { height: "2rem", px: vars.space[3], font: vars.text.size.sm },
+  lg: { height: "2.5rem", px: vars.space[4], font: vars.text.size.md },
 } as const;
 
 /**
@@ -130,7 +130,7 @@ export const componentTypographyRecipe = recipe({
     margin: 0,
     fontFamily: vars.font.sans,
     fontWeight: "500",
-    lineHeight: vars.text.variant.body.sm.lineHeight,
+    lineHeight: vars.text.size.sm.lineHeight,
     textDecoration: "none",
     whiteSpace: "nowrap",
     borderRadius: vars.component.borderRadius,

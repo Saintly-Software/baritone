@@ -138,7 +138,7 @@ export const Clickable: Story = {
           header={<Card.Header title="Activate this card" />}
         >
           {/* The card is a container now, so block content is fine. */}
-          <Text render={<p />} variant="sm" saliency="low">
+          <Text render={<p />} size="sm" saliency="low">
             Pressed {count} {count === 1 ? "time" : "times"}.
           </Text>
         </Card>
@@ -215,7 +215,7 @@ export const IntentsAndSaliencies: Story = {
     <IntentSaliencyMatrix intents={INTENTS} saliencies={SURFACE_SALIENCIES}>
       {(intent, saliency) => (
         <Card intent={intent} saliency={saliency} style={{ width: 160 }}>
-          <Text render={<p />} variant="sm">
+          <Text render={<p />} size="sm">
             Surface text
           </Text>
         </Card>

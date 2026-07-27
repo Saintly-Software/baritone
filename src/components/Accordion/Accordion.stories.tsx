@@ -37,7 +37,7 @@ const ITEMS = [
         }
       />
     ),
-    children: <Text variant="sm">All systems operational.</Text>,
+    children: <Text size="sm">All systems operational.</Text>,
   },
   {
     value: "staging",
@@ -57,7 +57,7 @@ const ITEMS = [
         }
       />
     ),
-    children: <Text variant="sm">Elevated error rate in the last hour.</Text>,
+    children: <Text size="sm">Elevated error rate in the last hour.</Text>,
   },
   {
     value: "legacy",
@@ -78,7 +78,7 @@ const ITEMS = [
         }
       />
     ),
-    children: <Text variant="sm">This environment has been retired.</Text>,
+    children: <Text size="sm">This environment has been retired.</Text>,
   },
 ] as const;
 type Section = (typeof ITEMS)[number]["value"];

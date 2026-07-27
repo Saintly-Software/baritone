@@ -293,12 +293,12 @@ function DrawerHeader({
       {(title != null || subtitle != null) && (
         <div className={drawerHeaderText}>
           {title != null && (
-            <BaseDrawer.Title render={<Heading level={level} variant="lg" />}>
+            <BaseDrawer.Title render={<Heading level={level} size="lg" />}>
               {title}
             </BaseDrawer.Title>
           )}
           {subtitle != null && (
-            <BaseDrawer.Description render={<Text variant="sm" saliency="low" />}>
+            <BaseDrawer.Description render={<Text size="sm" saliency="low" />}>
               {subtitle}
             </BaseDrawer.Description>
           )}

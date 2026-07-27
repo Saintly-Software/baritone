@@ -196,12 +196,12 @@ function PopoverHeader({
       {(title != null || subtitle != null) && (
         <div className={popoverHeaderText}>
           {title != null && (
-            <BasePopover.Title render={<Heading level={level} variant="lg" />}>
+            <BasePopover.Title render={<Heading level={level} size="lg" />}>
               {title}
             </BasePopover.Title>
           )}
           {subtitle != null && (
-            <BasePopover.Description render={<Text variant="sm" saliency="low" />}>
+            <BasePopover.Description render={<Text size="sm" saliency="low" />}>
               {subtitle}
             </BasePopover.Description>
           )}

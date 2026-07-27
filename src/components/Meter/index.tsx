@@ -10,7 +10,7 @@ import { meterFillVar, meterHeader, meterIndicator, meterRoot, meterTrack } from
 /**
  * Overrides for the meter's inner pieces. The three `Text` slots are partial:
  * you're layering props onto the slot's own defaults, so
- * `slotProps={{ value: { saliency: "high" }, label: { variant: "base" } }}`
+ * `slotProps={{ value: { saliency: "high" }, label: { size: "md" } }}`
  * just re-tunes those pieces while the rest of the meter stays as-is. Set
  * `children` here to override a slot's content entirely (rarely needed — prefer
  * the top-level `label` / `description` props).
@@ -166,12 +166,12 @@ export function Meter({
       {(label != null || showValue) && (
         <div className={meterHeader}>
           {label != null && (
-            <BaseMeter.Label render={<Text variant="sm" saliency="high" {...slotProps?.label} />}>
+            <BaseMeter.Label render={<Text size="sm" saliency="high" {...slotProps?.label} />}>
               {label}
             </BaseMeter.Label>
           )}
           {showValue && (
-            <BaseMeter.Value render={<Text variant="sm" saliency="low" {...slotProps?.value} />}>
+            <BaseMeter.Value render={<Text size="sm" saliency="low" {...slotProps?.value} />}>
               {formatValue}
             </BaseMeter.Value>
           )}
@@ -188,7 +188,7 @@ export function Meter({
         />
       </BaseMeter.Track>
       {description != null && (
-        <Text id={descriptionId} variant="sm" saliency="low" {...slotProps?.description}>
+        <Text id={descriptionId} size="sm" saliency="low" {...slotProps?.description}>
           {description}
         </Text>
       )}

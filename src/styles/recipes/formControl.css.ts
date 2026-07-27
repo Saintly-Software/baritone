@@ -12,17 +12,17 @@ const sizes = {
   sm: {
     height: "2rem",
     px: vars.space[2],
-    font: vars.text.variant.body.sm.fontSize,
+    font: vars.text.size.sm.fontSize,
   },
   md: {
     height: "2.5rem",
     px: vars.space[3],
-    font: vars.text.variant.body.base.fontSize,
+    font: vars.text.size.md.fontSize,
   },
   lg: {
     height: "3rem",
     px: vars.space[4],
-    font: vars.text.variant.body.lg.fontSize,
+    font: vars.text.size.lg.fontSize,
   },
 } as const;
 
@@ -105,7 +105,7 @@ export const formControlRecipe = recipe({
       true: {
         height: "auto",
         paddingBlock: vars.space[2],
-        lineHeight: vars.text.variant.body.base.lineHeight,
+        lineHeight: vars.text.size.md.lineHeight,
         // Let the user drag it taller, but never sideways (would break the field
         // column). `rows` sets the starting height.
         resize: "vertical",

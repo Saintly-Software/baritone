@@ -20,7 +20,7 @@ Most components accept these (see each component's `.d.ts` for its exact set):
 - `intent`: `primary` | `secondary` | `neutral` | `warning` | `negative` | `positive`
 - `saliency`: `high` | `mid` | `low` (prominence: `high` = filled, `mid` = tinted, `low` = outline)
 - `size`: `sm` | `md` | `lg`
-- Buttons also take `appearance` (`solid` | `text`); typography (`Text`) takes `variant` (`xs`|`sm`|`base`|`lg`|`xl`), `Heading` takes `level` (1–6).
+- Buttons also take `appearance` (`solid` | `text`); typography (`Text`) takes `size` — the full Tailwind-style ramp `xs`|`sm`|`md`|`lg`|`xl`|`2xl`|`3xl`|`4xl`|`5xl`|`6xl`|`7xl`|`8xl`|`9xl` (default `md`) — and `Heading` takes `level` (1–6) plus an optional `size` override.
 
 **Layout** is done with components, not raw divs + CSS: `Box`, `Flex`, `Grid` (with `Card`, `CardList`, `Lockup`, `MetricCard` for surfaces). Compose real Baritone components for the controls; use `Box`/`Flex`/`Grid` for arrangement.
 

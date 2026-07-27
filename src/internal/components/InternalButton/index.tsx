@@ -8,7 +8,7 @@ import {
 } from "../../../styles/recipes/component.css";
 import { resolveWidth } from "../../../styles/layoutProps";
 import { focusRingRecipe } from "../../../styles/recipes/focusRing.css";
-import { textVariantRecipe } from "../../../styles/recipes/text.css";
+import { textSizeRecipe } from "../../../styles/recipes/text.css";
 import { atoms } from "../../../styles/sprinkles.css";
 import { cx } from "../../../utils/cx";
 import { mergeProps, type RenderProp } from "../../../utils/render";
@@ -155,10 +155,7 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
   // takes its typography from `variant` (a body size) instead of `size`; the
   // default appearance keeps the shared component recipe + `size`.
   const appearanceClassName = isText
-    ? cx(
-        textButtonRecipe({ intent, saliency }),
-        textVariantRecipe({ family: "body", size: variant }),
-      )
+    ? cx(textButtonRecipe({ intent, saliency }), textSizeRecipe({ size: variant }))
     : cx(
         buttonBase,
         componentTypographyRecipe({ size }),

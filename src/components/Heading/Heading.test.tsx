@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { textTypographyRecipe, textVariantRecipe } from "../../styles/recipes/text.css";
+import { textSizeRecipe, typographyFont, typographyWeight } from "../../styles/recipes/text.css";
 import { Heading } from "./index";
 
 describe("Heading", () => {
@@ -16,67 +16,70 @@ describe("Heading", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Big" })).toBeInTheDocument();
   });
 
-  it("allows a visual variant independent of the semantic level", () => {
+  it("allows a visual size independent of the semantic level", () => {
     render(
-      <Heading level={3} variant="4xl">
+      <Heading level={3} size="4xl">
         Small tag, big look
       </Heading>,
     );
-    expect(screen.getByRole("heading", { level: 3 })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3 }).className).toContain(
+      textSizeRecipe({ size: "4xl" }),
+    );
   });
 
-  it("supports a body-scale variant (shared scale with Text)", () => {
-    // `xs` is unique to the body scale; a Heading can render it, borrowing body
-    // styling, since Heading and Text share the full size scale.
+  it("supports any size from the shared scale (same scale as Text)", () => {
+    // A Heading can render a small size like `xs` — Heading and Text share the
+    // full size scale and differ only in semantics.
     render(
-      <Heading level={2} variant="xs">
+      <Heading level={2} size="xs">
         Tiny
       </Heading>,
     );
     expect(screen.getByRole("heading", { level: 2 }).className).toContain(
-      textVariantRecipe({ family: "body", size: "xs" }),
+      textSizeRecipe({ size: "xs" }),
     );
   });
 
-  it("keeps the default weight when `weight` is omitted", () => {
+  it("applies the level's default weight, overridable via `weight`", () => {
     const { rerender } = render(
       <Heading level={2} data-testid="h">
         Default
       </Heading>,
     );
-    const defaultClasses = screen.getByTestId("h").className;
+    // Weight is independent of size now; each level carries a customary default
+    // (level 2 is bold), applied via the `typographyWeight` recipe.
+    expect(screen.getByTestId("h").className).toContain(typographyWeight({ weight: "bold" }));
     rerender(
       <Heading level={2} data-testid="h" weight="superbold">
         Overridden
       </Heading>,
     );
-    const weightedClasses = screen.getByTestId("h").className;
-    // Passing `weight` adds a class; omitting it must not, so the default render
-    // stays exactly as it was before the prop existed.
-    expect(weightedClasses).not.toBe(defaultClasses);
-    expect(weightedClasses.split(" ").length).toBeGreaterThan(defaultClasses.split(" ").length);
+    expect(screen.getByTestId("h").className).toContain(typographyWeight({ weight: "superbold" }));
   });
 
-  it("applies the mono variant", () => {
+  it("applies the mono font", () => {
     render(
       <Heading level={2} mono>
         Code
       </Heading>,
     );
-    expect(screen.getByRole("heading", { level: 2 }).className).toContain(
-      textTypographyRecipe({ mono: true }),
-    );
+    // Heading always carries a default weight class, so assert the mono font class
+    // itself rather than the (base + mono) pair, which needn't be adjacent.
+    const monoClass = typographyFont({ font: "mono" }).split(" ")[1];
+    expect(screen.getByRole("heading", { level: 2 }).className).toContain(monoClass);
   });
 
-  it("adds a class for each of align, weight, and wrap when passed", () => {
+  it("adds a class for each typographic knob passed", () => {
     const { rerender } = render(
       <Heading level={2} data-testid="h">
         Plain
       </Heading>,
     );
+    // The plain heading already carries the level's default weight; `italic`,
+    // `textAlign`, and `whiteSpace` are each additive on top of it.
     const base = screen.getByTestId("h").className.split(" ").length;
     rerender(
-      <Heading level={2} data-testid="h" align="center" weight="bold" wrap="nowrap">
+      <Heading level={2} data-testid="h" italic textAlign="center" whiteSpace="nowrap">
         Styled
       </Heading>,
     );

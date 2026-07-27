@@ -11,8 +11,8 @@ export const dataTableRoot = style({
   width: "100%",
   borderCollapse: "collapse",
   fontFamily: vars.font.sans,
-  fontSize: vars.text.variant.body.base.fontSize,
-  lineHeight: vars.text.variant.body.base.lineHeight,
+  fontSize: vars.text.size.md.fontSize,
+  lineHeight: vars.text.size.md.lineHeight,
   color: vars.text.color.neutral.mid,
   textAlign: "start",
 });
@@ -27,8 +27,8 @@ export const dataTableCaption = style({
   textAlign: "start",
   paddingBlockEnd: vars.space[3],
   color: vars.text.color.neutral.high,
-  fontSize: vars.text.variant.body.sm.fontSize,
-  lineHeight: vars.text.variant.body.sm.lineHeight,
+  fontSize: vars.text.size.sm.fontSize,
+  lineHeight: vars.text.size.sm.lineHeight,
   fontWeight: vars.text.weight.semibold,
 });
 

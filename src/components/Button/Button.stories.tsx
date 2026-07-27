@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { BODY_SIZES, INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
+import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Icon } from "../Icon";
 import { Button } from "./index";
@@ -194,10 +194,13 @@ export const TextIntentsAndSaliencies: Story = {
   ),
 };
 
+// The small end of the shared type scale — the sizes that suit inline text buttons.
+const TEXT_BUTTON_SIZES = ["xs", "sm", "md", "lg", "xl"] as const;
+
 export const TextVariants: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 20, alignItems: "baseline" }}>
-      {BODY_SIZES.map((variant) => (
+      {TEXT_BUTTON_SIZES.map((variant) => (
         <Button key={variant} appearance="text" intent="primary" variant={variant}>
           {variant}
         </Button>
@@ -220,7 +223,7 @@ export const TextInline: Story = {
   render: () => (
     <p style={{ maxWidth: 420 }}>
       Text-appearance buttons sit inline with copy, so you can drop one{" "}
-      <Button appearance="text" intent="primary" variant="base">
+      <Button appearance="text" intent="primary" variant="md">
         right into a sentence
       </Button>{" "}
       when the action is a script-driven navigation rather than an anchor.

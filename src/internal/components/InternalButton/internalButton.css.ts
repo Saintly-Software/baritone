@@ -74,7 +74,7 @@ const textFg = createVar();
  * drops the component chrome (background, border, control height, padding) and
  * renders as underlined text whose colour comes from the `text.color` tokens, so
  * it reads like a `Link` but is a real `<button>` driven by `intent`/`saliency`.
- * Typography is supplied separately by `textVariantRecipe` (the `variant` knob).
+ * Typography is supplied separately by `textSizeRecipe` (the `variant` knob).
  *
  * Colour is stored in `--textFg` so hover/active can derive from it with the same
  * oklch relative-colour math the `component`/`Link` schemes use, and it's mirrored

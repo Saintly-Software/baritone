@@ -245,12 +245,12 @@ function ModalHeader({
       {(title != null || subtitle != null) && (
         <div className={modalHeaderText}>
           {title != null && (
-            <BaseDialog.Title render={<Heading level={level} variant="lg" />}>
+            <BaseDialog.Title render={<Heading level={level} size="lg" />}>
               {title}
             </BaseDialog.Title>
           )}
           {subtitle != null && (
-            <BaseDialog.Description render={<Text variant="sm" saliency="low" />}>
+            <BaseDialog.Description render={<Text size="sm" saliency="low" />}>
               {subtitle}
             </BaseDialog.Description>
           )}

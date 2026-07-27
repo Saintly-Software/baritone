@@ -2,7 +2,7 @@
 import * as React from "react";
 import { InternalButton } from "../../internal/components/InternalButton";
 import type { WidthShorthand } from "../../styles/layoutProps";
-import type { BodySize, Intent, Saliency, Size } from "../../theme/constants";
+import type { Intent, Saliency, Size, TextSize } from "../../theme/constants";
 
 /**
  * Props shared by *every* `Button` arm — the labelled looks and the icon-only
@@ -104,8 +104,8 @@ export interface SolidButtonProps extends ButtonBaseProps {
 export interface TextButtonProps extends ButtonBaseProps {
   /** The hyperlink look. */
   appearance: "text";
-  /** Body typography variant for the link text. Default `base`. */
-  variant?: BodySize;
+  /** Typography size for the link text, from the shared scale. Default `md`. */
+  variant?: TextSize;
   /** Unsupported on the text appearance — typography comes from `variant`. */
   size?: never;
   /** Unsupported on the text appearance — there's no chrome to overlay a spinner. */

@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import type { BodySize, HeadingLevel, Intent, Saliency, TitleSize } from "../../theme/constants";
+import type { HeadingLevel, Intent, Saliency, TextSize } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 import { Heading } from "../Heading";
@@ -10,18 +10,18 @@ import { lockupRoot, lockupText, lockupTextHidden } from "./lockup.css";
 
 /**
  * Props for the Lockup's title slot. It layers onto the title's own defaults
- * (high-saliency, `lg` variant). Set `level` to render the title as a semantic
+ * (high-saliency, `lg` size). Set `level` to render the title as a semantic
  * `Heading` (`h1`–`h6`) instead of a `Text` — a pure semantics switch, so the
- * visual size still comes from `variant` and the lockup looks the same either
- * way. The `sm`/`base`/`lg`/`xl` sizes overlap between the body and title
- * scales, so a `variant` set here works whether or not `level` is present.
+ * visual size still comes from `size` and the lockup looks the same either way.
  */
 export interface LockupTitleSlotProps extends Omit<
   React.HTMLAttributes<HTMLElement>,
   "color" | "children"
 > {
-  /** Title size — a `body` (`Text`) or `title` (`Heading`) variant. Default `lg`. */
-  variant?: BodySize | TitleSize;
+  /** Title size, from the shared type scale (`xs`–`9xl`). Default `lg`. */
+  size?: TextSize;
+  /** Title font weight. Default `semibold`, shared by the `Text` and `Heading` branches. */
+  weight?: TextProps["weight"];
   /** Override the inherited colour with this intent. */
   intent?: Intent;
   /** Saliency of the title colour. Default `high`. */
@@ -39,7 +39,7 @@ export interface LockupTitleSlotProps extends Omit<
 /**
  * Props forwarded into each of the Lockup's three slots. Every field is partial:
  * you're layering overrides onto the slot's own defaults, so `slotProps={{ title:
- * { variant: "xl" }, icon: { size: "lg" } }}` just re-sizes those pieces while
+ * { size: "xl" }, icon: { size: "lg" } }}` just re-sizes those pieces while
  * the rest of the lockup stays as-is. To replace a slot's content entirely, use
  * the `slots` prop instead.
  */
@@ -101,16 +101,20 @@ export interface LockupProps extends Omit<React.HTMLAttributes<HTMLElement>, "ti
 
 /** Build the title node — a `Heading` when `level` is set, otherwise a `Text`. */
 function renderTitle(title: React.ReactNode, slot: LockupTitleSlotProps | undefined) {
-  const { level, variant, ...rest } = slot ?? {};
+  const { level, size, weight, ...rest } = slot ?? {};
+  // A pure semantics switch: both branches must render identically, so they share
+  // the same high-saliency, semibold-by-default title styling. `Heading` would
+  // otherwise apply its per-level weight, diverging from the `Text` branch.
+  const shared = { saliency: "high" as const, size: size ?? "lg", weight: weight ?? "semibold" };
   if (level != null) {
     return (
-      <Heading level={level} saliency="high" variant={(variant as TitleSize) ?? "lg"} {...rest}>
+      <Heading level={level} {...shared} {...rest}>
         {title}
       </Heading>
     );
   }
   return (
-    <Text saliency="high" variant={(variant as BodySize) ?? "lg"} {...rest}>
+    <Text {...shared} {...rest}>
       {title}
     </Text>
   );
@@ -150,7 +154,7 @@ export function Lockup({
   const subtitleNode =
     slots?.subtitle ??
     (subtitle != null ? (
-      <Text variant="sm" saliency="low" {...slotProps?.subtitle}>
+      <Text size="sm" saliency="low" {...slotProps?.subtitle}>
         {subtitle}
       </Text>
     ) : null);
