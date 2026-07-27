@@ -48,4 +48,6 @@ export interface TypographyAtomProps {
   whiteSpace?: Atoms["whiteSpace"];
   /** `overflow-wrap` — `break-word` to break long unbroken tokens. */
   overflowWrap?: Atoms["overflowWrap"];
+  /** `text-transform` — `uppercase`/`lowercase`/`capitalize` to recase the rendered text. */
+  textTransform?: Atoms["textTransform"];
 }

@@ -18,6 +18,10 @@ const meta: Meta<typeof Text> = {
     textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
     whiteSpace: { control: "inline-radio", options: ["normal", "nowrap"] },
     overflowWrap: { control: "inline-radio", options: ["normal", "break-word"] },
+    textTransform: {
+      control: "select",
+      options: ["none", "uppercase", "lowercase", "capitalize"],
+    },
   },
 };
 export default meta;
