@@ -190,14 +190,22 @@ interface ComboboxSingleProps {
   multiple?: false;
   value?: string | null;
   defaultValue?: string | null;
-  onValueChange?: (value: string | null) => void;
+  /**
+   * Called with the newly selected value first and the raw DOM event that drove
+   * the change second (base-ui's native `event`).
+   */
+  onValueChange?: (value: string | null, event: Event) => void;
 }
 
 interface ComboboxMultipleProps {
   multiple: true;
   value?: string[];
   defaultValue?: string[];
-  onValueChange?: (value: string[]) => void;
+  /**
+   * Called with the next selected-values array first and the raw DOM event that
+   * drove the change second (base-ui's native `event`).
+   */
+  onValueChange?: (value: string[], event: Event) => void;
 }
 
 /**
@@ -391,15 +399,21 @@ export function Combobox(props: ComboboxProps) {
           : toOption(defaultValue as string);
 
   const handleValueChange = React.useCallback(
-    (next: ComboboxOption | ComboboxOption[] | null) => {
+    (next: ComboboxOption | ComboboxOption[] | null, details: { event: Event }) => {
       if (multiple) {
         const arr = (next as ComboboxOption[]) ?? [];
         for (const o of arr) cacheRef.current.set(o.value, o);
-        (onValueChange as ((v: string[]) => void) | undefined)?.(arr.map((o) => o.value));
+        (onValueChange as ((v: string[], event: Event) => void) | undefined)?.(
+          arr.map((o) => o.value),
+          details.event,
+        );
       } else {
         const o = next as ComboboxOption | null;
         if (o) cacheRef.current.set(o.value, o);
-        (onValueChange as ((v: string | null) => void) | undefined)?.(o ? o.value : null);
+        (onValueChange as ((v: string | null, event: Event) => void) | undefined)?.(
+          o ? o.value : null,
+          details.event,
+        );
       }
     },
     [multiple, onValueChange],

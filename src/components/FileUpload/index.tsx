@@ -37,6 +37,15 @@ const hintClass = cx(
 export type FileUploadSlotProps = FieldSlotProps;
 
 /**
+ * The raw React event that drove a `FileUpload` change: a file-input `change`
+ * (picker) or a drag-and-drop on the zone. It's absent (`undefined`) when the
+ * change came from removing a staged file, since that path carries no event.
+ */
+export type FileUploadChangeEvent =
+  | React.ChangeEvent<HTMLInputElement>
+  | React.DragEvent<HTMLDivElement>;
+
+/**
  * Props every `FileUpload` takes, regardless of `multiple`. The `value` /
  * `onChange` / `multiple` triad is *not* here — it's split across the
  * discriminated union below so the shapes can't drift (a single upload's `value`
@@ -100,8 +109,12 @@ export interface SingleFileUploadProps extends FileUploadBaseProps {
   multiple?: false;
   /** The staged file, or `null` when empty (controlled). */
   value: FileInfo | null;
-  /** Called with the next staged file (or `null` when it's removed/cleared). */
-  onChange: (value: FileInfo | null) => void;
+  /**
+   * Called with the next staged file (or `null` when it's removed/cleared)
+   * first and, second, the raw React event that drove it — a picker `change` or
+   * a drop — or `undefined` when a file was removed (that path has no event).
+   */
+  onChange: (value: FileInfo | null, event?: FileUploadChangeEvent) => void;
 }
 
 /** Multi-file variant: `value` is a `FileInfo[]`. */
@@ -109,8 +122,12 @@ export interface MultipleFileUploadProps extends FileUploadBaseProps {
   multiple: true;
   /** The staged files (controlled). New selections/drops append to this. */
   value: FileInfo[];
-  /** Called with the next staged-files array (after an add or a remove). */
-  onChange: (value: FileInfo[]) => void;
+  /**
+   * Called with the next staged-files array (after an add or a remove) first
+   * and, second, the raw React event that drove it — a picker `change` or a
+   * drop — or `undefined` when a file was removed (that path has no event).
+   */
+  onChange: (value: FileInfo[], event?: FileUploadChangeEvent) => void;
 }
 
 /**
@@ -258,24 +275,25 @@ export function FileUpload(props: FileUploadProps) {
   // back to the caller's shape (a lone `FileInfo | null`, or the array).
   const multiple = props.multiple === true;
   const items = props.multiple ? props.value : props.value != null ? [props.value] : [];
-  const emit = (next: FileInfo[]) => {
-    if (props.multiple) props.onChange(next);
-    else props.onChange(next[0] ?? null);
+  const emit = (next: FileInfo[], event?: FileUploadChangeEvent) => {
+    if (props.multiple) props.onChange(next, event);
+    else props.onChange(next[0] ?? null, event);
   };
 
   // Filter by `acceptedFileTypes`, wrap as `FileInfo`s, then append (multiple) or
-  // replace with the first (single). No-op when disabled or nothing passes.
-  const addFiles = (incoming: File[]) => {
+  // replace with the first (single). No-op when disabled or nothing passes. The
+  // driving event (picker `change` or drop) rides through to `onChange`.
+  const addFiles = (incoming: File[], event?: FileUploadChangeEvent) => {
     if (disabled) return;
     const accepted = incoming.filter((file) => matchesAccept(file, acceptedFileTypes));
     if (accepted.length === 0) return;
     const infos = accepted.map(createFileInfo);
-    emit(multiple ? [...items, ...infos] : infos.slice(0, 1));
+    emit(multiple ? [...items, ...infos] : infos.slice(0, 1), event);
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selected = event.currentTarget.files;
-    if (selected != null && selected.length > 0) addFiles(Array.from(selected));
+    if (selected != null && selected.length > 0) addFiles(Array.from(selected), event);
     // Reset so selecting the same file again still fires `change`.
     event.currentTarget.value = "";
   };
@@ -300,7 +318,7 @@ export function FileUpload(props: FileUploadProps) {
     // can filter it (and apply single/multiple semantics) before staging.
     event.preventDefault();
     setDragging(false);
-    addFiles(Array.from(event.dataTransfer.files));
+    addFiles(Array.from(event.dataTransfer.files), event);
   };
 
   const acceptAttr =

@@ -37,8 +37,8 @@ function ContactFields() {
   const [agreed, setAgreed] = React.useState(false);
   return (
     <>
-      <TextInput label="Street" value={street} onChange={(e) => setStreet(e.target.value)} />
-      <TextInput label="City" value={city} onChange={(e) => setCity(e.target.value)} />
+      <TextInput label="Street" value={street} onChange={setStreet} />
+      <TextInput label="City" value={city} onChange={setCity} />
       <Switch label="Text me shipping updates" value={sms} onChange={setSms} />
       <Checkbox label="Save this address" value={agreed} onChange={setAgreed} />
     </>

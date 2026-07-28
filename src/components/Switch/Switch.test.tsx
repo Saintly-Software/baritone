@@ -16,16 +16,16 @@ function Notifications({
   "value" | "onChange" | "label" | "aria-label" | "aria-labelledby"
 > & {
   value?: boolean;
-  onChange?: (value: boolean) => void;
+  onChange?: (value: boolean, event: Event) => void;
 }) {
   const [value, setValue] = React.useState(initial);
   return (
     <Switch
       label="Notifications"
       value={value}
-      onChange={(next) => {
+      onChange={(next, event) => {
         setValue(next);
-        onChange?.(next);
+        onChange?.(next, event);
       }}
       {...rest}
     />
@@ -52,7 +52,7 @@ describe("Switch", () => {
 
     await user.click(screen.getByRole("switch", { name: "Notifications" }));
 
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.any(Event));
     expect(screen.getByRole("switch", { name: "Notifications" })).toBeChecked();
   });
 
@@ -63,7 +63,7 @@ describe("Switch", () => {
 
     await user.click(screen.getByText("Notifications"));
 
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.any(Event));
   });
 
   it("toggles with the keyboard", async () => {
@@ -75,7 +75,7 @@ describe("Switch", () => {
     expect(screen.getByRole("switch", { name: "Notifications" })).toHaveFocus();
 
     await user.keyboard(" ");
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.any(Event));
   });
 
   it("does not toggle when disabled", async () => {

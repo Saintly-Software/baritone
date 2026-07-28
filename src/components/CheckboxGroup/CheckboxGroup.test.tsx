@@ -15,7 +15,7 @@ function Subscriptions({
   ...rest
 }: {
   value?: Topic[];
-  onChange?: (value: Topic[]) => void;
+  onChange?: (value: Topic[], event: Event) => void;
 } & Partial<
   DistributiveOmit<
     React.ComponentProps<typeof CheckboxGroup<Topic>>,
@@ -27,9 +27,9 @@ function Subscriptions({
     <CheckboxGroup
       label="Email me about"
       value={value}
-      onChange={(next) => {
+      onChange={(next, event) => {
         setValue(next);
-        onChange?.(next);
+        onChange?.(next, event);
       }}
       {...rest}
     >
@@ -66,7 +66,7 @@ describe("CheckboxGroup", () => {
 
     await user.click(screen.getByRole("checkbox", { name: "billing" }));
 
-    expect(onChange).toHaveBeenCalledWith(["product", "billing"]);
+    expect(onChange).toHaveBeenCalledWith(["product", "billing"], expect.any(Event));
     expect(screen.getByRole("checkbox", { name: "billing" })).toBeChecked();
   });
 
@@ -77,7 +77,7 @@ describe("CheckboxGroup", () => {
 
     await user.click(screen.getByRole("checkbox", { name: "product" }));
 
-    expect(onChange).toHaveBeenCalledWith(["billing"]);
+    expect(onChange).toHaveBeenCalledWith(["billing"], expect.any(Event));
     expect(screen.getByRole("checkbox", { name: "product" })).not.toBeChecked();
   });
 
@@ -102,7 +102,7 @@ describe("CheckboxGroup", () => {
     expect(screen.getByRole("checkbox", { name: "product" })).toHaveFocus();
 
     await user.keyboard(" ");
-    expect(onChange).toHaveBeenCalledWith(["product"]);
+    expect(onChange).toHaveBeenCalledWith(["product"], expect.any(Event));
   });
 
   it("renders children as the label, overriding the default", () => {
@@ -165,7 +165,7 @@ describe("CheckboxGroup", () => {
     expect(onChange).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("checkbox", { name: "billing" }));
-    expect(onChange).toHaveBeenCalledWith(["billing"]);
+    expect(onChange).toHaveBeenCalledWith(["billing"], expect.any(Event));
   });
 
   it("renders the helpText as an error when invalid", () => {
@@ -230,6 +230,6 @@ describe("CheckboxGroup", () => {
     );
 
     await user.click(screen.getByRole("checkbox", { name: "Tuesday" }));
-    expect(onChange).toHaveBeenCalledWith([Day.Mon, Day.Tue]);
+    expect(onChange).toHaveBeenCalledWith([Day.Mon, Day.Tue], expect.any(Event));
   });
 });

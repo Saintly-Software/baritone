@@ -172,6 +172,21 @@ describe("FileUpload", () => {
       const arg = lastArg<FileInfo | null>(onChange);
       expect(arg?.file).toBe(first);
     });
+
+    it("forwards the drop event as onChange's second argument", () => {
+      const onChange = vi.fn();
+      const { container } = render(<FileUpload label="Avatar" value={null} onChange={onChange} />);
+
+      fireEvent.drop(
+        getZone(container),
+        dragData([new File([], "pic.png", { type: "image/png" })]),
+      );
+
+      // The raw React drop event rides along as the second argument.
+      const event = onChange.mock.calls.at(-1)?.[1];
+      expect(event).toBeDefined();
+      expect(event).toHaveProperty("nativeEvent");
+    });
   });
 
   describe("staged FileList", () => {
@@ -188,7 +203,8 @@ describe("FileUpload", () => {
       expect(screen.getByText("b.png")).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Remove a.pdf" }));
-      expect(onChange).toHaveBeenCalledExactlyOnceWith([value.at(1)]);
+      // Removal carries no DOM event, so `onChange`'s second arg is `undefined`.
+      expect(onChange).toHaveBeenCalledExactlyOnceWith([value.at(1)], undefined);
     });
 
     it("emits null when the single staged file is removed", async () => {
@@ -198,7 +214,8 @@ describe("FileUpload", () => {
       render(<FileUpload label="Avatar" value={value} onChange={onChange} />);
 
       await user.click(screen.getByRole("button", { name: "Remove a.pdf" }));
-      expect(onChange).toHaveBeenCalledExactlyOnceWith(null);
+      // Removal carries no DOM event, so `onChange`'s second arg is `undefined`.
+      expect(onChange).toHaveBeenCalledExactlyOnceWith(null, undefined);
     });
 
     it("renders no FileList when empty", () => {

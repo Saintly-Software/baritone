@@ -22,8 +22,11 @@ interface CheckboxBaseProps {
    * while `indeterminate` is set — a mixed box reports `aria-checked="mixed"`.
    */
   value: boolean;
-  /** Called with the next checked state when the user toggles the box. */
-  onChange: (value: boolean) => void;
+  /**
+   * Called when the user toggles the box, with the next checked state first and
+   * the raw DOM event that drove it second (base-ui's native `event`).
+   */
+  onChange: (value: boolean, event: Event) => void;
   /**
    * Show the tri-state "mixed" look (a dash) and report `aria-checked="mixed"`.
    * Typically a parent box summarising a set of children that are only partly
@@ -137,7 +140,7 @@ export function Checkbox(props: CheckboxProps) {
         <BaseCheckbox.Root
           checked={value}
           indeterminate={indeterminate}
-          onCheckedChange={(checked) => onChange(checked)}
+          onCheckedChange={(checked, details) => onChange(checked, details.event)}
           // `readOnly` (not `disabled`) keeps the box keyboard-focusable: base-ui
           // leaves it in the tab order but vetoes the toggle (click / Space). The
           // `aria-disabled` carries the disabled semantics to assistive tech.

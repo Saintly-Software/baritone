@@ -14,7 +14,7 @@ function ViewToggle({
   disabled,
 }: {
   value?: View;
-  onChange?: (value: View) => void;
+  onChange?: (value: View, event: Event) => void;
   disabled?: boolean;
 }) {
   const [value, setValue] = React.useState<View>(initial);
@@ -22,9 +22,9 @@ function ViewToggle({
     <ToggleGroup
       aria-label="View"
       value={value}
-      onChange={(next) => {
+      onChange={(next, event) => {
         setValue(next);
-        onChange?.(next);
+        onChange?.(next, event);
       }}
       disabled={disabled}
     >
@@ -60,7 +60,7 @@ describe("ToggleGroup", () => {
 
     await user.click(screen.getByRole("button", { name: "Board" }));
 
-    expect(onChange).toHaveBeenCalledWith("board");
+    expect(onChange).toHaveBeenCalledWith("board", expect.any(Event));
     expect(screen.getByRole("button", { name: "Board" })).toHaveAttribute("aria-pressed", "true");
   });
 
@@ -103,7 +103,7 @@ describe("ToggleGroup", () => {
 
     // Enter selects the focused segment.
     await user.keyboard("{Enter}");
-    expect(onChange).toHaveBeenCalledWith("board");
+    expect(onChange).toHaveBeenCalledWith("board", expect.any(Event));
   });
 
   it("keeps the current selection when the active segment is pressed again", async () => {

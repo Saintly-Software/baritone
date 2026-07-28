@@ -18,7 +18,7 @@ function ThemeSwitcher({
   ...rest
 }: {
   value?: ThemeValue;
-  onChange?: (value: ThemeValue) => void;
+  onChange?: (value: ThemeValue, event: Event) => void;
 } & Partial<
   DistributiveOmit<
     React.ComponentProps<typeof RadioGroup<ThemeValue>>,
@@ -30,9 +30,9 @@ function ThemeSwitcher({
     <RadioGroup
       label="Theme"
       value={value}
-      onChange={(next) => {
+      onChange={(next, event) => {
         setValue(next);
-        onChange?.(next);
+        onChange?.(next, event);
       }}
       {...rest}
     >
@@ -69,7 +69,7 @@ describe("RadioGroup", () => {
 
     await user.click(screen.getByRole("radio", { name: "dark" }));
 
-    expect(onChange).toHaveBeenCalledWith("dark");
+    expect(onChange).toHaveBeenCalledWith("dark", expect.any(Event));
     expect(screen.getByRole("radio", { name: "dark" })).toBeChecked();
   });
 
@@ -82,7 +82,7 @@ describe("RadioGroup", () => {
     expect(screen.getByRole("radio", { name: "dark" })).toHaveFocus();
 
     await user.keyboard("{ArrowDown}");
-    expect(onChange).toHaveBeenLastCalledWith("light");
+    expect(onChange).toHaveBeenLastCalledWith("light", expect.any(Event));
   });
 
   it("renders children as the label, overriding the default", () => {
@@ -149,7 +149,7 @@ describe("RadioGroup", () => {
     expect(onChange).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("radio", { name: "light" }));
-    expect(onChange).toHaveBeenCalledWith("light");
+    expect(onChange).toHaveBeenCalledWith("light", expect.any(Event));
   });
 
   it("renders the helpText as an error when invalid", () => {
@@ -178,6 +178,6 @@ describe("RadioGroup", () => {
     );
 
     await user.click(screen.getByRole("radio", { name: "Cozy" }));
-    expect(onChange).toHaveBeenCalledWith(Density.Cozy);
+    expect(onChange).toHaveBeenCalledWith(Density.Cozy, expect.any(Event));
   });
 });

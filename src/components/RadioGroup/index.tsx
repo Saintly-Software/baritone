@@ -105,8 +105,11 @@ function RadioGroupItem<T>({
 interface RadioGroupBaseProps<T> {
   /** The currently selected value (controlled). */
   value: T;
-  /** Called with the newly selected value. */
-  onChange: (value: T) => void;
+  /**
+   * Called with the newly selected value first and the raw DOM event that drove
+   * the selection second (base-ui's native `event`).
+   */
+  onChange: (value: T, event: Event) => void;
   /**
    * Render-prop children. Receives a `RadioGroupItem` already bound to this
    * group's `T`, so every `<RadioGroupItem value={...} />` is type-checked
@@ -219,7 +222,7 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
       <RadioGroupItemContext.Provider value={itemContext}>
         <BaseRadioGroup
           value={value}
-          onValueChange={(next) => onChange(next)}
+          onValueChange={(next, details) => onChange(next, details.event)}
           // The `Field` marks the label; base-ui turns this into `aria-required`.
           required={required}
           // Group-level disable also goes through `readOnly` (base-ui forwards it to

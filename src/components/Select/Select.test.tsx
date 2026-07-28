@@ -35,7 +35,7 @@ function SingleHost({
   ...rest
 }: {
   value?: string | null;
-  onChange?: (value: string | null) => void;
+  onChange?: (value: string | null, event: Event) => void;
 } & Partial<React.ComponentProps<typeof Select>>) {
   const [value, setValue] = React.useState<string | null>(initial);
   return (
@@ -44,9 +44,9 @@ function SingleHost({
       placeholder="Pick one"
       options={OPTIONS}
       value={value}
-      onChange={(next) => {
+      onChange={(next, event) => {
         setValue(next);
-        onChange?.(next);
+        onChange?.(next, event);
       }}
       {...(rest as object)}
     />
@@ -59,7 +59,7 @@ function MultiHost({
   onChange,
 }: {
   value?: string[];
-  onChange?: (value: string[]) => void;
+  onChange?: (value: string[], event: Event) => void;
 }) {
   const [value, setValue] = React.useState<string[]>(initial);
   return (
@@ -69,9 +69,9 @@ function MultiHost({
       placeholder="Pick some"
       options={OPTIONS}
       value={value}
-      onChange={(next) => {
+      onChange={(next, event) => {
         setValue(next);
-        onChange?.(next);
+        onChange?.(next, event);
       }}
     />
   );
@@ -111,7 +111,7 @@ describe("Select", () => {
     await user.click(screen.getByRole("combobox", { name: "Fruit" }));
     await user.click(await screen.findByRole("option", { name: "Cherry" }));
 
-    expect(onChange).toHaveBeenCalledWith("cherry");
+    expect(onChange).toHaveBeenCalledWith("cherry", expect.any(Event));
     expect(screen.getByRole("combobox", { name: "Fruit" })).toHaveTextContent("Cherry");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   });
@@ -134,7 +134,7 @@ describe("Select", () => {
 
     await user.click(screen.getByRole("button", { name: "Clear selection" }));
 
-    expect(onChange).toHaveBeenCalledWith(null);
+    expect(onChange).toHaveBeenCalledWith(null, expect.any(Event));
     expect(screen.getByRole("combobox", { name: "Fruit" })).toHaveTextContent("Pick one");
   });
 
@@ -161,7 +161,7 @@ describe("Select", () => {
     );
     // Selecting a second option keeps the popup open and appends to the array.
     await user.click(screen.getByRole("option", { name: "Banana" }));
-    expect(onChange).toHaveBeenCalledWith(["apple", "banana"]);
+    expect(onChange).toHaveBeenCalledWith(["apple", "banana"], expect.any(Event));
     expect(screen.getByRole("listbox")).toBeInTheDocument();
   });
 
@@ -205,7 +205,11 @@ describe("Select", () => {
   });
 
   describe("grouped options", () => {
-    function GroupedHost({ onChange }: { onChange?: (value: string | null) => void }) {
+    function GroupedHost({
+      onChange,
+    }: {
+      onChange?: (value: string | null, event: Event) => void;
+    }) {
       const [value, setValue] = React.useState<string | null>(null);
       return (
         <Select
@@ -213,9 +217,9 @@ describe("Select", () => {
           placeholder="Pick one"
           options={GROUPED}
           value={value}
-          onChange={(next) => {
+          onChange={(next, event) => {
             setValue(next);
-            onChange?.(next);
+            onChange?.(next, event);
           }}
         />
       );
@@ -251,7 +255,7 @@ describe("Select", () => {
       await user.click(screen.getByRole("combobox", { name: "Fruit" }));
       await user.click(await screen.findByRole("option", { name: "Strawberry" }));
 
-      expect(onChange).toHaveBeenCalledWith("strawberry");
+      expect(onChange).toHaveBeenCalledWith("strawberry", expect.any(Event));
       expect(screen.getByRole("combobox", { name: "Fruit" })).toHaveTextContent("Strawberry");
     });
   });
