@@ -14,6 +14,7 @@ import {
   type Saliency,
   type TextSize,
 } from "../../theme/constants";
+import type { FontName } from "../../theme/fonts";
 import type { RenderProp } from "../../utils/render";
 
 export interface HeadingProps
@@ -36,8 +37,12 @@ export interface HeadingProps
   weight?: TypographyWeightVariants["weight"];
   /** Render the heading in italics. */
   italic?: TypographyDecorationVariants["italic"];
-  /** Render the heading in the monospace font family. */
-  mono?: boolean;
+  /**
+   * Font family, by name. `sans` (default) and `mono` are always available; other
+   * names are consumer-defined via the theme's `fonts` option + `FontRegistry`.
+   * See {@link FontName}.
+   */
+  font?: FontName;
   /** Render as a different element/component (base-ui `render` pattern). */
   render?: RenderProp;
   ref?: React.Ref<HTMLHeadingElement>;
@@ -49,7 +54,7 @@ export interface HeadingProps
  * matching `h1`–`h6`) for the document outline and an optional visual `size`
  * override. Defaults to high saliency and, per level, a customary bold/semibold
  * `weight` (weight is otherwise independent of `size`). Shares `Text`'s
- * token-backed typographic knobs (`weight`, `italic`, `mono`) and the
+ * token-backed typographic knobs (`weight`, `italic`, `font`) and the
  * `textAlign` / `whiteSpace` / `overflowWrap` / `textTransform` layout atoms.
  */
 export function Heading(props: HeadingProps) {

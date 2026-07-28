@@ -2,7 +2,7 @@ import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
-import { iconColorVar, textColorVar } from "../vars.css";
+import { iconColorVar, textColorVar, textFontVar } from "../vars.css";
 
 // The colour an explicit `intent`/`saliency` resolves to. Only set when a
 // variant is active, so the base style can fall through to the inherited
@@ -59,8 +59,11 @@ export type TextIntentVariants = NonNullable<RecipeVariants<typeof textIntentRec
  */
 export const textSizeRecipe = recipe({
   base: {
+    // Single indirection for the family: the `font` prop sets `--textFont` per
+    // instance (to a `var(--font-<name>)` the theme published); unset, it falls
+    // back to the `sans` token. Mirrors how colour reads `--textColor`.
+    fontFamily: fallbackVar(textFontVar, vars.font.sans),
     margin: 0,
-    fontFamily: vars.font.sans,
     fontWeight: vars.text.weight.default,
   },
   variants: {
@@ -82,9 +85,10 @@ export const textSizeRecipe = recipe({
 export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>>;
 
 // The optional typographic knobs, split by concern. Each is defined after
-// `textSizeRecipe` so it wins over the defaults baked into the size recipe's base
-// (font-weight / font-family). Alignment and wrapping are NOT here — they're plain
-// CSS-property passthroughs and live in the sprinkles `atoms` instead.
+// `textSizeRecipe` so it wins over the default font-weight baked into the size
+// recipe's base. The *family* is not a recipe knob — it's the `--textFont` var the
+// base reads (set by the `font` prop). Alignment and wrapping aren't here either;
+// they're plain CSS-property passthroughs and live in the sprinkles `atoms`.
 
 /**
  * "typography weight" recipe — the `weight` knob. Reads a `text.weight` token and
@@ -111,17 +115,7 @@ export const typographyDecoration = recipe({
 
 export type TypographyDecorationVariants = NonNullable<RecipeVariants<typeof typographyDecoration>>;
 
-/**
- * "typography font" recipe — swaps the font family. Overrides the default `sans`
- * family from the size recipe; extend the `font` variant as more families land.
- */
-export const typographyFont = recipe({
-  variants: {
-    font: {
-      sans: { fontFamily: vars.font.sans },
-      mono: { fontFamily: vars.font.mono },
-    },
-  },
-});
-
-export type TypographyFontVariants = NonNullable<RecipeVariants<typeof typographyFont>>;
+// Note: there's no "font" recipe. The family is consumer-defined and open-ended,
+// so it can't be enumerated into build-time variant classes. Instead the base of
+// `textSizeRecipe` reads `--textFont` (see above) and the `font` prop sets it to a
+// `var(--font-<name>)` the active theme published. See `theme/fonts.ts`.

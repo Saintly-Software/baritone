@@ -1,9 +1,27 @@
 import { createTheme, globalStyle } from "@vanilla-extract/css";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
+import { textFontVar } from "../styles/vars.css";
 import { warnOnContrastIssues } from "./contrast";
 import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
+import { fontFamilyVars, fontVarName, type FontName } from "./fonts";
 
-export interface CreateThemeOptions {
+/**
+ * The consumer-defined font vocabulary for a theme. Each entry publishes a
+ * `--font-<name>` custom property whose value is a `font-family` stack; the
+ * `font` prop on `Text`/`Heading` selects one by name. `sans`/`mono` are always
+ * published from the tokens, so they need no entry here.
+ */
+export interface FontOptions {
+  /** Extra named families, e.g. `{ display: '"Playfair Display", serif' }`. */
+  fonts?: Record<string, string>;
+  /**
+   * The family a bare `<Text>`/`<Heading>` (no `font` prop) uses. Defaults to
+   * `sans`. Set e.g. `"mono"` so a code-focused app is monospace by default.
+   */
+  defaultFont?: FontName;
+}
+
+export interface CreateThemeOptions extends FontOptions {
   /** Colour scheme. Sets `oklchOperator` (-1 light / +1 dark). */
   scheme: "light" | "dark";
   /** Label used in contrast warnings. */
@@ -12,6 +30,20 @@ export interface CreateThemeOptions {
    * Run the build-time WCAG contrast check. Defaults to on outside production.
    */
   checkContrast?: boolean;
+}
+
+/**
+ * The `{ [cssVar]: value }` payload that carries the font registry onto a theme
+ * root: the `--font-<name>` families plus, when a `defaultFont` is set, the
+ * `--textFont` var that makes bare text use it. Shared by the build-time
+ * (`globalStyle`) and runtime (`assignInlineVars`) paths so they stay in step.
+ */
+function fontVars({ fonts, defaultFont }: FontOptions): Record<string, string> {
+  const family = fontFamilyVars(fonts);
+  if (defaultFont === undefined) return family;
+  // `textFontVar` is a vanilla-extract var reference, so it can't be an inline
+  // object key directly — `assignInlineVars` maps it to its real property name.
+  return { ...family, ...assignInlineVars({ [textFontVar]: `var(${fontVarName(defaultFont)})` }) };
 }
 
 function withOperator(tokens: ThemeTokensInput, scheme: "light" | "dark"): DesignTokens {
@@ -47,8 +79,10 @@ export function createDesignSystemTheme(
   // end of `<body>` (Tooltip/Popover/Menu/Select/Combobox/Modal/Drawer) — which is
   // why those surfaces need no z-index of their own. Attached to the generated
   // class itself (not a second class) so the return value stays a single class,
-  // safe for `classList.add`. `BaritoneTheme` sets the same via inline style.
-  globalStyle(`.${themeClass}`, { isolation: "isolate" });
+  // safe for `classList.add`. `BaritoneTheme` sets the same via inline style. The
+  // `--font-<name>` registry rides along on the same root so the `font` prop
+  // resolves against this theme's families.
+  globalStyle(`.${themeClass}`, { isolation: "isolate", vars: fontVars(options) });
   return themeClass;
 }
 
@@ -56,11 +90,16 @@ export function createDesignSystemTheme(
  * Runtime theming. Maps a token set to an inline-style object of CSS custom
  * properties (`{ '--…': value }`) you spread onto an element's `style`. Use this
  * for brands whose values only arrive at runtime (e.g. per-tenant colours),
- * since it needs neither the VE compiler nor a pre-generated class.
+ * since it needs neither the VE compiler nor a pre-generated class. Pass `fonts`
+ * to publish consumer families (`--font-<name>`) and `defaultFont` to pick the
+ * family bare text uses.
  */
 export function createInlineTheme(
   tokens: ThemeTokensInput,
-  options: Pick<CreateThemeOptions, "scheme">,
+  options: Pick<CreateThemeOptions, "scheme"> & FontOptions,
 ): Record<string, string> {
-  return assignInlineVars(vars, withOperator(tokens, options.scheme));
+  return {
+    ...assignInlineVars(vars, withOperator(tokens, options.scheme)),
+    ...fontVars(options),
+  };
 }

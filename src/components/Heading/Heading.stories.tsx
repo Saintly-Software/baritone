@@ -11,7 +11,9 @@ const meta: Meta<typeof Heading> = {
     size: { control: "select", options: TEXT_SIZES },
     weight: { control: "select", options: TEXT_WEIGHTS },
     italic: { control: "boolean" },
-    mono: { control: "boolean" },
+    // Built-in `sans`/`mono` only here; consumer apps publish more (see the Text
+    // "CustomFonts" story for how the open-ended `font` vocabulary works).
+    font: { control: "select", options: ["sans", "mono"] },
     textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
     whiteSpace: { control: "inline-radio", options: ["normal", "nowrap"] },
     overflowWrap: { control: "inline-radio", options: ["normal", "break-word"] },
@@ -25,7 +27,7 @@ export default meta;
 
 type Story = StoryObj<typeof Heading>;
 
-// Interactive default — tune every knob (level, size, weight, italic, mono,
+// Interactive default — tune every knob (level, size, weight, italic, font,
 // textAlign, whiteSpace, overflowWrap, textTransform) from the controls panel.
 export const Basic: Story = {};
 

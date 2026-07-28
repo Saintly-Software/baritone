@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { textSizeRecipe, typographyWeight } from "../../../styles/recipes/text.css";
+import { fontVarName } from "../../../theme/fonts";
 import { InternalText } from "./index";
 
 describe("InternalText", () => {
@@ -29,6 +30,17 @@ describe("InternalText", () => {
       </InternalText>,
     );
     expect(screen.getByText("Bold").className).toContain(typographyWeight({ weight: "bold" }));
+  });
+
+  it("points the --textFont var at the named family when `font` is set", () => {
+    render(
+      <InternalText size="md" defaultElement="div" font="display">
+        Fancy
+      </InternalText>,
+    );
+    expect(screen.getByText("Fancy").getAttribute("style")).toContain(
+      `var(${fontVarName("display")})`,
+    );
   });
 
   it("forwards arbitrary html attributes", () => {

@@ -1,8 +1,24 @@
 export { vars } from "./contract.css";
 export type { DesignTokens, ThemeTokensInput } from "./contract.css";
 
-export { createDesignSystemTheme, createInlineTheme, type CreateThemeOptions } from "./createTheme";
+export {
+  createDesignSystemTheme,
+  createInlineTheme,
+  type CreateThemeOptions,
+  type FontOptions,
+} from "./createTheme";
 export { buildDefaultTokens, type BrandSeed } from "./defaultTokens";
+
+// The consumer-extensible font vocabulary. `FontRegistry` is the module-augmentation
+// seam (declare `module "@saintly-software/baritone"` and add keys); `FontName` is
+// what the `font` prop accepts.
+export {
+  fontVarName,
+  fontFamilyVars,
+  type FontRegistry,
+  type FontName,
+  type BuiltinFontName,
+} from "./fonts";
 export { lightTheme, darkTheme } from "./defaultTheme.css";
 
 export {

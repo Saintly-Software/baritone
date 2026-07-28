@@ -19,6 +19,16 @@ export const iconColorVar = createVar("iconColor");
 export const textColorVar = createVar("textColor");
 
 /**
+ * The *current font family*, mirroring {@link textColorVar}. The size recipe reads
+ * this (falling back to the `sans` token) so the resolved family is a single
+ * indirection; the `font` prop on `Text`/`Heading` sets it per instance to
+ * `var(--font-<name>)`, pointing at a family the active theme published. Left
+ * unset, text stays on `sans` — so this is the font analogue of the inherited
+ * `--textColor`: a var the element reads, a prop that overrides it.
+ */
+export const textFontVar = createVar("textFont");
+
+/**
  * The resolved focus-ring colour. Each element-intent recipe (`surface`,
  * `component`, `formControl`) sets this to its `focus.<intent>` token; the shared
  * `focusRingRecipe` reads it when drawing the ring, so the ring colour follows

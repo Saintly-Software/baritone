@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { textSizeRecipe, typographyFont, typographyWeight } from "../../styles/recipes/text.css";
+import { textSizeRecipe, typographyWeight } from "../../styles/recipes/text.css";
+import { fontVarName } from "../../theme/fonts";
 import { Heading } from "./index";
 
 describe("Heading", () => {
@@ -57,16 +58,26 @@ describe("Heading", () => {
     expect(screen.getByTestId("h").className).toContain(typographyWeight({ weight: "superbold" }));
   });
 
-  it("applies the mono font", () => {
+  it("selects a font family by name via the --textFont var", () => {
     render(
-      <Heading level={2} mono>
+      <Heading level={2} font="display">
+        Fancy
+      </Heading>,
+    );
+    expect(screen.getByRole("heading", { level: 2 }).getAttribute("style")).toContain(
+      `var(${fontVarName("display")})`,
+    );
+  });
+
+  it("selects the built-in mono family via `font`", () => {
+    render(
+      <Heading level={2} font="mono">
         Code
       </Heading>,
     );
-    // Heading always carries a default weight class, so assert the mono font class
-    // itself rather than the (base + mono) pair, which needn't be adjacent.
-    const monoClass = typographyFont({ font: "mono" }).split(" ")[1];
-    expect(screen.getByRole("heading", { level: 2 }).className).toContain(monoClass);
+    expect(screen.getByRole("heading", { level: 2 }).getAttribute("style")).toContain(
+      `var(${fontVarName("mono")})`,
+    );
   });
 
   it("adds a class for each typographic knob passed", () => {

@@ -6,11 +6,11 @@
 // and inlined into the first paint — no client boundary, no flash, no hydration
 // mismatch.
 import * as React from "react";
-import { createInlineTheme } from "../../theme/createTheme";
+import { createInlineTheme, type FontOptions } from "../../theme/createTheme";
 import type { ThemeTokensInput } from "../../theme/contract.css";
 import { useRender, type RenderProp } from "../../utils/render";
 
-export interface BaritoneThemeProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface BaritoneThemeProps extends React.HTMLAttributes<HTMLDivElement>, FontOptions {
   /** Token values for this theme scope — e.g. from `buildDefaultTokens`. */
   tokens: ThemeTokensInput;
   /** Colour scheme; sets the oklch interaction direction (`-1` light / `+1` dark). */
@@ -47,7 +47,16 @@ export interface BaritoneThemeProps extends React.HTMLAttributes<HTMLDivElement>
  *   </html>
  * );
  */
-export function BaritoneTheme({ tokens, scheme, render, style, ref, ...rest }: BaritoneThemeProps) {
+export function BaritoneTheme({
+  tokens,
+  scheme,
+  fonts,
+  defaultFont,
+  render,
+  style,
+  ref,
+  ...rest
+}: BaritoneThemeProps) {
   // `isolation: isolate` makes this scope its own stacking context, so any
   // z-indexed app content stays contained below the popups base-ui portals to
   // the end of `<body>` (Tooltip/Popover/Menu/Select/Combobox/Modal/Drawer).
@@ -57,7 +66,7 @@ export function BaritoneTheme({ tokens, scheme, render, style, ref, ...rest }: B
   // add layout styles (or deliberately override a single `--var`).
   const themeStyle = {
     isolation: "isolate" as const,
-    ...createInlineTheme(tokens, { scheme }),
+    ...createInlineTheme(tokens, { scheme, fonts, defaultFont }),
     ...style,
   };
   return useRender({

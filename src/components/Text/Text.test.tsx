@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   textSizeRecipe,
   typographyDecoration,
-  typographyFont,
   typographyWeight,
 } from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
 import { TEXT_WEIGHTS } from "../../theme/constants";
+import { fontVarName } from "../../theme/fonts";
 import { Text } from "./index";
 
 describe("Text", () => {
@@ -46,9 +46,32 @@ describe("Text", () => {
     expect(screen.getByText("Slanted").className).toContain(typographyDecoration({ italic: true }));
   });
 
-  it("applies the mono font", () => {
-    render(<Text mono>Code</Text>);
-    expect(screen.getByText("Code").className).toContain(typographyFont({ font: "mono" }));
+  it("selects a consumer font family by name via the --textFont var", () => {
+    render(<Text font="display">Fancy</Text>);
+    expect(screen.getByText("Fancy").getAttribute("style")).toContain(
+      `var(${fontVarName("display")})`,
+    );
+  });
+
+  it("selects the built-in mono family via `font`", () => {
+    render(<Text font="mono">Code</Text>);
+    expect(screen.getByText("Code").getAttribute("style")).toContain(`var(${fontVarName("mono")})`);
+  });
+
+  it("sets no font var when `font` is not passed", () => {
+    render(<Text>Plain</Text>);
+    expect(screen.getByText("Plain").getAttribute("style") ?? "").not.toContain("--font-");
+  });
+
+  it("preserves a consumer `style` while injecting the font var", () => {
+    render(
+      <Text font="display" style={{ letterSpacing: "0.1em" }}>
+        Both
+      </Text>,
+    );
+    const style = screen.getByText("Both").getAttribute("style") ?? "";
+    expect(style).toContain(`var(${fontVarName("display")})`);
+    expect(style).toContain("letter-spacing");
   });
 
   it("applies the textAlign atom", () => {
