@@ -90,8 +90,6 @@ export interface InternalTextProps
    * for type-safety. Resolves to `var(--font-<name>)`.
    */
   font?: FontName;
-  /** @deprecated Use `font="mono"`. Kept as an alias; `font` wins when both are set. */
-  mono?: boolean;
   /** The tag rendered when `render` isn't supplied. */
   defaultElement: React.ElementType;
   /** base-ui `render` escape hatch (any element/component). */
@@ -107,7 +105,6 @@ export function InternalText({
   weight,
   italic,
   font,
-  mono,
   textAlign,
   whiteSpace,
   overflowWrap,
@@ -134,16 +131,14 @@ export function InternalText({
   pl,
   ...rest
 }: InternalTextProps) {
-  // Resolve the family name (explicit `font` beats the legacy `mono` alias) and,
-  // when set, point `--textFont` at the theme's `var(--font-<name>)`. This is an
-  // inline var, not a variant class, because the family vocabulary is open-ended
-  // and consumer-defined — see `theme/fonts.ts`. Consumer `style` spreads last so
-  // it can still override.
-  const fontName = font ?? (mono ? "mono" : undefined);
+  // When `font` is set, point `--textFont` at the theme's `var(--font-<name>)`.
+  // This is an inline var, not a variant class, because the family vocabulary is
+  // open-ended and consumer-defined — see `theme/fonts.ts`. Consumer `style`
+  // spreads last so it can still override.
   const resolvedStyle =
-    fontName === undefined
+    font === undefined
       ? style
-      : { ...assignInlineVars({ [textFontVar]: `var(${fontVarName(fontName)})` }), ...style };
+      : { ...assignInlineVars({ [textFontVar]: `var(${fontVarName(font)})` }), ...style };
 
   // Dev-only: warn when `font` points at a var the theme never published. Compose
   // an internal ref onto the node so we can read its computed style after mount; in
@@ -151,8 +146,8 @@ export function InternalText({
   const nodeRef = React.useRef<HTMLElement | null>(null);
   const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
   React.useEffect(() => {
-    if (isDev() && fontName !== undefined) warnIfFontUnset(nodeRef.current, fontName);
-  }, [fontName]);
+    if (isDev() && font !== undefined) warnIfFontUnset(nodeRef.current, font);
+  }, [font]);
 
   return useRender({
     render,

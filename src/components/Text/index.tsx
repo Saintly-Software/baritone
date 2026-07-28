@@ -39,8 +39,6 @@ interface TextOwnProps
    * {@link FontName}.
    */
   font?: FontName;
-  /** @deprecated Use `font="mono"` instead. */
-  mono?: boolean;
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
 }

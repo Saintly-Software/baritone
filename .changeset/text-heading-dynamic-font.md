@@ -37,8 +37,7 @@ Also:
   the active theme never published logs an actionable `console.warn` (the text
   would otherwise silently inherit its ancestor's family). Deduped per name,
   skipped under jsdom, and dead-code-eliminated from production builds.
-- **`mono` is deprecated** in favour of `font="mono"`. It still works as an alias
-  (`font` wins when both are passed); the redundant `typographyFont` recipe is
-  gone.
+- **The boolean `mono` prop is removed** — use `font="mono"` (a built-in). The
+  redundant `typographyFont` recipe is gone too.
 - `textFontVar` is exported alongside `textColorVar` for advanced composition, and
   `FontRegistry` / `FontName` / `fontVarName` / `fontFamilyVars` from the theme.

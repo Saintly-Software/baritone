@@ -43,8 +43,6 @@ export interface HeadingProps
    * See {@link FontName}.
    */
   font?: FontName;
-  /** @deprecated Use `font="mono"` instead. */
-  mono?: boolean;
   /** Render as a different element/component (base-ui `render` pattern). */
   render?: RenderProp;
   ref?: React.Ref<HTMLHeadingElement>;

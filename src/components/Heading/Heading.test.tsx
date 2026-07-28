@@ -69,9 +69,9 @@ describe("Heading", () => {
     );
   });
 
-  it('treats the legacy `mono` prop as `font="mono"`', () => {
+  it("selects the built-in mono family via `font`", () => {
     render(
-      <Heading level={2} mono>
+      <Heading level={2} font="mono">
         Code
       </Heading>,
     );

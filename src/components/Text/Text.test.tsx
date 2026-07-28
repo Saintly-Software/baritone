@@ -53,23 +53,12 @@ describe("Text", () => {
     );
   });
 
-  it('treats the legacy `mono` prop as `font="mono"`', () => {
-    render(<Text mono>Code</Text>);
+  it("selects the built-in mono family via `font`", () => {
+    render(<Text font="mono">Code</Text>);
     expect(screen.getByText("Code").getAttribute("style")).toContain(`var(${fontVarName("mono")})`);
   });
 
-  it("lets an explicit `font` win over the legacy `mono` alias", () => {
-    render(
-      <Text font="sans" mono>
-        Body
-      </Text>,
-    );
-    const style = screen.getByText("Body").getAttribute("style") ?? "";
-    expect(style).toContain(`var(${fontVarName("sans")})`);
-    expect(style).not.toContain(fontVarName("mono"));
-  });
-
-  it("sets no font var when neither `font` nor `mono` is passed", () => {
+  it("sets no font var when `font` is not passed", () => {
     render(<Text>Plain</Text>);
     expect(screen.getByText("Plain").getAttribute("style") ?? "").not.toContain("--font-");
   });
