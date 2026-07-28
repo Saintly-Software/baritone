@@ -59,6 +59,9 @@ export function fontVarName(name: string): string {
  * and `mono` — routed through the contract vars so a runtime theme/brand swap
  * still flows through — plus one entry per consumer-supplied family. Spread into
  * a theme class's `vars` (build time) or a `style` object (runtime).
+ *
+ * `sans`/`mono` are reserved: entries by those names in `fonts` are ignored (they
+ * stay token-backed). Change the built-in families via the theme tokens instead.
  */
 export function fontFamilyVars(fonts: Record<string, string> = {}): Record<string, string> {
   const out: Record<string, string> = {
@@ -66,6 +69,10 @@ export function fontFamilyVars(fonts: Record<string, string> = {}): Record<strin
     [fontVarName("mono")]: vars.font.mono,
   };
   for (const [name, family] of Object.entries(fonts)) {
+    // `sans`/`mono` are always token-backed (`vars.font.*`) so bare text and
+    // `font="sans"` never diverge; the registry can't shadow them. Customise the
+    // built-in families through the theme tokens (`brand.fonts`) instead.
+    if (name === "sans" || name === "mono") continue;
     out[fontVarName(name)] = family;
   }
   return out;

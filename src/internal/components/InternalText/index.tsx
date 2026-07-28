@@ -17,8 +17,14 @@ import { fontVarName, type FontName } from "../../../theme/fonts";
 import { cx } from "../../../utils/cx";
 import { composeRefs, useRender, type RenderProp } from "../../../utils/render";
 
-const isDev = (): boolean =>
-  typeof process === "undefined" || process.env.NODE_ENV !== "production";
+// Prod-safe by construction: a browser production bundle replaces
+// `process.env.NODE_ENV` with `"production"`, so this folds to `false` and the
+// whole dev-only path (ref composition + effect) dead-code-eliminates. React is a
+// peer dep that already requires `process.env.NODE_ENV` to be defined, so reading
+// it unguarded is safe wherever this runs. (Deliberately not the
+// `typeof process === "undefined" || …` form — that returns `true` in a browser
+// where `process` is undefined, which would leak the dev path into production.)
+const isDev = (): boolean => process.env.NODE_ENV !== "production";
 
 // Font names already warned about, so a page full of `<Text font="…">` with the
 // same unset name warns once, not once per element.
