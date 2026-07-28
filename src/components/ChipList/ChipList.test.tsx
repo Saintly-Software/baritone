@@ -1,6 +1,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { Chip } from "../Chip";
 import type { ChipListItem } from "./index";
 import { ChipList } from "./index";
 
@@ -153,6 +154,51 @@ describe("ChipList", () => {
       render(<ChipList items={[{ id: "x", children: "Tag", handleRemove }]} />);
       await user.click(screen.getByRole("button", { name: "Remove" }));
       expect(handleRemove).toHaveBeenCalledOnce();
+    });
+
+    it("keeps a chip's remove-button click from bubbling to a clickable ancestor", async () => {
+      const onAncestor = vi.fn();
+      const handleRemove = vi.fn();
+      const user = userEvent.setup();
+      // A common layout: the whole list sits inside a clickable region. Removing a
+      // chip should act on that chip alone, never trip the surrounding handler.
+      render(
+        <div onClick={onAncestor}>
+          <ChipList items={[{ id: "x", children: "Tag", handleRemove }]} />
+        </div>,
+      );
+      await user.click(screen.getByRole("button", { name: "Remove" }));
+      expect(handleRemove).toHaveBeenCalledOnce();
+      expect(onAncestor).not.toHaveBeenCalled();
+    });
+
+    it("lets a chip's button adornment reach the ancestor when the item opts into forcePropagation", async () => {
+      const onAncestor = vi.fn();
+      const onAdornment = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <div onClick={onAncestor}>
+          <ChipList
+            items={[
+              {
+                id: "x",
+                children: "Tag",
+                trailAdornments: [
+                  <Chip.Adornment
+                    icon={<span>×</span>}
+                    label="Remove"
+                    onClick={onAdornment}
+                    forcePropagation
+                  />,
+                ],
+              },
+            ]}
+          />
+        </div>,
+      );
+      await user.click(screen.getByRole("button", { name: "Remove" }));
+      expect(onAdornment).toHaveBeenCalledOnce();
+      expect(onAncestor).toHaveBeenCalledOnce();
     });
   });
 

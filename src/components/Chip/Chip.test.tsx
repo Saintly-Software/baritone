@@ -501,6 +501,92 @@ describe("Chip", () => {
     });
   });
 
+  describe("adornment click propagation", () => {
+    it("stops a button adornment's click from bubbling to a clickable ancestor by default", async () => {
+      const onAncestor = vi.fn();
+      const onAdornment = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <div onClick={onAncestor}>
+          <Chip
+            trailAdornments={[
+              <Chip.Adornment icon={<span>×</span>} label="Remove" onClick={onAdornment} />,
+            ]}
+          >
+            Tag
+          </Chip>
+        </div>,
+      );
+      await user.click(screen.getByRole("button", { name: "Remove" }));
+      expect(onAdornment).toHaveBeenCalledOnce();
+      // The adornment is its own hit target — its click must not reach the row.
+      expect(onAncestor).not.toHaveBeenCalled();
+    });
+
+    it("lets a button adornment's click bubble to the ancestor when forcePropagation is set", async () => {
+      const onAncestor = vi.fn();
+      const onAdornment = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <div onClick={onAncestor}>
+          <Chip
+            trailAdornments={[
+              <Chip.Adornment
+                icon={<span>×</span>}
+                label="Remove"
+                onClick={onAdornment}
+                forcePropagation
+              />,
+            ]}
+          >
+            Tag
+          </Chip>
+        </div>,
+      );
+      await user.click(screen.getByRole("button", { name: "Remove" }));
+      expect(onAdornment).toHaveBeenCalledOnce();
+      expect(onAncestor).toHaveBeenCalledOnce();
+    });
+
+    it("stops the built-in remove button's click from bubbling to a clickable ancestor", async () => {
+      const onAncestor = vi.fn();
+      const handleRemove = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <div onClick={onAncestor}>
+          <Chip handleRemove={handleRemove}>Tag</Chip>
+        </div>,
+      );
+      await user.click(screen.getByRole("button", { name: "Remove" }));
+      expect(handleRemove).toHaveBeenCalledOnce();
+      expect(onAncestor).not.toHaveBeenCalled();
+    });
+
+    it("still lets a link adornment's click bubble to a clickable ancestor (scoped to buttons)", async () => {
+      const onAncestor = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <div
+          onClick={(event) => {
+            // Swallow the anchor's default navigation so jsdom doesn't warn.
+            event.preventDefault();
+            onAncestor();
+          }}
+        >
+          <Chip
+            trailAdornments={[
+              <Chip.Adornment icon={<span>↗</span>} label="Open docs" href="/docs" />,
+            ]}
+          >
+            Tag
+          </Chip>
+        </div>,
+      );
+      await user.click(screen.getByRole("link", { name: "Open docs" }));
+      expect(onAncestor).toHaveBeenCalledOnce();
+    });
+  });
+
   describe("contentToCopy", () => {
     it("renders no copy button when contentToCopy is omitted", () => {
       render(<Chip>Tag</Chip>);
