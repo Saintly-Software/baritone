@@ -44,7 +44,7 @@ export interface InternalTextProps
   /** Render the text in the monospace font family. */
   mono?: boolean;
   /** The tag rendered when `render` isn't supplied. */
-  defaultElement: React.ElementType;
+  defaultElement: keyof React.JSX.IntrinsicElements;
   /** base-ui `render` escape hatch (any element/component). */
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;

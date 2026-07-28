@@ -64,18 +64,21 @@ function mergeProps(ours: AnyProps, theirs: AnyProps): AnyProps {
 
 export interface UseRenderParams {
   render: RenderProp | undefined;
-  defaultElement: React.ElementType;
+  /**
+   * The element rendered when `render` isn't supplied. An intrinsic tag name only
+   * (`"div"`, `"a"`, …) — base-ui renders it via `createElement` and supports only
+   * string tags. To render *as* a component, use `render` (`render={<Component />}`).
+   */
+  defaultElement: keyof React.JSX.IntrinsicElements;
   props: AnyProps;
 }
 
 /**
  * Polymorphic render, delegating to base-ui's `useRender` so we inherit its
  * ref-merging, event-handler chaining, and `preventBaseUIHandler` support rather
- * than maintaining a parallel implementation. Our `defaultElement` maps to
- * base-ui's `defaultTagName`: base-ui only renders a *string* default tag, and
- * every caller passes an intrinsic tag (`"div"`, `"a"`, `` `h${level}` ``, …), so
- * the cast is sound. Refs are still passed inside `props` — base-ui reads
- * `props.ref` and merges it, so call sites keep their existing shape.
+ * than maintaining a parallel implementation. Our `defaultElement` is base-ui's
+ * `defaultTagName` (an intrinsic tag name). Refs are still passed inside `props` —
+ * base-ui reads `props.ref` and merges it, so call sites keep their existing shape.
  *
  * This is a hook (base-ui's `useRender` calls `useMergedRefs` internally), so it
  * must be called unconditionally. To render polymorphically from a conditional
@@ -84,7 +87,7 @@ export interface UseRenderParams {
 export function useRender({ render, defaultElement, props }: UseRenderParams): React.ReactElement {
   return baseUseRender({
     render: render as UseRenderRenderProp | undefined,
-    defaultTagName: defaultElement as keyof React.JSX.IntrinsicElements,
+    defaultTagName: defaultElement,
     props,
   });
 }
