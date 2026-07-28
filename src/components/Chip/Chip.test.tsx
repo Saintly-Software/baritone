@@ -562,6 +562,20 @@ describe("Chip", () => {
       expect(onAncestor).not.toHaveBeenCalled();
     });
 
+    it("stops the built-in copy button's click from bubbling to a clickable ancestor while still copying", async () => {
+      const onAncestor = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <div onClick={onAncestor}>
+          <Chip contentToCopy="npm i baritone">Tag</Chip>
+        </div>,
+      );
+      await user.click(screen.getByRole("button", { name: "Copy" }));
+      // The copy still happens; the click just doesn't reach the row.
+      expect(await navigator.clipboard.readText()).toBe("npm i baritone");
+      expect(onAncestor).not.toHaveBeenCalled();
+    });
+
     it("still lets a link adornment's click bubble to a clickable ancestor (scoped to buttons)", async () => {
       const onAncestor = vi.fn();
       const user = userEvent.setup();
