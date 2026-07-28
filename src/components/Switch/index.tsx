@@ -24,8 +24,11 @@ interface SwitchBaseProps {
    * needed it should be added deliberately, never silently repurposed from here.
    */
   value: boolean;
-  /** Called with the next checked state when the user toggles the switch. */
-  onChange: (value: boolean) => void;
+  /**
+   * Called when the user toggles the switch, with the next checked state first
+   * and the raw DOM event that drove it second (base-ui's native `event`).
+   */
+  onChange: (value: boolean, event: Event) => void;
   /** Where the label sits relative to the track. Default `end`. */
   labelPosition?: LabelPosition;
   /** Inline help shown under the row and wired via `aria-describedby`. */
@@ -192,7 +195,7 @@ export function Switch(props: SwitchProps) {
       <label className={cx(switchRow({ size, labelPosition }), disabled && switchRowDisabled)}>
         <BaseSwitch.Root
           checked={value}
-          onCheckedChange={(checked) => onChange(checked)}
+          onCheckedChange={(checked, details) => onChange(checked, details.event)}
           // `readOnly` (not `disabled`) keeps the track keyboard-focusable: base-ui
           // leaves it in the tab order but vetoes the toggle (click / Space). The
           // `aria-disabled` carries the disabled semantics to assistive tech.

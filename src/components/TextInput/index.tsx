@@ -48,10 +48,20 @@ interface TextInputBaseProps {
 export interface SingleLineTextInputProps
   extends
     TextInputBaseProps,
-    Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "aria-label" | "aria-labelledby"> {
+    Omit<
+      React.InputHTMLAttributes<HTMLInputElement>,
+      "size" | "onChange" | "aria-label" | "aria-labelledby"
+    > {
   multiline?: false;
   /** Control size. Default `md`. Mutually exclusive with `multiline` / `rows`. */
   size?: Size;
+  /**
+   * Called on input, with the current string value first and the raw React
+   * change event second — the shared form-control shape. (Replaces the native
+   * event-only `onChange`; read the value from the first argument, not
+   * `event.target.value`.)
+   */
+  onChange?: (value: string, event: React.ChangeEvent<HTMLInputElement>) => void;
   ref?: React.Ref<HTMLInputElement>;
 }
 
@@ -61,11 +71,18 @@ export interface MultilineTextInputProps
     TextInputBaseProps,
     Omit<
       React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-      "size" | "aria-label" | "aria-labelledby"
+      "size" | "onChange" | "aria-label" | "aria-labelledby"
     > {
   multiline: true;
   /** Visible rows (the textarea's starting height). Default `3`. */
   rows?: number;
+  /**
+   * Called on input, with the current string value first and the raw React
+   * change event second — the shared form-control shape. (Replaces the native
+   * event-only `onChange`; read the value from the first argument, not
+   * `event.target.value`.)
+   */
+  onChange?: (value: string, event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   ref?: React.Ref<HTMLTextAreaElement>;
 }
 
@@ -84,15 +101,22 @@ export type TextInputProps = (SingleLineTextInputProps | MultilineTextInputProps
 // place, so we widen `multiline`/`size`/`rows`/`ref` and merge both attribute sets.
 type TextInputInternalProps = TextInputBaseProps &
   FieldLabellingInput &
-  Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "aria-label" | "aria-labelledby"> &
+  Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    "size" | "onChange" | "aria-label" | "aria-labelledby"
+  > &
   Omit<
     React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-    "size" | "aria-label" | "aria-labelledby"
+    "size" | "onChange" | "aria-label" | "aria-labelledby"
   > & {
     multiline?: boolean;
     size?: Size;
     rows?: number;
     className?: string;
+    onChange?: (
+      value: string,
+      event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    ) => void;
     ref?: React.Ref<HTMLInputElement & HTMLTextAreaElement>;
   };
 
@@ -111,8 +135,17 @@ type TextInputInternalProps = TextInputBaseProps &
  * Name it with exactly one of `label`, `aria-label`, or `aria-labelledby` — they
  * are mutually exclusive (see `FieldLabellingProps`).
  *
+ * `onChange` follows the shared form-control shape — it's called with the string
+ * value first and the raw React change event second, so read the value from the
+ * first argument rather than `event.target.value`.
+ *
  * @example
  * <TextInput label="Email" type="email" placeholder="you@example.com" />
+ *
+ * @example
+ * // Controlled: the value arrives first, the raw event second.
+ * const [email, setEmail] = React.useState("");
+ * <TextInput label="Email" value={email} onChange={(value) => setEmail(value)} />
  *
  * @example
  * // Multiline, with a label InfoButton
@@ -148,10 +181,16 @@ export function TextInput(props: TextInputProps) {
     multiline = false,
     size = "md",
     rows = 3,
+    onChange,
     ...rest
   } = props as unknown as TextInputInternalProps;
 
   const disabled = disabledProp || inheritedDisabled;
+
+  // Report the string value first and the raw React event second — the shared
+  // form-control shape — rather than forwarding the native event-only `onChange`.
+  const handleChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined =
+    onChange && ((event) => onChange(event.target.value, event));
 
   const controlClass = cx(
     formControlRecipe(multiline ? { state, multiline: true } : { state, size }),
@@ -186,6 +225,7 @@ export function TextInput(props: TextInputProps) {
         // emits an attribute for the label-less arms.
         {...fieldNameAttrs({ label, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby })}
         {...rest}
+        onChange={handleChange}
       />
     </Field>
   );

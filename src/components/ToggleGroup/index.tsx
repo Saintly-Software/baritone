@@ -116,8 +116,12 @@ function ToggleGroupItem<T extends string>({
 interface ToggleGroupBaseProps<T extends string> {
   /** The currently selected value (controlled). Always exactly one, like `RadioGroup`. */
   value: T;
-  /** Called with the newly selected value. Not called when the group is disabled. */
-  onChange: (value: T) => void;
+  /**
+   * Called with the newly selected value first and the raw DOM event that drove
+   * the selection second (base-ui's native `event`). Not called when the group
+   * is disabled.
+   */
+  onChange: (value: T, event: Event) => void;
   /**
    * Render-prop children. Receives a `ToggleGroupItem` already bound to this
    * group's `T`, so every `<ToggleGroupItem value={...} />` is type-checked
@@ -295,7 +299,7 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
                 details.cancel();
                 return;
               }
-              onChange(selected);
+              onChange(selected, details.event);
             }}
             {...nameAttrs}
             aria-describedby={joinIds(ariaDescribedby, describedBy)}

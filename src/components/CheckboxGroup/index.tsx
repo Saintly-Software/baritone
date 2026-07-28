@@ -35,8 +35,11 @@ interface CheckboxGroupItemContextValue {
   disabled: boolean;
   /** The currently-selected values (membership decides each box's checked state). */
   value: readonly unknown[];
-  /** Add (`checked`) or remove (`!checked`) a value from the selection. */
-  toggle: (value: unknown, checked: boolean) => void;
+  /**
+   * Add (`checked`) or remove (`!checked`) a value from the selection, carrying
+   * the raw DOM event through to the group's `onChange`.
+   */
+  toggle: (value: unknown, checked: boolean, event: Event) => void;
 }
 
 const CheckboxGroupItemContext = React.createContext<CheckboxGroupItemContextValue>({
@@ -109,7 +112,7 @@ function CheckboxGroupItem<T>({
     <label className={cx(checkboxRow({ size }), itemDisabled && checkboxRowDisabled, className)}>
       <BaseCheckbox.Root
         checked={checked}
-        onCheckedChange={(next) => toggle(value, next)}
+        onCheckedChange={(next, details) => toggle(value, next, details.event)}
         // `readOnly` + `aria-disabled` (not `disabled`) so a disabled box stays in
         // the tab order and reachable, while base-ui vetoes the toggle.
         readOnly={itemDisabled}
@@ -133,8 +136,11 @@ function CheckboxGroupItem<T>({
 interface CheckboxGroupBaseProps<T> {
   /** The currently selected values (controlled). Order is not significant. */
   value: T[];
-  /** Called with the next selection whenever an option is ticked or unticked. */
-  onChange: (value: T[]) => void;
+  /**
+   * Called whenever an option is ticked or unticked, with the next selection
+   * first and the raw DOM event that drove it second (base-ui's native `event`).
+   */
+  onChange: (value: T[], event: Event) => void;
   /**
    * Render-prop children. Receives a `CheckboxGroupItem` already bound to this
    * group's `T`, so every `<CheckboxGroupItem value={...} />` is type-checked
@@ -236,10 +242,10 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
   onChangeRef.current = onChange;
 
   const toggle = React.useCallback(
-    (toggled: unknown, checked: boolean) => {
+    (toggled: unknown, checked: boolean, event: Event) => {
       const current = value as readonly T[];
       const next = checked ? [...current, toggled as T] : current.filter((v) => v !== toggled);
-      onChangeRef.current(next);
+      onChangeRef.current(next, event);
     },
     [value],
   );

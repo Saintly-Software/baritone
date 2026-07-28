@@ -13,7 +13,7 @@ function Subscribe({
   ...rest
 }: {
   value?: boolean;
-  onChange?: (value: boolean) => void;
+  onChange?: (value: boolean, event: Event) => void;
 } & Partial<
   DistributiveOmit<
     React.ComponentProps<typeof Checkbox>,
@@ -25,9 +25,9 @@ function Subscribe({
     <Checkbox
       label="Subscribe"
       value={value}
-      onChange={(next) => {
+      onChange={(next, event) => {
         setValue(next);
-        onChange?.(next);
+        onChange?.(next, event);
       }}
       {...rest}
     />
@@ -54,7 +54,7 @@ describe("Checkbox", () => {
 
     await user.click(screen.getByRole("checkbox", { name: "Subscribe" }));
 
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.any(Event));
     expect(screen.getByRole("checkbox", { name: "Subscribe" })).toBeChecked();
   });
 
@@ -65,7 +65,7 @@ describe("Checkbox", () => {
 
     await user.click(screen.getByText("Subscribe"));
 
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.any(Event));
   });
 
   it("toggles with the keyboard", async () => {
@@ -77,7 +77,7 @@ describe("Checkbox", () => {
     expect(screen.getByRole("checkbox", { name: "Subscribe" })).toHaveFocus();
 
     await user.keyboard(" ");
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.any(Event));
   });
 
   it("does not toggle when disabled", async () => {
@@ -149,7 +149,7 @@ describe("Checkbox", () => {
 
     await user.click(screen.getByRole("checkbox", { name: "Subscribe" }));
 
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(true, expect.any(Event));
   });
 
   it("names a label-less box with aria-label", () => {

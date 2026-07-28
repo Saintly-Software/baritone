@@ -117,8 +117,12 @@ export interface SingleSelectProps extends SelectBaseProps {
   multiple?: false;
   /** The selected value, or `null` when nothing is selected (controlled). */
   value: string | null;
-  /** Called with the newly selected value (or `null` when cleared). */
-  onChange: (value: string | null) => void;
+  /**
+   * Called with the newly selected value (or `null` when cleared) first and the
+   * raw DOM event that drove the change second (base-ui's native `event`, or the
+   * clear button's).
+   */
+  onChange: (value: string | null, event: Event) => void;
 }
 
 /** Multi-select: an array of values. */
@@ -126,8 +130,12 @@ export interface MultipleSelectProps extends SelectBaseProps {
   multiple: true;
   /** The selected values (controlled). */
   value: string[];
-  /** Called with the next selected-values array (after a toggle or clear). */
-  onChange: (value: string[]) => void;
+  /**
+   * Called with the next selected-values array (after a toggle or clear) first
+   * and the raw DOM event that drove the change second (base-ui's native
+   * `event`, or the clear button's).
+   */
+  onChange: (value: string[], event: Event) => void;
 }
 
 /**
@@ -255,7 +263,7 @@ export function Select(props: SelectProps) {
     FieldLabellingInput & {
       multiple?: boolean;
       value: string | string[] | null;
-      onChange: (value: never) => void;
+      onChange: (value: never, event: Event) => void;
     };
 
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
@@ -268,10 +276,14 @@ export function Select(props: SelectProps) {
   };
 
   // The union is collapsed to a single runtime handler; the casts are safe
-  // because `multiple` decides which arm the caller wired.
-  const emit = onChange as (value: string | string[] | null) => void;
-  const handleValueChange = (next: string | string[] | null) => emit(next);
-  const clear = () => emit(multiple ? [] : null);
+  // because `multiple` decides which arm the caller wired. Both commit paths
+  // carry a raw DOM event: base-ui hands one through `details.event`, and the
+  // clear button forwards its click's `nativeEvent`.
+  const emit = onChange as (value: string | string[] | null, event: Event) => void;
+  const handleValueChange = (next: string | string[] | null, details: { event: Event }) =>
+    emit(next, details.event);
+  const clear = (event: React.MouseEvent<HTMLButtonElement>) =>
+    emit(multiple ? [] : null, event.nativeEvent);
 
   const hasValue = multiple ? (value as string[]).length > 0 : value != null;
   const showClear = !hideClearButton && hasValue && !disabled && !loading;

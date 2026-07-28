@@ -94,7 +94,7 @@ describe("Combobox", () => {
     await user.click(screen.getByRole("combobox", { name: "Fruit" }));
     await user.click(await screen.findByRole("option", { name: "Banana" }));
 
-    expect(onValueChange).toHaveBeenCalledWith("banana");
+    expect(onValueChange).toHaveBeenCalledWith("banana", expect.any(Event));
   });
 
   it("filters options as the user types", async () => {
@@ -169,7 +169,7 @@ describe("Combobox", () => {
     const createOption = await screen.findByRole("option", { name: /mango/i });
     await user.click(createOption);
 
-    expect(onValueChange).toHaveBeenCalledWith("mango");
+    expect(onValueChange).toHaveBeenCalledWith("mango", expect.any(Event));
   });
 
   it("does not offer a free-text option without freeText", async () => {
@@ -210,7 +210,7 @@ describe("Combobox", () => {
       await user.click(screen.getByRole("combobox", { name: "Fruit" }));
       await user.click(await screen.findByRole("option", { name: "Banana" }));
 
-      expect(onValueChange).toHaveBeenCalledWith(["apple", "banana"]);
+      expect(onValueChange).toHaveBeenCalledWith(["apple", "banana"], expect.any(Event));
     });
   });
 
@@ -227,7 +227,7 @@ describe("Combobox", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "Clear" }));
-    expect(onValueChange).toHaveBeenCalledWith(null);
+    expect(onValueChange).toHaveBeenCalledWith(null, expect.any(Event));
   });
 
   it("shows the error message and marks the field invalid in the invalid state", () => {
@@ -284,7 +284,7 @@ describe("Combobox", () => {
       await user.click(screen.getByRole("combobox", { name: "Fruit" }));
       await user.click(await screen.findByRole("option", { name: "Lime" }));
 
-      expect(onValueChange).toHaveBeenCalledWith("lime");
+      expect(onValueChange).toHaveBeenCalledWith("lime", expect.any(Event));
     });
   });
 
@@ -336,7 +336,7 @@ describe("Combobox", () => {
       await user.click(screen.getByRole("combobox", { name: "Colour" }));
       await user.click(await screen.findByRole("gridcell", { name: "Blue" }));
 
-      expect(onValueChange).toHaveBeenCalledWith("blue");
+      expect(onValueChange).toHaveBeenCalledWith("blue", expect.any(Event));
     });
 
     it("marks the selected gridcell aria-selected", async () => {
