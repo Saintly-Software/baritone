@@ -5,7 +5,7 @@ import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { useRender, type RenderProp } from "../../utils/render";
+import { RenderElement, useRender, type RenderProp } from "../../utils/render";
 import { Heading } from "../Heading";
 import { Text } from "../Text";
 import {
@@ -404,26 +404,30 @@ function CardRoot(props: CardProps) {
     </CardHeaderContext.Provider>
   );
 
-  return useRender({
-    render: interactive ? undefined : render,
-    defaultElement: as,
-    props: {
-      ref,
-      className: cx(
-        surfaceRecipe({ intent, saliency, interactive }),
-        cardResponsivePadding,
-        cardRoot,
-        // Interactive cards position their overlay link; static cards keep the
-        // focus ring in case a consumer makes the surface itself focusable.
-        interactive ? cardInteractive : focusRingRecipe({ type: "visible" }),
-        cardSelectedRecipe({ selected }),
-        className,
-      ),
-      "aria-disabled": disabled || undefined,
-      children: body,
-      ...rest,
-    },
-  });
+  // `RenderElement` (not the `useRender` hook) because this render sits behind the
+  // earlier `if (collapsible)` return.
+  return (
+    <RenderElement
+      render={interactive ? undefined : render}
+      defaultElement={as}
+      props={{
+        ref,
+        className: cx(
+          surfaceRecipe({ intent, saliency, interactive }),
+          cardResponsivePadding,
+          cardRoot,
+          // Interactive cards position their overlay link; static cards keep the
+          // focus ring in case a consumer makes the surface itself focusable.
+          interactive ? cardInteractive : focusRingRecipe({ type: "visible" }),
+          cardSelectedRecipe({ selected }),
+          className,
+        ),
+        "aria-disabled": disabled || undefined,
+        children: body,
+        ...rest,
+      }}
+    />
+  );
 }
 
 /**

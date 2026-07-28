@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useRender as baseUseRender, type UseRenderRenderProp } from "@base-ui/react/use-render";
 import { cx } from "./cx";
 
 /**
@@ -67,14 +68,36 @@ export interface UseRenderParams {
   props: AnyProps;
 }
 
-export function useRender({ render, defaultElement, props }: UseRenderParams): React.ReactNode {
-  if (typeof render === "function") {
-    return render(props);
-  }
-  if (React.isValidElement(render)) {
-    return React.cloneElement(render, mergeProps(props, render.props as AnyProps));
-  }
-  return React.createElement(defaultElement, props);
+/**
+ * Polymorphic render, delegating to base-ui's `useRender` so we inherit its
+ * ref-merging, event-handler chaining, and `preventBaseUIHandler` support rather
+ * than maintaining a parallel implementation. Our `defaultElement` maps to
+ * base-ui's `defaultTagName`: base-ui only renders a *string* default tag, and
+ * every caller passes an intrinsic tag (`"div"`, `"a"`, `` `h${level}` ``, …), so
+ * the cast is sound. Refs are still passed inside `props` — base-ui reads
+ * `props.ref` and merges it, so call sites keep their existing shape.
+ *
+ * This is a hook (base-ui's `useRender` calls `useMergedRefs` internally), so it
+ * must be called unconditionally. To render polymorphically from a conditional
+ * branch (behind an early `return`), use {@link RenderElement} instead.
+ */
+export function useRender({ render, defaultElement, props }: UseRenderParams): React.ReactElement {
+  return baseUseRender({
+    render: render as UseRenderRenderProp | undefined,
+    defaultTagName: defaultElement as keyof React.JSX.IntrinsicElements,
+    props,
+  });
+}
+
+/**
+ * Component form of {@link useRender}, for call sites that render polymorphically
+ * from a conditional branch — e.g. after an early `return` for a disabled or
+ * collapsed variant. Rendering a component conditionally is fine (the hook inside
+ * runs unconditionally whenever the component renders), whereas calling
+ * `useRender` directly after an early `return` would break the Rules of Hooks.
+ */
+export function RenderElement(params: UseRenderParams): React.ReactElement {
+  return useRender(params);
 }
 
 export { composeRefs, mergeProps };
