@@ -1,5 +1,208 @@
 # @saintly-software/baritone
 
+## 1.0.0-alpha.2
+
+### Major Changes
+
+- 77c49ee: Give every form control the same change-callback shape: **the plain value comes
+  first, the raw event comes last.** Previously the value-first controls dropped
+  the event entirely, and `TextInput` did the opposite — it forwarded the native
+  event only. Now they agree.
+
+  - `Checkbox`, `Switch`, `RadioGroup`, `CheckboxGroup`, `Select`, `ToggleGroup`
+    call `onChange(value, event)`, and `Combobox` calls `onValueChange(value, event)`.
+    The second argument is base-ui's raw DOM `Event` (from its `eventDetails.event`)
+    — for `Select`, the clear button forwards its click's `nativeEvent`.
+  - **`TextInput` is the breaking one.** Its `onChange` no longer forwards the
+    native React event by itself — it is now `onChange(value: string, event)`, where
+    `event` is the raw `React.ChangeEvent`. Read the text from the **first**
+    argument; `event.target.value` still works but the value arg is the point.
+  - `FileUpload`'s event is optional: `onChange(value, event?)`. A picker `change`
+    or a drag-and-drop passes the raw `React` event (`FileUploadChangeEvent`, newly
+    exported); removing a staged file passes no event (`undefined`).
+
+  Migration:
+
+  ```tsx
+  // TextInput — before
+  <TextInput value={v} onChange={(e) => setV(e.target.value)} />
+  // TextInput — after
+  <TextInput value={v} onChange={(value) => setV(value)} />
+  // (or simply onChange={setV})
+  ```
+
+  Callbacks that only use the value — `onChange={setValue}` and friends — need no
+  change; the extra argument is additive for them.
+
+- 015b267: Rename `Text`/`Heading`'s `variant` prop to `size` and unify typography on one
+  token-driven scale.
+
+  - **Breaking — `variant` → `size`** on `Text` and `Heading` (and `Lockup`'s title
+    slot). The `base` value is renamed `md`, which is also the new default.
+  - **Breaking — new size scale** `xs sm md lg xl 2xl 3xl 4xl 5xl 6xl 7xl 8xl 9xl`
+    (Tailwind-style). `3.5xl` is removed; `5xl`–`9xl` are new. `Text` and `Heading`
+    share the full scale — there is no more body/title split.
+  - **Breaking — token API:** `text.variant.{body,title}.<size>` is replaced by a
+    flat `text.size.<size>` (`{ fontSize, lineHeight }`) plus two increment tokens
+    `text.fontStep.{lower,upper}`. Each per-size font-size is `calc()`-derived from
+    the `md` anchor + the increments, so the whole ramp re-themes at runtime by
+    changing three tokens — or override any single `text.size.<size>` leaf.
+    `BrandSeed` gains a `fontScale` option. Defaults match Tailwind for `xs`–`2xl`
+    (font-size) and use Tailwind's per-size line-heights.
+  - **Breaking — constants/recipe:** removed `BODY_SIZES`/`TITLE_SIZES` and
+    `BodySize`/`TitleSize` (use `TEXT_SIZES`/`TextSize`); `HEADING_LEVEL_VARIANT` →
+    `HEADING_LEVEL_SIZE`; the `textVariantRecipe` recipe (and `TextVariantVariants`)
+    → `textSizeRecipe`/`TextSizeVariants`, and its `family` variant is gone.
+  - Weight is now independent of `size`: `Heading` keeps its customary per-level
+    weight (via the new `HEADING_LEVEL_WEIGHT`); large `Text` is no longer
+    auto-bolded — use the `weight` prop.
+  - **Breaking — `align`/`wrap`/`wordBreak` → layout atoms.** These `Text`/`Heading`
+    props are replaced by the `textAlign` / `whiteSpace` / `overflowWrap` atoms
+    (e.g. `wrap="nowrap"` → `whiteSpace="nowrap"`, `wrap="wrap"` →
+    `whiteSpace="normal"`, `wordBreak="break-word"` → `overflowWrap="break-word"`).
+    `mono` / `italic` / `weight` remain, now backed by the split `typographyFont` /
+    `typographyDecoration` / `typographyWeight` recipes.
+
+  `Text` and `Heading` now delegate to a shared internal `InternalText` primitive.
+
+### Minor Changes
+
+- fd73b93: Stop `Chip` button adornments from leaking their click to a clickable ancestor,
+  with a `forcePropagation` opt-out.
+
+  - **Button adornments now stop propagation by default** — a `Chip.Adornment`
+    rendered as a `<button>` (`onClick`), plus the built-in `handleRemove` "×" and
+    `contentToCopy` buttons, is its own hit target, so its click no longer bubbles
+    past the chip. Wrapping a `Chip` / `ChipList` in a clickable row and removing a
+    chip (or clicking any button adornment) acts on that control alone and no longer
+    also fires the row's handler. This realises the existing "the label and any
+    adornments are independent hit targets" design intent.
+  - **`Chip.Adornment` gains `forcePropagation`** (button adornments only) — set it
+    to let the click bubble up to an ancestor as before. Link adornments (`href`)
+    keep bubbling and don't take the prop; a disabled/inert adornment still swallows
+    its click regardless.
+
+- 9379c08: Add a `LinkProvider` to wire `Link` to your app's router once, for the whole tree.
+
+  Previously every router-driven `Link` needed its own `render`
+  (`render={<NextLink href="…" />}`). `LinkProvider` hoists that to the app root:
+  wrap your tree once and every _internal_ `Link` — inline or `appearance="button"` —
+  renders through your router's link, keeping the system's styling while the router
+  owns client-side navigation.
+
+  ```tsx
+  import Link from "next/link";
+
+  <LinkProvider render={(props) => <Link {...props} />}>
+    <App />
+  </LinkProvider>;
+
+  // …no per-link render needed:
+  <Link href="/dashboard">Dashboard</Link>;
+  ```
+
+  - **Router-agnostic.** The provider's `render` receives the resolved link props
+    (`href`, `className`, `children`, …); map `href` onto whatever prop your router
+    uses — `href` for Next.js, `to` for React Router / TanStack Router
+    (`render={({ href, ...props }) => <RouterLink to={href} {...props} />}`).
+  - **Safe to wrap everything.** Only _internal_ links route; external URLs
+    (`https:`, `mailto:`, `tel:`, …), new-tab (`target`), and `download` links stay
+    plain anchors. The internal test is `isInternalHref` (exported) — purely
+    syntactic, so it's SSR-safe — overridable via the provider's `isInternal` prop.
+  - **Escape hatch preserved.** A per-link `render` still wins over the provider,
+    and a `Link` outside any provider behaves exactly as before.
+  - Exposes `useLinkRender` for building your own router-aware link-like components
+    (the same hook `Link` uses).
+
+- 9bb98f1: Add `SegmentedBar` — one bar divided into the parts that make up a whole, with a
+  legend naming each part (time by project, spend by category, storage by type).
+  Where `Meter` shows one value against a range, this shows one whole split up.
+
+  - `segments` take a `label` and a raw `value`; the shares are computed, so callers
+    pass counts rather than percentages. `total` sets the denominator explicitly —
+    pass a number above their sum (a quota, a target) to leave the difference as
+    unfilled track. Slices are sized by `flex-grow`, so they divide the track
+    exactly, with a minimum width that keeps a sliver visible and a 2px gap
+    separating neighbours instead of a stroke around each one.
+  - Each segment is coloured by `intent` × `saliency`, defaulting to a fixed
+    sequence of intents so a bar is legible with nothing but labels and values.
+    Assignment is by position — give segments an explicit colour when the set can
+    change, or a filtered-out segment repaints the ones after it. A per-segment
+    `color` is the escape hatch for fills that are _data_ (a user-chosen category
+    colour), mutually exclusive with `intent`/`saliency` as `Badge`'s is.
+  - The legend is a real list, one item per segment carrying its label, share, and
+    value; the track duplicates it, so the track is `aria-hidden` and colour is
+    never the only thing carrying identity. `showLegend={false}` therefore hides it
+    _visually only_ — it stays in the accessibility tree, since it's the only thing
+    announcing the numbers. `showPercent` / `showValue` trim its columns.
+  - A visible `label` (which names the legend list) and an optional `showTotal`
+    read-out sit above the track, mirroring `Meter`'s header; `size` sets the track
+    thickness, `format` / `locale` format the values, and `slotProps` re-tune each
+    `Text` slot.
+
+  Also exports `SegmentedBarProps`, `SegmentedBarSegment`, `SegmentedBarSegmentBase`,
+  `SegmentedBarSegmentIntentColour`, `SegmentedBarSegmentCustomColour`, and
+  `SegmentedBarSlotProps`.
+
+- b3afea8: Add a dynamic, consumer-defined `font` prop to `Text` and `Heading`.
+
+  Unlike every other typography knob (`size`, `weight`, `intent`, …), the set of
+  values `font` accepts is defined by the **consuming app**, not the design system.
+  A coding app might register `monospace` / `nonmono`; a lyric-writing app a larger
+  set of display faces. This is the one _open_ vocabulary in Baritone, so it can't
+  ride the build-time vanilla-extract contract — it works through three seams:
+
+  - **Values** — the theme publishes one `--font-<name>` custom property per family.
+    `createDesignSystemTheme` / `createInlineTheme` / `BaritoneTheme` gain a `fonts`
+    option (`{ display: '"Playfair Display", serif' }`) plus a `defaultFont` option
+    that picks the family bare text uses (e.g. `"mono"` for a code-first app). The
+    built-in `sans` and `mono` are always published.
+  - **Types** — augment the new `FontRegistry` interface to tighten `font` from a
+    loose `string` to `sans | mono | <your names>` with autocompletion, while
+    Baritone stays ignorant of the names:
+    ```ts
+    declare module "@saintly-software/baritone" {
+      interface FontRegistry {
+        display: true;
+        handwriting: true;
+      }
+    }
+    ```
+  - **Plumbing** — the `font` prop resolves to `var(--font-<name>)` via a new
+    `--textFont` custom property that the size recipe reads (mirroring how colour
+    reads `--textColor`); a single inline var per instance, no variant-class
+    explosion.
+
+  Also:
+
+  - **Dev warning** — in development, `font="<name>"` pointing at a `--font-<name>`
+    the active theme never published logs an actionable `console.warn` (the text
+    would otherwise silently inherit its ancestor's family). Deduped per name,
+    skipped under jsdom, and dead-code-eliminated from production builds.
+  - **The boolean `mono` prop is removed** — use `font="mono"` (a built-in). The
+    redundant `typographyFont` recipe is gone too.
+  - `textFontVar` is exported alongside `textColorVar` for advanced composition, and
+    `FontRegistry` / `FontName` / `fontVarName` / `fontFamilyVars` from the theme.
+
+- a3a159c: Add a `textTransform` prop to `Text` and `Heading` (`none` | `uppercase` |
+  `lowercase` | `capitalize`). Like `textAlign`, `whiteSpace`, and `overflowWrap`,
+  it's a plain `text-transform` passthrough backed by the sprinkles atoms, so it's
+  opt-in and additive — omitting it leaves the rendered casing untouched.
+- 3591373: `useRender` now delegates to base-ui's own `useRender` instead of a parallel
+  hand-rolled implementation, inheriting base-ui's ref-merging, event-handler
+  chaining, and `preventBaseUIHandler` support.
+
+  **Breaking:** `defaultElement` is now typed as — and restricted to — an intrinsic
+  tag name (`keyof JSX.IntrinsicElements`) rather than any `ElementType`. The old
+  implementation rendered a component-valued `defaultElement` via `createElement`;
+  base-ui renders only string tags, so a component default is no longer accepted at
+  either the type level or runtime. To render _as_ a component, use the `render`
+  prop (`render={<Component />}`) — always its intended role.
+
+  One more note for direct `useRender` consumers: an element that defaults to
+  `<button>` now receives `type="button"` unless you pass a `type`, matching
+  base-ui (keeps an in-form button from submitting).
+
 ## 1.0.0-alpha.1
 
 ### Major Changes
