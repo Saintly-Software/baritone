@@ -57,6 +57,7 @@ export interface ChipRegularAdornmentProps extends ChipAdornmentBaseProps {
   href?: never;
   disabled?: never;
   render?: never;
+  forcePropagation?: never;
 }
 
 /**
@@ -74,6 +75,13 @@ export interface ChipButtonAdornmentProps extends ChipAdornmentBaseProps {
    * makes its clickable adornments inert.
    */
   disabled?: boolean;
+  /**
+   * A button adornment is its own hit target, so by default its click is stopped
+   * from bubbling past the chip — it won't also trigger a clickable ancestor
+   * (e.g. a clickable row wrapping the chip). Set this to let the click propagate
+   * up as usual.
+   */
+  forcePropagation?: boolean;
   href?: never;
   render?: never;
 }
@@ -94,6 +102,7 @@ export interface ChipLinkAdornmentProps extends ChipAdornmentBaseProps {
   render?: RenderProp;
   onClick?: never;
   disabled?: never;
+  forcePropagation?: never;
 }
 
 /**
@@ -214,7 +223,7 @@ function ChipCopyAdornment({ content }: { content: string }) {
  * props: a regular icon, a `<button>` (`onClick`), or an `<a>` (`href`).
  */
 function ChipAdornment(props: ChipAdornmentProps) {
-  const { icon, intent, label, onClick, href, disabled, render } = props;
+  const { icon, intent, label, onClick, href, disabled, render, forcePropagation } = props;
   const {
     saliency = "mid",
     size = "md",
@@ -244,6 +253,13 @@ function ChipAdornment(props: ChipAdornmentProps) {
       event.preventDefault();
       event.stopPropagation();
       return;
+    }
+    // A button adornment is its own hit target: its click shouldn't also fire a
+    // clickable ancestor (e.g. a row wrapping the chip), so stop it bubbling
+    // unless `forcePropagation` opts back in. Links keep bubbling — they navigate
+    // anyway and never take `forcePropagation`.
+    if (onClick != null && forcePropagation !== true) {
+      event.stopPropagation();
     }
     onClick?.(event as React.MouseEvent<HTMLButtonElement>);
   };
