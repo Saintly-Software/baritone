@@ -91,7 +91,7 @@ export interface InternalTextProps
    */
   font?: FontName;
   /** The tag rendered when `render` isn't supplied. */
-  defaultElement: React.ElementType;
+  defaultElement: keyof React.JSX.IntrinsicElements;
   /** base-ui `render` escape hatch (any element/component). */
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;

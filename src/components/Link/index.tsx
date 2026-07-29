@@ -5,7 +5,7 @@ import type { WidthShorthand } from "../../styles/layoutProps";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { useRender, type RenderProp } from "../../utils/render";
+import { RenderElement, type RenderProp } from "../../utils/render";
 import { useLinkRender } from "../LinkProvider";
 import { linkBase } from "./link.css";
 
@@ -163,14 +163,18 @@ export function Link(props: LinkProps) {
   }
 
   const { appearance: _appearance, render: _render, className, children, ref, ...rest } = props;
-  return useRender({
-    render,
-    defaultElement: "a",
-    props: {
-      ref,
-      className: cx(linkBase, focusRingRecipe({ type: "visible" }), className),
-      children,
-      ...rest,
-    },
-  });
+  // `RenderElement` (not the `useRender` hook) because this render sits behind the
+  // earlier `appearance === "button"` return.
+  return (
+    <RenderElement
+      render={render}
+      defaultElement="a"
+      props={{
+        ref,
+        className: cx(linkBase, focusRingRecipe({ type: "visible" }), className),
+        children,
+        ...rest,
+      }}
+    />
+  );
 }

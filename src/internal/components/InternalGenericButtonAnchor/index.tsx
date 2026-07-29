@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useRender, type RenderProp } from "../../../utils/render";
+import { RenderElement, type RenderProp } from "../../../utils/render";
 
 export interface InternalGenericButtonAnchorProps extends Omit<
   React.HTMLAttributes<HTMLElement>,
@@ -148,8 +148,9 @@ export function InternalGenericButtonAnchor({
 
     // Internal, client-side navigation: hand our props to the consumer's router
     // link via the base-ui render seam. Falls back to a plain `<a>` when `render`
-    // is a plain `href` link with no element.
-    return useRender({ render, defaultElement: "a", props: linkProps });
+    // is a plain `href` link with no element. `RenderElement` (not the `useRender`
+    // hook) because this render sits behind the earlier disabled/button returns.
+    return <RenderElement render={render} defaultElement="a" props={linkProps} />;
   }
 
   // Not a link → a button. Disabled uses `aria-disabled` (never the native
