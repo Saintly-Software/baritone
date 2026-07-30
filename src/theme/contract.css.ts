@@ -3,6 +3,7 @@ import {
   BORDER_WIDTH_KEYS,
   FORM_STATES,
   INTENTS,
+  LETTER_SPACING_KEYS,
   RADIUS_KEYS,
   SALIENCIES,
   SHADOW_KEYS,
@@ -59,6 +60,9 @@ export const tokenShape = {
     fontStep: { lower: s(), upper: s() },
     // Named `font-weight` steps selectable via the `weight` prop.
     weight: record(TEXT_WEIGHTS, () => s()),
+    // Named letter-spacing (tracking) steps selectable via the `letterSpacing`
+    // prop. `em`-based so a step scales with font-size across the whole ramp.
+    letterSpacing: record(LETTER_SPACING_KEYS, () => s()),
   },
   font: {
     sans: s(),

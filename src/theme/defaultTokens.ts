@@ -6,6 +6,7 @@ import {
   TEXT_SIZES,
   type BorderWidthKey,
   type Intent,
+  type LetterSpacingKey,
   type RadiusKey,
   type Saliency,
   type SpaceKey,
@@ -18,6 +19,7 @@ import {
   fontSizeAnchor,
   fontStep,
   fontWeight,
+  letterSpacing,
   lineHeight,
   motion,
   radius,
@@ -121,6 +123,11 @@ export interface BrandSeed {
     sizes?: Partial<Record<TextSize, string>>;
     lineHeight?: Partial<Record<TextSize, string>>;
   };
+  /**
+   * Letter-spacing (tracking) scale overrides, merged over the built-in `em`
+   * steps. Bump e.g. `widest` if your brand's uppercase labels want more track.
+   */
+  letterSpacing?: Partial<Record<LetterSpacingKey, string>>;
 }
 
 /** Fully-resolved seed (defaults filled in) threaded through the colour math. */
@@ -437,6 +444,7 @@ export function buildDefaultTokens(
   const radiusScale = { ...radius, ...brand.radius };
   const spaceScale = { ...space, ...brand.space };
   const borderWidthScale = { ...borderWidth, ...brand.borderWidth };
+  const letterSpacingScale = { ...letterSpacing, ...brand.letterSpacing };
   const fontScale = {
     anchor: brand.fontScale?.anchor ?? fontSizeAnchor,
     stepLower: brand.fontScale?.stepLower ?? fontStep.lower,
@@ -473,6 +481,7 @@ export function buildDefaultTokens(
         bold: fontWeight.bold,
         superbold: fontWeight.superbold,
       },
+      letterSpacing: letterSpacingScale,
     },
     font: {
       sans: brand.fonts?.sans ?? fontFamily.sans,

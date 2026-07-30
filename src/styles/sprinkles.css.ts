@@ -1,12 +1,18 @@
 import { createSprinkles, defineProperties } from "@vanilla-extract/sprinkles";
 import { breakpoints } from "../theme/breakpoints";
-import { SPACE_KEYS } from "../theme/constants";
+import { LETTER_SPACING_KEYS, SPACE_KEYS } from "../theme/constants";
 import { vars } from "../theme/contract.css";
 
 const spaceValues = Object.fromEntries(SPACE_KEYS.map((key) => [key, vars.space[key]])) as Record<
   (typeof SPACE_KEYS)[number],
   string
 >;
+
+// The `letterSpacing` atom reads the `text.letterSpacing` token scale directly
+// (like `spaceValues` reads `space`), so a themed `--…` drives each step.
+const letterSpacingValues = Object.fromEntries(
+  LETTER_SPACING_KEYS.map((key) => [key, vars.text.letterSpacing[key]]),
+) as Record<(typeof LETTER_SPACING_KEYS)[number], string>;
 
 const marginValues = { ...spaceValues, auto: "auto" };
 
@@ -79,6 +85,7 @@ const responsiveProperties = defineProperties({
     whiteSpace: ["normal", "nowrap"],
     overflowWrap: ["normal", "break-word"],
     textTransform: ["none", "uppercase", "lowercase", "capitalize"],
+    letterSpacing: letterSpacingValues,
   },
   shorthands: {
     p: ["padding"],

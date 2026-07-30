@@ -55,7 +55,8 @@ export interface HeadingProps
  * override. Defaults to high saliency and, per level, a customary bold/semibold
  * `weight` (weight is otherwise independent of `size`). Shares `Text`'s
  * token-backed typographic knobs (`weight`, `italic`, `font`) and the
- * `textAlign` / `whiteSpace` / `overflowWrap` / `textTransform` layout atoms.
+ * `textAlign` / `whiteSpace` / `overflowWrap` / `textTransform` / `letterSpacing`
+ * layout atoms.
  */
 export function Heading(props: HeadingProps) {
   const {

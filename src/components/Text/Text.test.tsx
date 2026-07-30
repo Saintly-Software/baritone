@@ -96,6 +96,11 @@ describe("Text", () => {
     expect(screen.getByText("Shout").className).toContain(atoms({ textTransform: "uppercase" }));
   });
 
+  it("applies the letterSpacing atom", () => {
+    render(<Text letterSpacing="widest">Eyebrow</Text>);
+    expect(screen.getByText("Eyebrow").className).toContain(atoms({ letterSpacing: "widest" }));
+  });
+
   it("applies the size recipe class", () => {
     render(<Text size="lg">Body</Text>);
     expect(screen.getByText("Body").className).toContain(textSizeRecipe({ size: "lg" }));
