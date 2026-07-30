@@ -258,11 +258,14 @@ export const LineHeights: Story = {
  * app publishes font-sizes as `--fontSize-<name>` custom properties (via the theme's
  * `sizes` option) and, for autocompletion + type-safety, declares those names by
  * augmenting the `FontSizeRegistry` interface. The built-in `xs`…`9xl` ramp is always
- * available. A consumer size sets `font-size` only, so pair a display size with a
- * tight `lineHeight`.
+ * available. A size given as `{ fontSize, lineHeight }` also publishes a paired
+ * `--lineHeight-<name>` — a tight display leading applied by default, no `lineHeight`
+ * prop needed (Tailwind-style); a bare `font-size` string falls back to the `md`
+ * leading.
  *
- * This story fakes a consumer by declaring a couple of `--fontSize-*` vars on the
- * wrapper, so `size="hero"` / `"figure"` resolve — exactly what a real theme emits.
+ * This story fakes a consumer by declaring the `--fontSize-*` (and, for `hero`, a
+ * paired `--lineHeight-*`) vars on the wrapper — exactly what a real theme emits for
+ * `sizes: { hero: { fontSize: "4rem", lineHeight: "1.05" }, figure: "2.75rem" }`.
  */
 export const CustomSizes: Story = {
   render: () => (
@@ -272,15 +275,18 @@ export const CustomSizes: Story = {
           display: "grid",
           gap: 12,
           "--fontSize-hero": "4rem",
+          "--lineHeight-hero": "1.05",
           "--fontSize-figure": "2.75rem",
         } as CSSProperties
       }
     >
       <Text size="xl">Default — a built-in size</Text>
-      <Text size="hero" weight="bold" lineHeight="none">
-        size=&quot;hero&quot; — a consumer-defined --fontSize-hero
+      <Text size="hero" weight="bold">
+        size=&quot;hero&quot; — a consumer pair (--fontSize-hero + paired --lineHeight-hero)
       </Text>
-      <Text size="figure">size=&quot;figure&quot; — a consumer-defined --fontSize-figure</Text>
+      <Text size="figure">
+        size=&quot;figure&quot; — a font-size-only consumer size (leading falls back to md)
+      </Text>
     </div>
   ),
 };

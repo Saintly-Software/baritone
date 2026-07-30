@@ -62,30 +62,31 @@ export function lineHeightVarName(name: string): string {
 
 // The reserved line-height names — the built-in leadings *and* the size names. A
 // consumer `lineHeights` entry can't shadow either: the leadings stay token-backed,
-// and the per-size names below back `size`'s paired default line-height.
+// and the `--lineHeight-<size>` namespace is owned by the size vocabulary (each
+// size's paired default leading — see `fontSizeVars`), so a standalone entry named
+// after a size would collide with it.
 const RESERVED_LINE_HEIGHT_NAMES: readonly string[] = [...LINE_HEIGHT_KEYS, ...TEXT_SIZES];
 
 /**
- * The `--lineHeight-<name>` custom properties a theme publishes:
- *   - the named leadings (`none`…`loose`) from the `text.lineHeight` tokens — the
- *     `lineHeight` prop's built-in vocabulary, and
- *   - one per size (`xs`…`9xl`) from the per-size `text.size.<name>.lineHeight`
- *     tokens — the paired default `size` applies when `lineHeight` is unset,
- * both routed through the contract vars so a runtime theme/brand swap still flows
- * through, plus one entry per consumer-supplied value. Spread into a theme class's
- * `vars` (build time) or a `style` object (runtime).
+ * The `--lineHeight-<name>` custom properties the *leading vocabulary* publishes:
+ * the named leadings (`none`…`loose`) from the `text.lineHeight` tokens — the
+ * `lineHeight` prop's built-in scale — routed through the contract vars so a runtime
+ * theme/brand swap still flows through, plus one entry per consumer-supplied value.
+ * Spread into a theme class's `vars` (build time) or a `style` object (runtime).
  *
- * The built-in leading names and the size names are reserved: entries by those
- * names in `lineHeights` are ignored (they stay token-backed). Customise them
- * through the theme tokens (`BrandSeed.lineHeight` / `BrandSeed.fontScale`) instead.
+ * The size-paired leadings (`--lineHeight-<size>`, the default `size` applies) live
+ * in the size vocabulary instead — see {@link fontSizeVars} — since a size is a
+ * font-size + leading pair.
+ *
+ * The built-in leading names and the size names are reserved: entries by those names
+ * in `lineHeights` are ignored. Customise the leadings through the theme tokens
+ * (`BrandSeed.lineHeight`), and a size's paired leading via the `sizes` option's
+ * `{ fontSize, lineHeight }` form (or `BrandSeed.fontScale`) instead.
  */
 export function lineHeightVars(lineHeights: Record<string, string> = {}): Record<string, string> {
   const out: Record<string, string> = {};
   for (const key of LINE_HEIGHT_KEYS) {
     out[lineHeightVarName(key)] = vars.text.lineHeight[key];
-  }
-  for (const size of TEXT_SIZES) {
-    out[lineHeightVarName(size)] = vars.text.size[size].lineHeight;
   }
   for (const [name, value] of Object.entries(lineHeights)) {
     if (RESERVED_LINE_HEIGHT_NAMES.includes(name)) continue;

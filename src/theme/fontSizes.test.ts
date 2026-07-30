@@ -9,16 +9,33 @@ describe("fontSizeVarName", () => {
 });
 
 describe("fontSizeVars", () => {
-  it("always publishes the built-in ramp from the theme tokens", () => {
+  it("always publishes the built-in ramp (font-size + paired leading) from the tokens", () => {
     const out = fontSizeVars();
     expect(out["--fontSize-xs"]).toBe(vars.text.size.xs.fontSize);
     expect(out["--fontSize-md"]).toBe(vars.text.size.md.fontSize);
     expect(out["--fontSize-9xl"]).toBe(vars.text.size["9xl"].fontSize);
+    // A size is a pair: it publishes its paired `--lineHeight-<size>` too (the
+    // default `size` applies when `lineHeight` is unset).
+    expect(out["--lineHeight-md"]).toBe(vars.text.size.md.lineHeight);
+    expect(out["--lineHeight-4xl"]).toBe(vars.text.size["4xl"].lineHeight);
   });
 
-  it("publishes each consumer value as a --fontSize-<name> property", () => {
+  it("publishes a string consumer size as a font-size only (no paired leading)", () => {
     const out = fontSizeVars({ hero: "4rem" });
     expect(out["--fontSize-hero"]).toBe("4rem");
+    expect(out["--lineHeight-hero"]).toBeUndefined();
+  });
+
+  it("publishes a { fontSize, lineHeight } pair as paired --fontSize/--lineHeight", () => {
+    const out = fontSizeVars({ hero: { fontSize: "4rem", lineHeight: "1.05" } });
+    expect(out["--fontSize-hero"]).toBe("4rem");
+    expect(out["--lineHeight-hero"]).toBe("1.05");
+  });
+
+  it("omits the paired leading when a pair sets only fontSize", () => {
+    const out = fontSizeVars({ hero: { fontSize: "4rem" } });
+    expect(out["--fontSize-hero"]).toBe("4rem");
+    expect(out["--lineHeight-hero"]).toBeUndefined();
   });
 
   it("ignores built-in size names so they stay token-backed", () => {

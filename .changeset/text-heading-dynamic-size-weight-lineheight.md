@@ -37,6 +37,12 @@ scale — `none` (1), `tight` (1.25), `snug` (1.375), `normal` (1.5), `relaxed`
 (1.625), `loose` (2) — backed by a new `text.lineHeight` token group (overridable via
 `BrandSeed.lineHeight`).
 
+A consumer `size` can carry its own paired leading too, Tailwind-style: a `sizes`
+entry is either a bare `font-size` (`{ hero: "4rem" }`, leading falls back to `md`)
+or a `{ fontSize, lineHeight }` pair (`{ hero: { fontSize: "4rem", lineHeight: "1.05" } }`)
+whose line-height becomes the size's default (still overridden by the `lineHeight`
+prop). The exported `SizeValue` type names the pair form.
+
 Also:
 
 - **Dev warning** — in development, a `size`/`weight`/`lineHeight` name pointing at a

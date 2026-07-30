@@ -16,10 +16,12 @@ describe("lineHeightVars", () => {
     expect(out["--lineHeight-loose"]).toBe(vars.text.lineHeight.loose);
   });
 
-  it("publishes the per-size line-heights so `size` has a paired default", () => {
+  it("does not publish per-size leadings — those belong to the size vocabulary", () => {
+    // The `--lineHeight-<size>` namespace is owned by `fontSizeVars` (a size is a
+    // font-size + leading pair), so the leading vocabulary leaves it alone.
     const out = lineHeightVars();
-    expect(out["--lineHeight-md"]).toBe(vars.text.size.md.lineHeight);
-    expect(out["--lineHeight-4xl"]).toBe(vars.text.size["4xl"].lineHeight);
+    expect(out["--lineHeight-md"]).toBeUndefined();
+    expect(out["--lineHeight-4xl"]).toBeUndefined();
   });
 
   it("publishes each consumer value as a --lineHeight-<name> property", () => {
@@ -27,12 +29,12 @@ describe("lineHeightVars", () => {
     expect(out["--lineHeight-airy"]).toBe("2.2");
   });
 
-  it("ignores built-in leading names and size names so both stay token-backed", () => {
-    // A consumer entry can shadow neither the leadings nor the per-size defaults —
-    // `size`'s paired line-height reads the same `--lineHeight-<size>` namespace.
+  it("ignores built-in leading names and size names", () => {
+    // A consumer entry can shadow neither the leadings (token-backed) nor a size
+    // name (owned by the size vocabulary's paired `--lineHeight-<size>`).
     const out = lineHeightVars({ normal: "IGNORED", md: "IGNORED", airy: "2.2" });
     expect(out["--lineHeight-normal"]).toBe(vars.text.lineHeight.normal);
-    expect(out["--lineHeight-md"]).toBe(vars.text.size.md.lineHeight);
+    expect(out["--lineHeight-md"]).toBeUndefined();
     expect(out["--lineHeight-airy"]).toBe("2.2");
   });
 });

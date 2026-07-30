@@ -44,6 +44,7 @@ export {
   type FontSizeRegistry,
   type FontSizeName,
   type BuiltinFontSizeName,
+  type SizeValue,
 } from "./fontSizes";
 export {
   fontWeightVarName,

@@ -3,7 +3,7 @@ import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { textFontVar, textLetterSpacingVar, textWeightVar } from "../styles/vars.css";
 import { warnOnContrastIssues } from "./contrast";
 import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
-import { fontSizeVars } from "./fontSizes";
+import { fontSizeVars, type SizeValue } from "./fontSizes";
 import { fontFamilyVars, fontVarName, type FontName } from "./fonts";
 import { fontWeightVarName, fontWeightVars, type FontWeightName } from "./fontWeights";
 import { letterSpacingVarName, letterSpacingVars, type LetterSpacingName } from "./letterSpacings";
@@ -46,13 +46,18 @@ export interface LetterSpacingOptions {
  * The consumer-defined font-size vocabulary for a theme, the size analogue of
  * {@link FontOptions}. Each entry publishes a `--fontSize-<name>` custom property;
  * the `size` prop on `Text`/`Heading` selects one by name. The built-in ramp
- * (`xs`…`9xl`) is always published from the tokens, so it needs no entry here.
- * A consumer size sets `font-size` only; its line-height defaults to `md` unless the
- * element also sets `lineHeight`.
+ * (`xs`…`9xl`) is always published from the tokens, so it needs no entry here. An
+ * entry is a bare `font-size` (its line-height defaults to `md`) or a
+ * `{ fontSize, lineHeight }` pair that also carries the size's paired default leading
+ * (Tailwind-style); the `lineHeight` prop overrides either.
  */
 export interface FontSizeOptions {
-  /** Extra named font-sizes, e.g. `{ hero: "4rem" }`. */
-  sizes?: Record<string, string>;
+  /**
+   * Extra named font-sizes. A string is a `font-size` (`{ hero: "4rem" }`); a
+   * `{ fontSize, lineHeight }` pair also sets the size's paired default leading
+   * (`{ hero: { fontSize: "4rem", lineHeight: "1.05" } }`).
+   */
+  sizes?: Record<string, string | SizeValue>;
 }
 
 /**

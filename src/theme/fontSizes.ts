@@ -1,5 +1,6 @@
 import { TEXT_SIZES, type TextSize } from "./constants";
 import { vars } from "./contract.css";
+import { lineHeightVarName } from "./lineHeights";
 
 /**
  * The consumer-defined font-size vocabulary — an *open* vocabulary mirroring the
@@ -22,9 +23,11 @@ import { vars } from "./contract.css";
  * `BaritoneTheme`), which emits one `--fontSize-<name>` per entry. The built-in
  * sizes are always emitted, so they need no registry entry.
  *
- * A consumer-defined size supplies only a `font-size`; its line-height defaults to
- * the `md` step (the built-in sizes keep their tuned per-size line-heights). Pair a
- * display size with an explicit `lineHeight` for tighter leading.
+ * A consumer-defined size is either a bare `font-size` (its line-height defaults to
+ * the `md` step) or a `{ fontSize, lineHeight }` pair that carries its own paired
+ * default leading, Tailwind-style — its `fontSize` scale bundles the line-height.
+ * The built-in sizes always keep their tuned per-size line-heights, and the
+ * `lineHeight` prop overrides either.
  *
  * @example
  * // Somewhere in the consuming app (e.g. a `baritone.d.ts`):
@@ -38,6 +41,14 @@ import { vars } from "./contract.css";
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- intentionally empty; consumers augment it.
 export interface FontSizeRegistry {}
+
+/**
+ * A consumer-defined size value: a bare `font-size` string, or a
+ * `{ fontSize, lineHeight }` pair whose `lineHeight` becomes the size's paired
+ * default leading (which the `lineHeight` prop still overrides). Mirrors Tailwind's
+ * `fontSize` scale, where an entry can carry its line-height.
+ */
+export type SizeValue = { fontSize: string; lineHeight?: string };
 
 /** The size names Baritone always publishes, independent of the registry. */
 export type BuiltinFontSizeName = TextSize;
@@ -62,26 +73,40 @@ export function fontSizeVarName(name: string): string {
 }
 
 /**
- * The `--fontSize-<name>` custom properties a theme publishes: the built-in ramp
- * (`xs`…`9xl`) — routed through the contract vars so a runtime theme/brand swap
- * still flows through — plus one entry per consumer-supplied value. Spread into a
- * theme class's `vars` (build time) or a `style` object (runtime).
+ * The custom properties the *size vocabulary* publishes — its `--fontSize-<name>`
+ * and each size's paired `--lineHeight-<name>` (a size is a font-size + leading pair,
+ * exactly like the `text.size` tokens). The built-in ramp (`xs`…`9xl`) is routed
+ * through the contract vars so a runtime theme/brand swap still flows through; each
+ * consumer entry adds its `--fontSize-<name>` plus, for a `{ fontSize, lineHeight }`
+ * pair, a paired `--lineHeight-<name>`. Spread into a theme class's `vars` (build
+ * time) or a `style` object (runtime). (The standalone leading scale — `none`…`loose`
+ * — is published separately by {@link lineHeightVars}.)
  *
  * The built-in size names are reserved: entries by those names in `sizes` are
  * ignored (they stay token-backed). Customise the built-in ramp through the theme
  * tokens (`BrandSeed.fontScale`) instead.
  */
-export function fontSizeVars(sizes: Record<string, string> = {}): Record<string, string> {
+export function fontSizeVars(
+  sizes: Record<string, string | SizeValue> = {},
+): Record<string, string> {
   const out: Record<string, string> = {};
   for (const size of TEXT_SIZES) {
     out[fontSizeVarName(size)] = vars.text.size[size].fontSize;
+    out[lineHeightVarName(size)] = vars.text.size[size].lineHeight;
   }
   for (const [name, value] of Object.entries(sizes)) {
     // The built-in sizes stay token-backed (`vars.text.size.*`) so bare text and
     // e.g. `size="lg"` never diverge; the registry can't shadow them. Customise the
     // built-ins through the theme tokens instead.
     if ((TEXT_SIZES as readonly string[]).includes(name)) continue;
-    out[fontSizeVarName(name)] = value;
+    if (typeof value === "string") {
+      out[fontSizeVarName(name)] = value;
+    } else {
+      out[fontSizeVarName(name)] = value.fontSize;
+      // A bundled `lineHeight` becomes the size's paired default; without one, the
+      // size's leading falls back to `md` (the size recipe's fallback).
+      if (value.lineHeight !== undefined) out[lineHeightVarName(name)] = value.lineHeight;
+    }
   }
   return out;
 }
