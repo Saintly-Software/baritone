@@ -7,6 +7,9 @@ export {
   type CreateThemeOptions,
   type FontOptions,
   type LetterSpacingOptions,
+  type FontSizeOptions,
+  type FontWeightOptions,
+  type LineHeightOptions,
 } from "./createTheme";
 export { buildDefaultTokens, type BrandSeed } from "./defaultTokens";
 
@@ -31,6 +34,31 @@ export {
   type LetterSpacingName,
   type BuiltinLetterSpacingName,
 } from "./letterSpacings";
+
+// The consumer-extensible font-size, font-weight, and line-height vocabularies,
+// mirroring the font seam above. Each `*Registry` is a module-augmentation seam;
+// each `*Name` is what the matching prop (`size` / `weight` / `lineHeight`) accepts.
+export {
+  fontSizeVarName,
+  fontSizeVars,
+  type FontSizeRegistry,
+  type FontSizeName,
+  type BuiltinFontSizeName,
+} from "./fontSizes";
+export {
+  fontWeightVarName,
+  fontWeightVars,
+  type FontWeightRegistry,
+  type FontWeightName,
+  type BuiltinFontWeightName,
+} from "./fontWeights";
+export {
+  lineHeightVarName,
+  lineHeightVars,
+  type LineHeightRegistry,
+  type LineHeightName,
+  type BuiltinLineHeightName,
+} from "./lineHeights";
 export { lightTheme, darkTheme } from "./defaultTheme.css";
 
 export {

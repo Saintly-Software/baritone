@@ -1,12 +1,14 @@
 import { contrastRatio } from "./color-math";
 import {
   INTENTS,
+  LINE_HEIGHT_KEYS,
   SALIENCIES,
   SURFACE_SALIENCIES,
   TEXT_SIZES,
   type BorderWidthKey,
   type Intent,
   type LetterSpacingKey,
+  type LineHeightKey,
   type RadiusKey,
   type Saliency,
   type SpaceKey,
@@ -19,6 +21,7 @@ import {
   fontSizeAnchor,
   fontStep,
   fontWeight,
+  leading,
   letterSpacing,
   lineHeight,
   motion,
@@ -128,6 +131,13 @@ export interface BrandSeed {
    * steps. Bump e.g. `widest` if your brand's uppercase labels want more track.
    */
   letterSpacing?: Partial<Record<LetterSpacingKey, string>>;
+  /**
+   * Named line-height (leading) scale overrides, merged over the built-in
+   * unitless steps (`none`…`loose`). This is the standalone `lineHeight` prop's
+   * vocabulary; the per-size line-heights are overridden separately via
+   * {@link BrandSeed.fontScale}'s `lineHeight`.
+   */
+  lineHeight?: Partial<Record<LineHeightKey, string>>;
 }
 
 /** Fully-resolved seed (defaults filled in) threaded through the colour math. */
@@ -445,6 +455,7 @@ export function buildDefaultTokens(
   const spaceScale = { ...space, ...brand.space };
   const borderWidthScale = { ...borderWidth, ...brand.borderWidth };
   const letterSpacingScale = { ...letterSpacing, ...brand.letterSpacing };
+  const leadingScale = { ...leading, ...brand.lineHeight };
   const fontScale = {
     anchor: brand.fontScale?.anchor ?? fontSizeAnchor,
     stepLower: brand.fontScale?.stepLower ?? fontStep.lower,
@@ -482,6 +493,7 @@ export function buildDefaultTokens(
         superbold: fontWeight.superbold,
       },
       letterSpacing: letterSpacingScale,
+      lineHeight: record(LINE_HEIGHT_KEYS, (k) => leadingScale[k]),
     },
     font: {
       sans: brand.fonts?.sans ?? fontFamily.sans,

@@ -1,10 +1,13 @@
 import { createTheme, globalStyle } from "@vanilla-extract/css";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
-import { textFontVar, textLetterSpacingVar } from "../styles/vars.css";
+import { textFontVar, textLetterSpacingVar, textWeightVar } from "../styles/vars.css";
 import { warnOnContrastIssues } from "./contrast";
 import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
+import { fontSizeVars } from "./fontSizes";
 import { fontFamilyVars, fontVarName, type FontName } from "./fonts";
+import { fontWeightVarName, fontWeightVars, type FontWeightName } from "./fontWeights";
 import { letterSpacingVarName, letterSpacingVars, type LetterSpacingName } from "./letterSpacings";
+import { lineHeightVars } from "./lineHeights";
 
 /**
  * The consumer-defined font vocabulary for a theme. Each entry publishes a
@@ -39,7 +42,48 @@ export interface LetterSpacingOptions {
   defaultLetterSpacing?: LetterSpacingName;
 }
 
-export interface CreateThemeOptions extends FontOptions, LetterSpacingOptions {
+/**
+ * The consumer-defined font-size vocabulary for a theme, the size analogue of
+ * {@link FontOptions}. Each entry publishes a `--fontSize-<name>` custom property;
+ * the `size` prop on `Text`/`Heading` selects one by name. The built-in ramp
+ * (`xs`…`9xl`) is always published from the tokens, so it needs no entry here.
+ * A consumer size sets `font-size` only; its line-height defaults to `md` unless the
+ * element also sets `lineHeight`.
+ */
+export interface FontSizeOptions {
+  /** Extra named font-sizes, e.g. `{ hero: "4rem" }`. */
+  sizes?: Record<string, string>;
+}
+
+/**
+ * The consumer-defined font-weight vocabulary for a theme, the weight analogue of
+ * {@link FontOptions}. Each entry publishes a `--fontWeight-<name>` custom property;
+ * the `weight` prop selects one by name. The built-in steps are always published.
+ */
+export interface FontWeightOptions {
+  /** Extra named weights, e.g. `{ black: "900" }`. */
+  weights?: Record<string, string>;
+  /**
+   * The weight a bare `<Text>` (no `weight` prop) uses. Defaults to `default`. Set
+   * e.g. `"semibold"` for a heavier body voice. (`Heading` always applies its own
+   * per-level weight, so this affects `Text`.)
+   */
+  defaultWeight?: FontWeightName;
+}
+
+/**
+ * The consumer-defined line-height (leading) vocabulary for a theme, the leading
+ * analogue of {@link FontOptions}. Each entry publishes a `--lineHeight-<name>`
+ * custom property; the `lineHeight` prop selects one by name. The built-in steps
+ * (`none`…`loose`) and the per-size defaults are always published from the tokens.
+ */
+export interface LineHeightOptions {
+  /** Extra named leadings, e.g. `{ airy: "2.2" }`. */
+  lineHeights?: Record<string, string>;
+}
+
+export interface CreateThemeOptions
+  extends FontOptions, LetterSpacingOptions, FontSizeOptions, FontWeightOptions, LineHeightOptions {
   /** Colour scheme. Sets `oklchOperator` (-1 light / +1 dark). */
   scheme: "light" | "dark";
   /** Label used in contrast warnings. */
@@ -84,6 +128,22 @@ function trackingVars({
   };
 }
 
+/**
+ * The weight counterpart to {@link fontVars}: the `--fontWeight-<name>` scale plus,
+ * when a `defaultWeight` is set, the `--textWeight` var that makes bare text use it.
+ * (`sizes`/`lineHeights` have no default-seed twin — `size` is always applied by the
+ * components, so `--textSize`/`--textLineHeight` are set per instance regardless — so
+ * they publish their scales directly via `fontSizeVars`/`lineHeightVars`.)
+ */
+function weightVars({ weights, defaultWeight }: FontWeightOptions): Record<string, string> {
+  const scale = fontWeightVars(weights);
+  if (defaultWeight === undefined) return scale;
+  return {
+    ...scale,
+    ...assignInlineVars({ [textWeightVar]: `var(${fontWeightVarName(defaultWeight)})` }),
+  };
+}
+
 function withOperator(tokens: ThemeTokensInput, scheme: "light" | "dark"): DesignTokens {
   return { ...tokens, oklchOperator: scheme === "dark" ? "1" : "-1" };
 }
@@ -118,12 +178,18 @@ export function createDesignSystemTheme(
   // why those surfaces need no z-index of their own. Attached to the generated
   // class itself (not a second class) so the return value stays a single class,
   // safe for `classList.add`. `BaritoneTheme` sets the same via inline style. The
-  // `--font-<name>` and `--letterSpacing-<name>` registries ride along on the same
-  // root so the `font` and `letterSpacing` props resolve against this theme's
-  // vocabulary.
+  // `--font-<name>` / `--fontSize-<name>` / `--fontWeight-<name>` /
+  // `--lineHeight-<name>` / `--letterSpacing-<name>` registries ride along on the
+  // same root so the open typographic props resolve against this theme's vocabulary.
   globalStyle(`.${themeClass}`, {
     isolation: "isolate",
-    vars: { ...fontVars(options), ...trackingVars(options) },
+    vars: {
+      ...fontVars(options),
+      ...trackingVars(options),
+      ...fontSizeVars(options.sizes),
+      ...weightVars(options),
+      ...lineHeightVars(options.lineHeights),
+    },
   });
   return themeClass;
 }
@@ -135,15 +201,25 @@ export function createDesignSystemTheme(
  * since it needs neither the VE compiler nor a pre-generated class. Pass `fonts`
  * to publish consumer families (`--font-<name>`) and `defaultFont` to pick the
  * family bare text uses; likewise `letterSpacings` / `defaultLetterSpacing` for
- * the tracking vocabulary (`--letterSpacing-<name>`).
+ * the tracking vocabulary, `sizes` for extra `--fontSize-<name>`, `weights` /
+ * `defaultWeight` for the weight vocabulary, and `lineHeights` for extra
+ * `--lineHeight-<name>` leadings.
  */
 export function createInlineTheme(
   tokens: ThemeTokensInput,
-  options: Pick<CreateThemeOptions, "scheme"> & FontOptions & LetterSpacingOptions,
+  options: Pick<CreateThemeOptions, "scheme"> &
+    FontOptions &
+    LetterSpacingOptions &
+    FontSizeOptions &
+    FontWeightOptions &
+    LineHeightOptions,
 ): Record<string, string> {
   return {
     ...assignInlineVars(vars, withOperator(tokens, options.scheme)),
     ...fontVars(options),
     ...trackingVars(options),
+    ...fontSizeVars(options.sizes),
+    ...weightVars(options),
+    ...lineHeightVars(options.lineHeights),
   };
 }

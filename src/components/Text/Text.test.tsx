@@ -1,14 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import {
-  textSizeRecipe,
-  typographyDecoration,
-  typographyWeight,
-} from "../../styles/recipes/text.css";
+import { typographyDecoration } from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
 import { TEXT_WEIGHTS } from "../../theme/constants";
+import { fontSizeVarName } from "../../theme/fontSizes";
 import { fontVarName } from "../../theme/fonts";
+import { fontWeightVarName } from "../../theme/fontWeights";
 import { letterSpacingVarName } from "../../theme/letterSpacings";
+import { lineHeightVarName } from "../../theme/lineHeights";
 import { Text } from "./index";
 
 describe("Text", () => {
@@ -37,9 +36,11 @@ describe("Text", () => {
     expect(screen.getByText("Styled").className.length).toBeGreaterThan(0);
   });
 
-  it.each(TEXT_WEIGHTS)("applies the %s weight recipe", (weight) => {
+  it.each(TEXT_WEIGHTS)("points the --textWeight var at the %s weight", (weight) => {
     render(<Text weight={weight}>Weighted</Text>);
-    expect(screen.getByText("Weighted").className).toContain(typographyWeight({ weight }));
+    expect(screen.getByText("Weighted").getAttribute("style")).toContain(
+      `var(${fontWeightVarName(weight)})`,
+    );
   });
 
   it("applies the italic decoration", () => {
@@ -116,19 +117,41 @@ describe("Text", () => {
     expect(screen.getByText("Plain").getAttribute("style") ?? "").not.toContain("--letterSpacing-");
   });
 
-  it("applies the size recipe class", () => {
+  it("points the --textSize var at the named size", () => {
     render(<Text size="lg">Body</Text>);
-    expect(screen.getByText("Body").className).toContain(textSizeRecipe({ size: "lg" }));
+    expect(screen.getByText("Body").getAttribute("style")).toContain(
+      `var(${fontSizeVarName("lg")})`,
+    );
   });
 
   it("renders any size from the shared scale (same scale as Heading)", () => {
     // Text and Heading share the full scale; a large display size is valid on Text.
     render(<Text size="4xl">Display</Text>);
-    expect(screen.getByText("Display").className).toContain(textSizeRecipe({ size: "4xl" }));
+    expect(screen.getByText("Display").getAttribute("style")).toContain(
+      `var(${fontSizeVarName("4xl")})`,
+    );
   });
 
-  it("omits a weight class when `weight` is not passed", () => {
+  it("defaults the leading to the size's paired line-height", () => {
+    render(<Text size="4xl">Display</Text>);
+    expect(screen.getByText("Display").getAttribute("style")).toContain(
+      `var(${lineHeightVarName("4xl")})`,
+    );
+  });
+
+  it("overrides the leading via the `lineHeight` prop", () => {
+    render(
+      <Text size="4xl" lineHeight="none">
+        Tight display
+      </Text>,
+    );
+    expect(screen.getByText("Tight display").getAttribute("style")).toContain(
+      `var(${lineHeightVarName("none")})`,
+    );
+  });
+
+  it("sets no weight var when `weight` is not passed", () => {
     render(<Text>Plain</Text>);
-    expect(screen.getByText("Plain").className).not.toContain(typographyWeight({ weight: "bold" }));
+    expect(screen.getByText("Plain").getAttribute("style") ?? "").not.toContain("--fontWeight-");
   });
 });

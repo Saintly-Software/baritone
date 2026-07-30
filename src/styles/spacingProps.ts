@@ -1,4 +1,5 @@
 import type { LetterSpacingName } from "../theme/letterSpacings";
+import type { LineHeightName } from "../theme/lineHeights";
 import type { Atoms } from "./sprinkles.css";
 
 /**
@@ -41,9 +42,10 @@ export interface PaddingProps {
  * Text-layout props surfaced on the typography components. `textAlign`,
  * `whiteSpace`, `overflowWrap`, and `textTransform` map straight to a single CSS
  * property via the sprinkles, so they behave like the other atoms props
- * (responsive-capable). `letterSpacing` is the exception: its vocabulary is
- * open-ended and consumer-defined (like `font`), so it's routed through the
- * `--textLetterSpacing` var rather than an enumerated atom.
+ * (responsive-capable). `letterSpacing` and `lineHeight` are the exceptions: their
+ * vocabularies are open-ended and consumer-defined (like `font`), so they're routed
+ * through the `--textLetterSpacing` / `--textLineHeight` vars rather than enumerated
+ * atoms.
  */
 export interface TypographyAtomProps {
   /** `text-align` — logical `start`/`center`/`end` (RTL-safe) or physical `left`/`right`. */
@@ -63,4 +65,13 @@ export interface TypographyAtomProps {
    * `widest` suits small uppercase labels/eyebrows.
    */
   letterSpacing?: LetterSpacingName;
+  /**
+   * Line-height (leading), by name — an *override* for the size's paired default.
+   * The built-in unitless steps (`none`…`loose`) are always available; other names
+   * are consumer-defined — the theme publishes them through its `lineHeights` option
+   * (as `--lineHeight-<name>` custom properties) and declares the names on
+   * {@link LineHeightName}'s registry. Resolves to `var(--lineHeight-<name>)`. Left
+   * unset, `size` supplies the line-height.
+   */
+  lineHeight?: LineHeightName;
 }

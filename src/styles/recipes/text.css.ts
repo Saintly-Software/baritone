@@ -2,7 +2,15 @@ import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
-import { iconColorVar, textColorVar, textFontVar, textLetterSpacingVar } from "../vars.css";
+import {
+  iconColorVar,
+  textColorVar,
+  textFontVar,
+  textLetterSpacingVar,
+  textLineHeightVar,
+  textSizeVar,
+  textWeightVar,
+} from "../vars.css";
 
 // The colour an explicit `intent`/`saliency` resolves to. Only set when a
 // variant is active, so the base style can fall through to the inherited
@@ -52,10 +60,19 @@ export const textIntentRecipe = recipe({
 export type TextIntentVariants = NonNullable<RecipeVariants<typeof textIntentRecipe>>;
 
 /**
- * "text size" recipe — selects a typography size. `size` maps to a `text.size`
- * token, setting font-size and line-height together; the base sets the default
- * font-weight (overridden by the `weight` prop via `typographyWeight`).
- * Colour-agnostic; pair with `textIntentRecipe`.
+ * "text size" recipe — the shared typography base plus a built-in `size` variant.
+ *
+ * Every typographic dimension resolves through a single `--text…` indirection the
+ * base reads: family (`--textFont`), tracking (`--textLetterSpacing`), size
+ * (`--textSize`), leading (`--textLineHeight`), and weight (`--textWeight`). This
+ * lets each be an *open*, consumer-defined vocabulary — `Text`/`Heading` set the
+ * vars per instance to a `var(--<x>-<name>)` the theme published (see
+ * `theme/fontSizes.ts`, `theme/fontWeights.ts`, `theme/lineHeights.ts`).
+ *
+ * The `size` variant remains for module-scope callers that apply a *built-in* size
+ * to a raw element as a class (it just sets `--textSize`/`--textLineHeight` to the
+ * per-size tokens); pair with `typographyWeight` for the weight. Colour-agnostic;
+ * pair with `textIntentRecipe`.
  */
 export const textSizeRecipe = recipe({
   base: {
@@ -70,42 +87,54 @@ export const textSizeRecipe = recipe({
     // matching bare text before this was a knob). Open-ended like `font`, so it's
     // a var here, not an enumerated variant. See `theme/letterSpacings.ts`.
     letterSpacing: fallbackVar(textLetterSpacingVar, "normal"),
+    // Size, leading, and weight follow the same pattern. `--textSize` /
+    // `--textLineHeight` are set by the `size` prop (or the `size` variant below);
+    // `--textLineHeight` is overridden by the `lineHeight` prop; `--textWeight` by
+    // the `weight` prop (or `typographyWeight`). Unset, each falls back to the
+    // `md` / `default` token.
+    fontSize: fallbackVar(textSizeVar, vars.text.size.md.fontSize),
+    lineHeight: fallbackVar(textLineHeightVar, vars.text.size.md.lineHeight),
+    fontWeight: fallbackVar(textWeightVar, vars.text.weight.default),
     margin: 0,
-    fontWeight: vars.text.weight.default,
   },
   variants: {
     size: Object.fromEntries(
       TEXT_SIZES.map((size) => [
         size,
         {
-          fontSize: vars.text.size[size].fontSize,
-          lineHeight: vars.text.size[size].lineHeight,
+          vars: {
+            [textSizeVar]: vars.text.size[size].fontSize,
+            [textLineHeightVar]: vars.text.size[size].lineHeight,
+          },
         },
       ]),
-    ) as Record<(typeof TEXT_SIZES)[number], { fontSize: string; lineHeight: string }>,
-  },
-  defaultVariants: {
-    size: "md",
+    ) as Record<(typeof TEXT_SIZES)[number], { vars: Record<string, string> }>,
   },
 });
 
 export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>>;
 
-// The optional typographic knobs, split by concern. Each is defined after
-// `textSizeRecipe` so it wins over the default font-weight baked into the size
-// recipe's base. The *family* is not a recipe knob — it's the `--textFont` var the
-// base reads (set by the `font` prop). Alignment and wrapping aren't here either;
-// they're plain CSS-property passthroughs and live in the sprinkles `atoms`.
+// The optional typographic knobs, split by concern. The *family*, *size*,
+// *leading*, and *weight* are not enumerated recipe knobs on the open path — they're
+// the `--text…` vars the base reads (set by the `font`/`size`/`lineHeight`/`weight`
+// props). Alignment and wrapping aren't here either; they're plain CSS-property
+// passthroughs and live in the sprinkles `atoms`.
 
 /**
- * "typography weight" recipe — the `weight` knob. Reads a `text.weight` token and
- * overrides the size recipe's default weight.
+ * "typography weight" recipe — the built-in `weight` knob for module-scope callers
+ * (e.g. `MetricCard`) that apply a weight to a raw element as a class. Sets the
+ * `--textWeight` var the `textSizeRecipe` base reads, so it must be composed
+ * alongside that base. The `weight` prop on `Text`/`Heading` sets the same var
+ * inline instead (supporting consumer-defined weights). See `theme/fontWeights.ts`.
  */
 export const typographyWeight = recipe({
   variants: {
     weight: Object.fromEntries(
-      TEXT_WEIGHTS.map((weight) => [weight, { fontWeight: vars.text.weight[weight] }]),
-    ) as Record<(typeof TEXT_WEIGHTS)[number], { fontWeight: string }>,
+      TEXT_WEIGHTS.map((weight) => [
+        weight,
+        { vars: { [textWeightVar]: vars.text.weight[weight] } },
+      ]),
+    ) as Record<(typeof TEXT_WEIGHTS)[number], { vars: Record<string, string> }>,
   },
 });
 
@@ -122,7 +151,11 @@ export const typographyDecoration = recipe({
 
 export type TypographyDecorationVariants = NonNullable<RecipeVariants<typeof typographyDecoration>>;
 
-// Note: there's no "font" recipe. The family is consumer-defined and open-ended,
-// so it can't be enumerated into build-time variant classes. Instead the base of
-// `textSizeRecipe` reads `--textFont` (see above) and the `font` prop sets it to a
-// `var(--font-<name>)` the active theme published. See `theme/fonts.ts`.
+// Note: there's no "font" recipe — nor an open "size"/"lineHeight" recipe. Those
+// vocabularies are consumer-defined and open-ended, so they can't be enumerated into
+// build-time variant classes. Instead the base of `textSizeRecipe` reads the
+// `--textFont` / `--textSize` / `--textLineHeight` / `--textWeight` vars (see above)
+// and `Text`/`Heading` set them to a `var(--<x>-<name>)` the active theme published.
+// See `theme/fonts.ts`, `theme/fontSizes.ts`, `theme/lineHeights.ts`,
+// `theme/fontWeights.ts`. The `size` variant + `typographyWeight` above stay only as
+// a class-based convenience for the built-in values.

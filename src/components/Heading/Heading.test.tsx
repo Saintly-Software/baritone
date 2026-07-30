@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { textSizeRecipe, typographyWeight } from "../../styles/recipes/text.css";
+import { fontSizeVarName } from "../../theme/fontSizes";
 import { fontVarName } from "../../theme/fonts";
+import { fontWeightVarName } from "../../theme/fontWeights";
 import { letterSpacingVarName } from "../../theme/letterSpacings";
 import { Heading } from "./index";
 
@@ -24,8 +25,8 @@ describe("Heading", () => {
         Small tag, big look
       </Heading>,
     );
-    expect(screen.getByRole("heading", { level: 3 }).className).toContain(
-      textSizeRecipe({ size: "4xl" }),
+    expect(screen.getByRole("heading", { level: 3 }).getAttribute("style")).toContain(
+      `var(${fontSizeVarName("4xl")})`,
     );
   });
 
@@ -37,8 +38,8 @@ describe("Heading", () => {
         Tiny
       </Heading>,
     );
-    expect(screen.getByRole("heading", { level: 2 }).className).toContain(
-      textSizeRecipe({ size: "xs" }),
+    expect(screen.getByRole("heading", { level: 2 }).getAttribute("style")).toContain(
+      `var(${fontSizeVarName("xs")})`,
     );
   });
 
@@ -49,14 +50,18 @@ describe("Heading", () => {
       </Heading>,
     );
     // Weight is independent of size now; each level carries a customary default
-    // (level 2 is bold), applied via the `typographyWeight` recipe.
-    expect(screen.getByTestId("h").className).toContain(typographyWeight({ weight: "bold" }));
+    // (level 2 is bold), applied via the `--textWeight` var.
+    expect(screen.getByTestId("h").getAttribute("style")).toContain(
+      `var(${fontWeightVarName("bold")})`,
+    );
     rerender(
       <Heading level={2} data-testid="h" weight="superbold">
         Overridden
       </Heading>,
     );
-    expect(screen.getByTestId("h").className).toContain(typographyWeight({ weight: "superbold" }));
+    expect(screen.getByTestId("h").getAttribute("style")).toContain(
+      `var(${fontWeightVarName("superbold")})`,
+    );
   });
 
   it("selects a font family by name via the --textFont var", () => {
@@ -98,9 +103,9 @@ describe("Heading", () => {
         Plain
       </Heading>,
     );
-    // The plain heading already carries the level's default weight; `italic`,
-    // `textAlign`, and `whiteSpace` are each additive class atoms on top of it.
-    // (`letterSpacing` is an inline var, not a class — covered above.)
+    // `italic`, `textAlign`, and `whiteSpace` are each additive class atoms.
+    // (`size`/`weight`/`lineHeight`/`letterSpacing` are inline vars, not classes —
+    // covered above.)
     const base = screen.getByTestId("h").className.split(" ").length;
     rerender(
       <Heading level={2} data-testid="h" italic textAlign="center" whiteSpace="nowrap">

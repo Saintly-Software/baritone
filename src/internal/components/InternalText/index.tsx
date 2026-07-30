@@ -6,15 +6,22 @@ import {
   textSizeRecipe,
   typographyDecoration,
   type TypographyDecorationVariants,
-  typographyWeight,
-  type TypographyWeightVariants,
 } from "../../../styles/recipes/text.css";
 import { atoms } from "../../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps, TypographyAtomProps } from "../../../styles/spacingProps";
-import { textFontVar, textLetterSpacingVar } from "../../../styles/vars.css";
-import type { Intent, Saliency, TextSize } from "../../../theme/constants";
+import {
+  textFontVar,
+  textLetterSpacingVar,
+  textLineHeightVar,
+  textSizeVar,
+  textWeightVar,
+} from "../../../styles/vars.css";
+import type { Intent, Saliency } from "../../../theme/constants";
+import { fontSizeVarName, type FontSizeName } from "../../../theme/fontSizes";
 import { fontVarName, type FontName } from "../../../theme/fonts";
+import { fontWeightVarName, type FontWeightName } from "../../../theme/fontWeights";
 import { letterSpacingVarName } from "../../../theme/letterSpacings";
+import { lineHeightVarName } from "../../../theme/lineHeights";
 import { cx } from "../../../utils/cx";
 import { composeRefs, useRender, type RenderProp } from "../../../utils/render";
 
@@ -28,20 +35,20 @@ import { composeRefs, useRender, type RenderProp } from "../../../utils/render";
 const isDev = (): boolean => process.env.NODE_ENV !== "production";
 
 // `--…-<name>` custom properties already warned about, so a page full of
-// `<Text font="…">` / `<Text letterSpacing="…">` with the same unset name warns
-// once, not once per element. Keyed by the resolved CSS var, which is unique per
+// `<Text size="…">` / `<Text font="…">` / … with the same unset name warns once,
+// not once per element. Keyed by the resolved CSS var, which is unique per
 // (prop, name) pair.
 const warnedUnsetVars = new Set<string>();
 
 /**
- * Dev-only guard shared by the two open-ended props (`font`, `letterSpacing`).
- * When the prop names a `--…-<name>` the active theme never published, that inner
- * var is guaranteed-invalid, so the `--textFont` / `--textLetterSpacing` reference
- * built on it collapses to the size recipe's *fallback* — the theme's `sans`
- * family, or `normal` tracking — instead of doing anything visibly wrong. Easy to
- * ship by accident (a typo, or a name declared on the registry but never wired
- * into the theme). So probe the resolved value once per var and point the dev at
- * the fix.
+ * Dev-only guard shared by the open-ended typographic props (`size`, `weight`,
+ * `lineHeight`, `font`, `letterSpacing`). When the prop names a `--…-<name>` the
+ * active theme never published, that inner var is guaranteed-invalid, so the
+ * `--text…` reference built on it collapses to the size recipe's *fallback* — the
+ * theme's `md` size/leading, `default` weight, `sans` family, or `normal` tracking
+ * — instead of doing anything visibly wrong. Easy to ship by accident (a typo, or a
+ * name declared on the registry but never wired into the theme). So probe the
+ * resolved value once per var and point the dev at the fix.
  *
  * Skipped under jsdom (unit tests): it doesn't resolve stylesheet custom
  * properties, so it would report every themed element as unset. This is a
@@ -81,16 +88,56 @@ function warnIfLetterSpacingUnset(el: HTMLElement | null, name: string): void {
   );
 }
 
+function warnIfFontSizeUnset(el: HTMLElement | null, name: string): void {
+  warnIfVarUnset(
+    el,
+    fontSizeVarName(name),
+    () =>
+      `[baritone] size="${name}": the CSS variable ${fontSizeVarName(name)} isn't set in this ` +
+      `element's theme, so the text falls back to the \`md\` size. Publish the size via the theme's ` +
+      `\`sizes\` option (e.g. \`sizes: { ${name}: '4rem' }\` on \`createInlineTheme\` / ` +
+      "`createDesignSystemTheme` / `BaritoneTheme`), or use a built-in (`xs`…`9xl`). Declare the " +
+      "name on `FontSizeRegistry` for autocompletion.",
+  );
+}
+
+function warnIfFontWeightUnset(el: HTMLElement | null, name: string): void {
+  warnIfVarUnset(
+    el,
+    fontWeightVarName(name),
+    () =>
+      `[baritone] weight="${name}": the CSS variable ${fontWeightVarName(name)} isn't set in this ` +
+      `element's theme, so the text falls back to the \`default\` weight. Publish the weight via the ` +
+      `theme's \`weights\` option (e.g. \`weights: { ${name}: '900' }\` on \`createInlineTheme\` / ` +
+      "`createDesignSystemTheme` / `BaritoneTheme`), or use a built-in " +
+      "(`default` / `semibold` / `bold` / `superbold`). Declare the name on `FontWeightRegistry` " +
+      "for autocompletion.",
+  );
+}
+
+function warnIfLineHeightUnset(el: HTMLElement | null, name: string): void {
+  warnIfVarUnset(
+    el,
+    lineHeightVarName(name),
+    () =>
+      `[baritone] lineHeight="${name}": the CSS variable ${lineHeightVarName(name)} isn't set in ` +
+      `this element's theme, so the leading falls back to the \`md\` size's line-height. Publish the ` +
+      `value via the theme's \`lineHeights\` option (e.g. \`lineHeights: { ${name}: '2' }\` on ` +
+      "`createInlineTheme` / `createDesignSystemTheme` / `BaritoneTheme`), or use a built-in " +
+      "(`none`…`loose`). Declare the name on `LineHeightRegistry` for autocompletion.",
+  );
+}
+
 /**
  * `InternalText` — the shared typography primitive behind `Text` and `Heading`.
- * It owns the whole class composition — colour (`textIntentRecipe`), size +
- * line-height (`textSizeRecipe`), the optional typographic recipes
- * (`typographyWeight` / `typographyDecoration`), the `font` family (via the
- * `--textFont` var), and the text-layout + spacing atoms — plus the base-ui
- * `render` polymorphism. The two
- * public components differ only in the values they feed in (default element,
- * default `size`/`weight`/`saliency`, and their semantic tag), so they resolve
- * those and delegate here.
+ * It owns the whole class composition — colour (`textIntentRecipe`), the shared
+ * typography base + italics (`textSizeRecipe` / `typographyDecoration`), and the
+ * text-layout + spacing atoms — plus the base-ui `render` polymorphism. The
+ * open-ended typographic knobs (`size`, `weight`, `lineHeight`, `font`,
+ * `letterSpacing`) resolve through the `--text…` inline vars to a
+ * `var(--<x>-<name>)` the active theme published. The two public components differ
+ * only in the values they feed in (default element, default `size`/`weight`/
+ * `saliency`, and their semantic tag), so they resolve those and delegate here.
  */
 export interface InternalTextProps
   extends
@@ -98,14 +145,23 @@ export interface InternalTextProps
     MarginProps,
     PaddingProps,
     TypographyAtomProps {
-  /** Typography size — drives both font-size and line-height. */
-  size: TextSize;
+  /**
+   * Typography size, by name — drives `font-size` and, unless a `lineHeight` is
+   * given, its paired default line-height. Built-ins `xs`…`9xl` are always
+   * available; other names are consumer-defined via the theme's `sizes` option +
+   * `FontSizeRegistry`. Resolves to `var(--fontSize-<name>)`.
+   */
+  size: FontSizeName;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */
   intent?: Intent;
   /** Override the inherited colour at this saliency. Falls back to `mid` when standalone. */
   saliency?: Saliency;
-  /** Font weight, from the `text.weight` tokens. Overrides the size's default weight. */
-  weight?: TypographyWeightVariants["weight"];
+  /**
+   * Font weight, by name. Built-ins `default`/`semibold`/`bold`/`superbold` are
+   * always available; other names are consumer-defined via the theme's `weights`
+   * option + `FontWeightRegistry`. Resolves to `var(--fontWeight-<name>)`.
+   */
+  weight?: FontWeightName;
   /** Render the text in italics. */
   italic?: TypographyDecorationVariants["italic"];
   /**
@@ -130,6 +186,7 @@ export function InternalText({
   weight,
   italic,
   font,
+  lineHeight,
   textAlign,
   whiteSpace,
   overflowWrap,
@@ -157,35 +214,42 @@ export function InternalText({
   pl,
   ...rest
 }: InternalTextProps) {
-  // When `font`/`letterSpacing` are set, point `--textFont` / `--textLetterSpacing`
-  // at the theme's `var(--font-<name>)` / `var(--letterSpacing-<name>)`. These are
-  // inline vars, not variant classes, because both vocabularies are open-ended and
-  // consumer-defined — see `theme/fonts.ts` and `theme/letterSpacings.ts`. Consumer
-  // `style` spreads last so it can still override.
-  const resolvedStyle =
-    font === undefined && letterSpacing === undefined
-      ? style
-      : {
-          ...assignInlineVars({
-            ...(font !== undefined ? { [textFontVar]: `var(${fontVarName(font)})` } : {}),
-            ...(letterSpacing !== undefined
-              ? { [textLetterSpacingVar]: `var(${letterSpacingVarName(letterSpacing)})` }
-              : {}),
-          }),
-          ...style,
-        };
+  // Point the `--text…` vars at the theme's `var(--<x>-<name>)`. These are inline
+  // vars, not variant classes, because every one of these vocabularies is
+  // open-ended and consumer-defined — see the `theme/*` modules. `size` is always
+  // present, so `--textSize` and its paired default `--textLineHeight`
+  // (`var(--lineHeight-<size>)`) are always set; the `lineHeight` prop overrides the
+  // leading; `weight`/`font`/`letterSpacing` set their vars only when passed.
+  // Consumer `style` spreads last so it can still override.
+  const resolvedStyle = {
+    ...assignInlineVars({
+      [textSizeVar]: `var(${fontSizeVarName(size)})`,
+      [textLineHeightVar]: `var(${lineHeightVarName(lineHeight ?? size)})`,
+      ...(weight !== undefined ? { [textWeightVar]: `var(${fontWeightVarName(weight)})` } : {}),
+      ...(font !== undefined ? { [textFontVar]: `var(${fontVarName(font)})` } : {}),
+      ...(letterSpacing !== undefined
+        ? { [textLetterSpacingVar]: `var(${letterSpacingVarName(letterSpacing)})` }
+        : {}),
+    }),
+    ...style,
+  };
 
-  // Dev-only: warn when `font`/`letterSpacing` point at a var the theme never
-  // published. Compose an internal ref onto the node so we can read its computed
-  // style after mount; in production this is a no-op and the consumer's `ref`
-  // passes through untouched.
+  // Dev-only: warn when a knob points at a var the theme never published. Compose
+  // an internal ref onto the node so we can read its computed style after mount; in
+  // production this is a no-op and the consumer's `ref` passes through untouched.
+  // `lineHeight` is only checked when the prop is set — a size-derived leading that
+  // falls back to `md` (a consumer size with no paired line-height) is intended, not
+  // a mistake.
   const nodeRef = React.useRef<HTMLElement | null>(null);
   const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
   React.useEffect(() => {
     if (!isDev()) return;
+    warnIfFontSizeUnset(nodeRef.current, size);
+    if (weight !== undefined) warnIfFontWeightUnset(nodeRef.current, weight);
+    if (lineHeight !== undefined) warnIfLineHeightUnset(nodeRef.current, lineHeight);
     if (font !== undefined) warnIfFontUnset(nodeRef.current, font);
     if (letterSpacing !== undefined) warnIfLetterSpacingUnset(nodeRef.current, letterSpacing);
-  }, [font, letterSpacing]);
+  }, [size, weight, lineHeight, font, letterSpacing]);
 
   return useRender({
     render,
@@ -194,8 +258,7 @@ export function InternalText({
       ref: mergedRef,
       className: cx(
         textIntentRecipe({ intent, saliency }),
-        textSizeRecipe({ size }),
-        typographyWeight({ weight }),
+        textSizeRecipe(),
         typographyDecoration({ italic }),
         atoms({
           m,
