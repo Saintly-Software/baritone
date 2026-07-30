@@ -4,6 +4,7 @@ import { textFontVar } from "../styles/vars.css";
 import { warnOnContrastIssues } from "./contrast";
 import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
 import { fontFamilyVars, fontVarName, type FontName } from "./fonts";
+import { textStyleVars, type TextStyleDef } from "./textStyles";
 
 /**
  * The consumer-defined font vocabulary for a theme. Each entry publishes a
@@ -21,7 +22,23 @@ export interface FontOptions {
   defaultFont?: FontName;
 }
 
-export interface CreateThemeOptions extends FontOptions {
+/**
+ * The consumer-defined *text style* vocabulary for a theme. Each entry publishes a
+ * small group of `--textStyle-<name>-*` custom properties (font-size, line-height,
+ * weight, family) bundling a named typographic role; the `textStyle` prop on
+ * `Text`/`Heading` selects one by name. Mirrors {@link FontOptions}. See
+ * {@link TextStyleDef}.
+ */
+export interface TextStyleOptions {
+  /**
+   * Named text styles, e.g. `{ title: { lineHeight: 1.04, font: "serif" } }`. A
+   * style sets only the properties it owns; the rest fall through to the base
+   * defaults.
+   */
+  textStyles?: Record<string, TextStyleDef>;
+}
+
+export interface CreateThemeOptions extends FontOptions, TextStyleOptions {
   /** Colour scheme. Sets `oklchOperator` (-1 light / +1 dark). */
   scheme: "light" | "dark";
   /** Label used in contrast warnings. */
@@ -81,8 +98,12 @@ export function createDesignSystemTheme(
   // class itself (not a second class) so the return value stays a single class,
   // safe for `classList.add`. `BaritoneTheme` sets the same via inline style. The
   // `--font-<name>` registry rides along on the same root so the `font` prop
-  // resolves against this theme's families.
-  globalStyle(`.${themeClass}`, { isolation: "isolate", vars: fontVars(options) });
+  // resolves against this theme's families; the `--textStyle-<name>-*` groups ride
+  // along too so the `textStyle` prop resolves against this theme's styles.
+  globalStyle(`.${themeClass}`, {
+    isolation: "isolate",
+    vars: { ...fontVars(options), ...textStyleVars(options.textStyles) },
+  });
   return themeClass;
 }
 
@@ -91,15 +112,17 @@ export function createDesignSystemTheme(
  * properties (`{ '--…': value }`) you spread onto an element's `style`. Use this
  * for brands whose values only arrive at runtime (e.g. per-tenant colours),
  * since it needs neither the VE compiler nor a pre-generated class. Pass `fonts`
- * to publish consumer families (`--font-<name>`) and `defaultFont` to pick the
- * family bare text uses.
+ * to publish consumer families (`--font-<name>`), `defaultFont` to pick the family
+ * bare text uses, and `textStyles` to publish named typographic roles
+ * (`--textStyle-<name>-*`).
  */
 export function createInlineTheme(
   tokens: ThemeTokensInput,
-  options: Pick<CreateThemeOptions, "scheme"> & FontOptions,
+  options: Pick<CreateThemeOptions, "scheme"> & FontOptions & TextStyleOptions,
 ): Record<string, string> {
   return {
     ...assignInlineVars(vars, withOperator(tokens, options.scheme)),
     ...fontVars(options),
+    ...textStyleVars(options.textStyles),
   };
 }

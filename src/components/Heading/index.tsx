@@ -15,6 +15,7 @@ import {
   type TextSize,
 } from "../../theme/constants";
 import type { FontName } from "../../theme/fonts";
+import type { TextStyleName } from "../../theme/textStyles";
 import type { RenderProp } from "../../utils/render";
 
 export interface HeadingProps
@@ -28,8 +29,17 @@ export interface HeadingProps
   /**
    * Visual size override. Defaults to the size mapped from `level`, so an `<h2>`
    * can be made to look like any size. Accepts the full shared scale (`xs`–`9xl`).
+   * A `textStyle` supplies the size instead of the level default (still overridable here).
    */
   size?: TextSize;
+  /**
+   * A named *text style* — an app-defined bundle of typographic properties (size,
+   * line-height, weight, family) published by the theme's `textStyles` option and
+   * declared on `TextStyleRegistry`. It replaces the level's default `size` and
+   * `weight` as the baseline; explicit props still override it. See
+   * {@link TextStyleName}.
+   */
+  textStyle?: TextStyleName;
   intent?: Intent;
   /** Default `high` (headings are high saliency). */
   saliency?: Saliency;
@@ -59,23 +69,22 @@ export interface HeadingProps
  * layout atoms.
  */
 export function Heading(props: HeadingProps) {
-  const {
-    level,
-    render,
-    ref,
-    size = HEADING_LEVEL_SIZE[level],
-    saliency = "high",
-    weight = HEADING_LEVEL_WEIGHT[level],
-    ...rest
-  } = props;
+  const { level, render, ref, size, saliency = "high", weight, textStyle, ...rest } = props;
+
+  // Suppress the level's default `size`/`weight` when a `textStyle` is present, so
+  // the bundle owns them (unset props emit no class and the recipe base fallbacks
+  // read the style's `--textStyle-<name>-*`). Explicit `size`/`weight` still win.
+  const resolvedSize = size ?? (textStyle ? undefined : HEADING_LEVEL_SIZE[level]);
+  const resolvedWeight = weight ?? (textStyle ? undefined : HEADING_LEVEL_WEIGHT[level]);
 
   return (
     <InternalText
       {...rest}
       ref={ref as React.Ref<HTMLElement>}
-      size={size}
+      size={resolvedSize}
+      textStyle={textStyle}
       saliency={saliency}
-      weight={weight}
+      weight={resolvedWeight}
       render={render}
       defaultElement={`h${level}`}
     />

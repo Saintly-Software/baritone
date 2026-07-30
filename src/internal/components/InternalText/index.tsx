@@ -11,9 +11,10 @@ import {
 } from "../../../styles/recipes/text.css";
 import { atoms } from "../../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps, TypographyAtomProps } from "../../../styles/spacingProps";
-import { textFontVar } from "../../../styles/vars.css";
+import { fontSizeVar, fontWeightVar, lineHeightVar, textFontVar } from "../../../styles/vars.css";
 import type { Intent, Saliency, TextSize } from "../../../theme/constants";
 import { fontVarName, type FontName } from "../../../theme/fonts";
+import { TEXT_STYLE_PROPS, textStyleVarName, type TextStyleName } from "../../../theme/textStyles";
 import { cx } from "../../../utils/cx";
 import { composeRefs, useRender, type RenderProp } from "../../../utils/render";
 
@@ -56,6 +57,45 @@ function warnIfFontUnset(el: HTMLElement | null, name: string): void {
   );
 }
 
+// Text-style names already warned about, so a page full of the same unpublished
+// `textStyle` warns once, not once per element.
+const warnedUnpublishedTextStyles = new Set<string>();
+
+/**
+ * Dev-only guard for the open-ended `textStyle` prop — the `textStyle` analogue of
+ * {@link warnIfFontUnset}. When `textStyle="<name>"` names a style the active theme
+ * never published, none of its `--textStyle-<name>-*` vars resolve, so the bundle
+ * silently does nothing (the text keeps the base size/weight/family) — easy to ship
+ * by accident (a typo, or a name declared on `TextStyleRegistry` but never wired
+ * into the theme's `textStyles`). So probe the resolved values once per name and
+ * point the dev at the fix.
+ *
+ * Skipped under jsdom (unit tests): it doesn't resolve stylesheet custom
+ * properties, so it would report every themed element as unpublished. This is a
+ * real-browser aid (dev server, Storybook), which is where the mistake shows up.
+ */
+function warnIfTextStyleUnpublished(el: HTMLElement | null, name: string): void {
+  if (el == null || warnedUnpublishedTextStyles.has(name)) return;
+  if (typeof navigator !== "undefined" && navigator.userAgent.includes("jsdom")) return;
+  const cs = getComputedStyle(el);
+  // A published style sets at least one of its `--textStyle-<name>-*` props; only
+  // when every one is empty is the name truly unknown to the theme.
+  if (
+    TEXT_STYLE_PROPS.some((prop) => cs.getPropertyValue(textStyleVarName(name, prop)).trim() !== "")
+  ) {
+    return;
+  }
+  warnedUnpublishedTextStyles.add(name);
+  console.warn(
+    `[baritone] textStyle="${name}": no --textStyle-${name}-* variables are set in this ` +
+      `element's theme, so the style has no effect (the text keeps the base size/weight/` +
+      `family). Publish it via the theme's \`textStyles\` option (e.g. ` +
+      `\`textStyles: { ${name}: { size: 'xl', lineHeight: 1.5 } }\` on ` +
+      "`createInlineTheme` / `createDesignSystemTheme` / `BaritoneTheme`). Declare the name on " +
+      "`TextStyleRegistry` for autocompletion.",
+  );
+}
+
 /**
  * `InternalText` — the shared typography primitive behind `Text` and `Heading`.
  * It owns the whole class composition — colour (`textIntentRecipe`), size +
@@ -73,8 +113,20 @@ export interface InternalTextProps
     MarginProps,
     PaddingProps,
     TypographyAtomProps {
-  /** Typography size — drives both font-size and line-height. */
-  size: TextSize;
+  /**
+   * Typography size — drives both font-size and line-height. Optional: when a
+   * `textStyle` supplies the size, callers pass `undefined` so the bundle owns it
+   * (the size recipe's base fallback governs); otherwise `Text`/`Heading` default
+   * it (`md` / the level's size).
+   */
+  size?: TextSize;
+  /**
+   * A named *text style* — an app-defined bundle of typographic properties (size,
+   * line-height, weight, family) published by the theme's `textStyles` option and
+   * declared on `TextStyleRegistry`. It sets a baseline that explicit props
+   * (`size`, `weight`, `font`) still override. See {@link TextStyleName}.
+   */
+  textStyle?: TextStyleName;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */
   intent?: Intent;
   /** Override the inherited colour at this saliency. Falls back to `mid` when standalone. */
@@ -100,6 +152,7 @@ export interface InternalTextProps
 
 export function InternalText({
   size,
+  textStyle,
   intent,
   saliency,
   weight,
@@ -132,23 +185,42 @@ export function InternalText({
   pl,
   ...rest
 }: InternalTextProps) {
-  // When `font` is set, point `--textFont` at the theme's `var(--font-<name>)`.
-  // This is an inline var, not a variant class, because the family vocabulary is
-  // open-ended and consumer-defined — see `theme/fonts.ts`. Consumer `style`
-  // spreads last so it can still override.
+  // `textStyle` and `font` both resolve to inline CSS vars (not variant classes),
+  // because both vocabularies are open-ended and consumer-defined — see
+  // `theme/textStyles.ts` / `theme/fonts.ts`. A `textStyle` points the size recipe's
+  // four instance vars at the theme's per-style values (`--textStyle-<name>-<prop>`);
+  // omitted props resolve to guaranteed-invalid so the recipe falls back to the base
+  // token. An explicit `font` spreads *after*, so its `--textFont` wins over the
+  // bundle's family; consumer `style` spreads last so it can still override anything.
   const resolvedStyle =
-    font === undefined
+    textStyle === undefined && font === undefined
       ? style
-      : { ...assignInlineVars({ [textFontVar]: `var(${fontVarName(font)})` }), ...style };
+      : {
+          ...(textStyle !== undefined
+            ? assignInlineVars({
+                [fontSizeVar]: `var(${textStyleVarName(textStyle, "fontSize")})`,
+                [lineHeightVar]: `var(${textStyleVarName(textStyle, "lineHeight")})`,
+                [fontWeightVar]: `var(${textStyleVarName(textStyle, "fontWeight")})`,
+                [textFontVar]: `var(${textStyleVarName(textStyle, "fontFamily")})`,
+              })
+            : {}),
+          ...(font !== undefined
+            ? assignInlineVars({ [textFontVar]: `var(${fontVarName(font)})` })
+            : {}),
+          ...style,
+        };
 
-  // Dev-only: warn when `font` points at a var the theme never published. Compose
-  // an internal ref onto the node so we can read its computed style after mount; in
-  // production this is a no-op and the consumer's `ref` passes through untouched.
+  // Dev-only: warn when `font`/`textStyle` point at vars the theme never published.
+  // Compose an internal ref onto the node so we can read its computed style after
+  // mount; in production this is a no-op and the consumer's `ref` passes through.
   const nodeRef = React.useRef<HTMLElement | null>(null);
   const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
   React.useEffect(() => {
     if (isDev() && font !== undefined) warnIfFontUnset(nodeRef.current, font);
   }, [font]);
+  React.useEffect(() => {
+    if (isDev() && textStyle !== undefined) warnIfTextStyleUnpublished(nodeRef.current, textStyle);
+  }, [textStyle]);
 
   return useRender({
     render,

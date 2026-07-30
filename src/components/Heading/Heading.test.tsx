@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { textSizeRecipe, typographyWeight } from "../../styles/recipes/text.css";
 import { fontVarName } from "../../theme/fonts";
+import { textStyleVarName } from "../../theme/textStyles";
 import { Heading } from "./index";
 
 describe("Heading", () => {
@@ -56,6 +57,34 @@ describe("Heading", () => {
       </Heading>,
     );
     expect(screen.getByTestId("h").className).toContain(typographyWeight({ weight: "superbold" }));
+  });
+
+  it("suppresses the level's default size and weight when `textStyle` is set", () => {
+    render(
+      <Heading level={1} textStyle="title" data-testid="h">
+        Titled
+      </Heading>,
+    );
+    const className = screen.getByTestId("h").className;
+    // Level 1 would default to `4xl` / `bold`; a `textStyle` owns both, so neither
+    // level-default class is emitted (the bundle governs via the recipe fallback).
+    expect(className).not.toContain(textSizeRecipe({ size: "4xl" }));
+    expect(className).not.toContain(typographyWeight({ weight: "bold" }));
+    // …and the instance vars point at the style.
+    expect(screen.getByTestId("h").getAttribute("style") ?? "").toContain(
+      `var(${textStyleVarName("title", "fontSize")})`,
+    );
+  });
+
+  it("lets explicit `size`/`weight` override the textStyle on a heading", () => {
+    render(
+      <Heading level={1} textStyle="title" size="lg" weight="semibold" data-testid="h">
+        Nudged
+      </Heading>,
+    );
+    const className = screen.getByTestId("h").className;
+    expect(className).toContain(textSizeRecipe({ size: "lg" }));
+    expect(className).toContain(typographyWeight({ weight: "semibold" }));
   });
 
   it("selects a font family by name via the --textFont var", () => {

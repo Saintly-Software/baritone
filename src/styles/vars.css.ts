@@ -29,6 +29,20 @@ export const textColorVar = createVar("textColor");
 export const textFontVar = createVar("textFont");
 
 /**
+ * The three *text-style instance vars* — the size-recipe analogues of
+ * {@link textFontVar}, one per themeable typographic property a `textStyle` bundle
+ * can own. The size recipe's base reads each with a token fallback
+ * (`fallbackVar(fontSizeVar, vars.text.size.md.fontSize)`, etc.), so an unset var
+ * resolves to the usual default; the `textStyle` prop on `Text`/`Heading` points
+ * them per instance at `var(--textStyle-<name>-<prop>)`, the values the theme
+ * published. Family reuses `textFontVar` (a `textStyle` sets it to
+ * `var(--textStyle-<name>-fontFamily)`), so there's no separate var for it.
+ */
+export const fontSizeVar = createVar("fontSize");
+export const lineHeightVar = createVar("lineHeight");
+export const fontWeightVar = createVar("fontWeight");
+
+/**
  * The resolved focus-ring colour. Each element-intent recipe (`surface`,
  * `component`, `formControl`) sets this to its `focus.<intent>` token; the shared
  * `focusRingRecipe` reads it when drawing the ring, so the ring colour follows

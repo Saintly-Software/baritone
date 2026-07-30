@@ -2,7 +2,14 @@ import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
-import { iconColorVar, textColorVar, textFontVar } from "../vars.css";
+import {
+  fontSizeVar,
+  fontWeightVar,
+  iconColorVar,
+  lineHeightVar,
+  textColorVar,
+  textFontVar,
+} from "../vars.css";
 
 // The colour an explicit `intent`/`saliency` resolves to. Only set when a
 // variant is active, so the base style can fall through to the inherited
@@ -64,7 +71,15 @@ export const textSizeRecipe = recipe({
     // back to the `sans` token. Mirrors how colour reads `--textColor`.
     fontFamily: fallbackVar(textFontVar, vars.font.sans),
     margin: 0,
-    fontWeight: vars.text.weight.default,
+    // Size + weight also read per-instance vars with a token fallback, so a
+    // `textStyle` bundle can own them (it sets `--fontSize`/`--lineHeight`/
+    // `--fontWeight` to the theme's `--textStyle-<name>-*` values). Unset — the
+    // common case — each resolves to the base default: the `md` size and the
+    // default weight. The `size` variant below still wins when `size` is passed
+    // (it sets these as real properties, later in the cascade). See `theme/textStyles.ts`.
+    fontSize: fallbackVar(fontSizeVar, vars.text.size.md.fontSize),
+    lineHeight: fallbackVar(lineHeightVar, vars.text.size.md.lineHeight),
+    fontWeight: fallbackVar(fontWeightVar, vars.text.weight.default),
   },
   variants: {
     size: Object.fromEntries(
@@ -77,9 +92,10 @@ export const textSizeRecipe = recipe({
       ]),
     ) as Record<(typeof TEXT_SIZES)[number], { fontSize: string; lineHeight: string }>,
   },
-  defaultVariants: {
-    size: "md",
-  },
+  // No `defaultVariants` for `size`: an unset `size` must emit no class so the
+  // base's `fallbackVar(fontSizeVar, …)` governs (letting a `textStyle` supply the
+  // size). The `md` default is reintroduced at the component layer for the
+  // no-`textStyle` case; passing `size` still emits its class and wins over the base.
 });
 
 export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>>;

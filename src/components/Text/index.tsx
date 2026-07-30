@@ -8,6 +8,7 @@ import type {
 import type { MarginProps, PaddingProps, TypographyAtomProps } from "../../styles/spacingProps";
 import type { Intent, Saliency, TextSize } from "../../theme/constants";
 import type { FontName } from "../../theme/fonts";
+import type { TextStyleName } from "../../theme/textStyles";
 import type { RenderProp } from "../../utils/render";
 
 /** Element tags a `Text` can render as via the `as` shorthand. */
@@ -21,9 +22,18 @@ interface TextOwnProps
     TypographyAtomProps {
   /**
    * Typography size. Accepts the full shared scale (`xs`–`9xl`) — `Text` and
-   * `Heading` render the same sizes and differ only in semantics. Default `md`.
+   * `Heading` render the same sizes and differ only in semantics. Default `md`,
+   * unless a `textStyle` supplies the size (then it owns it, still overridable here).
    */
   size?: TextSize;
+  /**
+   * A named *text style* — an app-defined bundle of typographic properties (size,
+   * line-height, weight, family) published by the theme's `textStyles` option and
+   * declared on `TextStyleRegistry`. It replaces the built-in defaults as the
+   * baseline; explicit props (`size`, `weight`, `font`) still override it. See
+   * {@link TextStyleName}.
+   */
+  textStyle?: TextStyleName;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */
   intent?: Intent;
   /** Override the inherited colour at this saliency. Falls back to `mid` when standalone. */
@@ -80,15 +90,17 @@ export type TextProps = TextOwnProps &
  * layout atoms.
  */
 export function Text(props: TextProps) {
-  const {
-    as,
-    render,
-    size = "md",
-    ...rest
-  } = props as TextOwnProps & {
+  const { as, render, size, ...rest } = props as TextOwnProps & {
     as?: TextElement;
     render?: RenderProp;
   };
 
-  return <InternalText {...rest} size={size} render={render} defaultElement={as ?? "div"} />;
+  // Suppress the built-in `md` default when a `textStyle` is present, so the bundle
+  // owns the size (an unset `size` emits no class and the recipe base fallback reads
+  // the style's `--textStyle-<name>-fontSize`). An explicit `size` still wins.
+  const resolvedSize = size ?? (props.textStyle ? undefined : "md");
+
+  return (
+    <InternalText {...rest} size={resolvedSize} render={render} defaultElement={as ?? "div"} />
+  );
 }

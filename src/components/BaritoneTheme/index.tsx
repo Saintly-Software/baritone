@@ -6,11 +6,16 @@
 // and inlined into the first paint — no client boundary, no flash, no hydration
 // mismatch.
 import * as React from "react";
-import { createInlineTheme, type FontOptions } from "../../theme/createTheme";
+import {
+  createInlineTheme,
+  type FontOptions,
+  type TextStyleOptions,
+} from "../../theme/createTheme";
 import type { ThemeTokensInput } from "../../theme/contract.css";
 import { useRender, type RenderProp } from "../../utils/render";
 
-export interface BaritoneThemeProps extends React.HTMLAttributes<HTMLDivElement>, FontOptions {
+export interface BaritoneThemeProps
+  extends React.HTMLAttributes<HTMLDivElement>, FontOptions, TextStyleOptions {
   /** Token values for this theme scope — e.g. from `buildDefaultTokens`. */
   tokens: ThemeTokensInput;
   /** Colour scheme; sets the oklch interaction direction (`-1` light / `+1` dark). */
@@ -52,6 +57,7 @@ export function BaritoneTheme({
   scheme,
   fonts,
   defaultFont,
+  textStyles,
   render,
   style,
   ref,
@@ -66,7 +72,7 @@ export function BaritoneTheme({
   // add layout styles (or deliberately override a single `--var`).
   const themeStyle = {
     isolation: "isolate" as const,
-    ...createInlineTheme(tokens, { scheme, fonts, defaultFont }),
+    ...createInlineTheme(tokens, { scheme, fonts, defaultFont, textStyles }),
     ...style,
   };
   return useRender({

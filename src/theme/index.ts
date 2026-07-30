@@ -6,6 +6,7 @@ export {
   createInlineTheme,
   type CreateThemeOptions,
   type FontOptions,
+  type TextStyleOptions,
 } from "./createTheme";
 export { buildDefaultTokens, type BrandSeed } from "./defaultTokens";
 
@@ -19,6 +20,17 @@ export {
   type FontName,
   type BuiltinFontName,
 } from "./fonts";
+
+// The consumer-extensible text-style vocabulary — the `textStyle` analogue of the
+// font seam. `TextStyleRegistry` is the module-augmentation seam; `TextStyleName`
+// is what the `textStyle` prop accepts; `TextStyleDef` is a style's shape.
+export {
+  textStyleVarName,
+  textStyleVars,
+  type TextStyleRegistry,
+  type TextStyleName,
+  type TextStyleDef,
+} from "./textStyles";
 export { lightTheme, darkTheme } from "./defaultTheme.css";
 
 export {

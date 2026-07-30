@@ -8,6 +8,7 @@ import {
 import { atoms } from "../../styles/sprinkles.css";
 import { TEXT_WEIGHTS } from "../../theme/constants";
 import { fontVarName } from "../../theme/fonts";
+import { textStyleVarName } from "../../theme/textStyles";
 import { Text } from "./index";
 
 describe("Text", () => {
@@ -115,5 +116,35 @@ describe("Text", () => {
   it("omits a weight class when `weight` is not passed", () => {
     render(<Text>Plain</Text>);
     expect(screen.getByText("Plain").className).not.toContain(typographyWeight({ weight: "bold" }));
+  });
+
+  it("still applies the md size class by default (no textStyle)", () => {
+    // The recipe's `defaultVariants` was removed; the `md` default is reintroduced
+    // at the component layer, so a bare `Text` keeps its md size class.
+    render(<Text>Plain</Text>);
+    expect(screen.getByText("Plain").className).toContain(textSizeRecipe({ size: "md" }));
+  });
+
+  it("suppresses the md default size class when `textStyle` is set", () => {
+    // With a `textStyle`, `size` is left unset so the bundle owns the size (via the
+    // recipe base fallback) — no size class is emitted.
+    render(<Text textStyle="title">Titled</Text>);
+    expect(screen.getByText("Titled").className).not.toContain(textSizeRecipe({ size: "md" }));
+  });
+
+  it("points the instance vars at the style when `textStyle` is set", () => {
+    render(<Text textStyle="title">Titled</Text>);
+    expect(screen.getByText("Titled").getAttribute("style") ?? "").toContain(
+      `var(${textStyleVarName("title", "fontSize")})`,
+    );
+  });
+
+  it("lets an explicit `size` override the textStyle (its class still emits)", () => {
+    render(
+      <Text textStyle="title" size="4xl">
+        Nudged
+      </Text>,
+    );
+    expect(screen.getByText("Nudged").className).toContain(textSizeRecipe({ size: "4xl" }));
   });
 });
