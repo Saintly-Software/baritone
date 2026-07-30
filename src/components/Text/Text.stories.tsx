@@ -166,7 +166,13 @@ export const LetterSpacing: Story = {
           eyebrow — size=&quot;xs&quot; weight=&quot;bold&quot; textTransform=&quot;uppercase&quot;
           letterSpacing=&quot;widest&quot;
         </Text>
-        <Text size="xs" weight="bold" saliency="low" textTransform="uppercase" letterSpacing="widest">
+        <Text
+          size="xs"
+          weight="bold"
+          saliency="low"
+          textTransform="uppercase"
+          letterSpacing="widest"
+        >
           Section label
         </Text>
       </div>
