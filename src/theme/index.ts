@@ -6,6 +6,7 @@ export {
   createInlineTheme,
   type CreateThemeOptions,
   type FontOptions,
+  type LetterSpacingOptions,
 } from "./createTheme";
 export { buildDefaultTokens, type BrandSeed } from "./defaultTokens";
 
@@ -19,6 +20,17 @@ export {
   type FontName,
   type BuiltinFontName,
 } from "./fonts";
+
+// The consumer-extensible letter-spacing (tracking) vocabulary, mirroring the font
+// seam above. `LetterSpacingRegistry` is the module-augmentation seam;
+// `LetterSpacingName` is what the `letterSpacing` prop accepts.
+export {
+  letterSpacingVarName,
+  letterSpacingVars,
+  type LetterSpacingRegistry,
+  type LetterSpacingName,
+  type BuiltinLetterSpacingName,
+} from "./letterSpacings";
 export { lightTheme, darkTheme } from "./defaultTheme.css";
 
 export {

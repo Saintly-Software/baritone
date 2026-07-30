@@ -2,7 +2,7 @@ import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
-import { iconColorVar, textColorVar, textFontVar } from "../vars.css";
+import { iconColorVar, textColorVar, textFontVar, textLetterSpacingVar } from "../vars.css";
 
 // The colour an explicit `intent`/`saliency` resolves to. Only set when a
 // variant is active, so the base style can fall through to the inherited
@@ -63,6 +63,13 @@ export const textSizeRecipe = recipe({
     // instance (to a `var(--font-<name>)` the theme published); unset, it falls
     // back to the `sans` token. Mirrors how colour reads `--textColor`.
     fontFamily: fallbackVar(textFontVar, vars.font.sans),
+    // Same single-indirection for tracking: the `letterSpacing` prop sets
+    // `--textLetterSpacing` per instance (to a `var(--letterSpacing-<name>)` the
+    // theme published), and a theme's `defaultLetterSpacing` can seed it at the
+    // root; unset, it falls back to the CSS `normal` keyword (no added tracking,
+    // matching bare text before this was a knob). Open-ended like `font`, so it's
+    // a var here, not an enumerated variant. See `theme/letterSpacings.ts`.
+    letterSpacing: fallbackVar(textLetterSpacingVar, "normal"),
     margin: 0,
     fontWeight: vars.text.weight.default,
   },

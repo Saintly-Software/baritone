@@ -75,9 +75,10 @@ export type TextProps = TextOwnProps &
  * inline icons match the text.
  *
  * `size` picks a font-size + line-height from the shared scale; typography can be
- * further tuned with `weight`, `italic`, and `font` (the family), plus the
- * `textAlign`, `whiteSpace`, `overflowWrap`, `textTransform`, and `letterSpacing`
- * layout atoms.
+ * further tuned with `weight`, `italic`, `font` (the family), and `letterSpacing`
+ * (tracking) — both `font` and `letterSpacing` are open-ended, consumer-defined
+ * vocabularies — plus the `textAlign`, `whiteSpace`, `overflowWrap`, and
+ * `textTransform` layout atoms.
  */
 export function Text(props: TextProps) {
   const {

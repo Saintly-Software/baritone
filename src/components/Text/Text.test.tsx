@@ -8,6 +8,7 @@ import {
 import { atoms } from "../../styles/sprinkles.css";
 import { TEXT_WEIGHTS } from "../../theme/constants";
 import { fontVarName } from "../../theme/fonts";
+import { letterSpacingVarName } from "../../theme/letterSpacings";
 import { Text } from "./index";
 
 describe("Text", () => {
@@ -96,9 +97,23 @@ describe("Text", () => {
     expect(screen.getByText("Shout").className).toContain(atoms({ textTransform: "uppercase" }));
   });
 
-  it("applies the letterSpacing atom", () => {
+  it("selects a built-in tracking step by name via the --textLetterSpacing var", () => {
     render(<Text letterSpacing="widest">Eyebrow</Text>);
-    expect(screen.getByText("Eyebrow").className).toContain(atoms({ letterSpacing: "widest" }));
+    expect(screen.getByText("Eyebrow").getAttribute("style")).toContain(
+      `var(${letterSpacingVarName("widest")})`,
+    );
+  });
+
+  it("selects a consumer tracking value by name via the --textLetterSpacing var", () => {
+    render(<Text letterSpacing="eyebrow">Label</Text>);
+    expect(screen.getByText("Label").getAttribute("style")).toContain(
+      `var(${letterSpacingVarName("eyebrow")})`,
+    );
+  });
+
+  it("sets no tracking var when `letterSpacing` is not passed", () => {
+    render(<Text>Plain</Text>);
+    expect(screen.getByText("Plain").getAttribute("style") ?? "").not.toContain("--letterSpacing-");
   });
 
   it("applies the size recipe class", () => {

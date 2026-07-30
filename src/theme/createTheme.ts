@@ -1,9 +1,10 @@
 import { createTheme, globalStyle } from "@vanilla-extract/css";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
-import { textFontVar } from "../styles/vars.css";
+import { textFontVar, textLetterSpacingVar } from "../styles/vars.css";
 import { warnOnContrastIssues } from "./contrast";
 import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
 import { fontFamilyVars, fontVarName, type FontName } from "./fonts";
+import { letterSpacingVarName, letterSpacingVars, type LetterSpacingName } from "./letterSpacings";
 
 /**
  * The consumer-defined font vocabulary for a theme. Each entry publishes a
@@ -21,7 +22,24 @@ export interface FontOptions {
   defaultFont?: FontName;
 }
 
-export interface CreateThemeOptions extends FontOptions {
+/**
+ * The consumer-defined letter-spacing (tracking) vocabulary for a theme, the
+ * tracking analogue of {@link FontOptions}. Each entry publishes a
+ * `--letterSpacing-<name>` custom property; the `letterSpacing` prop on
+ * `Text`/`Heading` selects one by name. The built-in steps (`tighter`…`widest`)
+ * are always published from the tokens, so they need no entry here.
+ */
+export interface LetterSpacingOptions {
+  /** Extra named tracking values, e.g. `{ eyebrow: "0.2em" }`. */
+  letterSpacings?: Record<string, string>;
+  /**
+   * The tracking a bare `<Text>`/`<Heading>` (no `letterSpacing` prop) uses.
+   * Defaults to `normal`. Set e.g. `"tight"` for a display-led brand.
+   */
+  defaultLetterSpacing?: LetterSpacingName;
+}
+
+export interface CreateThemeOptions extends FontOptions, LetterSpacingOptions {
   /** Colour scheme. Sets `oklchOperator` (-1 light / +1 dark). */
   scheme: "light" | "dark";
   /** Label used in contrast warnings. */
@@ -44,6 +62,26 @@ function fontVars({ fonts, defaultFont }: FontOptions): Record<string, string> {
   // `textFontVar` is a vanilla-extract var reference, so it can't be an inline
   // object key directly — `assignInlineVars` maps it to its real property name.
   return { ...family, ...assignInlineVars({ [textFontVar]: `var(${fontVarName(defaultFont)})` }) };
+}
+
+/**
+ * The tracking counterpart to {@link fontVars}: the `--letterSpacing-<name>` scale
+ * plus, when a `defaultLetterSpacing` is set, the `--textLetterSpacing` var that
+ * makes bare text use it. Shared by the build-time (`globalStyle`) and runtime
+ * (`assignInlineVars`) paths so they stay in step.
+ */
+function trackingVars({
+  letterSpacings,
+  defaultLetterSpacing,
+}: LetterSpacingOptions): Record<string, string> {
+  const scale = letterSpacingVars(letterSpacings);
+  if (defaultLetterSpacing === undefined) return scale;
+  return {
+    ...scale,
+    ...assignInlineVars({
+      [textLetterSpacingVar]: `var(${letterSpacingVarName(defaultLetterSpacing)})`,
+    }),
+  };
 }
 
 function withOperator(tokens: ThemeTokensInput, scheme: "light" | "dark"): DesignTokens {
@@ -80,9 +118,13 @@ export function createDesignSystemTheme(
   // why those surfaces need no z-index of their own. Attached to the generated
   // class itself (not a second class) so the return value stays a single class,
   // safe for `classList.add`. `BaritoneTheme` sets the same via inline style. The
-  // `--font-<name>` registry rides along on the same root so the `font` prop
-  // resolves against this theme's families.
-  globalStyle(`.${themeClass}`, { isolation: "isolate", vars: fontVars(options) });
+  // `--font-<name>` and `--letterSpacing-<name>` registries ride along on the same
+  // root so the `font` and `letterSpacing` props resolve against this theme's
+  // vocabulary.
+  globalStyle(`.${themeClass}`, {
+    isolation: "isolate",
+    vars: { ...fontVars(options), ...trackingVars(options) },
+  });
   return themeClass;
 }
 
@@ -92,14 +134,16 @@ export function createDesignSystemTheme(
  * for brands whose values only arrive at runtime (e.g. per-tenant colours),
  * since it needs neither the VE compiler nor a pre-generated class. Pass `fonts`
  * to publish consumer families (`--font-<name>`) and `defaultFont` to pick the
- * family bare text uses.
+ * family bare text uses; likewise `letterSpacings` / `defaultLetterSpacing` for
+ * the tracking vocabulary (`--letterSpacing-<name>`).
  */
 export function createInlineTheme(
   tokens: ThemeTokensInput,
-  options: Pick<CreateThemeOptions, "scheme"> & FontOptions,
+  options: Pick<CreateThemeOptions, "scheme"> & FontOptions & LetterSpacingOptions,
 ): Record<string, string> {
   return {
     ...assignInlineVars(vars, withOperator(tokens, options.scheme)),
     ...fontVars(options),
+    ...trackingVars(options),
   };
 }
