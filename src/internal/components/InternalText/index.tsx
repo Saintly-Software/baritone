@@ -35,11 +35,13 @@ const warnedUnsetVars = new Set<string>();
 
 /**
  * Dev-only guard shared by the two open-ended props (`font`, `letterSpacing`).
- * When the prop names a `--…-<name>` the active theme never published, the CSS
- * declaration is invalid, so the text silently falls back (to the inherited font,
- * or to `normal` tracking) instead of doing anything visibly wrong — easy to ship
- * by accident (a typo, or a name declared on the registry but never wired into the
- * theme). So probe the resolved value once per var and point the dev at the fix.
+ * When the prop names a `--…-<name>` the active theme never published, that inner
+ * var is guaranteed-invalid, so the `--textFont` / `--textLetterSpacing` reference
+ * built on it collapses to the size recipe's *fallback* — the theme's `sans`
+ * family, or `normal` tracking — instead of doing anything visibly wrong. Easy to
+ * ship by accident (a typo, or a name declared on the registry but never wired
+ * into the theme). So probe the resolved value once per var and point the dev at
+ * the fix.
  *
  * Skipped under jsdom (unit tests): it doesn't resolve stylesheet custom
  * properties, so it would report every themed element as unset. This is a
@@ -59,8 +61,8 @@ function warnIfFontUnset(el: HTMLElement | null, name: string): void {
     fontVarName(name),
     () =>
       `[baritone] font="${name}": the CSS variable ${fontVarName(name)} isn't set in this ` +
-      `element's theme, so the text falls back to the inherited font. Publish the family via ` +
-      `the theme's \`fonts\` option (e.g. \`fonts: { ${name}: '"My Font", sans-serif' }\` on ` +
+      `element's theme, so the text falls back to the theme's \`sans\` family. Publish the family ` +
+      `via the theme's \`fonts\` option (e.g. \`fonts: { ${name}: '"My Font", sans-serif' }\` on ` +
       "`createInlineTheme` / `createDesignSystemTheme` / `BaritoneTheme`), or use a built-in " +
       "(`sans` / `mono`). Declare the name on `FontRegistry` for autocompletion.",
   );
