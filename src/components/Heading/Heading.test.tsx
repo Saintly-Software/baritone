@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { textSizeRecipe, typographyWeight } from "../../styles/recipes/text.css";
 import { fontVarName } from "../../theme/fonts";
+import { letterSpacingVarName } from "../../theme/letterSpacings";
 import { Heading } from "./index";
 
 describe("Heading", () => {
@@ -80,6 +81,17 @@ describe("Heading", () => {
     );
   });
 
+  it("selects a tracking value by name via the --textLetterSpacing var", () => {
+    render(
+      <Heading level={2} letterSpacing="wide">
+        Tracked
+      </Heading>,
+    );
+    expect(screen.getByRole("heading", { level: 2 }).getAttribute("style")).toContain(
+      `var(${letterSpacingVarName("wide")})`,
+    );
+  });
+
   it("adds a class for each typographic knob passed", () => {
     const { rerender } = render(
       <Heading level={2} data-testid="h">
@@ -87,21 +99,15 @@ describe("Heading", () => {
       </Heading>,
     );
     // The plain heading already carries the level's default weight; `italic`,
-    // `textAlign`, `whiteSpace`, and `letterSpacing` are each additive on top of it.
+    // `textAlign`, and `whiteSpace` are each additive class atoms on top of it.
+    // (`letterSpacing` is an inline var, not a class — covered above.)
     const base = screen.getByTestId("h").className.split(" ").length;
     rerender(
-      <Heading
-        level={2}
-        data-testid="h"
-        italic
-        textAlign="center"
-        whiteSpace="nowrap"
-        letterSpacing="wide"
-      >
+      <Heading level={2} data-testid="h" italic textAlign="center" whiteSpace="nowrap">
         Styled
       </Heading>,
     );
     const styled = screen.getByTestId("h").className.split(" ").length;
-    expect(styled).toBe(base + 4);
+    expect(styled).toBe(base + 3);
   });
 });

@@ -29,6 +29,17 @@ export const textColorVar = createVar("textColor");
 export const textFontVar = createVar("textFont");
 
 /**
+ * The *current letter-spacing (tracking)*, mirroring {@link textFontVar}. The size
+ * recipe reads this (falling back to the CSS `normal` keyword) so the resolved
+ * tracking is a single indirection; the `letterSpacing` prop on `Text`/`Heading`
+ * sets it per instance to `var(--letterSpacing-<name>)`, pointing at a value the
+ * active theme published. Left unset, text stays on `normal` — so this is the
+ * tracking analogue of `--textFont`: a var the element reads, a prop that
+ * overrides it. A theme's `defaultLetterSpacing` can seed it at the root.
+ */
+export const textLetterSpacingVar = createVar("textLetterSpacing");
+
+/**
  * The resolved focus-ring colour. Each element-intent recipe (`surface`,
  * `component`, `formControl`) sets this to its `focus.<intent>` token; the shared
  * `focusRingRecipe` reads it when drawing the ring, so the ring colour follows

@@ -1,18 +1,12 @@
 import { createSprinkles, defineProperties } from "@vanilla-extract/sprinkles";
 import { breakpoints } from "../theme/breakpoints";
-import { LETTER_SPACING_KEYS, SPACE_KEYS } from "../theme/constants";
+import { SPACE_KEYS } from "../theme/constants";
 import { vars } from "../theme/contract.css";
 
 const spaceValues = Object.fromEntries(SPACE_KEYS.map((key) => [key, vars.space[key]])) as Record<
   (typeof SPACE_KEYS)[number],
   string
 >;
-
-// The `letterSpacing` atom reads the `text.letterSpacing` token scale directly
-// (like `spaceValues` reads `space`), so a themed `--…` drives each step.
-const letterSpacingValues = Object.fromEntries(
-  LETTER_SPACING_KEYS.map((key) => [key, vars.text.letterSpacing[key]]),
-) as Record<(typeof LETTER_SPACING_KEYS)[number], string>;
 
 const marginValues = { ...spaceValues, auto: "auto" };
 
@@ -85,7 +79,10 @@ const responsiveProperties = defineProperties({
     whiteSpace: ["normal", "nowrap"],
     overflowWrap: ["normal", "break-word"],
     textTransform: ["none", "uppercase", "lowercase", "capitalize"],
-    letterSpacing: letterSpacingValues,
+    // NOTE: `letterSpacing` is deliberately *not* an atom. Its vocabulary is
+    // consumer-defined and open-ended (see `theme/letterSpacings.ts`), so it can't
+    // be enumerated into build-time classes; it's routed through the
+    // `--textLetterSpacing` var by `InternalText` instead, exactly like `font`.
   },
   shorthands: {
     p: ["padding"],

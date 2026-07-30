@@ -11,9 +11,10 @@ import {
 } from "../../../styles/recipes/text.css";
 import { atoms } from "../../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps, TypographyAtomProps } from "../../../styles/spacingProps";
-import { textFontVar } from "../../../styles/vars.css";
+import { textFontVar, textLetterSpacingVar } from "../../../styles/vars.css";
 import type { Intent, Saliency, TextSize } from "../../../theme/constants";
 import { fontVarName, type FontName } from "../../../theme/fonts";
+import { letterSpacingVarName } from "../../../theme/letterSpacings";
 import { cx } from "../../../utils/cx";
 import { composeRefs, useRender, type RenderProp } from "../../../utils/render";
 
@@ -26,33 +27,57 @@ import { composeRefs, useRender, type RenderProp } from "../../../utils/render";
 // where `process` is undefined, which would leak the dev path into production.)
 const isDev = (): boolean => process.env.NODE_ENV !== "production";
 
-// Font names already warned about, so a page full of `<Text font="…">` with the
-// same unset name warns once, not once per element.
-const warnedUnsetFonts = new Set<string>();
+// `--…-<name>` custom properties already warned about, so a page full of
+// `<Text font="…">` / `<Text letterSpacing="…">` with the same unset name warns
+// once, not once per element. Keyed by the resolved CSS var, which is unique per
+// (prop, name) pair.
+const warnedUnsetVars = new Set<string>();
 
 /**
- * Dev-only guard for the open-ended `font` prop. When `font="<name>"` points at a
- * `--font-<name>` the active theme never published, the `font-family` declaration
- * is invalid, so the text silently inherits its ancestor's family instead of doing
- * anything visibly wrong — easy to ship by accident (a typo, or a name declared on
- * `FontRegistry` but never wired into the theme's `fonts`). So probe the resolved
- * value once per name and point the dev at the fix.
+ * Dev-only guard shared by the two open-ended props (`font`, `letterSpacing`).
+ * When the prop names a `--…-<name>` the active theme never published, that inner
+ * var is guaranteed-invalid, so the `--textFont` / `--textLetterSpacing` reference
+ * built on it collapses to the size recipe's *fallback* — the theme's `sans`
+ * family, or `normal` tracking — instead of doing anything visibly wrong. Easy to
+ * ship by accident (a typo, or a name declared on the registry but never wired
+ * into the theme). So probe the resolved value once per var and point the dev at
+ * the fix.
  *
  * Skipped under jsdom (unit tests): it doesn't resolve stylesheet custom
  * properties, so it would report every themed element as unset. This is a
  * real-browser aid (dev server, Storybook), which is where the mistake shows up.
  */
-function warnIfFontUnset(el: HTMLElement | null, name: string): void {
-  if (el == null || warnedUnsetFonts.has(name)) return;
+function warnIfVarUnset(el: HTMLElement | null, cssVar: string, message: () => string): void {
+  if (el == null || warnedUnsetVars.has(cssVar)) return;
   if (typeof navigator !== "undefined" && navigator.userAgent.includes("jsdom")) return;
-  if (getComputedStyle(el).getPropertyValue(fontVarName(name)).trim() !== "") return;
-  warnedUnsetFonts.add(name);
-  console.warn(
-    `[baritone] font="${name}": the CSS variable ${fontVarName(name)} isn't set in this ` +
-      `element's theme, so the text falls back to the inherited font. Publish the family via ` +
-      `the theme's \`fonts\` option (e.g. \`fonts: { ${name}: '"My Font", sans-serif' }\` on ` +
+  if (getComputedStyle(el).getPropertyValue(cssVar).trim() !== "") return;
+  warnedUnsetVars.add(cssVar);
+  console.warn(message());
+}
+
+function warnIfFontUnset(el: HTMLElement | null, name: string): void {
+  warnIfVarUnset(
+    el,
+    fontVarName(name),
+    () =>
+      `[baritone] font="${name}": the CSS variable ${fontVarName(name)} isn't set in this ` +
+      `element's theme, so the text falls back to the theme's \`sans\` family. Publish the family ` +
+      `via the theme's \`fonts\` option (e.g. \`fonts: { ${name}: '"My Font", sans-serif' }\` on ` +
       "`createInlineTheme` / `createDesignSystemTheme` / `BaritoneTheme`), or use a built-in " +
       "(`sans` / `mono`). Declare the name on `FontRegistry` for autocompletion.",
+  );
+}
+
+function warnIfLetterSpacingUnset(el: HTMLElement | null, name: string): void {
+  warnIfVarUnset(
+    el,
+    letterSpacingVarName(name),
+    () =>
+      `[baritone] letterSpacing="${name}": the CSS variable ${letterSpacingVarName(name)} isn't ` +
+      `set in this element's theme, so the text falls back to \`normal\` tracking. Publish the ` +
+      `value via the theme's \`letterSpacings\` option (e.g. \`letterSpacings: { ${name}: '0.2em' }\` ` +
+      "on `createInlineTheme` / `createDesignSystemTheme` / `BaritoneTheme`), or use a built-in " +
+      "(`tighter`…`widest`). Declare the name on `LetterSpacingRegistry` for autocompletion.",
   );
 }
 
@@ -132,23 +157,35 @@ export function InternalText({
   pl,
   ...rest
 }: InternalTextProps) {
-  // When `font` is set, point `--textFont` at the theme's `var(--font-<name>)`.
-  // This is an inline var, not a variant class, because the family vocabulary is
-  // open-ended and consumer-defined — see `theme/fonts.ts`. Consumer `style`
-  // spreads last so it can still override.
+  // When `font`/`letterSpacing` are set, point `--textFont` / `--textLetterSpacing`
+  // at the theme's `var(--font-<name>)` / `var(--letterSpacing-<name>)`. These are
+  // inline vars, not variant classes, because both vocabularies are open-ended and
+  // consumer-defined — see `theme/fonts.ts` and `theme/letterSpacings.ts`. Consumer
+  // `style` spreads last so it can still override.
   const resolvedStyle =
-    font === undefined
+    font === undefined && letterSpacing === undefined
       ? style
-      : { ...assignInlineVars({ [textFontVar]: `var(${fontVarName(font)})` }), ...style };
+      : {
+          ...assignInlineVars({
+            ...(font !== undefined ? { [textFontVar]: `var(${fontVarName(font)})` } : {}),
+            ...(letterSpacing !== undefined
+              ? { [textLetterSpacingVar]: `var(${letterSpacingVarName(letterSpacing)})` }
+              : {}),
+          }),
+          ...style,
+        };
 
-  // Dev-only: warn when `font` points at a var the theme never published. Compose
-  // an internal ref onto the node so we can read its computed style after mount; in
-  // production this is a no-op and the consumer's `ref` passes through untouched.
+  // Dev-only: warn when `font`/`letterSpacing` point at a var the theme never
+  // published. Compose an internal ref onto the node so we can read its computed
+  // style after mount; in production this is a no-op and the consumer's `ref`
+  // passes through untouched.
   const nodeRef = React.useRef<HTMLElement | null>(null);
   const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
   React.useEffect(() => {
-    if (isDev() && font !== undefined) warnIfFontUnset(nodeRef.current, font);
-  }, [font]);
+    if (!isDev()) return;
+    if (font !== undefined) warnIfFontUnset(nodeRef.current, font);
+    if (letterSpacing !== undefined) warnIfLetterSpacingUnset(nodeRef.current, letterSpacing);
+  }, [font, letterSpacing]);
 
   return useRender({
     render,
@@ -179,7 +216,6 @@ export function InternalText({
           whiteSpace,
           overflowWrap,
           textTransform,
-          letterSpacing,
         }),
         className,
       ),

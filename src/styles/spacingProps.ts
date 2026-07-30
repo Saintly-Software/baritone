@@ -1,3 +1,4 @@
+import type { LetterSpacingName } from "../theme/letterSpacings";
 import type { Atoms } from "./sprinkles.css";
 
 /**
@@ -37,9 +38,12 @@ export interface PaddingProps {
 }
 
 /**
- * Text-layout atoms surfaced on the typography components. Each maps straight to
- * a single CSS property via the sprinkles, so they behave like the other atoms
- * props (responsive-capable) rather than a bespoke recipe.
+ * Text-layout props surfaced on the typography components. `textAlign`,
+ * `whiteSpace`, `overflowWrap`, and `textTransform` map straight to a single CSS
+ * property via the sprinkles, so they behave like the other atoms props
+ * (responsive-capable). `letterSpacing` is the exception: its vocabulary is
+ * open-ended and consumer-defined (like `font`), so it's routed through the
+ * `--textLetterSpacing` var rather than an enumerated atom.
  */
 export interface TypographyAtomProps {
   /** `text-align` — logical `start`/`center`/`end` (RTL-safe) or physical `left`/`right`. */
@@ -51,9 +55,12 @@ export interface TypographyAtomProps {
   /** `text-transform` — `uppercase`/`lowercase`/`capitalize` to recase the rendered text. */
   textTransform?: Atoms["textTransform"];
   /**
-   * `letter-spacing` (tracking), from the `text.letterSpacing` token scale
-   * (`tighter`…`widest`). `em`-based, so it tracks the font-size. `widest` suits
-   * small uppercase labels/eyebrows.
+   * Letter-spacing (tracking), by name. The built-in `em`-based steps
+   * (`tighter`…`widest`) are always available; other names are consumer-defined —
+   * the theme publishes them through its `letterSpacings` option (as
+   * `--letterSpacing-<name>` custom properties) and declares the names on
+   * {@link LetterSpacingName}'s registry. Resolves to `var(--letterSpacing-<name>)`.
+   * `widest` suits small uppercase labels/eyebrows.
    */
-  letterSpacing?: Atoms["letterSpacing"];
+  letterSpacing?: LetterSpacingName;
 }

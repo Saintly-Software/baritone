@@ -315,6 +315,7 @@ export {
   iconColorVar,
   textColorVar,
   textFontVar,
+  textLetterSpacingVar,
   focusRingColorVar,
   surfacePaddingVar,
 } from "./styles/vars.css";

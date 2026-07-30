@@ -30,6 +30,9 @@ const meta: Meta<typeof Text> = {
       control: "select",
       options: ["none", "uppercase", "lowercase", "capitalize"],
     },
+    // `letterSpacing`, like `font`, is open-ended (consumer-defined); the built-in
+    // `tighter`…`widest` steps are the ones always available without a theme that
+    // publishes more. See `CustomLetterSpacing`.
     letterSpacing: { control: "select", options: LETTER_SPACING_KEYS },
   },
 };
@@ -143,10 +146,11 @@ export const CustomFonts: Story = {
 };
 
 /**
- * The `letterSpacing` (tracking) scale, from `tighter` to `widest`. Values are
- * `em`-based, so a step tracks the font-size proportionally. The last row is the
- * canonical use — a small, bold, uppercase eyebrow — where `widest` supplies the
- * tracking that used to require a custom `style`.
+ * The built-in `letterSpacing` (tracking) steps, from `tighter` to `widest`.
+ * Values are `em`-based, so a step tracks the font-size proportionally. The last
+ * row is the canonical use — a small, bold, uppercase eyebrow — where `widest`
+ * supplies the tracking that used to require a custom `style`. For values outside
+ * this ramp, an app defines its own names — see `CustomLetterSpacing`.
  */
 export const LetterSpacing: Story = {
   render: () => (
@@ -176,6 +180,43 @@ export const LetterSpacing: Story = {
           Section label
         </Text>
       </div>
+    </div>
+  ),
+};
+
+/**
+ * Like `font`, the `letterSpacing` vocabulary is defined by the *consumer*, not
+ * Baritone. An app publishes tracking values as `--letterSpacing-<name>` custom
+ * properties (via the theme's `letterSpacings` option) and, for autocompletion +
+ * type-safety, declares those names by augmenting the `LetterSpacingRegistry`
+ * interface. The built-in `tighter`…`widest` steps are always available.
+ *
+ * This story fakes a consumer by declaring a couple of `--letterSpacing-*` vars on
+ * the wrapper, so `letterSpacing="eyebrow"` / `"display"` resolve — exactly what a
+ * real theme would emit — while `letterSpacing="widest"` uses a built-in.
+ */
+export const CustomLetterSpacing: Story = {
+  render: () => (
+    <div
+      style={
+        {
+          display: "grid",
+          gap: 12,
+          "--letterSpacing-eyebrow": "0.2em",
+          "--letterSpacing-display": "-0.03em",
+        } as CSSProperties
+      }
+    >
+      <Text size="xl">Default — inherits the theme&rsquo;s normal tracking</Text>
+      <Text size="xl" letterSpacing="widest">
+        letterSpacing=&quot;widest&quot; — a built-in step
+      </Text>
+      <Text size="xl" letterSpacing="display">
+        letterSpacing=&quot;display&quot; — a consumer-defined --letterSpacing-display
+      </Text>
+      <Text size="xs" weight="bold" textTransform="uppercase" letterSpacing="eyebrow">
+        letterSpacing=&quot;eyebrow&quot; — a consumer-defined --letterSpacing-eyebrow
+      </Text>
     </div>
   ),
 };
