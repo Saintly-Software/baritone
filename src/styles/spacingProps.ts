@@ -50,4 +50,10 @@ export interface TypographyAtomProps {
   overflowWrap?: Atoms["overflowWrap"];
   /** `text-transform` — `uppercase`/`lowercase`/`capitalize` to recase the rendered text. */
   textTransform?: Atoms["textTransform"];
+  /**
+   * `letter-spacing` (tracking), from the `text.letterSpacing` token scale
+   * (`tighter`…`widest`). `em`-based, so it tracks the font-size. `widest` suits
+   * small uppercase labels/eyebrows.
+   */
+  letterSpacing?: Atoms["letterSpacing"];
 }

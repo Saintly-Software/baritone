@@ -50,6 +50,21 @@ export type TextSize = (typeof TEXT_SIZES)[number];
 export const TEXT_WEIGHTS = ["default", "semibold", "bold", "superbold"] as const;
 export type TextWeight = (typeof TEXT_WEIGHTS)[number];
 
+/**
+ * Named letter-spacing (tracking) steps a `Text`/`Heading` can select via its
+ * `letterSpacing` prop. Mirrors the keys of the `text.letterSpacing` token scale;
+ * `normal` is the zero step (no added tracking).
+ */
+export const LETTER_SPACING_KEYS = [
+  "tighter",
+  "tight",
+  "normal",
+  "wide",
+  "wider",
+  "widest",
+] as const;
+export type LetterSpacingKey = (typeof LETTER_SPACING_KEYS)[number];
+
 /** Component sizing knob (padding / font / control height). */
 export const SIZES = ["sm", "md", "lg"] as const;
 export type Size = (typeof SIZES)[number];

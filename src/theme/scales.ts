@@ -22,6 +22,19 @@ export const fontWeight = {
   superbold: "800",
 } as const;
 
+// Letter-spacing (tracking) scale. `em`-based on purpose, so a step tracks the
+// font-size proportionally across the whole type ramp (0.05em reads the same at
+// `xs` and `9xl`). Values reproduce Tailwind's tracking scale; `normal` is the
+// zero step. `widest` (0.1em) is the go-to for small uppercase labels/eyebrows.
+export const letterSpacing = {
+  tighter: "-0.05em",
+  tight: "-0.025em",
+  normal: "0em",
+  wide: "0.025em",
+  wider: "0.05em",
+  widest: "0.1em",
+} as const;
+
 // Per-size line-heights, defaulting to Tailwind's values. Small–display sizes
 // use an absolute length; the largest sizes use a unitless `1`.
 export const lineHeight = {

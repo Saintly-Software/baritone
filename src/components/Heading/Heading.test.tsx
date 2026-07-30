@@ -87,14 +87,21 @@ describe("Heading", () => {
       </Heading>,
     );
     // The plain heading already carries the level's default weight; `italic`,
-    // `textAlign`, and `whiteSpace` are each additive on top of it.
+    // `textAlign`, `whiteSpace`, and `letterSpacing` are each additive on top of it.
     const base = screen.getByTestId("h").className.split(" ").length;
     rerender(
-      <Heading level={2} data-testid="h" italic textAlign="center" whiteSpace="nowrap">
+      <Heading
+        level={2}
+        data-testid="h"
+        italic
+        textAlign="center"
+        whiteSpace="nowrap"
+        letterSpacing="wide"
+      >
         Styled
       </Heading>,
     );
     const styled = screen.getByTestId("h").className.split(" ").length;
-    expect(styled).toBe(base + 3);
+    expect(styled).toBe(base + 4);
   });
 });

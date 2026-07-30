@@ -1,6 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import type { CSSProperties } from "react";
-import { INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/constants";
+import {
+  INTENTS,
+  LETTER_SPACING_KEYS,
+  SALIENCIES,
+  TEXT_SIZES,
+  TEXT_WEIGHTS,
+} from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Text } from "./index";
 
@@ -24,6 +30,7 @@ const meta: Meta<typeof Text> = {
       control: "select",
       options: ["none", "uppercase", "lowercase", "capitalize"],
     },
+    letterSpacing: { control: "select", options: LETTER_SPACING_KEYS },
   },
 };
 export default meta;
@@ -131,6 +138,44 @@ export const CustomFonts: Story = {
       <Text size="xl" font="cursive">
         font=&quot;cursive&quot; — a consumer-defined --font-cursive
       </Text>
+    </div>
+  ),
+};
+
+/**
+ * The `letterSpacing` (tracking) scale, from `tighter` to `widest`. Values are
+ * `em`-based, so a step tracks the font-size proportionally. The last row is the
+ * canonical use — a small, bold, uppercase eyebrow — where `widest` supplies the
+ * tracking that used to require a custom `style`.
+ */
+export const LetterSpacing: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 12 }}>
+      {LETTER_SPACING_KEYS.map((letterSpacing) => (
+        <div key={letterSpacing} style={{ display: "grid", gap: 2 }}>
+          <Text size="xs" saliency="low">
+            letterSpacing=&quot;{letterSpacing}&quot;
+          </Text>
+          <Text size="xl" letterSpacing={letterSpacing}>
+            The quick brown fox
+          </Text>
+        </div>
+      ))}
+      <div style={{ display: "grid", gap: 2 }}>
+        <Text size="xs" saliency="low">
+          eyebrow — size=&quot;xs&quot; weight=&quot;bold&quot; textTransform=&quot;uppercase&quot;
+          letterSpacing=&quot;widest&quot;
+        </Text>
+        <Text
+          size="xs"
+          weight="bold"
+          saliency="low"
+          textTransform="uppercase"
+          letterSpacing="widest"
+        >
+          Section label
+        </Text>
+      </div>
     </div>
   ),
 };
