@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { typographyDecoration } from "../../styles/recipes/text.css";
 import { atoms } from "../../styles/sprinkles.css";
 import { TEXT_WEIGHTS } from "../../theme/constants";
-import { fontSizeVarName } from "../../theme/fontSizes";
+import { fontSizeVarName, sizeLineHeightVarName } from "../../theme/fontSizes";
 import { fontVarName } from "../../theme/fonts";
 import { fontWeightVarName } from "../../theme/fontWeights";
 import { letterSpacingVarName } from "../../theme/letterSpacings";
@@ -135,7 +135,7 @@ describe("Text", () => {
   it("defaults the leading to the size's paired line-height", () => {
     render(<Text size="4xl">Display</Text>);
     expect(screen.getByText("Display").getAttribute("style")).toContain(
-      `var(${lineHeightVarName("4xl")})`,
+      `var(${sizeLineHeightVarName("4xl")})`,
     );
   });
 

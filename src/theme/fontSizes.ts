@@ -1,6 +1,5 @@
 import { TEXT_SIZES, type TextSize } from "./constants";
 import { vars } from "./contract.css";
-import { lineHeightVarName } from "./lineHeights";
 
 /**
  * The consumer-defined font-size vocabulary — an *open* vocabulary mirroring the
@@ -73,14 +72,27 @@ export function fontSizeVarName(name: string): string {
 }
 
 /**
+ * The CSS custom property that holds a size's *paired* line-height (the default
+ * leading `size` applies when the `lineHeight` prop is unset). Deliberately a
+ * distinct namespace from {@link lineHeightVarName}'s `--lineHeight-<name>`: the two
+ * vocabularies are independent, so a consumer size and a standalone leading may reuse
+ * the same name without one clobbering the other.
+ */
+export function sizeLineHeightVarName(name: string): string {
+  return `--sizeLineHeight-${name}`;
+}
+
+/**
  * The custom properties the *size vocabulary* publishes — its `--fontSize-<name>`
- * and each size's paired `--lineHeight-<name>` (a size is a font-size + leading pair,
- * exactly like the `text.size` tokens). The built-in ramp (`xs`…`9xl`) is routed
- * through the contract vars so a runtime theme/brand swap still flows through; each
- * consumer entry adds its `--fontSize-<name>` plus, for a `{ fontSize, lineHeight }`
- * pair, a paired `--lineHeight-<name>`. Spread into a theme class's `vars` (build
+ * and each size's paired `--sizeLineHeight-<name>` (a size is a font-size + leading
+ * pair, exactly like the `text.size` tokens). The built-in ramp (`xs`…`9xl`) is
+ * routed through the contract vars so a runtime theme/brand swap still flows through;
+ * each consumer entry adds its `--fontSize-<name>` plus, for a `{ fontSize, lineHeight }`
+ * pair, a paired `--sizeLineHeight-<name>`. Spread into a theme class's `vars` (build
  * time) or a `style` object (runtime). (The standalone leading scale — `none`…`loose`
- * — is published separately by {@link lineHeightVars}.)
+ * — is a *separate* namespace, `--lineHeight-<name>`, published by
+ * {@link lineHeightVars}; keeping the two apart means a consumer size and a standalone
+ * leading can share a name without colliding.)
  *
  * The built-in size names are reserved: entries by those names in `sizes` are
  * ignored (they stay token-backed). Customise the built-in ramp through the theme
@@ -92,7 +104,7 @@ export function fontSizeVars(
   const out: Record<string, string> = {};
   for (const size of TEXT_SIZES) {
     out[fontSizeVarName(size)] = vars.text.size[size].fontSize;
-    out[lineHeightVarName(size)] = vars.text.size[size].lineHeight;
+    out[sizeLineHeightVarName(size)] = vars.text.size[size].lineHeight;
   }
   for (const [name, value] of Object.entries(sizes)) {
     // The built-in sizes stay token-backed (`vars.text.size.*`) so bare text and
@@ -105,7 +117,7 @@ export function fontSizeVars(
       out[fontSizeVarName(name)] = value.fontSize;
       // A bundled `lineHeight` becomes the size's paired default; without one, the
       // size's leading falls back to `md` (the size recipe's fallback).
-      if (value.lineHeight !== undefined) out[lineHeightVarName(name)] = value.lineHeight;
+      if (value.lineHeight !== undefined) out[sizeLineHeightVarName(name)] = value.lineHeight;
     }
   }
   return out;

@@ -40,6 +40,7 @@ export {
 // each `*Name` is what the matching prop (`size` / `weight` / `lineHeight`) accepts.
 export {
   fontSizeVarName,
+  sizeLineHeightVarName,
   fontSizeVars,
   type FontSizeRegistry,
   type FontSizeName,

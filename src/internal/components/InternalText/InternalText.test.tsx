@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { fontSizeVarName } from "../../../theme/fontSizes";
+import { fontSizeVarName, sizeLineHeightVarName } from "../../../theme/fontSizes";
 import { fontVarName } from "../../../theme/fonts";
 import { fontWeightVarName } from "../../../theme/fontWeights";
 import { letterSpacingVarName } from "../../../theme/letterSpacings";
@@ -34,9 +34,9 @@ describe("InternalText", () => {
         Big
       </InternalText>,
     );
-    // With no `lineHeight`, the leading is the size's own `--lineHeight-<size>`.
+    // With no `lineHeight`, the leading is the size's own `--sizeLineHeight-<size>`.
     expect(screen.getByText("Big").getAttribute("style")).toContain(
-      `var(${lineHeightVarName("2xl")})`,
+      `var(${sizeLineHeightVarName("2xl")})`,
     );
   });
 

@@ -264,8 +264,8 @@ export const LineHeights: Story = {
  * leading.
  *
  * This story fakes a consumer by declaring the `--fontSize-*` (and, for `hero`, a
- * paired `--lineHeight-*`) vars on the wrapper — exactly what a real theme emits for
- * `sizes: { hero: { fontSize: "4rem", lineHeight: "1.05" }, figure: "2.75rem" }`.
+ * paired `--sizeLineHeight-*`) vars on the wrapper — exactly what a real theme emits
+ * for `sizes: { hero: { fontSize: "4rem", lineHeight: "1.05" }, figure: "2.75rem" }`.
  */
 export const CustomSizes: Story = {
   render: () => (
@@ -275,14 +275,14 @@ export const CustomSizes: Story = {
           display: "grid",
           gap: 12,
           "--fontSize-hero": "4rem",
-          "--lineHeight-hero": "1.05",
+          "--sizeLineHeight-hero": "1.05",
           "--fontSize-figure": "2.75rem",
         } as CSSProperties
       }
     >
       <Text size="xl">Default — a built-in size</Text>
       <Text size="hero" weight="bold">
-        size=&quot;hero&quot; — a consumer pair (--fontSize-hero + paired --lineHeight-hero)
+        size=&quot;hero&quot; — a consumer pair (--fontSize-hero + paired --sizeLineHeight-hero)
       </Text>
       <Text size="figure">
         size=&quot;figure&quot; — a font-size-only consumer size (leading falls back to md)

@@ -17,7 +17,11 @@ import {
   textWeightVar,
 } from "../../../styles/vars.css";
 import type { Intent, Saliency } from "../../../theme/constants";
-import { fontSizeVarName, type FontSizeName } from "../../../theme/fontSizes";
+import {
+  fontSizeVarName,
+  sizeLineHeightVarName,
+  type FontSizeName,
+} from "../../../theme/fontSizes";
 import { fontVarName, type FontName } from "../../../theme/fonts";
 import { fontWeightVarName, type FontWeightName } from "../../../theme/fontWeights";
 import { letterSpacingVarName } from "../../../theme/letterSpacings";
@@ -217,14 +221,19 @@ export function InternalText({
   // Point the `--text…` vars at the theme's `var(--<x>-<name>)`. These are inline
   // vars, not variant classes, because every one of these vocabularies is
   // open-ended and consumer-defined — see the `theme/*` modules. `size` is always
-  // present, so `--textSize` and its paired default `--textLineHeight`
-  // (`var(--lineHeight-<size>)`) are always set; the `lineHeight` prop overrides the
-  // leading; `weight`/`font`/`letterSpacing` set their vars only when passed.
-  // Consumer `style` spreads last so it can still override.
+  // present, so `--textSize` and its paired default `--textLineHeight` are always
+  // set; the leading comes from the size's own `--sizeLineHeight-<size>` namespace by
+  // default, or the `lineHeight` prop's `--lineHeight-<name>` when set (distinct
+  // namespaces, so a size and a leading may share a name). `weight`/`font`/
+  // `letterSpacing` set their vars only when passed. Consumer `style` spreads last so
+  // it can still override.
   const resolvedStyle = {
     ...assignInlineVars({
       [textSizeVar]: `var(${fontSizeVarName(size)})`,
-      [textLineHeightVar]: `var(${lineHeightVarName(lineHeight ?? size)})`,
+      [textLineHeightVar]:
+        lineHeight !== undefined
+          ? `var(${lineHeightVarName(lineHeight)})`
+          : `var(${sizeLineHeightVarName(size)})`,
       ...(weight !== undefined ? { [textWeightVar]: `var(${fontWeightVarName(weight)})` } : {}),
       ...(font !== undefined ? { [textFontVar]: `var(${fontVarName(font)})` } : {}),
       ...(letterSpacing !== undefined
