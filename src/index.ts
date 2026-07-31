@@ -1,5 +1,6 @@
 // Components
 export { BaritoneTheme, type BaritoneThemeProps } from "./components/BaritoneTheme";
+export { BaritoneProvider, type BaritoneProviderProps } from "./components/BaritoneProvider";
 export { Button, type ButtonProps } from "./components/Button";
 export {
   ButtonGroup,
@@ -234,6 +235,17 @@ export {
   type NoticeActionIconOnlyProps,
   type NoticeCloseProps,
 } from "./components/Notice";
+export {
+  useToast,
+  ToastViewport,
+  type ToastData,
+  type BaritoneToast,
+  type ToastPriority,
+  type AddToastOptions,
+  type ToastStateOptions,
+  type ToastPromiseOptions,
+  type UseToastReturn,
+} from "./components/Toast";
 export {
   Popover,
   type PopoverProps,
