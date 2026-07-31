@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import {
   INTENTS,
   LETTER_SPACING_KEYS,
+  LINE_HEIGHT_KEYS,
   SALIENCIES,
   TEXT_SIZES,
   TEXT_WEIGHTS,
@@ -15,6 +16,9 @@ const meta: Meta<typeof Text> = {
   component: Text,
   args: { children: "The quick brown fox", size: "md", saliency: "mid" },
   argTypes: {
+    // `size` and `weight` are open-ended (consumer-defined), like `font`; the
+    // built-in scales below are the ones always available without a theme that
+    // publishes more. See `CustomSizes` / `CustomWeights`.
     size: { control: "select", options: TEXT_SIZES },
     intent: { control: "select", options: INTENTS },
     saliency: { control: "select", options: SALIENCIES },
@@ -34,6 +38,9 @@ const meta: Meta<typeof Text> = {
     // `tighter`…`widest` steps are the ones always available without a theme that
     // publishes more. See `CustomLetterSpacing`.
     letterSpacing: { control: "select", options: LETTER_SPACING_KEYS },
+    // `lineHeight`, like `font`, is open-ended (consumer-defined); the built-in
+    // `none`…`loose` leadings are always available. See `CustomLineHeight`.
+    lineHeight: { control: "select", options: LINE_HEIGHT_KEYS },
   },
 };
 export default meta;
@@ -216,6 +223,138 @@ export const CustomLetterSpacing: Story = {
       </Text>
       <Text size="xs" weight="bold" textTransform="uppercase" letterSpacing="eyebrow">
         letterSpacing=&quot;eyebrow&quot; — a consumer-defined --letterSpacing-eyebrow
+      </Text>
+    </div>
+  ),
+};
+
+/**
+ * The built-in `lineHeight` (leading) steps, `none`…`loose` — unitless multipliers,
+ * so a step scales with the font-size. `lineHeight` overrides the line-height `size`
+ * otherwise supplies; each block below is the same wrapping paragraph at a different
+ * leading. For values outside this ramp, an app defines its own names — see
+ * `CustomLineHeight`.
+ */
+export const LineHeights: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16, maxWidth: 360 }}>
+      {LINE_HEIGHT_KEYS.map((lineHeight) => (
+        <div key={lineHeight} style={{ display: "grid", gap: 4 }}>
+          <Text size="xs" saliency="low">
+            lineHeight=&quot;{lineHeight}&quot;
+          </Text>
+          <Text lineHeight={lineHeight}>
+            The quick brown fox jumps over the lazy dog, then trots back across the meadow to do it
+            all again.
+          </Text>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/**
+ * Like `font`, the `size` vocabulary is defined by the *consumer*, not Baritone. An
+ * app publishes font-sizes as `--fontSize-<name>` custom properties (via the theme's
+ * `sizes` option) and, for autocompletion + type-safety, declares those names by
+ * augmenting the `FontSizeRegistry` interface. The built-in `xs`…`9xl` ramp is always
+ * available. A size given as `{ fontSize, lineHeight }` also publishes a paired
+ * `--lineHeight-<name>` — a tight display leading applied by default, no `lineHeight`
+ * prop needed (Tailwind-style); a bare `font-size` string falls back to the `md`
+ * leading.
+ *
+ * This story fakes a consumer by declaring the `--fontSize-*` (and, for `hero`, a
+ * paired `--sizeLineHeight-*`) vars on the wrapper — exactly what a real theme emits
+ * for `sizes: { hero: { fontSize: "4rem", lineHeight: "1.05" }, figure: "2.75rem" }`.
+ */
+export const CustomSizes: Story = {
+  render: () => (
+    <div
+      style={
+        {
+          display: "grid",
+          gap: 12,
+          "--fontSize-hero": "4rem",
+          "--sizeLineHeight-hero": "1.05",
+          "--fontSize-figure": "2.75rem",
+        } as CSSProperties
+      }
+    >
+      <Text size="xl">Default — a built-in size</Text>
+      <Text size="hero" weight="bold">
+        size=&quot;hero&quot; — a consumer pair (--fontSize-hero + paired --sizeLineHeight-hero)
+      </Text>
+      <Text size="figure">
+        size=&quot;figure&quot; — a font-size-only consumer size (leading falls back to md)
+      </Text>
+    </div>
+  ),
+};
+
+/**
+ * Like `font`, the `weight` vocabulary is defined by the *consumer*. An app publishes
+ * weights as `--fontWeight-<name>` custom properties (via the theme's `weights`
+ * option) and declares those names by augmenting the `FontWeightRegistry` interface.
+ * The built-in `default`/`semibold`/`bold`/`superbold` steps are always available.
+ *
+ * This story fakes a consumer by declaring a couple of `--fontWeight-*` vars on the
+ * wrapper, so `weight="hairline"` / `"black"` resolve.
+ */
+export const CustomWeights: Story = {
+  render: () => (
+    <div
+      style={
+        {
+          display: "grid",
+          gap: 12,
+          "--fontWeight-hairline": "200",
+          "--fontWeight-black": "900",
+        } as CSSProperties
+      }
+    >
+      <Text size="2xl">Default — the default weight</Text>
+      <Text size="2xl" weight="bold">
+        weight=&quot;bold&quot; — a built-in step
+      </Text>
+      <Text size="2xl" weight="hairline">
+        weight=&quot;hairline&quot; — a consumer-defined --fontWeight-hairline
+      </Text>
+      <Text size="2xl" weight="black">
+        weight=&quot;black&quot; — a consumer-defined --fontWeight-black
+      </Text>
+    </div>
+  ),
+};
+
+/**
+ * Like `font`, the `lineHeight` vocabulary is defined by the *consumer*. An app
+ * publishes leadings as `--lineHeight-<name>` custom properties (via the theme's
+ * `lineHeights` option) and declares those names by augmenting the
+ * `LineHeightRegistry` interface. The built-in `none`…`loose` steps are always
+ * available.
+ *
+ * This story fakes a consumer by declaring a `--lineHeight-*` var on the wrapper, so
+ * `lineHeight="airy"` resolves — while `lineHeight="loose"` uses a built-in.
+ */
+export const CustomLineHeight: Story = {
+  render: () => (
+    <div
+      style={
+        {
+          display: "grid",
+          gap: 16,
+          maxWidth: 360,
+          "--lineHeight-airy": "2.4",
+        } as CSSProperties
+      }
+    >
+      <Text lineHeight="loose">
+        lineHeight=&quot;loose&quot; — a built-in step. The quick brown fox jumps over the lazy dog
+        and keeps on running.
+      </Text>
+      <Text lineHeight="airy">
+        lineHeight=&quot;airy&quot; — a consumer-defined --lineHeight-airy. The quick brown fox
+        jumps over the lazy dog and keeps on running.
       </Text>
     </div>
   ),
