@@ -177,6 +177,33 @@ describe("ToggleGroup", () => {
       expect(onChange).toHaveBeenCalledWith(null, expect.any(Event));
       expect(screen.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "false");
     });
+
+    // Guards the "no selection" sentinel: `null`, not `""`, means "nothing
+    // selected". An empty-string segment value is a real, distinct value, so it
+    // must not read as selected just because the group is empty — otherwise it
+    // would take the selected styling and the active roving tab stop. (Regression
+    // guard for the old `value ?? ""` sentinel, which collided with `value=""`.)
+    it("keeps an empty-string segment unselected while the group value is null", () => {
+      type Filter = "" | "unread";
+      render(
+        <ToggleGroup<Filter> aria-label="Filter" clearable value={null} onChange={() => {}}>
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem value="">All</ToggleGroupItem>
+              <ToggleGroupItem value="unread">Unread</ToggleGroupItem>
+            </>
+          )}
+        </ToggleGroup>,
+      );
+      // The active-composite-item marker only rides the selected segment; with the
+      // group empty, no segment — including the empty-string one — should carry it.
+      expect(screen.getByRole("button", { name: "All" })).not.toHaveAttribute(
+        "data-composite-item-active",
+      );
+      expect(screen.getByRole("button", { name: "Unread" })).not.toHaveAttribute(
+        "data-composite-item-active",
+      );
+    });
   });
 
   it("marks a disabled group with aria-disabled and keeps its segments tabbable", async () => {

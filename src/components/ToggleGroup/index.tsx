@@ -34,14 +34,19 @@ const ACTIVE_COMPOSITE_ITEM_ATTR = "data-composite-item-active";
  * colour/size that look is drawn with.
  */
 interface ToggleGroupItemContextValue {
-  selectedValue: string;
+  /**
+   * The group's selected value, or `null` when nothing is selected. `null` (not
+   * `""`) is the "no selection" sentinel so an empty-string segment value stays a
+   * real, distinct value — `value === selectedValue` never matches a `null` group.
+   */
+  selectedValue: string | null;
   intent: Intent | undefined;
   saliency: Saliency;
   size: Size | undefined;
 }
 
 const ToggleGroupItemContext = React.createContext<ToggleGroupItemContextValue>({
-  selectedValue: "",
+  selectedValue: null,
   intent: undefined,
   saliency: "high",
   size: undefined,
@@ -197,6 +202,22 @@ interface ToggleGroupClearableProps<T extends string> {
 }
 
 /**
+ * The full strict-mode props: shared knobs + the strict `value`/`onChange` + the
+ * naming union. This is one overload arm (see {@link ToggleGroup}).
+ */
+type ToggleGroupStrictFullProps<T extends string> = ToggleGroupSharedProps<T> &
+  ToggleGroupStrictProps<T> &
+  FieldLabellingProps;
+
+/**
+ * The full clearable-mode props: shared knobs + the nullable `value`/`onChange` +
+ * the naming union. This is the other overload arm (see {@link ToggleGroup}).
+ */
+type ToggleGroupClearableFullProps<T extends string> = ToggleGroupSharedProps<T> &
+  ToggleGroupClearableProps<T> &
+  FieldLabellingProps;
+
+/**
  * Named by exactly one of `label` / `aria-label` / `aria-labelledby` — they're
  * mutually exclusive (see `FieldLabellingProps`). A visible `label` also flips
  * the control into **form-control semantics**: a labelled group, alongside the
@@ -205,10 +226,16 @@ interface ToggleGroupClearableProps<T extends string> {
  * The `value` / `onChange` pair is discriminated by `clearable`: omitted (or
  * `false`) keeps the strict single-select contract; `clearable` widens both to
  * accept `null`.
+ *
+ * The component itself is *overloaded* on these two arms rather than typed by
+ * this union — a union of two generic shapes defeats `T` inference (the strict
+ * arm's `value: T` yields a `T = value's-type-including-null` candidate that,
+ * failing `T extends string`, collapses `T` to `string`). Overloads let each arm
+ * infer `T` on its own, so consumers never have to spell out `<ToggleGroup<T>>`.
  */
-export type ToggleGroupProps<T extends string> = ToggleGroupSharedProps<T> &
-  (ToggleGroupStrictProps<T> | ToggleGroupClearableProps<T>) &
-  FieldLabellingProps;
+export type ToggleGroupProps<T extends string> =
+  | ToggleGroupStrictFullProps<T>
+  | ToggleGroupClearableFullProps<T>;
 
 /**
  * ToggleGroup — a single-select segmented control: a row of toggle buttons where
@@ -276,6 +303,12 @@ export type ToggleGroupProps<T extends string> = ToggleGroupSharedProps<T> &
  *   )}
  * </ToggleGroup>
  */
+export function ToggleGroup<T extends string>(
+  props: ToggleGroupStrictFullProps<T>,
+): React.JSX.Element;
+export function ToggleGroup<T extends string>(
+  props: ToggleGroupClearableFullProps<T>,
+): React.JSX.Element;
 export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
   const {
     value,
@@ -316,8 +349,9 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
   const groupValue = React.useMemo(() => (value === null ? [] : [value]), [value]);
 
   const itemContext = React.useMemo<ToggleGroupItemContextValue>(
-    // No value ⇒ empty string, which no segment matches, so none renders selected.
-    () => ({ selectedValue: value ?? "", intent, saliency, size }),
+    // Pass `value` through as-is: when it's `null`, no segment's `value === null`,
+    // so none renders selected — and an empty-string segment stays distinct.
+    () => ({ selectedValue: value, intent, saliency, size }),
     [value, intent, saliency, size],
   );
 
