@@ -87,7 +87,9 @@ describe("ToggleGroup", () => {
             <ToggleGroupItem value="list" aria-label="List view">
               List <span>3</span>
             </ToggleGroupItem>
-            <ToggleGroupItem value="board">Board</ToggleGroupItem>
+            <ToggleGroupItem value="board">
+              Board <span>7</span>
+            </ToggleGroupItem>
           </>
         )}
       </ToggleGroup>,
@@ -95,8 +97,10 @@ describe("ToggleGroup", () => {
     // The authored name wins over the flattened "List 3"...
     expect(screen.getByRole("button", { name: "List view" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "List 3" })).not.toBeInTheDocument();
-    // ...and a segment without aria-label still names itself from its children.
-    expect(screen.getByRole("button", { name: "Board" })).toBeInTheDocument();
+    // ...and a segment without aria-label still names itself from its (rich)
+    // children — the flattened text, not a fallback to the `value`.
+    expect(screen.getByRole("button", { name: "Board 7" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "board" })).not.toBeInTheDocument();
   });
 
   it("focuses the selected segment on Tab (roving tab stop), not the first", async () => {
