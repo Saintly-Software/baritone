@@ -79,6 +79,26 @@ describe("ToggleGroup", () => {
     expect(screen.getByRole("button", { name: "board" })).toBeInTheDocument();
   });
 
+  it("names a segment from aria-label when its children would flatten misleadingly", () => {
+    render(
+      <ToggleGroup<View> aria-label="View" value="list" onChange={() => {}}>
+        {({ ToggleGroupItem }) => (
+          <>
+            <ToggleGroupItem value="list" aria-label="List view">
+              List <span>3</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="board">Board</ToggleGroupItem>
+          </>
+        )}
+      </ToggleGroup>,
+    );
+    // The authored name wins over the flattened "List 3"...
+    expect(screen.getByRole("button", { name: "List view" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "List 3" })).not.toBeInTheDocument();
+    // ...and a segment without aria-label still names itself from its children.
+    expect(screen.getByRole("button", { name: "Board" })).toBeInTheDocument();
+  });
+
   it("focuses the selected segment on Tab (roving tab stop), not the first", async () => {
     const user = userEvent.setup();
     render(<ViewToggle value="board" />);

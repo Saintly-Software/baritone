@@ -58,6 +58,15 @@ export interface ToggleGroupItemProps<T extends string> {
    * pass children for anything richer.
    */
   children?: React.ReactNode;
+  /**
+   * An authored accessible name for the segment, for when the flattened text of
+   * `children` would name it misleadingly — e.g. a label paired with a trailing
+   * count `Badge` ("Comments" + "3" would otherwise announce as "Comments 3").
+   * When set, it becomes the segment's whole accessible name, so it must still
+   * contain the visible label text (WCAG 2.5.3 *Label in Name*). Leave it off
+   * when `children` already reads correctly (the common case).
+   */
+  "aria-label"?: string;
   /** Extra className merged onto the segment's `<button>`. */
   className?: string;
 }
@@ -76,6 +85,7 @@ export interface ToggleGroupItemProps<T extends string> {
 function ToggleGroupItem<T extends string>({
   value,
   children,
+  "aria-label": ariaLabel,
   className,
 }: ToggleGroupItemProps<T>) {
   const { selectedValue, intent, saliency, size } = React.useContext(ToggleGroupItemContext);
@@ -100,12 +110,21 @@ function ToggleGroupItem<T extends string>({
             children: content,
           }}
           htmlAttrs={
-            selected
-              ? // The selected segment also carries the active-tab-stop marker, so
-                // Tab focuses it. data-* isn't statically known on base-ui's props,
-                // hence the localized cast (same pattern as the overlay triggers).
-                ({ ...toggleProps, [ACTIVE_COMPOSITE_ITEM_ATTR]: "" } as InternalButtonHtmlAttrs)
-              : toggleProps
+            // Both the active-tab-stop marker and an authored `aria-label` ride
+            // this `htmlAttrs` seam rather than `consumerProps`: `InternalButton`
+            // strips `aria-label` off a text button's `consumerProps` (its name
+            // must be the visible label there), whereas `htmlAttrs` is merged
+            // *under* the button's own props — which never set `aria-label` here —
+            // so an authored name survives. data-* isn't statically known on
+            // base-ui's props, hence the localized cast (same pattern as the
+            // overlay triggers).
+            {
+              ...toggleProps,
+              // The selected segment carries the active-tab-stop marker, so Tab
+              // focuses it rather than the first segment.
+              ...(selected ? { [ACTIVE_COMPOSITE_ITEM_ATTR]: "" } : {}),
+              ...(ariaLabel != null ? { "aria-label": ariaLabel } : {}),
+            } as InternalButtonHtmlAttrs
           }
         />
       )}
