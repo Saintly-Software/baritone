@@ -11,9 +11,11 @@ type View = "list" | "board" | "calendar";
 // one naming prop for itself, since they're mutually exclusive. `DistributiveOmit`
 // (not the built-in `Omit`) is what keeps those arms apart while stripping them —
 // a plain `Omit` over a union collapses it into one object with every arm's keys.
+// `clearable` is stripped too: these hosts are strict single-select, so they never
+// forward it (leaving it in would drag `value`/`onChange` toward the nullable arm).
 type ViewToggleKnobs = DistributiveOmit<
   React.ComponentProps<typeof ToggleGroup<View>>,
-  "value" | "onChange" | "children" | "label" | "aria-label" | "aria-labelledby"
+  "value" | "onChange" | "clearable" | "children" | "label" | "aria-label" | "aria-labelledby"
 >;
 
 // ToggleGroup is controlled, so the stories drive it from local state — the same
@@ -105,6 +107,29 @@ export const FormControl: Story = {
   render: () => (
     <LabelledViewToggle label="Default view" required helpText="Applies to newly created boards." />
   ),
+};
+
+// A `clearable` host: starts with nothing selected, and re-pressing the active
+// segment clears it back to that empty state. `value` and `onChange` are widened
+// to `View | null`.
+function ClearableViewToggle(props: ViewToggleKnobs & { "aria-label"?: string }) {
+  const { "aria-label": ariaLabel = "View", ...rest } = props;
+  const [value, setValue] = React.useState<View | null>(null);
+  return (
+    <ToggleGroup aria-label={ariaLabel} clearable value={value} onChange={setValue} {...rest}>
+      {({ ToggleGroupItem }) => (
+        <>
+          <ToggleGroupItem value="list">List</ToggleGroupItem>
+          <ToggleGroupItem value="board">Board</ToggleGroupItem>
+          <ToggleGroupItem value="calendar">Calendar</ToggleGroupItem>
+        </>
+      )}
+    </ToggleGroup>
+  );
+}
+
+export const Clearable: Story = {
+  render: () => <ClearableViewToggle />,
 };
 
 const thStyle: React.CSSProperties = {
