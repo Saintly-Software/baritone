@@ -160,6 +160,11 @@ export function InternalChip({
   // inert element that keeps the styling but leaves the link a11y tree. The label
   // is the single truncating flex item between the decorative icons, so a long
   // label ellipsizes under `width="fill"` exactly as it does in `Chip`.
+  //
+  // `icon`/`trailIcon` are decorative-only (they take arbitrary content but never a
+  // label), and this chip-link is one anchor whose visible `children` *is* its
+  // accessible name — so the wrappers are `aria-hidden` to keep any textual glyph
+  // content out of that name, no matter what the caller passes.
   const chip = (
     <InternalGenericButtonAnchor
       {...(rest as InternalGenericButtonAnchorProps)}
@@ -171,9 +176,17 @@ export function InternalChip({
       disabled={disabled}
       className={cx(chipBoxClassName({ intent, saliency, size, shape, width }), className)}
     >
-      {icon != null && <span className={chipAdornmentRecipe({ size })}>{icon}</span>}
+      {icon != null && (
+        <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
+          {icon}
+        </span>
+      )}
       <span className={chipLabelRecipe()}>{children}</span>
-      {trailIcon != null && <span className={chipAdornmentRecipe({ size })}>{trailIcon}</span>}
+      {trailIcon != null && (
+        <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
+          {trailIcon}
+        </span>
+      )}
     </InternalGenericButtonAnchor>
   );
 

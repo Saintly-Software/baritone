@@ -29,19 +29,20 @@ describe("InternalChip", () => {
     expect(link.querySelector("span")?.textContent).toBe("Label");
   });
 
-  it("renders decorative lead and trail icons around the label", () => {
+  it("renders decorative lead and trail icons that stay out of the accessible name", () => {
     render(
       <InternalChip
         href="/x"
-        icon={<span data-testid="lead" />}
-        trailIcon={<span data-testid="trail" />}
+        icon={<span data-testid="lead">LEAD</span>}
+        trailIcon={<span data-testid="trail">TRAIL</span>}
       >
         Label
       </InternalChip>,
     );
     expect(screen.getByTestId("lead")).toBeInTheDocument();
     expect(screen.getByTestId("trail")).toBeInTheDocument();
-    // The decorative glyphs don't change the accessible name.
+    // Decorative glyphs are `aria-hidden`, so even textual icon content never leaks
+    // into the link's accessible name — it stays the visible label.
     expect(screen.getByRole("link", { name: "Label" })).toBeInTheDocument();
   });
 

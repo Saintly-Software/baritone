@@ -211,20 +211,21 @@ describe("Link", () => {
       expect(link).not.toHaveAttribute("width");
     });
 
-    it("renders decorative lead and trail icons around the label", () => {
+    it("renders decorative lead and trail icons that stay out of the accessible name", () => {
       render(
         <Link
           appearance="chip"
           href="/x"
-          icon={<span data-testid="lead" />}
-          trailIcon={<span data-testid="trail" />}
+          icon={<span data-testid="lead">LEAD</span>}
+          trailIcon={<span data-testid="trail">TRAIL</span>}
         >
           Label
         </Link>,
       );
       expect(screen.getByTestId("lead")).toBeInTheDocument();
       expect(screen.getByTestId("trail")).toBeInTheDocument();
-      // Decorative glyphs don't change the accessible name.
+      // Decorative glyphs are `aria-hidden`, so even textual icon content never
+      // leaks into the accessible name — it stays the visible label.
       expect(screen.getByRole("link", { name: "Label" })).toBeInTheDocument();
     });
 
