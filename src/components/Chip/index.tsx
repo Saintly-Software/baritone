@@ -1,17 +1,14 @@
 "use client";
 import { Popover as BasePopover } from "@base-ui/react/popover";
 import * as React from "react";
+import { chipBoxClassName } from "../../internal/components/InternalChip";
 import { InternalSpinner } from "../../internal/components/InternalSpinner";
-import {
-  componentIntentRecipe,
-  componentTypographyRecipe,
-} from "../../styles/recipes/component.css";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { mergeProps, useRender, type RenderProp } from "../../utils/render";
 import type { PopoverProps } from "../Popover";
-import { chipLabelRecipe, chipShapeRecipe, chipSizeRecipe, chipWidthRecipe } from "./chip.css";
+import { chipLabelRecipe } from "./chip.css";
 import { chipAdornmentRecipe } from "./chipAdornment.css";
 
 /**
@@ -511,19 +508,13 @@ function ChipRoot({
     defaultElement: "span",
     props: {
       ref,
-      className: cx(
-        // `interactive: "auto"` — the chip's own hit targets are the label
-        // button and the adornments, which carry their own affordances; the root
-        // is an inert `<span>` tag unless `render` makes it a link, and only then
-        // should it take a pointer and light up under the cursor.
-        componentTypographyRecipe({ size, interactive: "auto" }),
-        chipSizeRecipe({ size }),
-        chipShapeRecipe({ shape }),
-        chipWidthRecipe({ width }),
-        componentIntentRecipe({ intent, saliency, interactive: "auto" }),
-        focusRingRecipe({ type: "visible" }),
-        className,
-      ),
+      // The chip look comes from the shared `chipBoxClassName` — the one source of
+      // truth `Link`'s `appearance="chip"` renders from too, so the two never
+      // drift. Its `interactive: "auto"` leaves the pointer/hover/active to the
+      // rendered element: the chip's own hit targets are the label button and the
+      // adornments, so the root is an inert `<span>` tag unless `render` makes it a
+      // link, and only then should it take a pointer and light up under the cursor.
+      className: cx(chipBoxClassName({ intent, saliency, size, shape, width }), className),
       "aria-disabled": disabled || loading || undefined,
       "aria-busy": loading || undefined,
       // Loading swaps the whole content out for a decorative spinner; the
