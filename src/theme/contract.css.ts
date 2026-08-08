@@ -4,6 +4,7 @@ import {
   FORM_STATES,
   INTENTS,
   LETTER_SPACING_KEYS,
+  LINE_HEIGHT_KEYS,
   RADIUS_KEYS,
   SALIENCIES,
   SHADOW_KEYS,
@@ -63,6 +64,11 @@ export const tokenShape = {
     // Named letter-spacing (tracking) steps selectable via the `letterSpacing`
     // prop. `em`-based so a step scales with font-size across the whole ramp.
     letterSpacing: record(LETTER_SPACING_KEYS, () => s()),
+    // Named line-height (leading) steps selectable via the `lineHeight` prop.
+    // Unitless so a step scales with font-size. The per-size `size.lineHeight`
+    // above is a *separate* thing — the default `size` pairs with; this is the
+    // standalone override vocabulary.
+    lineHeight: record(LINE_HEIGHT_KEYS, () => s()),
   },
   font: {
     sans: s(),

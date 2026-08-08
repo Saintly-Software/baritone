@@ -47,6 +47,7 @@ export {
   type LinkProps,
   type InlineLinkProps,
   type ButtonLinkProps,
+  type ChipLinkProps,
 } from "./components/Link";
 export {
   LinkProvider,
@@ -56,6 +57,14 @@ export {
   type LinkRenderProps,
   type LinkRenderFn,
 } from "./components/LinkProvider";
+export {
+  List,
+  type ListProps,
+  type ListFlexProps,
+  type ListGridProps,
+  type ListItemProps,
+  type ListLayout,
+} from "./components/List";
 export { Text, type TextProps, type TextElement } from "./components/Text";
 export { HelpText, type HelpTextProps, type HelpTextVariant } from "./components/HelpText";
 export { Heading, type HeadingProps } from "./components/Heading";
@@ -119,6 +128,14 @@ export {
   type CardDividerProps,
 } from "./components/Card";
 export { CardList, type CardListProps } from "./components/CardList";
+export {
+  Table,
+  type TableProps,
+  type TableColumn,
+  type TableAlign,
+  type TableValue,
+  type TableRowFor,
+} from "./components/Table";
 // `DataTable` is intentionally NOT re-exported here — it ships from its own entry
 // point (`@saintly-software/baritone/datatable`) so the main barrel never pulls in
 // the `@tanstack/react-table` peer dependency. See `src/datatable.ts`.
@@ -277,6 +294,7 @@ export {
   type ModalHeaderProps,
   type ModalFooterProps,
 } from "./components/Modal";
+export { Lightbox, type LightboxProps, type LightboxTriggerProps } from "./components/Lightbox";
 export {
   ConfirmationModal,
   type ConfirmationModalProps,
@@ -328,6 +346,9 @@ export {
   textColorVar,
   textFontVar,
   textLetterSpacingVar,
+  textSizeVar,
+  textLineHeightVar,
+  textWeightVar,
   focusRingColorVar,
   surfacePaddingVar,
 } from "./styles/vars.css";

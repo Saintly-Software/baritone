@@ -79,6 +79,30 @@ describe("ToggleGroup", () => {
     expect(screen.getByRole("button", { name: "board" })).toBeInTheDocument();
   });
 
+  it("names a segment from aria-label when its children would flatten misleadingly", () => {
+    render(
+      <ToggleGroup<View> aria-label="View" value="list" onChange={() => {}}>
+        {({ ToggleGroupItem }) => (
+          <>
+            <ToggleGroupItem value="list" aria-label="List view">
+              List <span>3</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem value="board">
+              Board <span>7</span>
+            </ToggleGroupItem>
+          </>
+        )}
+      </ToggleGroup>,
+    );
+    // The authored name wins over the flattened "List 3"...
+    expect(screen.getByRole("button", { name: "List view" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "List 3" })).not.toBeInTheDocument();
+    // ...and a segment without aria-label still names itself from its (rich)
+    // children — the flattened text, not a fallback to the `value`.
+    expect(screen.getByRole("button", { name: "Board 7" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "board" })).not.toBeInTheDocument();
+  });
+
   it("focuses the selected segment on Tab (roving tab stop), not the first", async () => {
     const user = userEvent.setup();
     render(<ViewToggle value="board" />);
@@ -116,6 +140,94 @@ describe("ToggleGroup", () => {
 
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  describe("clearable", () => {
+    // A controlled clearable host: starts unselected and can return to unselected.
+    function ClearableViewToggle({
+      value: initial = null,
+      onChange,
+    }: {
+      value?: View | null;
+      onChange?: (value: View | null, event: Event) => void;
+    }) {
+      const [value, setValue] = React.useState<View | null>(initial);
+      return (
+        <ToggleGroup
+          aria-label="View"
+          clearable
+          value={value}
+          onChange={(next, event) => {
+            setValue(next);
+            onChange?.(next, event);
+          }}
+        >
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem value="list">List</ToggleGroupItem>
+              <ToggleGroupItem value="board">Board</ToggleGroupItem>
+              <ToggleGroupItem value="calendar">Calendar</ToggleGroupItem>
+            </>
+          )}
+        </ToggleGroup>
+      );
+    }
+
+    it("renders nothing selected when the value is null", () => {
+      render(<ClearableViewToggle value={null} />);
+      for (const name of ["List", "Board", "Calendar"]) {
+        expect(screen.getByRole("button", { name })).toHaveAttribute("aria-pressed", "false");
+      }
+    });
+
+    it("selects a segment from the empty state", async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(<ClearableViewToggle value={null} onChange={onChange} />);
+
+      await user.click(screen.getByRole("button", { name: "Board" }));
+
+      expect(onChange).toHaveBeenCalledWith("board", expect.any(Event));
+      expect(screen.getByRole("button", { name: "Board" })).toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("clears the selection with null when the active segment is re-pressed", async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(<ClearableViewToggle value="list" onChange={onChange} />);
+
+      await user.click(screen.getByRole("button", { name: "List" }));
+
+      expect(onChange).toHaveBeenCalledWith(null, expect.any(Event));
+      expect(screen.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "false");
+    });
+
+    // Guards the "no selection" sentinel: `null`, not `""`, means "nothing
+    // selected". An empty-string segment value is a real, distinct value, so it
+    // must not read as selected just because the group is empty — otherwise it
+    // would take the selected styling and the active roving tab stop. (Regression
+    // guard for the old `value ?? ""` sentinel, which collided with `value=""`.)
+    it("keeps an empty-string segment unselected while the group value is null", () => {
+      type Filter = "" | "unread";
+      render(
+        <ToggleGroup<Filter> aria-label="Filter" clearable value={null} onChange={() => {}}>
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem value="">All</ToggleGroupItem>
+              <ToggleGroupItem value="unread">Unread</ToggleGroupItem>
+            </>
+          )}
+        </ToggleGroup>,
+      );
+      // The active-composite-item marker only rides the selected segment; with the
+      // group empty, no segment — including the empty-string one — should carry it.
+      expect(screen.getByRole("button", { name: "All" })).not.toHaveAttribute(
+        "data-composite-item-active",
+      );
+      expect(screen.getByRole("button", { name: "Unread" })).not.toHaveAttribute(
+        "data-composite-item-active",
+      );
+    });
   });
 
   it("marks a disabled group with aria-disabled and keeps its segments tabbable", async () => {

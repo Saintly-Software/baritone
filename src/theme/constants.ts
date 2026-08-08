@@ -65,6 +65,16 @@ export const LETTER_SPACING_KEYS = [
 ] as const;
 export type LetterSpacingKey = (typeof LETTER_SPACING_KEYS)[number];
 
+/**
+ * Named line-height (leading) steps a `Text`/`Heading` can select via its
+ * `lineHeight` prop. Mirrors the keys of the `text.lineHeight` token scale —
+ * unitless multipliers (Tailwind's leading scale), so a step scales with the
+ * font-size. Distinct from the per-size line-heights baked into `text.size`
+ * (which `size` applies by default); this is the standalone override vocabulary.
+ */
+export const LINE_HEIGHT_KEYS = ["none", "tight", "snug", "normal", "relaxed", "loose"] as const;
+export type LineHeightKey = (typeof LINE_HEIGHT_KEYS)[number];
+
 /** Component sizing knob (padding / font / control height). */
 export const SIZES = ["sm", "md", "lg"] as const;
 export type Size = (typeof SIZES)[number];

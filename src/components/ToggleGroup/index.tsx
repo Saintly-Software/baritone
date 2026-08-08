@@ -34,14 +34,19 @@ const ACTIVE_COMPOSITE_ITEM_ATTR = "data-composite-item-active";
  * colour/size that look is drawn with.
  */
 interface ToggleGroupItemContextValue {
-  selectedValue: string;
+  /**
+   * The group's selected value, or `null` when nothing is selected. `null` (not
+   * `""`) is the "no selection" sentinel so an empty-string segment value stays a
+   * real, distinct value — `value === selectedValue` never matches a `null` group.
+   */
+  selectedValue: string | null;
   intent: Intent | undefined;
   saliency: Saliency;
   size: Size | undefined;
 }
 
 const ToggleGroupItemContext = React.createContext<ToggleGroupItemContextValue>({
-  selectedValue: "",
+  selectedValue: null,
   intent: undefined,
   saliency: "high",
   size: undefined,
@@ -58,6 +63,15 @@ export interface ToggleGroupItemProps<T extends string> {
    * pass children for anything richer.
    */
   children?: React.ReactNode;
+  /**
+   * An authored accessible name for the segment, for when the flattened text of
+   * `children` would name it misleadingly — e.g. a label paired with a trailing
+   * count `Badge` ("Comments" + "3" would otherwise announce as "Comments 3").
+   * When set, it becomes the segment's whole accessible name, so it must still
+   * contain the visible label text (WCAG 2.5.3 *Label in Name*). Leave it off
+   * when `children` already reads correctly (the common case).
+   */
+  "aria-label"?: string;
   /** Extra className merged onto the segment's `<button>`. */
   className?: string;
 }
@@ -76,6 +90,7 @@ export interface ToggleGroupItemProps<T extends string> {
 function ToggleGroupItem<T extends string>({
   value,
   children,
+  "aria-label": ariaLabel,
   className,
 }: ToggleGroupItemProps<T>) {
   const { selectedValue, intent, saliency, size } = React.useContext(ToggleGroupItemContext);
@@ -100,12 +115,21 @@ function ToggleGroupItem<T extends string>({
             children: content,
           }}
           htmlAttrs={
-            selected
-              ? // The selected segment also carries the active-tab-stop marker, so
-                // Tab focuses it. data-* isn't statically known on base-ui's props,
-                // hence the localized cast (same pattern as the overlay triggers).
-                ({ ...toggleProps, [ACTIVE_COMPOSITE_ITEM_ATTR]: "" } as InternalButtonHtmlAttrs)
-              : toggleProps
+            // Both the active-tab-stop marker and an authored `aria-label` ride
+            // this `htmlAttrs` seam rather than `consumerProps`: `InternalButton`
+            // strips `aria-label` off a text button's `consumerProps` (its name
+            // must be the visible label there), whereas `htmlAttrs` is merged
+            // *under* the button's own props — which never set `aria-label` here —
+            // so an authored name survives. data-* isn't statically known on
+            // base-ui's props, hence the localized cast (same pattern as the
+            // overlay triggers).
+            {
+              ...toggleProps,
+              // The selected segment carries the active-tab-stop marker, so Tab
+              // focuses it rather than the first segment.
+              ...(selected ? { [ACTIVE_COMPOSITE_ITEM_ATTR]: "" } : {}),
+              ...(ariaLabel != null ? { "aria-label": ariaLabel } : {}),
+            } as InternalButtonHtmlAttrs
           }
         />
       )}
@@ -113,15 +137,7 @@ function ToggleGroupItem<T extends string>({
   );
 }
 
-interface ToggleGroupBaseProps<T extends string> {
-  /** The currently selected value (controlled). Always exactly one, like `RadioGroup`. */
-  value: T;
-  /**
-   * Called with the newly selected value first and the raw DOM event that drove
-   * the selection second (base-ui's native `event`). Not called when the group
-   * is disabled.
-   */
-  onChange: (value: T, event: Event) => void;
+interface ToggleGroupSharedProps<T extends string> {
   /**
    * Render-prop children. Receives a `ToggleGroupItem` already bound to this
    * group's `T`, so every `<ToggleGroupItem value={...} />` is type-checked
@@ -169,12 +185,76 @@ interface ToggleGroupBaseProps<T extends string> {
 }
 
 /**
+ * The strict, single-select arm (the default). Exactly one value is always
+ * selected, like `RadioGroup`: `null` is not assignable, and re-pressing the
+ * active segment can't clear it, so `onChange` only ever emits a real `T`.
+ */
+interface ToggleGroupStrictProps<T extends string> {
+  /** The currently selected value (controlled). Always exactly one. */
+  value: T;
+  /**
+   * Called with the newly selected value first and the raw DOM event that drove
+   * the selection second (base-ui's native `event`). Not called when the group
+   * is disabled.
+   */
+  onChange: (value: T, event: Event) => void;
+  /** Off (or omitted): the group is strictly single-select. See {@link ToggleGroupClearableProps}. */
+  clearable?: false;
+}
+
+/**
+ * The opt-in clearable arm. `value` also accepts `null` (nothing selected), and
+ * re-pressing the active segment clears the selection — so `onChange` can emit
+ * `null` too, and callers must handle it.
+ */
+interface ToggleGroupClearableProps<T extends string> {
+  /** The currently selected value (controlled), or `null` for nothing selected. */
+  value: T | null;
+  /**
+   * Called with the newly selected value — or `null` when the active segment is
+   * re-pressed to clear the selection — first, and the raw DOM event that drove
+   * it second. Not called when the group is disabled.
+   */
+  onChange: (value: T | null, event: Event) => void;
+  /** Allow an empty (unselected) value and let re-pressing the active segment clear it. */
+  clearable: true;
+}
+
+/**
+ * The full strict-mode props: shared knobs + the strict `value`/`onChange` + the
+ * naming union. This is one overload arm (see {@link ToggleGroup}).
+ */
+type ToggleGroupStrictFullProps<T extends string> = ToggleGroupSharedProps<T> &
+  ToggleGroupStrictProps<T> &
+  FieldLabellingProps;
+
+/**
+ * The full clearable-mode props: shared knobs + the nullable `value`/`onChange` +
+ * the naming union. This is the other overload arm (see {@link ToggleGroup}).
+ */
+type ToggleGroupClearableFullProps<T extends string> = ToggleGroupSharedProps<T> &
+  ToggleGroupClearableProps<T> &
+  FieldLabellingProps;
+
+/**
  * Named by exactly one of `label` / `aria-label` / `aria-labelledby` — they're
  * mutually exclusive (see `FieldLabellingProps`). A visible `label` also flips
  * the control into **form-control semantics**: a labelled group, alongside the
  * toolbar styling. A bare toolbar names itself with `aria-label`.
+ *
+ * The `value` / `onChange` pair is discriminated by `clearable`: omitted (or
+ * `false`) keeps the strict single-select contract; `clearable` widens both to
+ * accept `null`.
+ *
+ * The component itself is *overloaded* on these two arms rather than typed by
+ * this union — a union of two generic shapes defeats `T` inference (the strict
+ * arm's `value: T` yields a `T = value's-type-including-null` candidate that,
+ * failing `T extends string`, collapses `T` to `string`). Overloads let each arm
+ * infer `T` on its own, so consumers never have to spell out `<ToggleGroup<T>>`.
  */
-export type ToggleGroupProps<T extends string> = ToggleGroupBaseProps<T> & FieldLabellingProps;
+export type ToggleGroupProps<T extends string> =
+  | ToggleGroupStrictFullProps<T>
+  | ToggleGroupClearableFullProps<T>;
 
 /**
  * ToggleGroup — a single-select segmented control: a row of toggle buttons where
@@ -201,6 +281,10 @@ export type ToggleGroupProps<T extends string> = ToggleGroupBaseProps<T> & Field
  * group renders field semantics — a named group with inline help / error text
  * wired through `aria-describedby` — while keeping the same toolbar look.
  *
+ * By default exactly one segment is always selected. Opt into an empty state
+ * with `clearable`: `value` then also accepts `null` (nothing selected), and
+ * re-pressing the active segment clears the selection back to `null`.
+ *
  * @example
  * // Toolbar mode.
  * type View = "list" | "board" | "calendar";
@@ -225,11 +309,30 @@ export type ToggleGroupProps<T extends string> = ToggleGroupBaseProps<T> & Field
  *     </>
  *   )}
  * </ToggleGroup>
+ *
+ * @example
+ * // Clearable: start unselected, and let re-pressing the active segment clear it.
+ * const [view, setView] = React.useState<View | null>(null);
+ * <ToggleGroup aria-label="View" clearable value={view} onChange={setView}>
+ *   {({ ToggleGroupItem }) => (
+ *     <>
+ *       <ToggleGroupItem value="list">List</ToggleGroupItem>
+ *       <ToggleGroupItem value="board">Board</ToggleGroupItem>
+ *     </>
+ *   )}
+ * </ToggleGroup>
  */
+export function ToggleGroup<T extends string>(
+  props: ToggleGroupStrictFullProps<T>,
+): React.JSX.Element;
+export function ToggleGroup<T extends string>(
+  props: ToggleGroupClearableFullProps<T>,
+): React.JSX.Element;
 export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
   const {
     value,
     onChange,
+    clearable = false,
     children,
     intent,
     saliency = "high",
@@ -246,7 +349,9 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
     required = false,
     className,
     ref,
-  } = props as ToggleGroupBaseProps<T> & FieldLabellingInput;
+    // The public type is discriminated by `clearable`; internally we work with the
+    // widened arm (value/onChange over `T | null`) and narrow back at the call site.
+  } = props as ToggleGroupClearableProps<T> & ToggleGroupSharedProps<T> & FieldLabellingInput;
 
   const invalid = state === "invalid";
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
@@ -258,11 +363,13 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
     "aria-labelledby": ariaLabelledby,
   };
   // base-ui's group value is an array (it supports multi-select); single-select
-  // is just a one-element array. Memoised so the controlled value is referentially
-  // stable across renders.
-  const groupValue = React.useMemo(() => [value], [value]);
+  // is just a one-element array, and a cleared/unselected group is the empty
+  // array. Memoised so the controlled value is referentially stable across renders.
+  const groupValue = React.useMemo(() => (value === null ? [] : [value]), [value]);
 
   const itemContext = React.useMemo<ToggleGroupItemContextValue>(
+    // Pass `value` through as-is: when it's `null`, no segment's `value === null`,
+    // so none renders selected — and an empty-string segment stays distinct.
     () => ({ selectedValue: value, intent, saliency, size }),
     [value, intent, saliency, size],
   );
@@ -289,14 +396,23 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
             ref={ref}
             value={groupValue}
             onValueChange={(next, details) => {
-              // The group always keeps exactly one value. Veto when disabled (the whole
-              // control is read-only) *or* when re-pressing the active segment would
-              // clear the selection (base-ui reports an empty array for that). base-ui
-              // shares this `details` with the toggle, so `cancel()` stops the
-              // controlled value from changing — no flicker — in both cases.
-              const selected = next[0];
-              if (disabled || selected === undefined) {
+              // Veto every change when disabled — the whole control is read-only.
+              // base-ui shares this `details` with the toggle, so `cancel()` stops
+              // the controlled value from changing (no flicker).
+              if (disabled) {
                 details.cancel();
+                return;
+              }
+              // Re-pressing the active segment clears it: base-ui reports an empty
+              // array. When `clearable`, that's a real change to `null`; otherwise
+              // the group keeps exactly one value, so veto it.
+              const selected = next[0];
+              if (selected === undefined) {
+                if (clearable) {
+                  onChange(null, details.event);
+                } else {
+                  details.cancel();
+                }
                 return;
               }
               onChange(selected, details.event);

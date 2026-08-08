@@ -40,6 +40,37 @@ export const textFontVar = createVar("textFont");
 export const textLetterSpacingVar = createVar("textLetterSpacing");
 
 /**
+ * The *current font-size*, mirroring {@link textFontVar}. The size recipe reads
+ * this (falling back to the `md` font-size token) so the resolved size is a single
+ * indirection; the `size` prop on `Text`/`Heading` sets it per instance to
+ * `var(--fontSize-<name>)`, pointing at a size the active theme published. The
+ * built-in `size` variant sets it too (from the per-size token) for the module-scope
+ * callers that apply a size as a class. See {@link module:../theme/fontSizes}.
+ */
+export const textSizeVar = createVar("textSize");
+
+/**
+ * The *current line-height*, mirroring {@link textSizeVar}. The size recipe reads
+ * this (falling back to the `md` line-height token). By default `size` sets it to
+ * its paired per-size leading (`var(--lineHeight-<size>)`); the `lineHeight` prop
+ * overrides it to `var(--lineHeight-<name>)`, a value the active theme published.
+ * See {@link module:../theme/lineHeights}.
+ */
+export const textLineHeightVar = createVar("textLineHeight");
+
+/**
+ * The *current font-weight*, mirroring {@link textFontVar}. The size recipe reads
+ * this (falling back to the `default` weight token); the `weight` prop on
+ * `Text`/`Heading` sets it per instance to `var(--fontWeight-<name>)`, and a theme's
+ * `defaultWeight` can seed it at the root. Left unset, text stays on the default
+ * weight — so, like `--textFont`, it's a var the element reads and a prop that
+ * overrides it. The built-in `weight` variant (`typographyWeight`) sets it too for
+ * the module-scope callers that apply a weight as a class.
+ * See {@link module:../theme/fontWeights}.
+ */
+export const textWeightVar = createVar("textWeight");
+
+/**
  * The resolved focus-ring colour. Each element-intent recipe (`surface`,
  * `component`, `formControl`) sets this to its `focus.<intent>` token; the shared
  * `focusRingRecipe` reads it when drawing the ring, so the ring colour follows

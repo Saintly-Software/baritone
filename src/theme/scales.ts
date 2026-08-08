@@ -35,6 +35,19 @@ export const letterSpacing = {
   widest: "0.1em",
 } as const;
 
+// Named line-height (leading) scale — unitless multipliers reproducing Tailwind's
+// `leading-*` steps, so a step scales with the font-size. This is the standalone
+// `lineHeight` prop's built-in vocabulary; it's distinct from the per-size
+// `lineHeight` below, which `size` applies as its paired default.
+export const leading = {
+  none: "1",
+  tight: "1.25",
+  snug: "1.375",
+  normal: "1.5",
+  relaxed: "1.625",
+  loose: "2",
+} as const;
+
 // Per-size line-heights, defaulting to Tailwind's values. Small–display sizes
 // use an absolute length; the largest sizes use a unitless `1`.
 export const lineHeight = {

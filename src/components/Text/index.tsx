@@ -1,13 +1,12 @@
 "use client";
 import * as React from "react";
 import { InternalText } from "../../internal/components/InternalText";
-import type {
-  TypographyDecorationVariants,
-  TypographyWeightVariants,
-} from "../../styles/recipes/text.css";
+import type { TypographyDecorationVariants } from "../../styles/recipes/text.css";
 import type { MarginProps, PaddingProps, TypographyAtomProps } from "../../styles/spacingProps";
-import type { Intent, Saliency, TextSize } from "../../theme/constants";
+import type { Intent, Saliency } from "../../theme/constants";
+import type { FontSizeName } from "../../theme/fontSizes";
 import type { FontName } from "../../theme/fonts";
+import type { FontWeightName } from "../../theme/fontWeights";
 import type { RenderProp } from "../../utils/render";
 
 /** Element tags a `Text` can render as via the `as` shorthand. */
@@ -20,16 +19,23 @@ interface TextOwnProps
     PaddingProps,
     TypographyAtomProps {
   /**
-   * Typography size. Accepts the full shared scale (`xs`–`9xl`) — `Text` and
-   * `Heading` render the same sizes and differ only in semantics. Default `md`.
+   * Typography size, by name. The built-in scale (`xs`–`9xl`, shared with
+   * `Heading`) is always available; other names are consumer-defined — published
+   * via the theme's `sizes` option and declared on `FontSizeRegistry`. Drives
+   * `font-size` and, unless `lineHeight` is set, its paired default line-height.
+   * Default `md`. See {@link FontSizeName}.
    */
-  size?: TextSize;
+  size?: FontSizeName;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */
   intent?: Intent;
   /** Override the inherited colour at this saliency. Falls back to `mid` when standalone. */
   saliency?: Saliency;
-  /** Font weight, from the `text.weight` tokens. Overrides the size's default weight. */
-  weight?: TypographyWeightVariants["weight"];
+  /**
+   * Font weight, by name. The built-in steps (`default`/`semibold`/`bold`/
+   * `superbold`) are always available; other names are consumer-defined via the
+   * theme's `weights` option + `FontWeightRegistry`. See {@link FontWeightName}.
+   */
+  weight?: FontWeightName;
   /** Render the text in italics. */
   italic?: TypographyDecorationVariants["italic"];
   /**
@@ -74,11 +80,12 @@ export type TextProps = TextOwnProps &
  * also exposes its resolved colour to descendant `Icon`s via `--iconColor`, so
  * inline icons match the text.
  *
- * `size` picks a font-size + line-height from the shared scale; typography can be
- * further tuned with `weight`, `italic`, `font` (the family), and `letterSpacing`
- * (tracking) — both `font` and `letterSpacing` are open-ended, consumer-defined
- * vocabularies — plus the `textAlign`, `whiteSpace`, `overflowWrap`, and
- * `textTransform` layout atoms.
+ * `size` picks a font-size and, by default, its paired line-height; typography can
+ * be further tuned with `weight`, `italic`, `lineHeight` (leading), `font` (the
+ * family), and `letterSpacing` (tracking) — `size`, `weight`, `lineHeight`, `font`,
+ * and `letterSpacing` are all open-ended, consumer-defined vocabularies (built-ins
+ * plus any names the theme publishes) — plus the `textAlign`, `whiteSpace`,
+ * `overflowWrap`, and `textTransform` layout atoms.
  */
 export function Text(props: TextProps) {
   const {
