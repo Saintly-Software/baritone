@@ -36,7 +36,9 @@ describe("isInternalHref", () => {
     "../up",
     "relative",
     "?query=1",
-    "#hash",
+    // A path that *carries* a fragment is a real navigation — still internal.
+    "/a#foo",
+    "/a",
     "/weird:segment",
   ])("treats %s as internal", (href) => {
     expect(isInternalHref(href)).toBe(true);
@@ -44,12 +46,18 @@ describe("isInternalHref", () => {
 
   it.each([
     "https://example.com",
+    "https://x",
     "http://example.com",
     "//cdn.example.com/app.js",
+    "//cdn/x",
     "mailto:hi@example.com",
+    "mailto:x",
     "tel:+15551234567",
     "sms:+15551234567",
     "ftp://files.example.com",
+    // A fragment-only href is a same-document jump the browser owns, not a
+    // navigation any client router should resolve.
+    "#foo",
   ])("treats %s as external", (href) => {
     expect(isInternalHref(href)).toBe(false);
   });

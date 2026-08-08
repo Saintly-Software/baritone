@@ -52,10 +52,14 @@ export type LinkRenderFn = (props: LinkRenderProps) => React.ReactNode;
  * - **External** (returns `false`): a URL carrying a scheme (`https:`, `http:`,
  *   `mailto:`, `tel:`, `sms:`, …) or a protocol-relative URL (`//host/path`).
  *   These leave your app's origin (or aren't HTTP at all), so a client router
- *   can't own them.
+ *   can't own them. A **fragment-only** href (`#footnote-1`) is external too: a
+ *   same-document jump to an anchor is browser behaviour, not a navigation, and
+ *   routers with structured APIs mishandle it (TanStack Router, for instance,
+ *   resolves `to="#foo"` as a relative *path* against the current pathname).
  * - **Internal** (returns `true`): an absolute path (`/about`), a relative one
- *   (`./x`, `../x`, `x`), or a same-document `?query` / `#hash` — the things the
- *   router owns.
+ *   (`./x`, `../x`, `x`), or a same-document `?query` — the things the router
+ *   owns. A path *carrying* a fragment (`/a#foo`) is a real navigation and stays
+ *   internal; only a bare `#…` is excluded.
  *
  * It's the default URL test a {@link LinkProvider} applies. Pass the provider
  * your own `isInternal` to widen or narrow it — e.g. to keep a legacy `/admin`
@@ -65,6 +69,12 @@ export function isInternalHref(href: string): boolean {
   // Protocol-relative (`//cdn.example.com/…`) resolves against the current
   // scheme but points at another origin — treat it as external.
   if (href.startsWith("//")) return false;
+  // A fragment-only href (`#footnote-1`) is a same-document jump the browser
+  // owns, not a navigation. Routers with structured APIs mishandle it (TanStack
+  // Router resolves `to="#foo"` as a relative path), so leave it a plain `<a>`.
+  // A path that merely *carries* a fragment (`/a#foo`) is still a real
+  // navigation and stays internal — only a leading `#` is external.
+  if (href.startsWith("#")) return false;
   // A leading URL scheme (`scheme:` per RFC 3986 — ALPHA then any of
   // ALPHA / DIGIT / `+` / `-` / `.`) marks an absolute or special-scheme URL
   // (`mailto:`, `tel:`, `https:`, …): not something the router navigates.
@@ -111,8 +121,9 @@ export interface LinkProviderProps {
  * *internal* `Link` — inline or `appearance="button"` — automatically renders
  * through your router's link, keeping the system's styling while the router owns
  * client-side navigation. External links (`https:`, `mailto:`, `tel:`, …),
- * new-tab links (`target`), and `download`s fall back to a real `<a>`, so a
- * single provider at the root is safe for every kind of link.
+ * fragment-only links (`#footnote-1` — a same-document jump the browser owns,
+ * not a navigation), new-tab links (`target`), and `download`s fall back to a
+ * real `<a>`, so a single provider at the root is safe for every kind of link.
  *
  * Precedence for a given `Link`: a per-link `render` prop always wins (the
  * escape hatch — route one link with bespoke router props, or force a plain
