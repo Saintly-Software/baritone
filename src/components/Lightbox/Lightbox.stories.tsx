@@ -84,7 +84,7 @@ export const WithCaption: Story = {
         <Lightbox.Trigger size="sm" saliency="low" aria-label="View image" icon={<ExpandGlyph />} />
       }
     >
-      <Text size="sm" render={<figcaption style={{ color: "white", textAlign: "center" }} />}>
+      <Text size="sm" render={<p style={{ color: "white", textAlign: "center" }} />}>
         {ALT}
       </Text>
     </Lightbox>

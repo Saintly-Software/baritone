@@ -129,7 +129,10 @@ function LightboxRoot({
                 />
               )}
             />
-            <img ref={ref} className={cx(lightboxImage, className)} src={src} alt={alt} />
+            {/* Empty string (not an absent attribute) when `alt` is omitted, so the
+                image is exposed as decorative rather than named from its src — the
+                dialog itself already carries the `alt || "Image"` name. */}
+            <img ref={ref} className={cx(lightboxImage, className)} src={src} alt={alt ?? ""} />
             {children}
           </BaseDialog.Popup>
         </BaseDialog.Viewport>
