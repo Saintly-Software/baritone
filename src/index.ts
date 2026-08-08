@@ -282,6 +282,7 @@ export {
   type ModalHeaderProps,
   type ModalFooterProps,
 } from "./components/Modal";
+export { Lightbox, type LightboxProps, type LightboxTriggerProps } from "./components/Lightbox";
 export {
   ConfirmationModal,
   type ConfirmationModalProps,
