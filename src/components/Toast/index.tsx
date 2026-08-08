@@ -99,10 +99,11 @@ export interface UseToastReturn {
 /**
  * Split the design-system fields (`intent`/`saliency`/`icon`/`actions`) into
  * base-ui's `data` bag, leaving the timing/identity fields flat. Only keys the
- * caller actually set are emitted: base-ui's `update` merges shallowly, so
- * passing an explicit `undefined` would *clear* a field — `update(id, { title })`
- * must not wipe the intent, and the `data` bag is only sent when a data field is
- * present so a partial update doesn't drop the others.
+ * caller actually set are emitted — base-ui's `update` merges shallowly, so an
+ * explicit `undefined` would *clear* a field (`update(id, { title })` must not
+ * wipe the intent). The `data` bag likewise carries only the set fields;
+ * `updateToast` merges it over the live toast's existing `data` (base-ui replaces
+ * `data` wholesale) so a partial update keeps the untouched visual fields.
  */
 function pack(options: Partial<AddToastOptions>): ToastManagerAddOptions<ToastData> {
   const { intent, saliency, icon, actions, title, description, timeout, priority, onClose } =
@@ -113,14 +114,12 @@ function pack(options: Partial<AddToastOptions>): ToastManagerAddOptions<ToastDa
   if (timeout !== undefined) packed.timeout = timeout;
   if (priority !== undefined) packed.priority = priority;
   if (onClose !== undefined) packed.onClose = onClose;
-  if (
-    intent !== undefined ||
-    saliency !== undefined ||
-    icon !== undefined ||
-    actions !== undefined
-  ) {
-    packed.data = { intent, saliency, icon, actions };
-  }
+  const data: ToastData = {};
+  if (intent !== undefined) data.intent = intent;
+  if (saliency !== undefined) data.saliency = saliency;
+  if (icon !== undefined) data.icon = icon;
+  if (actions !== undefined) data.actions = actions;
+  if (Object.keys(data).length > 0) packed.data = data;
   return packed;
 }
 
@@ -150,8 +149,17 @@ export function useToast(): UseToastReturn {
     [add],
   );
   const updateToast = React.useCallback(
-    (id: string, options: Partial<AddToastOptions>) => update(id, pack(options)),
-    [update],
+    (id: string, options: Partial<AddToastOptions>) => {
+      const packed = pack(options);
+      // base-ui replaces `data` wholesale on update; merge over the live toast's
+      // current data so a partial update (e.g. just `intent`) keeps icon/actions.
+      if (packed.data !== undefined) {
+        const existing = toasts.find((toast) => toast.id === id)?.data;
+        packed.data = { ...existing, ...packed.data };
+      }
+      update(id, packed);
+    },
+    [update, toasts],
   );
   const promiseToast = React.useCallback(
     <Value,>(promise_: Promise<Value>, options: ToastPromiseOptions<Value>) =>

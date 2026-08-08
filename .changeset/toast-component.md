@@ -16,7 +16,7 @@ Each toast's UI is a `Notice`, so it inherits the full `intent` / `saliency` /
   overlay — it's themed via the theme class on `<body>`.
 - **`useToast()`** — returns `add` / `update` / `close` / `promise` / `toasts`.
   `add({ title, description, intent, saliency, icon, actions, timeout, priority,
-  id, onClose })` shows a toast and returns its id; `promise()` drives a single
+id, onClose })` shows a toast and returns its id; `promise()` drives a single
   toast through loading → success/error.
 - **Accessibility** — built on base-ui's `Toast`. The viewport owns the live
   region that announces toasts; each toast is a `dialog` / `alertdialog` labelled

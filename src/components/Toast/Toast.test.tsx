@@ -161,6 +161,11 @@ describe("Toast", () => {
                 title: "Uploading",
                 description: "Starting up",
                 intent: "primary",
+                actions: [
+                  <Notice.Action key="cancel" onClick={() => {}}>
+                    Cancel
+                  </Notice.Action>,
+                ],
                 timeout: 0,
               });
             }}
@@ -170,6 +175,7 @@ describe("Toast", () => {
           <Button onClick={() => toast.update(idRef.current, { description: "Almost there" })}>
             Progress
           </Button>
+          <Button onClick={() => toast.update(idRef.current, { intent: "negative" })}>Fail</Button>
         </>
       );
     }
@@ -179,11 +185,19 @@ describe("Toast", () => {
     const toast = await screen.findByRole("dialog", { name: "Uploading" });
     expect(toast).toHaveTextContent("Starting up");
 
+    // A description-only update keeps the title and the (data-bag) action.
     await user.click(screen.getByRole("button", { name: "Progress" }));
-    // The description updated, and the title survived the partial update.
     await waitFor(() => expect(toast).toHaveTextContent("Almost there"));
     expect(toast).toHaveAccessibleName("Uploading");
     expect(toast).not.toHaveTextContent("Starting up");
+    expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+
+    // An intent-only update must not drop the other data fields (the action).
+    await user.click(screen.getByRole("button", { name: "Fail" }));
+    await waitFor(() =>
+      expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument(),
+    );
+    expect(toast).toHaveTextContent("Almost there");
   });
 
   it("throws a helpful error when useToast is used outside a provider", () => {
