@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { InternalButton } from "../../internal/components/InternalButton";
+import { InternalChip, type InternalChipProps } from "../../internal/components/InternalChip";
 import type { WidthShorthand } from "../../styles/layoutProps";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
@@ -107,10 +108,92 @@ export interface ButtonLinkProps extends Omit<
 }
 
 /**
- * Link props, discriminated on `appearance`: the default inline styled anchor
- * ({@link InlineLinkProps}) or a button-styled link ({@link ButtonLinkProps}).
+ * `<Link appearance="chip">` — a link that *looks like* a `Chip`. It reuses
+ * Chip's recipe wholesale (via the shared `InternalChip` / `chipBoxClassName`),
+ * so there's no style duplication: the same `intent`/`saliency`/`size`/`shape`/
+ * `width` knobs apply and it's visually identical to a `Chip`, but the rendered
+ * element is a real anchor (or your router link), with the chip's pointer /
+ * hover / active affordances and focus ring.
+ *
+ * A chip-link is deliberately *one anchor* — an optional decorative `icon` /
+ * `trailIcon` on each side of the label, and nothing action-bearing. Chip's
+ * interactive adornments, remove button, and `onClick`/`popover` label semantics
+ * intentionally stay on `Chip`: a navigable chip is a `Link`, not an `href` on
+ * `Chip` (which would create invalid nested interactive elements). Supply the
+ * destination the same way as any other `Link`: `href` for an external link, or
+ * `render` with your framework's link (which also carries *typed* router
+ * descriptors a plain `href` can't express) for client-side navigation.
  */
-export type LinkProps = InlineLinkProps | ButtonLinkProps;
+export interface ChipLinkProps extends Omit<
+  React.AnchorHTMLAttributes<HTMLAnchorElement>,
+  // Colour comes from intent/saliency, not the `color` attribute…
+  | "color"
+  // …and the accessible name is always the visible label, so an `aria-label`
+  // (which would silently override it) is intentionally unsupported (matches
+  // `Chip`/`Button`).
+  | "aria-label"
+> {
+  /** The chip look. */
+  appearance: "chip";
+  /** Colour intent — same knob and default (`neutral`) as `Chip`. */
+  intent?: Intent;
+  /** Colour saliency — same knob and default (`mid`) as `Chip`. */
+  saliency?: Saliency;
+  /** Chip sizing (height / font / padding). Same default (`md`) as `Chip`. */
+  size?: Size;
+  /**
+   * The chip's silhouette: `square` (default, the component radius) or `pill`
+   * (fully rounded ends). Same as `Chip`.
+   */
+  shape?: "square" | "pill";
+  /**
+   * `fit` (default) hugs the label; `fill` stretches the chip-link to its
+   * container's full width (the label still truncates). Same as `Chip`.
+   */
+  width?: "fit" | "fill";
+  /**
+   * Decorative leading icon — a single non-interactive glyph before the label
+   * (like `Chip`'s `icon`). Typically an `<Icon>`; inherits the chip's colour.
+   */
+  icon?: React.ReactNode;
+  /** Decorative trailing icon — mirrors `icon` (like `Chip`'s `trailIcon`). */
+  trailIcon?: React.ReactNode;
+  /**
+   * Disables the link. A disabled link has no honest HTML form, so it collapses
+   * to an inert element (no navigation, out of the a11y tree as a link) while
+   * keeping the chip styling — mirrors `appearance="button"`.
+   */
+  disabled?: boolean;
+  /**
+   * Explanation shown in a tooltip when the link is disabled and the user tabs to
+   * or hovers it.
+   */
+  disabledReason?: React.ReactNode;
+  /**
+   * Router-link element for client-side navigation (base-ui `render` pattern),
+   * e.g. `render={<NextLink href="/tags/music" />}` or a typed
+   * `render={<RouterLink to="/notes" search={{ tags: ["music"] }} />}`. Omit and
+   * pass `href` for a plain external `<a>` — or wrap the app in a `LinkProvider`
+   * to route every internal chip-link through your router without setting this per
+   * link (this then overrides the provider for a single link).
+   */
+  render?: RenderProp;
+  /** Required visible text label (also the accessible name). */
+  children: React.ReactNode;
+  ref?: React.Ref<HTMLElement>;
+  /**
+   * Unsupported: the accessible name is always the visible label, so passing an
+   * `aria-label` (which would silently override it) is a type error.
+   */
+  "aria-label"?: never;
+}
+
+/**
+ * Link props, discriminated on `appearance`: the default inline styled anchor
+ * ({@link InlineLinkProps}), a button-styled link ({@link ButtonLinkProps}), or a
+ * chip-styled link ({@link ChipLinkProps}).
+ */
+export type LinkProps = InlineLinkProps | ButtonLinkProps | ChipLinkProps;
 
 /**
  * Link — a router-agnostic link. By default it renders an inline styled `<a>`
@@ -124,8 +207,14 @@ export type LinkProps = InlineLinkProps | ButtonLinkProps;
  * renders an anchor, so you get button styling on a real navigation control
  * without duplicating any styles.
  *
+ * Pass `appearance="chip"` for a link that looks like a `Chip`: it reuses Chip's
+ * recipe (same `intent`/`saliency`/`size`/`shape`/`width` knobs, plus decorative
+ * `icon`/`trailIcon`) so it's visually identical to a `Chip`, but the element is a
+ * real navigable anchor — the way to make a whole chip navigate without putting an
+ * `href` on `Chip`.
+ *
  * **Router integration.** Either pass `render` per link, or wrap the app in a
- * `LinkProvider` to route every internal `Link` (both appearances) through your
+ * `LinkProvider` to route every internal `Link` (all appearances) through your
  * router at once — external / new-tab / `download` links still render a plain
  * `<a>`, and a per-link `render` always overrides the provider.
  */
@@ -160,6 +249,17 @@ export function Link(props: LinkProps) {
         }
       />
     );
+  }
+
+  if (props.appearance === "chip") {
+    // A chip-styled link: hand the shared `InternalChip` the Chip knobs plus the
+    // resolved anchor seam. It renders the chip chrome (via `chipBoxClassName` —
+    // the same recipe `Chip` uses) onto an `<a>`/router link. The `appearance`
+    // discriminant is Link's own, and the consumer's `render` is replaced with the
+    // provider-resolved one (`undefined` for a plain/external link), so both are
+    // stripped here.
+    const { appearance: _appearance, render: _render, ...chipProps } = props;
+    return <InternalChip {...(chipProps as InternalChipProps)} render={render} />;
   }
 
   const { appearance: _appearance, render: _render, className, children, ref, ...rest } = props;

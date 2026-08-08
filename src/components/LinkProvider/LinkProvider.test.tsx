@@ -251,4 +251,95 @@ describe("LinkProvider", () => {
       expect(router.navigations).toEqual([]);
     });
   });
+
+  describe('appearance="chip"', () => {
+    it("routes an internal chip-link through the provider (still an anchor)", () => {
+      const router = makeRouter();
+      render(
+        <LinkProvider render={router.render}>
+          <Link appearance="chip" href="/notes?tags=music">
+            Music
+          </Link>
+        </LinkProvider>,
+      );
+      const link = screen.getByRole("link", { name: "Music" });
+      expect(link.tagName).toBe("A");
+      expect(link).toHaveAttribute("data-router-link", "");
+      expect(link).toHaveAttribute("href", "/notes?tags=music");
+      // It still reuses the Chip recipe (many classes, not the bare inline link).
+      expect(link.className.split(/\s+/).length).toBeGreaterThan(1);
+    });
+
+    it("navigates via the router (not a full page load) when a routed chip-link is clicked", async () => {
+      const user = userEvent.setup();
+      const router = makeRouter();
+      render(
+        <LinkProvider render={router.render}>
+          <Link appearance="chip" href="/notes?tags=music">
+            Music
+          </Link>
+        </LinkProvider>,
+      );
+      await user.click(screen.getByRole("link", { name: "Music" }));
+      expect(router.navigations).toEqual(["/notes?tags=music"]);
+    });
+
+    it("leaves an external chip-link a plain anchor", () => {
+      const router = makeRouter();
+      render(
+        <LinkProvider render={router.render}>
+          <Link appearance="chip" href="https://example.com">
+            Docs
+          </Link>
+        </LinkProvider>,
+      );
+      expect(screen.getByRole("link", { name: "Docs" })).not.toHaveAttribute("data-router-link");
+    });
+
+    it("leaves a new-tab chip-link a plain anchor", () => {
+      const router = makeRouter();
+      render(
+        <LinkProvider render={router.render}>
+          <Link appearance="chip" href="/notes?tags=music" target="_blank">
+            Music
+          </Link>
+        </LinkProvider>,
+      );
+      expect(screen.getByRole("link", { name: "Music" })).not.toHaveAttribute("data-router-link");
+    });
+
+    it("lets a per-link render override the provider on a chip-link", () => {
+      const router = makeRouter();
+      render(
+        <LinkProvider render={router.render}>
+          <Link
+            appearance="chip"
+            href="/notes"
+            render={<a data-explicit-link="" href="/override" />}
+          >
+            Music
+          </Link>
+        </LinkProvider>,
+      );
+      const link = screen.getByRole("link", { name: "Music" });
+      expect(link).toHaveAttribute("data-explicit-link", "");
+      expect(link).not.toHaveAttribute("data-router-link");
+      expect(link).toHaveAttribute("href", "/override");
+    });
+
+    it("still collapses a disabled routed chip-link to an inert element", async () => {
+      const router = makeRouter();
+      const user = userEvent.setup();
+      render(
+        <LinkProvider render={router.render}>
+          <Link appearance="chip" href="/notes?tags=music" disabled>
+            Off
+          </Link>
+        </LinkProvider>,
+      );
+      expect(screen.queryByRole("link", { name: "Off" })).not.toBeInTheDocument();
+      await user.click(screen.getByText("Off"));
+      expect(router.navigations).toEqual([]);
+    });
+  });
 });

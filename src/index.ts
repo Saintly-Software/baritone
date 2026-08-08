@@ -46,6 +46,7 @@ export {
   type LinkProps,
   type InlineLinkProps,
   type ButtonLinkProps,
+  type ChipLinkProps,
 } from "./components/Link";
 export {
   LinkProvider,
