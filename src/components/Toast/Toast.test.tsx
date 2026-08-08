@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { BaritoneProvider } from "../BaritoneProvider";
 import { Button } from "../Button";
 import { Notice } from "../Notice";
+import { noticeRecipe } from "../Notice/notice.css";
 import { useToast, type AddToastOptions } from "./index";
 
 /** A button that fires one toast; auto-dismiss is off so assertions can't race the timer. */
@@ -192,12 +193,22 @@ describe("Toast", () => {
     expect(toast).not.toHaveTextContent("Starting up");
     expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
 
-    // An intent-only update must not drop the other data fields (the action).
+    // The Notice starts at the `primary` intent recipe class.
+    const noticeEl = toast.querySelector<HTMLElement>('[role="presentation"]');
+    expect(noticeEl?.className).toContain(noticeRecipe({ intent: "primary", saliency: "high" }));
+
+    // An intent-only update recolours the Notice (the `negative` recipe class)
+    // yet keeps the title, the description, and the other data field (the action).
     await user.click(screen.getByRole("button", { name: "Fail" }));
     await waitFor(() =>
-      expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument(),
+      expect(noticeEl?.className).toContain(noticeRecipe({ intent: "negative", saliency: "high" })),
     );
+    expect(noticeEl?.className).not.toContain(
+      noticeRecipe({ intent: "primary", saliency: "high" }),
+    );
+    expect(toast).toHaveAccessibleName("Uploading");
     expect(toast).toHaveTextContent("Almost there");
+    expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
   it("throws a helpful error when useToast is used outside a provider", () => {
