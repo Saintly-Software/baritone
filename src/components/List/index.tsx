@@ -159,25 +159,56 @@ function renderItems(
  * // Grid: three equal columns from a data array.
  * <List layout="grid" columns={3} gap="4" items={rows.map((r) => ({ id: r.id, children: r.label }))} />
  */
+/**
+ * Every layout prop widened into one shape, so a single destructure can strip
+ * *all* of them from `...rest` regardless of the active layout. Without this the
+ * inactive layout's props (e.g. `direction` when `layout="grid"`) would fall
+ * into `rest` and reach `Flex` / `Grid` — and from there the native list element
+ * as invalid attributes, or (for `align`, which both accept) silently change the
+ * layout. The `ListProps` union can't be passed at runtime the way the types
+ * imply (Storybook retains controls across a `layout` switch), so this guards the
+ * JS callers the discriminated union can't reach.
+ */
+type ResolvedListProps = ListBaseProps & {
+  layout?: ListLayout;
+  gap?: Atoms["gap"];
+  // `FlexJustify` and `GridJustify` are the same union; one field covers both.
+  justify?: FlexJustify;
+  direction?: FlexDirection;
+  align?: FlexAlign;
+  wrap?: boolean;
+  columns?: GridTracks;
+  rows?: GridTracks;
+  areas?: GridAreas;
+};
+
 function ListRoot(props: ListProps) {
-  if (props.layout === "grid") {
-    const {
-      layout: _layout,
-      ordered = false,
-      items,
-      gap,
-      columns,
-      rows,
-      areas,
-      justify,
-      className,
-      children,
-      ref,
-      ...rest
-    } = props;
+  const {
+    layout,
+    ordered = false,
+    items,
+    gap,
+    justify,
+    direction,
+    align,
+    wrap,
+    columns,
+    rows,
+    areas,
+    className,
+    children,
+    ref,
+    ...rest
+  } = props as ResolvedListProps;
+
+  const element = ordered ? <ol /> : <ul />;
+  const listClassName = cx(listReset, className);
+  const content = renderItems(items, children);
+
+  if (layout === "grid") {
     return (
       <Grid
-        render={ordered ? <ol /> : <ul />}
+        render={element}
         role="list"
         ref={ref}
         gap={gap}
@@ -185,31 +216,17 @@ function ListRoot(props: ListProps) {
         rows={rows}
         areas={areas}
         justify={justify}
-        className={cx(listReset, className)}
+        className={listClassName}
         {...rest}
       >
-        {renderItems(items, children)}
+        {content}
       </Grid>
     );
   }
 
-  const {
-    layout: _layout,
-    ordered = false,
-    items,
-    gap,
-    direction,
-    align,
-    justify,
-    wrap,
-    className,
-    children,
-    ref,
-    ...rest
-  } = props;
   return (
     <Flex
-      render={ordered ? <ol /> : <ul />}
+      render={element}
       role="list"
       ref={ref}
       gap={gap}
@@ -217,10 +234,10 @@ function ListRoot(props: ListProps) {
       align={align}
       justify={justify}
       wrap={wrap}
-      className={cx(listReset, className)}
+      className={listClassName}
       {...rest}
     >
-      {renderItems(items, children)}
+      {content}
     </Flex>
   );
 }
