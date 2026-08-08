@@ -14,7 +14,7 @@ use `Table` when the data is ready to show as-is.
   `rows`.
 - **Cells:** every row field is a `TableValue` (anything React can render). A
   column's optional `cell(value, row)` renderer wraps its value in any element
-  (e.g. a `Link`, a currency-formatted number). When a column needs to *know* its
+  (e.g. a `Link`, a currency-formatted number). When a column needs to _know_ its
   value is a `number` and format it with type safety, that's `DataTable`'s
   typed-accessor job; this plain table trades that for the strict key contract.
 - **Alignment:** set a column's `align` (`start` / `center` / `end`), a real

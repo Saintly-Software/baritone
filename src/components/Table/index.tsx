@@ -110,10 +110,7 @@ export interface TableProps<
 // The runtime body reads columns/rows through this widened shape — the generics
 // exist only to type the call site, so the implementation works one concrete
 // (string-keyed) row shape without re-narrowing on every field access.
-type TableRuntimeProps = Omit<
-  TableProps<string, readonly Record<string, TableValue>[]>,
-  "rows"
-> & {
+type TableRuntimeProps = Omit<TableProps<string, readonly Record<string, TableValue>[]>, "rows"> & {
   rows: ReadonlyArray<Record<string, TableValue>>;
 };
 
@@ -147,15 +144,8 @@ export function Table<
   const K extends string,
   const Rows extends readonly Record<string, TableValue>[],
 >(props: TableProps<K, Rows>) {
-  const {
-    columns,
-    rows,
-    caption,
-    getRowKey,
-    className,
-    ref,
-    ...rest
-  } = props as unknown as TableRuntimeProps;
+  const { columns, rows, caption, getRowKey, className, ref, ...rest } =
+    props as unknown as TableRuntimeProps;
 
   return (
     <table ref={ref} className={cx(tableRoot, className)} {...rest}>
@@ -177,10 +167,7 @@ export function Table<
         {rows.map((row, index) => (
           <tr key={getRowKey ? getRowKey(row, index) : index}>
             {columns.map((column) => (
-              <td
-                key={column.key}
-                className={cellRecipe({ align: column.align ?? "start" })}
-              >
+              <td key={column.key} className={cellRecipe({ align: column.align ?? "start" })}>
                 {column.cell ? column.cell(row[column.key], row) : row[column.key]}
               </td>
             ))}
