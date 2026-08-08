@@ -6,6 +6,12 @@ import { cell as cellRecipe, tableCaption, tableRoot } from "./table.css";
 /** Horizontal alignment of a column's header and body cells. */
 export type TableAlign = "start" | "center" | "end";
 
+// Dev/test only, matching Field's `assertExclusiveNames`: the naming check below
+// is deterministic on props, so any render in dev/test/CI trips it long before
+// production — and the whole guard dead-code-eliminates out of the bundle.
+const isDev = (): boolean =>
+  typeof process === "undefined" || process.env.NODE_ENV !== "production";
+
 /**
  * The value carried by any cell of a plain `Table`. Rows are plain data whose
  * every field is rendered as-is, so a value is anything React can render — a
@@ -75,11 +81,18 @@ type ExactRow<Row, Shape> = Row extends Shape
  * `string`, so `K` stays the exact set of column keys while each row is still
  * checked as its own literal — that pairing is what makes the row contract
  * strict in both directions.
+ *
+ * `Rows` is bounded by `readonly object[]`, not `readonly Record<string,
+ * TableValue>[]`, on purpose: an interface-backed row type (`interface Person {
+ * … }`) has no implicit string index signature, so the tighter bound would
+ * reject a plain `Person[]` outright. The bound only has to say "rows are
+ * objects" — {@link ExactRow} against `Record<K, TableValue>` does the real
+ * key-and-value validation.
  */
-export interface TableProps<
-  K extends string,
-  Rows extends readonly Record<string, TableValue>[],
-> extends Omit<React.TableHTMLAttributes<HTMLTableElement>, "children"> {
+export interface TableProps<K extends string, Rows extends readonly object[]> extends Omit<
+  React.TableHTMLAttributes<HTMLTableElement>,
+  "children"
+> {
   /**
    * The columns, in render order. Their `key`s define the row contract; give
    * each a `header`, an optional `align`, and an optional `cell` renderer.
@@ -140,21 +153,44 @@ type TableRuntimeProps = Omit<TableProps<string, readonly Record<string, TableVa
  *   ]}
  * />
  */
-export function Table<
-  const K extends string,
-  const Rows extends readonly Record<string, TableValue>[],
->(props: TableProps<K, Rows>) {
+export function Table<const K extends string, const Rows extends readonly object[]>(
+  props: TableProps<K, Rows>,
+) {
   const { columns, rows, caption, getRowKey, className, ref, ...rest } =
     props as unknown as TableRuntimeProps;
+
+  // A visible `caption` and an `aria-label`/`aria-labelledby` name the table
+  // twice, and the aria value wins in the accessible name — so the table would
+  // show one name and announce another. Reject the combination in dev, mirroring
+  // Field's `assertExclusiveNames` (a name mismatch is an a11y bug, not a
+  // condition to degrade through).
+  if (isDev()) {
+    const names = [
+      caption != null && "caption",
+      rest["aria-label"] != null && "aria-label",
+      rest["aria-labelledby"] != null && "aria-labelledby",
+    ].filter((v): v is string => typeof v === "string");
+    if (names.length > 1) {
+      throw new Error(
+        `[baritone] Table: \`${names.join("`, `")}\` are mutually exclusive — pass at most ` +
+          "one. `aria-label`/`aria-labelledby` override the visible `caption` in the accessible " +
+          "name, so the table would show one name and announce another.",
+      );
+    }
+  }
 
   return (
     <table ref={ref} className={cx(tableRoot, className)} {...rest}>
       {caption != null && <caption className={tableCaption}>{caption}</caption>}
       <thead>
         <tr>
-          {columns.map((column) => (
+          {/* Keyed by column position, not `column.key`: the columns are a
+              static ordered list, and positional keys stay stable even if two
+              columns happen to share a `key` (which is a valid, if unusual, way
+              to render the same field twice) — so React never warns. */}
+          {columns.map((column, columnIndex) => (
             <th
-              key={column.key}
+              key={columnIndex}
               scope="col"
               className={cellRecipe({ header: true, align: column.align ?? "start" })}
             >
@@ -166,8 +202,8 @@ export function Table<
       <tbody>
         {rows.map((row, index) => (
           <tr key={getRowKey ? getRowKey(row, index) : index}>
-            {columns.map((column) => (
-              <td key={column.key} className={cellRecipe({ align: column.align ?? "start" })}>
+            {columns.map((column, columnIndex) => (
+              <td key={columnIndex} className={cellRecipe({ align: column.align ?? "start" })}>
                 {column.cell ? column.cell(row[column.key], row) : row[column.key]}
               </td>
             ))}

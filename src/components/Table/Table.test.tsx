@@ -1,5 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Table, type TableColumn } from "./index";
 
 // A shared fixture typed to its column-key union, so the tests read like real
@@ -126,5 +126,74 @@ describe("Table", () => {
     const table = screen.getByTestId("tbl");
     expect(table.tagName).toBe("TABLE");
     expect(table.className).toContain("extra");
+  });
+
+  it("renders a typed interface-backed row array (no implicit index signature)", () => {
+    // Regression: the `rows` bound is `readonly object[]`, so a plain `Person[]`
+    // — an interface type with no string index signature — is accepted.
+    interface Person {
+      name: string;
+      role: string;
+    }
+    const staff: Person[] = [
+      { name: "Ada Lovelace", role: "Engineering" },
+      { name: "Alan Turing", role: "Research" },
+    ];
+    render(
+      <Table
+        aria-label="Staff"
+        columns={[
+          { key: "name", header: "Name" },
+          { key: "role", header: "Role" },
+        ]}
+        rows={staff}
+      />,
+    );
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Research" })).toBeInTheDocument();
+  });
+
+  it("renders duplicate column keys without a React key warning", () => {
+    // Two columns reading the same field is valid (e.g. the same data shown two
+    // ways). Cells are keyed by column position, so React never warns about
+    // duplicate keys.
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      render(
+        <Table
+          aria-label="People"
+          columns={[
+            { key: "name", header: "Name" },
+            { key: "name", header: "Name (again)" },
+          ]}
+          rows={[{ name: "Ada Lovelace" }]}
+        />,
+      );
+      // Both columns rendered the same field.
+      expect(screen.getAllByRole("columnheader")).toHaveLength(2);
+      expect(screen.getAllByRole("cell", { name: "Ada Lovelace" })).toHaveLength(2);
+      const keyWarnings = spy.mock.calls.filter((args) =>
+        args.some((a) => typeof a === "string" && a.includes('unique "key"')),
+      );
+      expect(keyWarnings).toHaveLength(0);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("throws in dev when a visible caption is combined with an aria name", () => {
+    // A visible caption plus an aria-label/aria-labelledby names the table twice
+    // and the aria value wins for assistive tech — so it's rejected in dev.
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      expect(() =>
+        render(<Table caption="People" aria-label="Team" columns={columns} rows={people} />),
+      ).toThrow(/mutually exclusive/);
+      expect(() =>
+        render(<Table caption="People" aria-labelledby="h1" columns={columns} rows={people} />),
+      ).toThrow(/mutually exclusive/);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
