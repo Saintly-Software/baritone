@@ -10,9 +10,15 @@ const spaceValues = Object.fromEntries(SPACE_KEYS.map((key) => [key, vars.space[
 
 const marginValues = { ...spaceValues, auto: "auto" };
 
-// Sizing values for `width` / `height` / `min*`: the spacing scale (so a flex
-// child can take a fixed size straight from the atoms scale) plus the intrinsic
-// keywords. `full` is a friendly alias for `100%`.
+// Inset values for `position`ed elements — `top` / `right` / `bottom` / `left`
+// and the `inset` shorthand. The spacing scale (so a sticky region can offset by
+// a token, e.g. `top="0"` or `top="4"`) plus `auto` (the initial value, and the
+// way to pin to the opposite edge).
+const insetValues = { ...spaceValues, auto: "auto" };
+
+// Sizing values for `width` / `height` / `min*` / `max*`: the spacing scale (so a
+// flex child can take a fixed size straight from the atoms scale) plus the
+// intrinsic keywords. `full` is a friendly alias for `100%`.
 const dimensionValues = {
   ...spaceValues,
   auto: "auto",
@@ -22,6 +28,22 @@ const dimensionValues = {
   "max-content": "max-content",
   "min-content": "min-content",
 };
+
+// Viewport-fill keywords for the *height* axis only. `screen` uses the dynamic
+// viewport unit (`dvh`), so a full-height region tracks the mobile URL bar
+// showing/hiding instead of overflowing the way classic `100vh` does. `screen-s`
+// / `screen-l` pin to the small / large viewport for a height that stays put
+// regardless of the URL bar (`svh` = as if it's showing, `lvh` = as if hidden).
+// There's deliberately no viewport *width* token — a viewport-width fill is
+// `width="full"`.
+const viewportHeightValues = {
+  screen: "100dvh",
+  "screen-s": "100svh",
+  "screen-l": "100lvh",
+};
+
+// The height axis carries the viewport keywords on top of the shared dimensions.
+const heightValues = { ...dimensionValues, ...viewportHeightValues };
 
 // Responsive atoms wired to the breakpoint tokens. `mobile` is the base
 // (mobile-first) condition; the rest are `min-width` media queries.
@@ -59,6 +81,12 @@ const responsiveProperties = defineProperties({
       "space-around",
       "space-evenly",
     ],
+    // `place-items` / `place-content` — the grid box-alignment shorthands, whose
+    // keywords (`start` / `center` / `end` / `stretch`) are already friendly, so
+    // no flex-style translation is needed. `place-items: center` is the canonical
+    // both-axes centering the grid path was missing.
+    placeItems: ["start", "center", "end", "stretch"],
+    placeContent: ["start", "center", "end", "stretch"],
     gap: spaceValues,
     padding: spaceValues,
     paddingTop: spaceValues,
@@ -71,10 +99,20 @@ const responsiveProperties = defineProperties({
     marginLeft: marginValues,
     marginRight: marginValues,
     width: dimensionValues,
-    height: dimensionValues,
     maxWidth: dimensionValues,
     minWidth: dimensionValues,
-    minHeight: dimensionValues,
+    // Height axis carries the viewport-fill keywords (`screen` → `100dvh`, …).
+    height: heightValues,
+    minHeight: heightValues,
+    maxHeight: heightValues,
+    // `position` + the inset atoms, so sticky/absolute regions don't need raw
+    // CSS. Every value flows through the responsive conditions like the rest.
+    position: ["static", "relative", "absolute", "sticky", "fixed"],
+    inset: insetValues,
+    top: insetValues,
+    right: insetValues,
+    bottom: insetValues,
+    left: insetValues,
     textAlign: ["start", "center", "end", "left", "right"],
     whiteSpace: ["normal", "nowrap"],
     overflowWrap: ["normal", "break-word"],

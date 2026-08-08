@@ -11,6 +11,14 @@ const meta: Meta<typeof Grid> = {
       control: "select",
       options: ["start", "center", "end", "between", "around", "evenly"],
     },
+    placeItems: {
+      control: "select",
+      options: [undefined, "start", "center", "end", "stretch"],
+    },
+    placeContent: {
+      control: "select",
+      options: [undefined, "start", "center", "end", "stretch"],
+    },
     gap: { control: "select", options: SPACE_KEYS },
     inline: { control: "boolean" },
   },
@@ -84,6 +92,19 @@ export const ResponsiveAutoFill: Story = {
       {Array.from({ length: 10 }, (_, i) => (
         <Box key={i}>Card {i + 1}</Box>
       ))}
+    </Grid>
+  ),
+};
+
+/**
+ * `placeItems="center"` — the one-prop way to center children on both axes. Here
+ * a single tile is centered in a viewport-fill grid (`minHeight="screen"`) — the
+ * classic centered splash/empty state.
+ */
+export const PlaceItemsCenter: Story = {
+  render: () => (
+    <Grid placeItems="center" minHeight="screen" style={{ border: "1px dashed #ccc" }}>
+      <Box>Centered on both axes</Box>
     </Grid>
   ),
 };
