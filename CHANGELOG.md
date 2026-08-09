@@ -1,5 +1,322 @@
 # @saintly-software/baritone
 
+## 1.0.0-alpha.4
+
+### Minor Changes
+
+- 536aded: Add `Lightbox` — a surface that opens an image at full size in a dialog centred
+  over a dimmed page.
+
+  - Opens from a **`<Lightbox.Trigger>`** (a `Button`, so all of Button's
+    intents / saliencies / sizes / icons are available) passed via `trigger`.
+  - Dismissed by clicking the backdrop, pressing Escape, or a built-in close
+    button pinned to the image's corner (`closeLabel` names it, default
+    `"Close"`); clicking the image itself does not close it.
+  - Built on base-ui's `Dialog`, so it is modal (an always-rendered backdrop) with
+    managed focus and ARIA. Its accessible name comes from `alt` (falling back to
+    `"Image"`).
+  - Supports controlled `open` / `defaultOpen` / `onOpenChange`, the shared
+    `useOverlayHandle(Lightbox)` imperative handle, and `initialFocus` /
+    `finalFocus`. `className` / `ref` target the `<img>`; optional `children`
+    render below the image as a caption.
+
+- 1ba7959: Add a chip-styled `appearance="chip"` arm to `Link`.
+
+  `LinkProps` gains a third `appearance`: the default inline styled anchor
+  (`"text"`), a link that looks like a `Button` (`"button"`), and now a link that
+  looks like a `Chip` (`"chip"`). A `<Link appearance="chip">` reuses `Chip`'s
+  recipe wholesale (through the shared `InternalChip` / `chipBoxClassName`), so
+  there's **no style duplication** — it's visually identical to a `Chip` with the
+  same `intent` / `saliency` / `size` / `shape` / `width`, plus decorative
+  `icon` / `trailIcon` — but the rendered element is a real navigable anchor.
+
+  This is how you make a _whole chip navigate_ — e.g. tag chips that link to a
+  filtered index page — without putting an `href` on `Chip`. Navigation stays on
+  `Link` (where it belongs), so `Chip` keeps its "tag, not a control" role and
+  avoids the invalid nested-interactive-element problem an `<a>` wrapping its
+  clickable adornments / remove button would create.
+
+  ```tsx
+  // Plain / string URL — routed by LinkProvider for internal hrefs:
+  <Link appearance="chip" intent="primary" saliency="low" size="sm" href="/notes?tags=music">
+    Music
+  </Link>
+
+  // Typed router navigation — via the render escape hatch (TanStack Router shown):
+  <Link
+    appearance="chip"
+    intent="primary"
+    saliency="low"
+    size="sm"
+    render={<RouterLink to="/notes" search={{ tags: ["music"] }} />}
+  >
+    Music
+  </Link>
+  ```
+
+  - **Element is a link, not a button:** supply the destination the usual way —
+    `href` for an external `<a>`, or `render` with your framework's link (which also
+    carries _typed_ router descriptors a plain `href` can't express) for
+    client-side navigation. `InternalGenericButtonAnchor` renders the chip chrome
+    onto that anchor.
+  - **Router integration matches the other appearances:** wrap the app in a
+    `LinkProvider` and every internal chip-link routes through your router; external
+    / new-tab / `download` links stay a plain `<a>`, and a per-link `render` always
+    wins.
+  - **One anchor by design:** an optional decorative `icon` / `trailIcon` on each
+    side of the label and nothing else — no interactive adornments, remove button,
+    or `onClick` / `popover` label semantics (those stay on `Chip`).
+  - **Disabled degrades honestly:** a disabled chip-link has no valid HTML form, so
+    it collapses to an inert element (out of the a11y tree as a link) while keeping
+    the chip styling, and can still explain itself via `disabledReason`.
+  - **Accessible name** is always the visible label — `aria-label` is `never`, as
+    on `Chip` / `Button`.
+
+  Internally, the chip's root-box look is now factored into a single shared
+  `chipBoxClassName`; both `Chip` and the new chip-link render from it, so the two
+  can't drift. `Chip` is otherwise unchanged.
+
+- 7656443: Add a `List` component (with a `List.Item` part) — a semantic list (`<ul>`, or
+  `<ol>` when `ordered`) whose items are laid out with either flexbox or CSS grid.
+
+  - **`layout`:** `flex` (default) or `grid`, the discriminant of the prop union —
+    the layout-specific knobs only type-check for the matching layout. `List`
+    delegates to `Flex` / `Grid` via the base-ui `render` pattern, so the layout
+    props behave exactly as they do on those primitives.
+  - **Flex knobs (`layout="flex"`):** `direction`, `align`, `justify`, `wrap`,
+    and `gap`.
+  - **Grid knobs (`layout="grid"`):** `columns`, `rows`, `areas`, `justify`, and
+    `gap` — place items in named areas with `List.Item`'s `area` (sets
+    `grid-area`).
+  - **`ordered`:** render an `<ol>` (semantic sequence) rather than a `<ul>`. The
+    marker is stripped either way (it doesn't flow through flex/grid tracks), so
+    `ordered` only changes the element.
+  - **`items` or children:** pass an `items` array (each entry a `List.Item`'s
+    props, keyed by `id` falling back to index) or compose `List.Item` children;
+    the data array wins when provided.
+  - **Real list semantics:** the `<ul>`/`<ol>` margin, padding, and marker are
+    reset so the layout drives all spacing, and a `role="list"` is kept explicitly
+    (Safari strips it under `list-style: none`); each `List.Item` is an `<li>` with
+    an explicit `role="listitem"`. Use `render` to swap the element.
+
+- a366107: Add a plain `Table` component — renders a set of `columns` and `rows` as a
+  semantic `<table>` (`<thead>`/`<tbody>`, real `<th scope="col">` and `<td>`) with
+  no sorting, filtering, or pagination. Reach for `DataTable` when you need those;
+  use `Table` when the data is ready to show as-is.
+
+  - **The columns are the contract:** `Table` infers the union of the columns'
+    `key`s and types `rows` against it, so a row that carries a key no column maps
+    — or omits one a column needs — is a compile error. The strictness runs in both
+    directions and needs no helper: write plain object literals for `columns` and
+    `rows`.
+  - **Cells:** every row field is a `TableValue` (anything React can render). A
+    column's optional `cell(value, row)` renderer wraps its value in any element
+    (e.g. a `Link`, a currency-formatted number). When a column needs to _know_ its
+    value is a `number` and format it with type safety, that's `DataTable`'s
+    typed-accessor job; this plain table trades that for the strict key contract.
+  - **Alignment:** set a column's `align` (`start` / `center` / `end`), a real
+    style recipe variant.
+  - **Naming & keys:** an optional `caption` renders a `<caption>` (which also names
+    the table); pass `aria-label` / `aria-labelledby` (forwarded to the `<table>`)
+    to name one without a visible caption. `getRowKey` derives stable React keys.
+  - **No new dependencies:** ships from the main entry point (unlike `DataTable`,
+    which lives on its own subpath to keep the `@tanstack/react-table` peer out of
+    the main barrel).
+
+- ce2a070: Make `Text`/`Heading`'s `size` and `weight` props **dynamic and consumer-defined**,
+  and add a matching **`lineHeight` (leading) prop** — all three mirroring the `font`
+  and `letterSpacing` pattern. The built-in scales still ship and stay token-backed
+  (`xs`…`9xl`, `default`…`superbold`, and the new `none`…`loose` leadings), but an app
+  can now register its own font-sizes, weights, and line-heights outside them. Each is
+  an _open_ vocabulary, working through three seams instead of the vanilla-extract
+  contract:
+
+  - **Values** — the theme publishes one `--fontSize-<name>` / `--fontWeight-<name>` /
+    `--lineHeight-<name>` custom property per step. `createDesignSystemTheme` /
+    `createInlineTheme` / `BaritoneTheme` gain `sizes`, `weights`, and `lineHeights`
+    options (`{ hero: "4rem" }`, `{ black: "900" }`, `{ airy: "2.2" }`) plus a
+    `defaultWeight` option that sets the weight bare `<Text>` uses.
+  - **Types** — augment the new `FontSizeRegistry` / `FontWeightRegistry` /
+    `LineHeightRegistry` interfaces to tighten each prop from a loose `string` to the
+    built-ins plus your names, with autocompletion:
+    ```ts
+    declare module "@saintly-software/baritone" {
+      interface FontSizeRegistry {
+        hero: true;
+      }
+    }
+    ```
+  - **Plumbing** — the props resolve to `var(--fontSize-<name>)` etc. via new
+    `--textSize` / `--textLineHeight` / `--textWeight` custom properties the size
+    recipe reads (mirroring how the family reads `--textFont`); inline vars per
+    instance, no variant-class explosion.
+
+  `lineHeight` is purely **additive** and preserves the size↔leading pairing: `size`
+  still applies its tuned per-size line-height by default, and `lineHeight` only
+  overrides it when set. Its built-in vocabulary is a Tailwind-style unitless leading
+  scale — `none` (1), `tight` (1.25), `snug` (1.375), `normal` (1.5), `relaxed`
+  (1.625), `loose` (2) — backed by a new `text.lineHeight` token group (overridable via
+  `BrandSeed.lineHeight`).
+
+  A consumer `size` can carry its own paired leading too, Tailwind-style: a `sizes`
+  entry is either a bare `font-size` (`{ hero: "4rem" }`, leading falls back to `md`)
+  or a `{ fontSize, lineHeight }` pair (`{ hero: { fontSize: "4rem", lineHeight: "1.05" } }`)
+  whose line-height becomes the size's default (still overridden by the `lineHeight`
+  prop). The exported `SizeValue` type names the pair form.
+
+  Also:
+
+  - **Dev warning** — in development, a `size`/`weight`/`lineHeight` name pointing at a
+    custom property the active theme never published logs an actionable `console.warn`
+    (the text would otherwise silently fall back to the `md` size/leading or `default`
+    weight). Deduped per var, skipped under jsdom, dead-code-eliminated from production.
+  - `textSizeVar` / `textLineHeightVar` / `textWeightVar` are exported for advanced
+    composition, alongside `FontSizeRegistry` / `FontSizeName` / `BuiltinFontSizeName` /
+    `fontSizeVarName` / `fontSizeVars` / `FontSizeOptions` (and the `FontWeight*` /
+    `LineHeight*` equivalents) from the theme.
+
+  **Breaking (alpha):** `size` and `weight` are now loose `string`s until you augment
+  the matching registry — the built-in names and the scalar API
+  (`size="4xl"`, `weight="bold"`) are unchanged, and the `text.size` / `text.weight`
+  tokens (and `BrandSeed.fontScale`) still back the built-ins, but the compile-time
+  autocomplete/typo-check on the raw props is opt-in via the registry (exactly as with
+  `font` / `letterSpacing`). The other components that take a built-in size
+  (`Button.variant`, `MetricCard.valueSize`, `Lockup.size`, `HelpText`) are unchanged.
+
+- b26adf6: Make `Text`/`Heading`'s `letterSpacing` (tracking) prop **dynamic and
+  consumer-defined**, mirroring the `font` prop. The built-in steps
+  (`tighter`…`widest`) still ship and stay token-backed, but an app can now register
+  its own tracking values — a hand-tuned `em` for an all-caps eyebrow, a display
+  headline's negative track — outside that ramp. Like `font`, this is an _open_
+  vocabulary, so it works through three seams instead of the vanilla-extract
+  contract:
+
+  - **Values** — the theme publishes one `--letterSpacing-<name>` custom property
+    per step. `createDesignSystemTheme` / `createInlineTheme` / `BaritoneTheme` gain
+    a `letterSpacings` option (`{ eyebrow: "0.2em" }`) plus a `defaultLetterSpacing`
+    option that sets the tracking bare text uses. The built-in `tighter`…`widest`
+    steps are always published (from the `text.letterSpacing` tokens).
+  - **Types** — augment the new `LetterSpacingRegistry` interface to tighten
+    `letterSpacing` from a loose `string` to the built-ins plus your names, with
+    autocompletion, while Baritone stays ignorant of the names:
+    ```ts
+    declare module "@saintly-software/baritone" {
+      interface LetterSpacingRegistry {
+        eyebrow: true;
+        display: true;
+      }
+    }
+    ```
+  - **Plumbing** — the `letterSpacing` prop resolves to `var(--letterSpacing-<name>)`
+    via a new `--textLetterSpacing` custom property the size recipe reads (mirroring
+    how the family reads `--textFont`); a single inline var per instance, no
+    variant-class explosion.
+
+  Also:
+
+  - **Dev warning** — in development, `letterSpacing="<name>"` pointing at a
+    `--letterSpacing-<name>` the active theme never published logs an actionable
+    `console.warn` (the text would otherwise silently fall back to `normal`
+    tracking). Deduped per name, skipped under jsdom, and dead-code-eliminated from
+    production builds.
+  - `textLetterSpacingVar` is exported for advanced composition, alongside
+    `LetterSpacingRegistry` / `LetterSpacingName` / `BuiltinLetterSpacingName` /
+    `letterSpacingVarName` / `letterSpacingVars` / `LetterSpacingOptions` from the
+    theme.
+
+  **Breaking (alpha):** `letterSpacing` is no longer a responsive sprinkles atom —
+  it no longer accepts per-breakpoint objects (`{ mobile: "tight", md: "wide" }`).
+  The scalar API (`letterSpacing="widest"`) and the built-in step names are
+  unchanged. The `text.letterSpacing` tokens and `BrandSeed.letterSpacing` overrides
+  still back the built-ins.
+
+- b3f2290: Add a `Toast` component and a `BaritoneProvider` that wires it up.
+
+  Toasts are fired imperatively with `useToast()` and rendered by a viewport that
+  `BaritoneProvider` mounts for you — there's no toast element to place inline.
+  Each toast's UI is a `Notice`, so it inherits the full `intent` / `saliency` /
+  `icon` / `title` / `description` / `actions` / dismiss surface.
+
+  - **`BaritoneProvider`** — the client-side application provider (the counterpart
+    to the server-renderable, token-only `BaritoneTheme`). Wrap your app in it and
+    `useToast()` works anywhere below. Takes `toastTimeout` / `toastLimit` /
+    `toastManager`. The viewport portals to `<body>`, so — like every other
+    overlay — it's themed via the theme class on `<body>`.
+  - **`useToast()`** — returns `add` / `update` / `close` / `promise` / `toasts`.
+    `add({ title, description, intent, saliency, icon, actions, timeout, priority,
+id, onClose })` shows a toast and returns its id; `promise()` drives a single
+    toast through loading → success/error.
+  - **Accessibility** — built on base-ui's `Toast`. The viewport owns the live
+    region that announces toasts; each toast is a `dialog` / `alertdialog` labelled
+    by its title and described by its description. The `Notice` is presentational
+    so it never becomes a second live region.
+  - Toasts stack bottom-right as a smooth, always-expanded list (newest at the
+    bottom), swipe right/down to dismiss, hover to pause the auto-dismiss timers,
+    and respect `prefers-reduced-motion`.
+
+- 9c56c9d: Add an opt-in `clearable` prop to `ToggleGroup` for a null (unselected) value.
+
+  By default `ToggleGroup` stays strictly single-select — exactly one segment is
+  always selected, and re-pressing the active segment is vetoed. Pass `clearable`
+  to allow an empty state:
+
+  - **`value` widens to `T | null`:** pass `null` to render the group with nothing
+    selected (e.g. a control that starts empty).
+  - **Re-pressing the active segment clears it:** `onChange` widens to
+    `(value: T | null, event) => void` and fires with `null` when the current
+    selection is toggled off.
+
+  The prop is discriminated: without `clearable`, `value`/`onChange` keep their
+  strict `T` types, so existing usage is unchanged. When nothing is selected there
+  is no roving tab-stop marker, so Tab lands on the first segment.
+
+- 4abd9d6: Add an optional **`aria-label`** to `ToggleGroupItem`, an escape hatch for
+  authoring a segment's accessible name when its `children` would flatten
+  misleadingly.
+
+  A `ToggleGroupItem` renders a `<button>` whose accessible name is derived from
+  its content, so rich `children` — e.g. a label paired with a trailing count
+  `Badge` — would announce as the concatenated text ("Comments" + "3" →
+  "Comments 3"). Passing `aria-label` overrides that with an authored name while
+  `children` stays purely visual:
+
+  ```tsx
+  <ToggleGroupItem value="comments" aria-label="Comments">
+    Comments <Badge>3</Badge>
+  </ToggleGroupItem>
+  ```
+
+  Opt-in and non-breaking — omit it and the segment names itself from `children`
+  exactly as before. Because it replaces the whole accessible name, it should
+  still contain the visible label text (WCAG 2.5.3 _Label in Name_).
+
+  Internally the name rides the `InternalButton` `htmlAttrs` seam rather than
+  `consumerProps`: a text button's `consumerProps.aria-label` is intentionally
+  stripped (its name must be the visible label), whereas `htmlAttrs` merges under
+  the button's own props — which never set `aria-label` here — so the authored
+  name survives.
+
+### Patch Changes
+
+- 8f130e8: `LinkProvider` now leaves a **fragment-only** `href` (`#footnote-1`) a plain
+  `<a>` instead of routing it.
+
+  `isInternalHref` classified any href that wasn't scheme-prefixed or
+  protocol-relative as internal, so a bare `#hash` was handed to the consumer's
+  router `render`. But a same-document jump to an anchor is browser behaviour, not
+  a navigation any client router should own — and routers with structured APIs
+  mishandle it: TanStack Router, for instance, resolves `to="#foo"` as a relative
+  _path_ against the current pathname. Fragment-only links now fall through to a
+  plain anchor for both the inline and `appearance="button"` / `"chip"` arms.
+
+  A path that merely _carries_ a fragment (`/a#foo`) is a real navigation and is
+  unchanged — it stays internal and still routes through your `render`.
+
+  **Behaviour change.** If you relied on same-page `#…` links being routed through
+  your provider (e.g. a custom scroll handler in your `render`), they now render as
+  plain anchors. Pass the provider a custom `isInternal` that returns `true` for
+  `#`-prefixed hrefs to restore the old classification.
+
 ## 1.0.0-alpha.3
 
 ### Minor Changes
