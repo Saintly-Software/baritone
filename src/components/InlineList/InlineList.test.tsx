@@ -61,6 +61,34 @@ describe("InlineList", () => {
     expect(screen.getAllByText("·")).toHaveLength(1);
   });
 
+  it("drops falsy leaves toArray keeps (0 and empty string), leaving no stray separator", () => {
+    const count = 0;
+    render(
+      <InlineList>
+        <span>a</span>
+        {count && <span>never</span>}
+        {""}
+        <span>b</span>
+      </InlineList>,
+    );
+    expect(screen.queryByText("never")).toBeNull();
+    // Only the two real items survive → exactly one separator, and no bare "0".
+    expect(screen.getAllByText("·")).toHaveLength(1);
+    expect(screen.queryByText("0")).toBeNull();
+  });
+
+  it("marks separators inert so an interactive delimiter can't take focus", () => {
+    render(
+      <InlineList separator={<button type="button">x</button>}>
+        <span>a</span>
+        <span>b</span>
+      </InlineList>,
+    );
+    const sep = screen.getByRole("button", { hidden: true }).parentElement;
+    expect(sep).toHaveAttribute("inert");
+    expect(sep).toHaveAttribute("aria-hidden", "true");
+  });
+
   it("accepts a custom separator node", () => {
     render(
       <InlineList separator="/">

@@ -34,10 +34,22 @@ export const Playground: Story = {
  */
 export const MutedMetadata: Story = {
   render: () => (
-    <InlineList separator={<Text as="span" size="sm" saliency="low">·</Text>}>
-      <Text size="sm" saliency="low">12 lines</Text>
-      <Text size="sm" saliency="low">340 words</Text>
-      <Text size="sm" saliency="low">Updated 2h ago</Text>
+    <InlineList
+      separator={
+        <Text as="span" size="sm" saliency="low">
+          ·
+        </Text>
+      }
+    >
+      <Text size="sm" saliency="low">
+        12 lines
+      </Text>
+      <Text size="sm" saliency="low">
+        340 words
+      </Text>
+      <Text size="sm" saliency="low">
+        Updated 2h ago
+      </Text>
     </InlineList>
   ),
 };
@@ -76,12 +88,24 @@ export const Wrapping: Story = {
       }}
     >
       <InlineList>
-        <Text size="sm" saliency="low">Fiction</Text>
-        <Text size="sm" saliency="low">1994</Text>
-        <Text size="sm" saliency="low">Paperback</Text>
-        <Text size="sm" saliency="low">320 pages</Text>
-        <Text size="sm" saliency="low">English</Text>
-        <Text size="sm" saliency="low">Reissue</Text>
+        <Text size="sm" saliency="low">
+          Fiction
+        </Text>
+        <Text size="sm" saliency="low">
+          1994
+        </Text>
+        <Text size="sm" saliency="low">
+          Paperback
+        </Text>
+        <Text size="sm" saliency="low">
+          320 pages
+        </Text>
+        <Text size="sm" saliency="low">
+          English
+        </Text>
+        <Text size="sm" saliency="low">
+          Reissue
+        </Text>
       </InlineList>
     </div>
   ),

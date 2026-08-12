@@ -35,11 +35,13 @@ export interface InlineListProps
  * wherever that shape appears (a card's metadata, an article header, a list
  * row): it interleaves the `separator` between items, spaces everything with
  * `gap`, and wraps. Two details make it safe to hand any content:
- *   - **Falsy children are dropped** (via `React.Children.toArray`), so a
- *     conditional item — `{isLyrics && <Text>…</Text>}` — never leaves a
- *     dangling separator when it's absent.
- *   - **Separators are `aria-hidden` and non-selectable**, so assistive tech
- *     reads (and a copy-paste yields) just the items, never the dots.
+ *   - **Falsy children are dropped** (via `React.Children.toArray` +
+ *     `filter(Boolean)`, so `0` / `""` go too), so a conditional item —
+ *     `{isLyrics && <Text>…</Text>}` or `{count && <Text>…</Text>}` — never
+ *     leaves a dangling separator when it's absent.
+ *   - **Separators are `aria-hidden`, `inert`, and non-selectable**, so
+ *     assistive tech reads (and a copy-paste yields) just the items, never the
+ *     dots — and an interactive delimiter node can't steal focus or clicks.
  *
  * It deliberately does *not* use list semantics (`ul` / `li`): a metadata line
  * is decorative separation, and announcing "list, 3 items" would be noise. For a
@@ -68,9 +70,11 @@ export function InlineList({
   ...rest
 }: InlineListProps) {
   // `toArray` flattens fragments/arrays, drops `null` / `undefined` / booleans,
-  // and assigns stable keys — so conditional children collapse away cleanly and
-  // the separator count always matches the *rendered* items.
-  const items = React.Children.toArray(children);
+  // and assigns stable keys. The extra `filter(Boolean)` also drops the *falsy
+  // leaves toArray keeps* — `0`, `""`, `NaN` — so a numeric guard like
+  // `{count && <Text/>}` (which yields `0` when empty) collapses away like the
+  // boolean form, and the separator count always matches the *rendered* items.
+  const items = React.Children.toArray(children).filter(Boolean);
   return (
     <Flex
       ref={ref}
@@ -85,11 +89,15 @@ export function InlineList({
         const key = React.isValidElement(child) && child.key != null ? child.key : index;
         return (
           <React.Fragment key={key}>
-            {index > 0 && separator != null && (
-              <span aria-hidden="true" className={inlineListSeparator}>
-                {separator}
-              </span>
-            )}
+            {index > 0 &&
+              separator != null && (
+                // `inert` alongside `aria-hidden` so a separator is fully out of
+                // reach: even an interactive node passed as the delimiter can't be
+                // focused, clicked, or found — it's pure decoration between items.
+                <span aria-hidden="true" inert className={inlineListSeparator}>
+                  {separator}
+                </span>
+              )}
             {child}
           </React.Fragment>
         );
