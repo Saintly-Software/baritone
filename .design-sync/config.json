@@ -16,14 +16,38 @@
   "titleMap": {
     "InternalButton": null,
     "InternalCheckbox": null,
+    "InternalChip": null,
     "InternalGenericButtonAnchor": null,
     "InternalSpinner": null,
     "InternalSwitch": null,
-    "InternalTooltip": null
+    "InternalTooltip": null,
+    "DataTable": null,
+    "Toast": null
   },
   "overrides": {
     "BaritoneTheme": { "cardMode": "column" },
     "Badge": { "cardMode": "column" },
+    "Button": { "cardMode": "column" },
+    "Text": { "cardMode": "column" },
+    "Table": { "cardMode": "column" },
+    "Lightbox": {
+      "cardMode": "single",
+      "primaryStory": "Open",
+      "skip": [
+        "interaction-tests-lightbox--opens-from-trigger",
+        "interaction-tests-lightbox--closes-from-close-button"
+      ]
+    },
+    "Overflow": {
+      "skip": [
+        "interaction-tests-overflow--horizontal",
+        "interaction-tests-overflow--horizontal-page",
+        "interaction-tests-overflow--vertical"
+      ]
+    },
+    "LinkProvider": {
+      "skip": ["interaction-tests-linkprovider--routes-internal-links"]
+    },
     "Link": { "cardMode": "column" },
     "ToggleGroup": { "cardMode": "column" },
     "Box": { "cardMode": "column" },
@@ -49,7 +73,8 @@
       "primaryStory": "Single",
       "skip": [
         "interaction-tests-select--single-select-picks-option",
-        "interaction-tests-select--multi-select-hover-selected-option"
+        "interaction-tests-select--multi-select-hover-selected-option",
+        "interaction-tests-select--grouped-selection"
       ]
     },
     "ConfirmationModal": { "cardMode": "single", "primaryStory": "Controlled" },
