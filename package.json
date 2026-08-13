@@ -31,6 +31,10 @@
       "types": "./dist/datatable.d.ts",
       "import": "./dist/datatable.js"
     },
+    "./form": {
+      "types": "./dist/form.d.ts",
+      "import": "./dist/form.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./package.json": "./package.json"
   },
@@ -60,6 +64,7 @@
     "@changesets/cli": "2.31.0",
     "@storybook/addon-vitest": "10.4.6",
     "@storybook/react-vite": "10.4.6",
+    "@tanstack/react-form": "1.33.5",
     "@tanstack/react-table": "9.0.0-beta.53",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
@@ -89,6 +94,7 @@
   },
   "peerDependencies": {
     "@base-ui/react": "^1.6.0",
+    "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-table": "^9.0.0-beta.53",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

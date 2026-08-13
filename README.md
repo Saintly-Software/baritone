@@ -104,6 +104,49 @@ export function App() {
 The pre-compiled CSS means consumers do **not** need the vanilla-extract bundler
 plugin.
 
+### Optional integrations (subpaths)
+
+Two TanStack integrations ship from their own entry points, so the main barrel
+never pulls in their engines — install the peer only if you import the subpath:
+
+| Subpath                                | Peer dependency          | What it adds                                  |
+| -------------------------------------- | ------------------------ | --------------------------------------------- |
+| `@saintly-software/baritone/datatable` | `@tanstack/react-table`  | `DataTable` (headless table → semantic table) |
+| `@saintly-software/baritone/form`      | `@tanstack/react-form`   | Form controls bound to TanStack Form          |
+
+The `/form` integration maps a field's validation errors onto the control's
+`state="invalid"` + `helpText` for you. The blessed surface is the composition
+API — `useAppForm` with pre-bound field components and a form-aware `SubmitButton`:
+
+```tsx
+import { useAppForm } from "@saintly-software/baritone/form";
+
+function SignUp() {
+  const form = useAppForm({
+    defaultValues: { email: "", terms: false },
+    onSubmit: ({ value }) => save(value),
+  });
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}>
+      <form.AppField
+        name="email"
+        validators={{ onChange: ({ value }) => (value.includes("@") ? undefined : "Enter a valid email") }}
+      >
+        {(field) => <field.TextInput label="Email" type="email" />}
+      </form.AppField>
+      <form.AppField name="terms">{(field) => <field.Checkbox label="I agree" />}</form.AppField>
+      <form.AppForm>
+        <form.SubmitButton>Sign up</form.SubmitButton>
+      </form.AppForm>
+    </form>
+  );
+}
+```
+
+Prefer the plain `form.Field` API? The render-prop adapters (`FormTextInput`,
+`FormSelect`, …) bind a field to a control directly: `<FormTextInput field={field}
+label="Email" />`.
+
 ---
 
 ## Theming / whitelabeling

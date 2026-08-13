@@ -36,6 +36,7 @@ export default defineConfig({
       entry: {
         index: resolve(__dirname, "../src/index.ts"),
         datatable: resolve(__dirname, "../src/datatable.ts"),
+        form: resolve(__dirname, "../src/form.ts"),
       },
       formats: ["es"],
       fileName: (_format, entryName) => `${entryName}.js`,
@@ -53,6 +54,11 @@ export default defineConfig({
         // so leave it external instead of bundling it — bundling the peer is
         // what dragged its CJS `require("react")` interop into the ESM output.
         /^@tanstack\/react-table/,
+        // `@tanstack/react-form` is likewise a peer dep, reached only from the
+        // `form.ts` entry. Its `form-core` / `react-store` deps re-export through
+        // it and we import that one specifier, so externalising it is enough to
+        // keep the whole family out of the runtime bundle.
+        /^@tanstack\/react-form/,
         // The VE *compiler* is build-time only (used by createDesignSystemTheme
         // inside consumers' .css.ts). Keep it out of the runtime bundle; it's an
         // optional peer. The small VE *runtime* helpers (recipes/sprinkles/
