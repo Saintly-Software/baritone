@@ -86,6 +86,11 @@ describe("Text", () => {
     expect(screen.getByText("Single line").className).toContain(atoms({ whiteSpace: "nowrap" }));
   });
 
+  it("applies the pre-wrap whiteSpace atom", () => {
+    render(<Text whiteSpace="pre-wrap">Preserved</Text>);
+    expect(screen.getByText("Preserved").className).toContain(atoms({ whiteSpace: "pre-wrap" }));
+  });
+
   it("applies the overflowWrap atom", () => {
     render(<Text overflowWrap="break-word">Breakable</Text>);
     expect(screen.getByText("Breakable").className).toContain(
