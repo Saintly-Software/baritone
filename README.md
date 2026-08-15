@@ -109,10 +109,10 @@ plugin.
 Two TanStack integrations ship from their own entry points, so the main barrel
 never pulls in their engines — install the peer only if you import the subpath:
 
-| Subpath                                | Peer dependency          | What it adds                                  |
-| -------------------------------------- | ------------------------ | --------------------------------------------- |
-| `@saintly-software/baritone/datatable` | `@tanstack/react-table`  | `DataTable` (headless table → semantic table) |
-| `@saintly-software/baritone/form`      | `@tanstack/react-form`   | Form controls bound to TanStack Form          |
+| Subpath                                | Peer dependency         | What it adds                                  |
+| -------------------------------------- | ----------------------- | --------------------------------------------- |
+| `@saintly-software/baritone/datatable` | `@tanstack/react-table` | `DataTable` (headless table → semantic table) |
+| `@saintly-software/baritone/form`      | `@tanstack/react-form`  | Form controls bound to TanStack Form          |
 
 The `/form` integration maps a field's validation errors onto the control's
 `state="invalid"` + `helpText` for you. The blessed surface is the composition
@@ -127,10 +127,17 @@ function SignUp() {
     onSubmit: ({ value }) => save(value),
   });
   return (
-    <form onSubmit={(e) => { e.preventDefault(); form.handleSubmit(); }}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+    >
       <form.AppField
         name="email"
-        validators={{ onChange: ({ value }) => (value.includes("@") ? undefined : "Enter a valid email") }}
+        validators={{
+          onChange: ({ value }) => (value.includes("@") ? undefined : "Enter a valid email"),
+        }}
       >
         {(field) => <field.TextInput label="Email" type="email" />}
       </form.AppField>

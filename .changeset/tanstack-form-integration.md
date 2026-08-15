@@ -18,7 +18,7 @@ through this subpath; importing anything else from the package never references 
   `FormTextInput`, `FormSelect`, `FormCheckbox`, `FormSwitch`, `FormCheckboxGroup`,
   `FormRadioGroup`, `FormCombobox` — binding a TanStack field to the Baritone
   control for use with the plain `form.Field` API (`<FormTextInput field={field}
-  label="Email" />`). Every form control that composes `Field` is covered.
+label="Email" />`). Every form control that composes `Field` is covered.
 - **Errors become display, automatically:** a field's validation errors map onto
   the control's `state="invalid"` + `helpText` (Baritone's one-message rule — no
   `errorMessage` prop), gated by `showErrorsWhen` (`"touched"` default, or
@@ -29,6 +29,6 @@ through this subpath; importing anything else from the package never references 
   form can't submit.
 
 Adapters take a structural `FieldLike<T>` rather than the concrete `FieldApi`, so a
-real TanStack field is assignable *and* a value/control mismatch (e.g. a `number`
+real TanStack field is assignable _and_ a value/control mismatch (e.g. a `number`
 field on a text input) is a compile error. Nothing existing moves; every other
 component still imports from the package root.

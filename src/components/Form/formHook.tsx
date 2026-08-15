@@ -1,5 +1,5 @@
 "use client";
-import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
+import { createFormHook, createFormHookContexts, useSelector } from "@tanstack/react-form";
 import type { DistributiveOmit } from "../../utils/types";
 import { Button, type ButtonProps } from "../Button";
 import {
@@ -106,21 +106,23 @@ export type SubmitButtonProps = DistributiveOmit<ButtonProps, "type" | "loading"
  */
 function SubmitButton(props: SubmitButtonProps) {
   const form = useFormContext();
-  return (
-    <form.Subscribe
-      selector={(state) => ({ canSubmit: state.canSubmit, isSubmitting: state.isSubmitting })}
-    >
-      {({ canSubmit, isSubmitting }) => {
-        const buttonProps = {
-          ...props,
-          type: "submit",
-          loading: isSubmitting,
-          disabled: !canSubmit,
-        } as ButtonProps;
-        return <Button {...buttonProps} />;
-      }}
-    </form.Subscribe>
+  // Subscribe with a shallow comparator, not a bare object selector: react-store's
+  // default equality is referential, so `(s) => ({ canSubmit, isSubmitting })` would
+  // allocate a fresh object each emission and re-render this button on *every* form
+  // change (each keystroke). Comparing the two flags narrows it to the transitions
+  // that actually flip the button's `loading` / `disabled`.
+  const { canSubmit, isSubmitting } = useSelector(
+    form.store,
+    (state) => ({ canSubmit: state.canSubmit, isSubmitting: state.isSubmitting }),
+    { compare: (a, b) => a.canSubmit === b.canSubmit && a.isSubmitting === b.isSubmitting },
   );
+  const buttonProps = {
+    ...props,
+    type: "submit",
+    loading: isSubmitting,
+    disabled: !canSubmit,
+  } as ButtonProps;
+  return <Button {...buttonProps} />;
 }
 
 /**

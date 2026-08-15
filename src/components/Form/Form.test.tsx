@@ -18,6 +18,13 @@ describe("firstFieldErrorMessage", () => {
     expect(firstFieldErrorMessage([])).toBeUndefined();
     expect(firstFieldErrorMessage(undefined)).toBeUndefined();
   });
+
+  it("renders a React node, both bare and under a `{ message }` issue", () => {
+    const bare = <span>Bare node</span>;
+    expect(firstFieldErrorMessage([bare])).toBe(bare);
+    const wrapped = <strong>Too short</strong>;
+    expect(firstFieldErrorMessage([{ message: wrapped }])).toBe(wrapped);
+  });
 });
 
 describe("resolveFieldDisplay", () => {
@@ -136,6 +143,12 @@ describe("useAppForm + pre-bound field components", () => {
 
     await user.type(email, "bad");
     expect(submit).toHaveAttribute("aria-disabled", "true");
+    // Focusable-disabled contract (AGENTS.md): the button models "disabled" with
+    // `aria-disabled`, never the native attribute, so it stays in the tab order and
+    // can still be focused while the form can't submit.
+    expect(submit).not.toHaveAttribute("disabled");
+    submit.focus();
+    expect(submit).toHaveFocus();
 
     await user.clear(email);
     await user.type(email, "ada@example.com");
