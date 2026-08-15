@@ -28,7 +28,7 @@ const meta: Meta<typeof Text> = {
     // two always available without a theme that publishes more. See `CustomFonts`.
     font: { control: "select", options: ["sans", "mono"] },
     textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
-    whiteSpace: { control: "inline-radio", options: ["normal", "nowrap"] },
+    whiteSpace: { control: "inline-radio", options: ["normal", "nowrap", "pre-wrap"] },
     overflowWrap: { control: "inline-radio", options: ["normal", "break-word"] },
     textTransform: {
       control: "select",
@@ -246,6 +246,30 @@ export const LineHeights: Story = {
           <Text lineHeight={lineHeight}>
             The quick brown fox jumps over the lazy dog, then trots back across the meadow to do it
             all again.
+          </Text>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/**
+ * The `whiteSpace` atom, against the same source string — which contains a hard
+ * newline and a run of consecutive spaces. `normal` (the default) collapses both
+ * and wraps; `nowrap` collapses them and stays on one line; `pre-wrap` preserves
+ * the newline and the spaces while still wrapping at the container edge, which is
+ * what you want for user-authored copy, log lines, or model output.
+ */
+export const WhiteSpace: Story = {
+  render: () => (
+    <div style={{ display: "grid", gap: 16, maxWidth: 360 }}>
+      {(["normal", "nowrap", "pre-wrap"] as const).map((whiteSpace) => (
+        <div key={whiteSpace} style={{ display: "grid", gap: 4, overflowX: "auto" }}>
+          <Text size="xs" saliency="low">
+            whiteSpace=&quot;{whiteSpace}&quot;
+          </Text>
+          <Text whiteSpace={whiteSpace}>
+            {"The quick brown fox\njumps over    the lazy dog, then trots back across the meadow."}
           </Text>
         </div>
       ))}

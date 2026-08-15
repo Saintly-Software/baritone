@@ -50,7 +50,10 @@ export interface PaddingProps {
 export interface TypographyAtomProps {
   /** `text-align` — logical `start`/`center`/`end` (RTL-safe) or physical `left`/`right`. */
   textAlign?: Atoms["textAlign"];
-  /** `white-space` — e.g. `nowrap` to keep text on a single line. */
+  /**
+   * `white-space` — `nowrap` to keep text on a single line, or `pre-wrap` to
+   * preserve newlines and runs of spaces in the content while still wrapping.
+   */
   whiteSpace?: Atoms["whiteSpace"];
   /** `overflow-wrap` — `break-word` to break long unbroken tokens. */
   overflowWrap?: Atoms["overflowWrap"];
