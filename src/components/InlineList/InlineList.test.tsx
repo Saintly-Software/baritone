@@ -112,6 +112,54 @@ describe("InlineList", () => {
     expect(screen.getByText("b")).toBeInTheDocument();
   });
 
+  it("treats any falsy separator (empty string) like null — no separator span", () => {
+    const { container } = render(
+      <InlineList separator="">
+        <span>a</span>
+        <span>b</span>
+      </InlineList>,
+    );
+    // No stray empty spacer spans: the two items are the only element children.
+    expect(container.querySelectorAll("span")).toHaveLength(2);
+    expect(screen.getByText("a")).toBeInTheDocument();
+    expect(screen.getByText("b")).toBeInTheDocument();
+  });
+
+  it("renders nothing when every child is falsy (no empty box to carry margins)", () => {
+    const show = false;
+    const { container } = render(
+      <InlineList mx="2" data-testid="il">
+        {show && <span>never</span>}
+        {null}
+        {""}
+      </InlineList>,
+    );
+    expect(screen.queryByTestId("il")).toBeNull();
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("forwards the layout knobs (wrap / gap / align / margins) to the root", () => {
+    const { rerender } = render(
+      <InlineList data-testid="il">
+        <span>x</span>
+      </InlineList>,
+    );
+    const base = screen.getByTestId("il").className;
+    for (const props of [
+      { wrap: false },
+      { gap: "4" as const },
+      { align: "baseline" as const },
+      { mx: "2" as const },
+    ]) {
+      rerender(
+        <InlineList data-testid="il" {...props}>
+          <span>x</span>
+        </InlineList>,
+      );
+      expect(screen.getByTestId("il").className).not.toBe(base);
+    }
+  });
+
   it("can render as a different element via the render prop", () => {
     render(
       <InlineList render={<nav />} data-testid="il">

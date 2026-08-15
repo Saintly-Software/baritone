@@ -4,14 +4,15 @@ import type { Atoms } from "../../styles/sprinkles.css";
 import type { MarginProps } from "../../styles/spacingProps";
 import type { RenderProp } from "../../utils/render";
 import { Flex, type FlexAlign } from "../Flex";
-import { inlineListSeparator } from "./inlineList.css";
 
 export interface InlineListProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps {
   /**
-   * The delimiter drawn between items: a string (the default `·`), any node, or
-   * `null` to separate items with the `gap` alone. It's rendered `aria-hidden`
-   * (and non-selectable), so the row reads — and copies — as just its items.
+   * The delimiter drawn between items: a string (the default `·`) or any node.
+   * A falsy value (`null` / `false` / `""`) separates items with the `gap`
+   * alone. It's rendered `aria-hidden` and `inert` (so also non-selectable), so
+   * the row reads — and copies — as just its items, and an interactive delimiter
+   * node can't take focus or clicks.
    */
   separator?: React.ReactNode;
   /** Gap between items (and each separator), from the spacing scale. Default `2`. */
@@ -75,6 +76,10 @@ export function InlineList({
   // `{count && <Text/>}` (which yields `0` when empty) collapses away like the
   // boolean form, and the separator count always matches the *rendered* items.
   const items = React.Children.toArray(children).filter(Boolean);
+  // Nothing to lay out — render no element at all, rather than an empty box that
+  // would still apply its margins (`mx` / `my` / …) as phantom spacing. Common
+  // for a metadata line whose every item is conditional.
+  if (items.length === 0) return null;
   return (
     <Flex
       ref={ref}
@@ -89,15 +94,17 @@ export function InlineList({
         const key = React.isValidElement(child) && child.key != null ? child.key : index;
         return (
           <React.Fragment key={key}>
-            {index > 0 &&
-              separator != null && (
-                // `inert` alongside `aria-hidden` so a separator is fully out of
-                // reach: even an interactive node passed as the delimiter can't be
-                // focused, clicked, or found — it's pure decoration between items.
-                <span aria-hidden="true" inert className={inlineListSeparator}>
-                  {separator}
-                </span>
-              )}
+            {/* A ternary (not `&&`) so a falsy separator yields `null`, never a
+                stray render: `separator && …` would leak a `0` / `NaN` as text,
+                and any falsy value (`""` / `false`) means "no separator" here —
+                the same as `null`. `inert` alongside `aria-hidden` keeps the
+                separator fully out of reach: even an interactive delimiter node
+                can't be focused, clicked, or found. */}
+            {index > 0 && separator ? (
+              <span aria-hidden="true" inert>
+                {separator}
+              </span>
+            ) : null}
             {child}
           </React.Fragment>
         );
