@@ -77,6 +77,7 @@ export {
   type FlexItemProps,
   type FlexItemAlign,
 } from "./components/Flex";
+export { InlineList, type InlineListProps } from "./components/InlineList";
 export {
   Grid,
   type GridProps,
