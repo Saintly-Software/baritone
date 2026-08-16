@@ -119,7 +119,7 @@ The `/form` integration maps a field's validation errors onto the control's
 API — `useAppForm` with pre-bound field components and a form-aware `SubmitButton`:
 
 ```tsx
-import { useAppForm } from "@saintly-software/baritone/form";
+import { Form, useAppForm } from "@saintly-software/baritone/form";
 
 function SignUp() {
   const form = useAppForm({
@@ -127,12 +127,7 @@ function SignUp() {
     onSubmit: ({ value }) => save(value),
   });
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        form.handleSubmit();
-      }}
-    >
+    <Form form={form}>
       <form.AppField
         name="email"
         validators={{
@@ -142,13 +137,17 @@ function SignUp() {
         {(field) => <field.TextInput label="Email" type="email" />}
       </form.AppField>
       <form.AppField name="terms">{(field) => <field.Checkbox label="I agree" />}</form.AppField>
-      <form.AppForm>
-        <form.SubmitButton>Sign up</form.SubmitButton>
-      </form.AppForm>
-    </form>
+      <form.SubmitButton>Sign up</form.SubmitButton>
+    </Form>
   );
 }
 ```
+
+`<Form form={form}>` renders the `<form>` element for you: it prevents the default
+and calls `form.handleSubmit()` on submit, lays its children out as a vertical stack
+(it's a `Flex`, so `gap` / `direction` / `maxWidth` / spacing props apply), and
+provides the form context so `SubmitButton` needs no wrapping `<form.AppForm>`. You
+can still render a raw `<form>` and wire `handleSubmit` by hand if you prefer.
 
 Prefer the plain `form.Field` API? The render-prop adapters (`FormTextInput`,
 `FormSelect`, …) bind a field to a control directly: `<FormTextInput field={field}

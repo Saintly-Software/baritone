@@ -27,6 +27,12 @@ label="Email" />`). Every form control that composes `Field` is covered.
 - **`SubmitButton`** drives `type="submit"`, `loading` from `isSubmitting`, and
   `disabled` from `canSubmit`, so it spins while submitting and disables while the
   form can't submit.
+- **`<Form form={form}>`** renders the `<form>` element itself — it prevents the
+  default and calls `form.handleSubmit()` on submit, lays its children out as a
+  vertical stack (it's a `Flex`, so `gap` / `direction` / `maxWidth` / spacing props
+  apply), and provides the form context so `SubmitButton` needs no wrapping
+  `<form.AppForm>`. Works with a plain `useForm()` too (no context, just the wired
+  element).
 
 Adapters take a structural `FieldLike<T>` rather than the concrete `FieldApi`, so a
 real TanStack field is assignable _and_ a value/control mismatch (e.g. a `number`

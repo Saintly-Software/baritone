@@ -35,6 +35,7 @@ export {
   resolveFieldDisplay,
   type ShowErrorsWhen,
 } from "./fieldError";
+export { Form, type FormApiLike, type FormProps } from "./Form";
 export {
   baritoneFieldComponents,
   baritoneFormComponents,

@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { firstFieldErrorMessage, resolveFieldDisplay } from "./fieldError";
+import { Form } from "./Form";
 import { useAppForm } from "./formHook";
 
 // A minimal, deterministic stub of the slice `resolveFieldDisplay` reads — enough
@@ -68,12 +70,7 @@ function SignupForm({ onValid }: { onValid?: (value: Values) => void }) {
     onSubmit: ({ value }) => onValid?.(value),
   });
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        void form.handleSubmit();
-      }}
-    >
+    <Form form={form}>
       <form.AppField name="email" validators={{ onChange: notEmail }}>
         {(field) => <field.TextInput label="Email" />}
       </form.AppField>
@@ -83,10 +80,8 @@ function SignupForm({ onValid }: { onValid?: (value: Values) => void }) {
       >
         {(field) => <field.Checkbox label="I agree" />}
       </form.AppField>
-      <form.AppForm>
-        <form.SubmitButton>Submit</form.SubmitButton>
-      </form.AppForm>
-    </form>
+      <form.SubmitButton>Submit</form.SubmitButton>
+    </Form>
   );
 }
 
@@ -153,5 +148,42 @@ describe("useAppForm + pre-bound field components", () => {
     await user.clear(email);
     await user.type(email, "ada@example.com");
     expect(submit).not.toHaveAttribute("aria-disabled", "true");
+  });
+});
+
+describe("Form", () => {
+  it("renders a native <form> and wires submit to handleSubmit — no AppForm needed", async () => {
+    const user = userEvent.setup();
+    const handleSubmit = vi.fn();
+    const onSubmit = vi.fn();
+    // A plain form-like value (no `AppForm`) — mirrors a bare `useForm()`.
+    const { container } = render(
+      <Form form={{ handleSubmit }} onSubmit={onSubmit}>
+        <button type="submit">Go</button>
+      </Form>,
+    );
+    expect(container.querySelector("form")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Go" }));
+    expect(handleSubmit).toHaveBeenCalledTimes(1);
+    // The side-effect hook still fires, and the browser default is prevented.
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit.mock.calls[0]?.[0]?.defaultPrevented).toBe(true);
+  });
+
+  it("wraps children in the AppForm context provider when the form supplies one", () => {
+    const handleSubmit = vi.fn();
+    const AppForm = ({ children }: { children?: ReactNode }) => (
+      <div data-testid="app-form">{children}</div>
+    );
+    render(
+      <Form form={{ handleSubmit, AppForm }}>
+        <span>inside</span>
+      </Form>,
+    );
+    const provider = screen.getByTestId("app-form");
+    expect(provider).toHaveTextContent("inside");
+    // The <form> lives inside the provider, so form components resolve context.
+    expect(provider.querySelector("form")).toBeInTheDocument();
   });
 });

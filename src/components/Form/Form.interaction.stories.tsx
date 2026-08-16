@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
+import { Form } from "./Form";
 import { useAppForm } from "./formHook";
 
 /**
@@ -28,14 +29,7 @@ function SignupForm() {
     onSubmit: ({ value }) => setSubmitted(value),
   });
   return (
-    <form
-      noValidate
-      style={{ display: "grid", gap: 16, maxWidth: 360 }}
-      onSubmit={(event) => {
-        event.preventDefault();
-        void form.handleSubmit();
-      }}
-    >
+    <Form form={form} style={{ maxWidth: 360 }}>
       <form.AppField
         name="email"
         validators={{
@@ -51,11 +45,9 @@ function SignupForm() {
       >
         {(field) => <field.Checkbox label="I accept the terms" />}
       </form.AppField>
-      <form.AppForm>
-        <form.SubmitButton>Create account</form.SubmitButton>
-      </form.AppForm>
+      <form.SubmitButton>Create account</form.SubmitButton>
       {submitted && <pre data-testid="result">{JSON.stringify(submitted)}</pre>}
-    </form>
+    </Form>
   );
 }
 

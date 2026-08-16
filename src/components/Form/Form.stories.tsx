@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useForm } from "@tanstack/react-form";
 import * as React from "react";
 import { FormTextInput } from "./adapters";
+import { Form } from "./Form";
 import { useAppForm } from "./formHook";
 
 /**
@@ -43,14 +44,7 @@ function SignupForm() {
   });
 
   return (
-    <form
-      noValidate
-      style={{ display: "grid", gap: 20, maxWidth: 360 }}
-      onSubmit={(event) => {
-        event.preventDefault();
-        void form.handleSubmit();
-      }}
-    >
+    <Form form={form} gap="6" style={{ maxWidth: 360 }}>
       <form.AppField name="email" validators={{ onChange: isEmail }}>
         {(field) => (
           <field.TextInput
@@ -86,16 +80,14 @@ function SignupForm() {
         {(field) => <field.Checkbox label="I accept the terms of service" />}
       </form.AppField>
 
-      <form.AppForm>
-        <form.SubmitButton>Create account</form.SubmitButton>
-      </form.AppForm>
+      <form.SubmitButton>Create account</form.SubmitButton>
 
       {submitted && (
         <pre data-testid="result" style={{ margin: 0, fontSize: 12 }}>
           {JSON.stringify(submitted, null, 2)}
         </pre>
       )}
-    </form>
+    </Form>
   );
 }
 
@@ -122,7 +114,9 @@ export const RenderPropAdapter: Story = {
       onSubmit: () => {},
     });
     return (
-      <form style={{ maxWidth: 360 }}>
+      // A plain `useForm()` has no `AppForm`, so `<Form>` renders the styled
+      // `<form>` + submit wiring without a context provider.
+      <Form form={form} style={{ maxWidth: 360 }}>
         <form.Field
           name="name"
           validators={{
@@ -131,7 +125,7 @@ export const RenderPropAdapter: Story = {
         >
           {(field) => <FormTextInput field={field} label="Full name" placeholder="Ada Lovelace" />}
         </form.Field>
-      </form>
+      </Form>
     );
   },
 };
