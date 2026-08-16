@@ -25,9 +25,13 @@ export interface FormProps extends Omit<FlexProps, "render" | "onSubmit"> {
   /** The form instance from `useAppForm()` (or a plain `useForm()`). */
   form: FormApiLike;
   /**
-   * Fires after the browser default is prevented and `form.handleSubmit()` has been
-   * kicked off — for side effects like analytics or closing a dialog. You do **not**
-   * call `handleSubmit` here; the `<Form>` wires it for you.
+   * A raw DOM-submit hook: fires on **every** submit attempt, synchronously, after
+   * the browser default is prevented and `form.handleSubmit()` is kicked off — but
+   * *before* it resolves and regardless of whether validation passes, so it can't
+   * tell a successful submit from a rejected one. Use it for submit-*attempt* side
+   * effects (e.g. analytics); success / failure side effects belong on the form
+   * config's `onSubmit` / `onSubmitInvalid` in `useAppForm()`. You do **not** call
+   * `handleSubmit` here — `<Form>` wires it for you.
    */
   onSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
   /** Skip native browser validation — TanStack owns validation. Defaults to `true`. */

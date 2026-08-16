@@ -100,6 +100,12 @@
     "react-dom": "^19.0.0"
   },
   "peerDependenciesMeta": {
+    "@tanstack/react-form": {
+      "optional": true
+    },
+    "@tanstack/react-table": {
+      "optional": true
+    },
     "@vanilla-extract/css": {
       "optional": true
     }

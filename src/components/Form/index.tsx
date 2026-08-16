@@ -32,6 +32,7 @@ export {
   type FieldLike,
   firstFieldErrorMessage,
   type FormFieldExtras,
+  hasFieldError,
   resolveFieldDisplay,
   type ShowErrorsWhen,
 } from "./fieldError";

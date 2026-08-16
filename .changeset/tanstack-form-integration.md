@@ -4,8 +4,10 @@
 
 Add a TanStack Form integration — import it from
 `@saintly-software/baritone/form`. Like `/datatable`, it ships from its own entry
-point, so `@tanstack/react-form` (a new, required peer dependency) is reached only
-through this subpath; importing anything else from the package never references it.
+point, so `@tanstack/react-form` (a new **optional** peer dependency — install it
+only if you import `/form`) is reached only through this subpath; importing anything
+else from the package never references it. (`@tanstack/react-table` is now marked
+optional too, to match `/datatable`'s subpath contract.)
 
 - **Composition API (the blessed surface):** `useAppForm` gives you pre-bound
   field components and a form-aware `SubmitButton`, so a field is
@@ -23,7 +25,12 @@ label="Email" />`). Every form control that composes `Field` is covered.
   the control's `state="invalid"` + `helpText` (Baritone's one-message rule — no
   `errorMessage` prop), gated by `showErrorsWhen` (`"touched"` default, or
   `"always"`). `firstFieldErrorMessage` reads strings, `{ message }` issues
-  (Standard Schema, Zod, Valibot, …), and React nodes.
+  (Standard Schema, Zod, Valibot, …), and React nodes; `hasFieldError` decides
+  invalidity, so a real error with no display string still flips the control to
+  `invalid` rather than leaving it neutral while `canSubmit` is `false`. The blur of
+  every control that exposes one (`TextInput`, `Combobox`, `Select`) runs
+  `validators.onBlur`, and each adapter coalesces a value missing from
+  `defaultValues` so the control stays controlled.
 - **`SubmitButton`** drives `type="submit"`, `loading` from `isSubmitting`, and
   `disabled` from `canSubmit`, so it spins while submitting and disables while the
   form can't submit.

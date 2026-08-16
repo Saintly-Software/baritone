@@ -71,6 +71,20 @@ export function firstFieldErrorMessage(
   return undefined;
 }
 
+/**
+ * Whether a field's error list holds a *real* error — any entry that isn't a
+ * "no error" placeholder (`null` / `undefined` / `false` / `""`). TanStack leaves
+ * such placeholders in `meta.errors` for validators that passed, so a non-empty
+ * array doesn't by itself mean the field is invalid. Used to flip a control to
+ * `invalid` even when {@link firstFieldErrorMessage} can't extract a display string
+ * (e.g. a validator returning a bare `{ code, minimum }` object) — otherwise the
+ * field would render neutral while `form.canSubmit` stays `false`.
+ */
+export function hasFieldError(errors: readonly unknown[] | undefined): boolean {
+  if (errors == null) return false;
+  return errors.some((error) => error != null && error !== false && error !== "");
+}
+
 function errorToNode(error: unknown): React.ReactNode | undefined {
   if (error == null) return undefined;
   if (typeof error === "string") return error.length > 0 ? error : undefined;
@@ -112,6 +126,12 @@ export interface FieldErrorSource {
  * caller's own `helpText` / `state` pass through unchanged — so a field can show
  * inline guidance while valid and the error while not, from one `helpText` slot
  * (Baritone's one-message rule; there is no separate `errorMessage`).
+ *
+ * Invalidity is decided by {@link hasFieldError}, not by whether a message could be
+ * extracted: a field whose only error is a non-standard object (no string/element
+ * `message`) still flips to `invalid` — just without help text — rather than
+ * rendering neutral while `form.canSubmit` stays `false`. Give such fields a string
+ * or `{ message }` error to show text.
  */
 export function resolveFieldDisplay(
   field: FieldErrorSource,
@@ -119,9 +139,8 @@ export function resolveFieldDisplay(
 ): FieldDisplay {
   const { showErrorsWhen = "touched", helpText, state } = options;
   const visible = showErrorsWhen === "always" || field.state.meta.isTouched;
-  const message = visible ? firstFieldErrorMessage(field.state.meta.errors) : undefined;
-  if (message != null) {
-    return { state: "invalid", helpText: message };
+  if (visible && hasFieldError(field.state.meta.errors)) {
+    return { state: "invalid", helpText: firstFieldErrorMessage(field.state.meta.errors) };
   }
   return { state: state ?? "neutral", helpText };
 }

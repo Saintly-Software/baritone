@@ -2,7 +2,21 @@ import type { ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { firstFieldErrorMessage, resolveFieldDisplay } from "./fieldError";
+import {
+  FormCheckbox,
+  FormCheckboxGroup,
+  FormCombobox,
+  FormRadioGroup,
+  FormSelect,
+  FormSwitch,
+  FormTextInput,
+} from "./adapters";
+import {
+  type FieldLike,
+  firstFieldErrorMessage,
+  hasFieldError,
+  resolveFieldDisplay,
+} from "./fieldError";
 import { Form } from "./Form";
 import { useAppForm } from "./formHook";
 
@@ -26,6 +40,17 @@ describe("firstFieldErrorMessage", () => {
     expect(firstFieldErrorMessage([bare])).toBe(bare);
     const wrapped = <strong>Too short</strong>;
     expect(firstFieldErrorMessage([{ message: wrapped }])).toBe(wrapped);
+  });
+});
+
+describe("hasFieldError", () => {
+  it("ignores no-error placeholders and flags real errors", () => {
+    expect(hasFieldError(undefined)).toBe(false);
+    expect(hasFieldError([])).toBe(false);
+    expect(hasFieldError([null, undefined, false, ""])).toBe(false);
+    expect(hasFieldError(["Required"])).toBe(true);
+    // A real error that carries no display string (a non-standard object).
+    expect(hasFieldError([{ code: "too_short", minimum: 2 }])).toBe(true);
   });
 });
 
@@ -53,6 +78,20 @@ describe("resolveFieldDisplay", () => {
       state: "invalid",
       helpText: "Bad",
     });
+  });
+
+  it("marks invalid (no help text) for a real error carrying no display string", () => {
+    // The field is invalid — `form.canSubmit` is false — so it must not render
+    // neutral just because no message could be extracted.
+    expect(
+      resolveFieldDisplay(source([{ code: "too_short", minimum: 2 }], true), { helpText: "Hint" }),
+    ).toEqual({ state: "invalid", helpText: undefined });
+  });
+
+  it("stays neutral when the error list holds only no-error placeholders", () => {
+    expect(
+      resolveFieldDisplay(source([null, undefined, false, ""], true), { helpText: "Hint" }),
+    ).toEqual({ state: "neutral", helpText: "Hint" });
   });
 });
 
@@ -185,5 +224,107 @@ describe("Form", () => {
     expect(provider).toHaveTextContent("inside");
     // The <form> lives inside the provider, so form components resolve context.
     expect(provider.querySelector("form")).toBeInTheDocument();
+  });
+});
+
+describe("Form adapters (render-prop, across controls)", () => {
+  // A field whose path was omitted from `defaultValues`, so `field.state.value` is
+  // `undefined` — the case each adapter must coalesce to stay controlled.
+  const missing = <T,>(handleChange?: (value: T) => void): FieldLike<T> => ({
+    name: "field",
+    handleChange: handleChange ?? (() => {}),
+    handleBlur: () => {},
+    state: { value: undefined as unknown as T, meta: { errors: [], isTouched: false } },
+  });
+
+  it("FormCheckbox coalesces a missing value to unchecked and binds change", async () => {
+    const user = userEvent.setup();
+    const handleChange = vi.fn();
+    render(<FormCheckbox field={missing<boolean>(handleChange)} label="Agree" />);
+    const box = screen.getByRole("checkbox", { name: "Agree" });
+    expect(box).not.toBeChecked();
+    await user.click(box);
+    expect(handleChange).toHaveBeenCalledWith(true);
+  });
+
+  it("FormSwitch coalesces a missing value to off and binds change", async () => {
+    const user = userEvent.setup();
+    const handleChange = vi.fn();
+    render(<FormSwitch field={missing<boolean>(handleChange)} label="Wi-Fi" />);
+    const sw = screen.getByRole("switch", { name: "Wi-Fi" });
+    expect(sw).not.toBeChecked();
+    await user.click(sw);
+    expect(handleChange).toHaveBeenCalledWith(true);
+  });
+
+  it("FormCheckboxGroup coalesces a missing value to [] (no `undefined.includes` throw)", () => {
+    render(
+      <FormCheckboxGroup field={missing<string[]>()} label="Topics">
+        {({ CheckboxGroupItem }) => <CheckboxGroupItem value="a">A</CheckboxGroupItem>}
+      </FormCheckboxGroup>,
+    );
+    expect(screen.getByRole("checkbox", { name: "A" })).not.toBeChecked();
+  });
+
+  it("FormRadioGroup coalesces a missing value to no selection and binds change", async () => {
+    const user = userEvent.setup();
+    const handleChange = vi.fn();
+    render(
+      <FormRadioGroup field={missing<string>(handleChange)} label="Plan">
+        {({ RadioGroupItem }) => (
+          <>
+            <RadioGroupItem value="free">Free</RadioGroupItem>
+            <RadioGroupItem value="pro">Pro</RadioGroupItem>
+          </>
+        )}
+      </FormRadioGroup>,
+    );
+    expect(screen.getByRole("radio", { name: "Free" })).not.toBeChecked();
+    await user.click(screen.getByRole("radio", { name: "Pro" }));
+    expect(handleChange).toHaveBeenCalledWith("pro");
+  });
+
+  it("FormSelect coalesces a missing value to none and forwards blur to the field", async () => {
+    const user = userEvent.setup();
+    const handleBlur = vi.fn();
+    render(
+      <>
+        <FormSelect
+          field={{ ...missing<string | string[] | null>(), handleBlur }}
+          label="Fruit"
+          options={[{ label: "Apple", value: "apple" }]}
+        />
+        <button type="button">outside</button>
+      </>,
+    );
+    const trigger = screen.getByRole("combobox", { name: "Fruit" });
+    trigger.focus();
+    // Moving focus away blurs the trigger → the adapter forwards it to handleBlur,
+    // which is also what would run a `validators.onBlur` on the field.
+    await user.click(screen.getByRole("button", { name: "outside" }));
+    expect(handleBlur).toHaveBeenCalledTimes(1);
+  });
+
+  it("FormCombobox coalesces a missing value (stays controlled)", () => {
+    render(
+      <FormCombobox
+        field={missing<string | string[] | null>()}
+        label="City"
+        options={[{ label: "Paris", value: "paris" }]}
+      />,
+    );
+    expect(screen.getByRole("combobox", { name: "City" })).toBeInTheDocument();
+  });
+
+  it("surfaces the error before any interaction with showErrorsWhen='always'", () => {
+    const field: FieldLike<string> = {
+      name: "email",
+      handleChange: () => {},
+      handleBlur: () => {},
+      state: { value: "", meta: { errors: ["Required"], isTouched: false } },
+    };
+    render(<FormTextInput field={field} label="Email" showErrorsWhen="always" />);
+    expect(screen.getByText("Required")).toBeInTheDocument();
+    expect(screen.getByLabelText("Email")).toHaveAttribute("aria-invalid", "true");
   });
 });

@@ -32,10 +32,18 @@ type Bound = "value" | "onChange" | "onBlur" | "name" | "defaultValue";
  * for the same reason — so a single assertion per adapter keeps the wiring uniform.
  *
  * Change marks the field touched on its own (TanStack's `setFieldValue` sets
- * `isTouched`), so no adapter has to touch it manually. `TextInput` and `Combobox`
- * additionally forward `handleBlur` to `onBlur` (`forwardBlur`) — the one case
- * change misses is focusing a field and leaving it *without* typing (a required
- * field the user skipped); the blur then marks it touched so its error can surface.
+ * `isTouched`), so no adapter has to touch it manually. The controls that expose an
+ * `onBlur` — `TextInput`, `Combobox`, and `Select` — also forward `handleBlur`
+ * (`forwardBlur`), which (a) covers focusing a field and leaving it *without*
+ * committing a value, and (b) runs any `validators.onBlur` the consumer configured.
+ * `Checkbox`, `Switch`, `RadioGroup`, and `CheckboxGroup` don't surface `onBlur`, so
+ * `validators.onBlur` won't fire on those fields — validate them with `onChange` /
+ * `onSubmit` (change already marks them touched, and submit validates every field).
+ *
+ * `value` is coalesced per control (booleans `?? false`, array controls `?? []`,
+ * the rest `?? null` / `?? ""`) so a field missing from `defaultValues` — where
+ * `field.state.value` is `undefined` — stays controlled instead of flipping
+ * uncontrolled→controlled (or, for `CheckboxGroup`, throwing on `undefined.includes`).
  */
 
 interface FieldBinding extends FormFieldExtras {
@@ -116,9 +124,12 @@ export function FormSelect(props: FormSelectProps) {
     helpText,
     state,
     changeProp: "onChange",
-    value: field.state.value,
+    value: field.state.value ?? null,
     bindName: true,
-    forwardBlur: false,
+    // `Select` exposes `onBlur` (it extends `HTMLAttributes`) and forwards it to its
+    // trigger, so forward blur exactly like `Combobox` — this also runs any
+    // `validators.onBlur` configured on the field.
+    forwardBlur: true,
   }) as SelectProps;
   return <Select {...controlProps} />;
 }
@@ -139,7 +150,7 @@ export function FormCheckbox(props: FormCheckboxProps) {
     helpText,
     state,
     changeProp: "onChange",
-    value: field.state.value,
+    value: field.state.value ?? false,
     bindName: true,
     forwardBlur: false,
   }) as CheckboxProps;
@@ -162,7 +173,7 @@ export function FormSwitch(props: FormSwitchProps) {
     helpText,
     state,
     changeProp: "onChange",
-    value: field.state.value,
+    value: field.state.value ?? false,
     bindName: true,
     forwardBlur: false,
   }) as SwitchProps;
@@ -192,7 +203,7 @@ export function FormCheckboxGroup<T>(props: FormCheckboxGroupProps<T>) {
     helpText,
     state,
     changeProp: "onChange",
-    value: field.state.value,
+    value: field.state.value ?? [],
     // `CheckboxGroup` has no `name` prop — a group of checkboxes isn't a single
     // named form control the way a radio group is.
     bindName: false,
@@ -224,7 +235,7 @@ export function FormRadioGroup<T>(props: FormRadioGroupProps<T>) {
     helpText,
     state,
     changeProp: "onChange",
-    value: field.state.value,
+    value: field.state.value ?? null,
     bindName: true,
     forwardBlur: false,
   }) as RadioGroupProps<T>;
@@ -250,7 +261,7 @@ export function FormCombobox(props: FormComboboxProps) {
     helpText,
     state,
     changeProp: "onValueChange",
-    value: field.state.value,
+    value: field.state.value ?? null,
     bindName: true,
     forwardBlur: true,
   }) as ComboboxProps;
