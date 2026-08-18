@@ -6,7 +6,7 @@ import { BaritoneProvider } from "../BaritoneProvider";
 import { Button } from "../Button";
 import { Notice } from "../Notice";
 import { noticeRecipe } from "../Notice/notice.css";
-import { useToast, type AddToastOptions } from "./index";
+import { createToastManager, useToast, type AddToastOptions } from "./index";
 
 /** A button that fires one toast; auto-dismiss is off so assertions can't race the timer. */
 function Trigger({ options, label = "Show" }: { options: AddToastOptions; label?: string }) {
@@ -209,6 +209,21 @@ describe("Toast", () => {
     expect(toast).toHaveAccessibleName("Uploading");
     expect(toast).toHaveTextContent("Almost there");
     expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+  });
+
+  it("fires toasts from outside React via a module-scope manager, packing the design fields", async () => {
+    // The manager lives outside any component — the whole point is that no
+    // useToast() (and so no React tree) is needed to fire.
+    const manager = createToastManager();
+    render(<BaritoneProvider toastManager={manager}>{null}</BaritoneProvider>);
+
+    manager.add({ title: "Couldn't save", intent: "negative", timeout: 0 });
+
+    const toast = await screen.findByRole("dialog", { name: "Couldn't save" });
+    // The top-level `intent` was packed into base-ui's `data` bag and read back
+    // by the Notice, exactly as useToast().add would have done.
+    const noticeEl = toast.querySelector<HTMLElement>('[role="presentation"]');
+    expect(noticeEl?.className).toContain(noticeRecipe({ intent: "negative", saliency: "high" }));
   });
 
   it("throws a helpful error when useToast is used outside a provider", () => {

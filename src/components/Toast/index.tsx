@@ -1,6 +1,11 @@
 "use client";
 import { Toast as BaseToast } from "@base-ui/react/toast";
-import type { ToastManagerAddOptions, ToastObject } from "@base-ui/react/toast";
+import type {
+  ToastManager,
+  ToastManagerAddOptions,
+  ToastManagerPromiseOptions,
+  ToastObject,
+} from "@base-ui/react/toast";
 import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, SurfaceSaliency } from "../../theme/constants";
@@ -97,6 +102,36 @@ export interface UseToastReturn {
 }
 
 /**
+ * A toast controller for firing toasts from *outside* React — module scope, a
+ * store, a fetch interceptor, a TanStack Query cache: anywhere there's no
+ * component to call {@link useToast} from. Create one with
+ * {@link createToastManager}, hand it to `<BaritoneProvider toastManager={…}>` to
+ * wire it to the on-screen viewport, then call `add`/`update`/`close`/`promise`
+ * from anywhere. Inside components, prefer {@link useToast}.
+ *
+ * Its methods take the same design-system options as {@link useToast}'s (the
+ * `intent`/`saliency`/`icon`/`actions` fields packed for you) — with one caveat:
+ * `update` replaces the toast's visual `data` wholesale rather than merging over
+ * the live toast (a module-scope manager holds no reactive toast list to merge
+ * against), so pass every visual field you want kept.
+ */
+export interface BaritoneToastManager {
+  /**
+   * base-ui's private subscription channel, read by `BaritoneProvider` to
+   * connect this manager to the viewport. Not called directly.
+   */
+  " subscribe": ToastManager<ToastData>[" subscribe"];
+  /** Show a toast; returns its id. */
+  add: (options: AddToastOptions) => string;
+  /** Update a live toast in place by id (replaces its visual `data` wholesale). */
+  update: (id: string, options: Partial<AddToastOptions>) => void;
+  /** Dismiss a toast by id, or the newest if omitted. */
+  close: (id?: string) => void;
+  /** Drive a loading → success/error toast from a promise; resolves to its value. */
+  promise: <Value>(promise: Promise<Value>, options: ToastPromiseOptions<Value>) => Promise<Value>;
+}
+
+/**
  * Split the design-system fields (`intent`/`saliency`/`icon`/`actions`) into
  * base-ui's `data` bag, leaving the timing/identity fields flat. Only keys the
  * caller actually set are emitted — base-ui's `update` merges shallowly, so an
@@ -126,6 +161,23 @@ function pack(options: Partial<AddToastOptions>): ToastManagerAddOptions<ToastDa
 /** A promise-state entry (`string | options`) → packed options. */
 function packState(state: string | ToastStateOptions): ToastManagerAddOptions<ToastData> {
   return pack(typeof state === "string" ? { title: state } : state);
+}
+
+/**
+ * Pack a `promise()` call's per-state options (`loading`/`success`/`error`, each a
+ * `string`, options object, or function of the settled value) into base-ui's
+ * shape. Shared by {@link useToast} and {@link createToastManager}.
+ */
+function packPromiseOptions<Value>(
+  options: ToastPromiseOptions<Value>,
+): ToastManagerPromiseOptions<Value, ToastData> {
+  return {
+    loading: packState(options.loading),
+    success: (result) =>
+      packState(typeof options.success === "function" ? options.success(result) : options.success),
+    error: (error) =>
+      packState(typeof options.error === "function" ? options.error(error) : options.error),
+  };
 }
 
 /**
@@ -163,19 +215,42 @@ export function useToast(): UseToastReturn {
   );
   const promiseToast = React.useCallback(
     <Value,>(promise_: Promise<Value>, options: ToastPromiseOptions<Value>) =>
-      promise(promise_, {
-        loading: packState(options.loading),
-        success: (result) =>
-          packState(
-            typeof options.success === "function" ? options.success(result) : options.success,
-          ),
-        error: (error) =>
-          packState(typeof options.error === "function" ? options.error(error) : options.error),
-      }),
+      promise(promise_, packPromiseOptions(options)),
     [promise],
   );
 
   return { toasts, add: addToast, update: updateToast, close, promise: promiseToast };
+}
+
+/**
+ * Create a {@link BaritoneToastManager} for firing toasts from *outside* React.
+ * Wraps base-ui's `Toast.createToastManager`, pre-typed with {@link ToastData} and
+ * with `add`/`update`/`promise` accepting the design-system fields
+ * (`intent`/`saliency`/`icon`/`actions`) at the top level — just like
+ * {@link useToast}, so module-scope code needn't know about base-ui's `data` bag.
+ *
+ * Create it once at module scope and hand it to `<BaritoneProvider>` so it reaches
+ * the on-screen viewport:
+ *
+ * @example
+ * // toast.ts — module scope, no component needed
+ * export const toasts = createToastManager();
+ *
+ * // App root
+ * <BaritoneProvider toastManager={toasts}>{children}</BaritoneProvider>
+ *
+ * // Anywhere — an interceptor, a query cache's onError, a plain function
+ * toasts.add({ title: "Couldn't save", intent: "negative", priority: "high" });
+ */
+export function createToastManager(): BaritoneToastManager {
+  const manager = BaseToast.createToastManager<ToastData>();
+  return {
+    " subscribe": manager[" subscribe"],
+    add: (options) => manager.add({ ...pack(options), id: options.id }),
+    update: (id, options) => manager.update(id, pack(options)),
+    close: (id) => manager.close(id),
+    promise: (promise_, options) => manager.promise(promise_, packPromiseOptions(options)),
+  };
 }
 
 /**

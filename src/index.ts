@@ -258,9 +258,11 @@ export {
 } from "./components/Notice";
 export {
   useToast,
+  createToastManager,
   ToastViewport,
   type ToastData,
   type BaritoneToast,
+  type BaritoneToastManager,
   type ToastPriority,
   type AddToastOptions,
   type ToastStateOptions,
