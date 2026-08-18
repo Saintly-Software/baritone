@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { useOverlayHandle } from "../../utils/overlayHandle";
 import { ButtonGroup } from "../ButtonGroup";
+import { Menu } from "../Menu";
 import { Drawer } from "./index";
 
 describe("Drawer", () => {
@@ -238,8 +239,12 @@ describe("Drawer.Header actions", () => {
           <Drawer.Header
             title="Document"
             actions={[
-              { children: "Rename", onClick: onRename },
-              { children: "Delete", intent: "negative", onClick: () => {} },
+              <Menu.Item key="rename" onClick={onRename}>
+                Rename
+              </Menu.Item>,
+              <Menu.Item key="delete" intent="negative" onClick={() => {}}>
+                Delete
+              </Menu.Item>,
             ]}
           />
         }
@@ -267,7 +272,11 @@ describe("Drawer.Header actions", () => {
           <Drawer.Header
             title="Document"
             actionsLabel="Document actions"
-            actions={[{ children: "Rename", onClick: () => {} }]}
+            actions={[
+              <Menu.Item key="rename" onClick={() => {}}>
+                Rename
+              </Menu.Item>,
+            ]}
           />
         }
       >

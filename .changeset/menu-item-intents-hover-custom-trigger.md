@@ -13,7 +13,7 @@ Builds on the initial `Menu` with the rest of the DES-69 API:
   still dismiss on click by default.
 - **`items` accepts falsy entries** (`null` / `false` / `undefined`), which are
   filtered out — so a row can be included conditionally inline
-  (`canDelete && { children: "Delete", … }`) without a wrapper.
+  (`canDelete && <Menu.Item intent="negative">Delete</Menu.Item>`) without a wrapper.
 - **`Menu.Trigger` gains `openOnHover`** (plus `delay` / `closeDelay`) to open
   the menu on pointer hover, not just click/keyboard.
 - **`Menu.Trigger` accepts a base-ui `render`** for a fully custom, non-Button

@@ -21,7 +21,6 @@ const meta: Meta<typeof List> = {
     },
     wrap: { control: "boolean" },
     items: { table: { disable: true } },
-    children: { table: { disable: true } },
   },
 };
 export default meta;
@@ -48,17 +47,20 @@ const Cell = ({ children }: { children: React.ReactNode }) => (
 /** Fully wired to the controls — flip `layout` / `direction` / `gap` in the panel. */
 export const Playground: Story = {
   render: (args) => (
-    <List {...args}>
-      <List.Item>
-        <Cell>Alpha</Cell>
-      </List.Item>
-      <List.Item>
-        <Cell>Bravo</Cell>
-      </List.Item>
-      <List.Item>
-        <Cell>Charlie</Cell>
-      </List.Item>
-    </List>
+    <List
+      {...args}
+      items={[
+        <List.Item key="alpha">
+          <Cell>Alpha</Cell>
+        </List.Item>,
+        <List.Item key="bravo">
+          <Cell>Bravo</Cell>
+        </List.Item>,
+        <List.Item key="charlie">
+          <Cell>Charlie</Cell>
+        </List.Item>,
+      ]}
+    />
   ),
 };
 
@@ -66,17 +68,21 @@ export const Playground: Story = {
 export const FlexColumn: Story = {
   render: () => (
     <Section label='layout="flex" · direction="column" · gap="2"'>
-      <List direction="column" gap="2">
-        <List.Item>
-          <Cell>First</Cell>
-        </List.Item>
-        <List.Item>
-          <Cell>Second</Cell>
-        </List.Item>
-        <List.Item>
-          <Cell>Third</Cell>
-        </List.Item>
-      </List>
+      <List
+        direction="column"
+        gap="2"
+        items={[
+          <List.Item key="first">
+            <Cell>First</Cell>
+          </List.Item>,
+          <List.Item key="second">
+            <Cell>Second</Cell>
+          </List.Item>,
+          <List.Item key="third">
+            <Cell>Third</Cell>
+          </List.Item>,
+        ]}
+      />
     </Section>
   ),
 };
@@ -85,17 +91,22 @@ export const FlexColumn: Story = {
 export const FlexRow: Story = {
   render: () => (
     <Section label='layout="flex" · direction="row" · align="center" · gap="4"'>
-      <List direction="row" align="center" gap="4">
-        <List.Item>
-          <Cell>One</Cell>
-        </List.Item>
-        <List.Item>
-          <Cell>Two</Cell>
-        </List.Item>
-        <List.Item>
-          <Cell>Three</Cell>
-        </List.Item>
-      </List>
+      <List
+        direction="row"
+        align="center"
+        gap="4"
+        items={[
+          <List.Item key="one">
+            <Cell>One</Cell>
+          </List.Item>,
+          <List.Item key="two">
+            <Cell>Two</Cell>
+          </List.Item>,
+          <List.Item key="three">
+            <Cell>Three</Cell>
+          </List.Item>,
+        ]}
+      />
     </Section>
   ),
 };
@@ -104,13 +115,19 @@ export const FlexRow: Story = {
 export const FlexWrap: Story = {
   render: () => (
     <Section label='layout="flex" · direction="row" · wrap · justify="between" · gap="2"'>
-      <List direction="row" wrap justify="between" gap="2">
-        {["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel"].map((label) => (
-          <List.Item key={label}>
-            <Cell>{label}</Cell>
-          </List.Item>
-        ))}
-      </List>
+      <List
+        direction="row"
+        wrap
+        justify="between"
+        gap="2"
+        items={["Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel"].map(
+          (label) => (
+            <List.Item key={label}>
+              <Cell>{label}</Cell>
+            </List.Item>
+          ),
+        )}
+      />
     </Section>
   ),
 };
@@ -119,13 +136,17 @@ export const FlexWrap: Story = {
 export const GridColumns: Story = {
   render: () => (
     <Section label='layout="grid" · columns={3} · rows={2} · gap="4"'>
-      <List layout="grid" columns={3} rows={2} gap="4">
-        {["A", "B", "C", "D", "E", "F"].map((label) => (
+      <List
+        layout="grid"
+        columns={3}
+        rows={2}
+        gap="4"
+        items={["A", "B", "C", "D", "E", "F"].map((label) => (
           <List.Item key={label}>
             <Cell>{label}</Cell>
           </List.Item>
         ))}
-      </List>
+      />
     </Section>
   ),
 };
@@ -143,20 +164,21 @@ export const GridAreas: Story = {
           ["nav", "main"],
           ["footer", "footer"],
         ]}
-      >
-        <List.Item area="header">
-          <Cell>header</Cell>
-        </List.Item>
-        <List.Item area="nav">
-          <Cell>nav</Cell>
-        </List.Item>
-        <List.Item area="main">
-          <Cell>main</Cell>
-        </List.Item>
-        <List.Item area="footer">
-          <Cell>footer</Cell>
-        </List.Item>
-      </List>
+        items={[
+          <List.Item key="header" area="header">
+            <Cell>header</Cell>
+          </List.Item>,
+          <List.Item key="nav" area="nav">
+            <Cell>nav</Cell>
+          </List.Item>,
+          <List.Item key="main" area="main">
+            <Cell>main</Cell>
+          </List.Item>,
+          <List.Item key="footer" area="footer">
+            <Cell>footer</Cell>
+          </List.Item>,
+        ]}
+      />
     </Section>
   ),
 };
@@ -165,34 +187,46 @@ export const GridAreas: Story = {
 export const Ordered: Story = {
   render: () => (
     <Section label="ordered · renders <ol>">
-      <List ordered direction="column" gap="2">
-        <List.Item>
-          <Cell>Step one</Cell>
-        </List.Item>
-        <List.Item>
-          <Cell>Step two</Cell>
-        </List.Item>
-        <List.Item>
-          <Cell>Step three</Cell>
-        </List.Item>
-      </List>
-    </Section>
-  ),
-};
-
-/** Data-driven: pass an `items` array of `List.Item` props instead of children. */
-export const FromItemsArray: Story = {
-  render: () => (
-    <Section label="items array · keyed by id">
       <List
+        ordered
         direction="column"
         gap="2"
         items={[
-          { id: "a", children: <Cell>Ada</Cell> },
-          { id: "b", children: <Cell>Alan</Cell> },
-          { id: "c", children: <Cell>Grace</Cell> },
+          <List.Item key="1">
+            <Cell>Step one</Cell>
+          </List.Item>,
+          <List.Item key="2">
+            <Cell>Step two</Cell>
+          </List.Item>,
+          <List.Item key="3">
+            <Cell>Step three</Cell>
+          </List.Item>,
         ]}
       />
     </Section>
   ),
+};
+
+/** Data-driven: map a data array to `List.Item` elements, keyed by a stable id. */
+export const FromDataArray: Story = {
+  render: () => {
+    const people = [
+      { id: "a", name: "Ada" },
+      { id: "b", name: "Alan" },
+      { id: "c", name: "Grace" },
+    ];
+    return (
+      <Section label="items array · mapped from data · keyed by id">
+        <List
+          direction="column"
+          gap="2"
+          items={people.map((person) => (
+            <List.Item key={person.id}>
+              <Cell>{person.name}</Cell>
+            </List.Item>
+          ))}
+        />
+      </Section>
+    );
+  },
 };

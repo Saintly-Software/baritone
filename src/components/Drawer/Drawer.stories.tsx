@@ -5,6 +5,7 @@ import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Button } from "../Button";
 import { ButtonGroup } from "../ButtonGroup";
 import { Icon } from "../Icon";
+import { Menu } from "../Menu";
 import { Modal } from "../Modal";
 import { Text } from "../Text";
 import { Drawer, type DrawerProps, type DrawerWidth } from "./index";
@@ -87,9 +88,15 @@ export const KitchenSink: Story = {
           title="Edit profile"
           subtitle="Update your account details"
           actions={[
-            { children: "Rename", icon: <EditGlyph />, onClick: () => {} },
-            { children: "Share", icon: <ShareGlyph />, onClick: () => {} },
-            { children: "Delete", icon: <TrashGlyph />, intent: "negative", onClick: () => {} },
+            <Menu.Item key="rename" icon={<EditGlyph />} onClick={() => {}}>
+              Rename
+            </Menu.Item>,
+            <Menu.Item key="share" icon={<ShareGlyph />} onClick={() => {}}>
+              Share
+            </Menu.Item>,
+            <Menu.Item key="delete" icon={<TrashGlyph />} intent="negative" onClick={() => {}}>
+              Delete
+            </Menu.Item>,
           ]}
         />
       }

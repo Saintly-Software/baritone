@@ -24,7 +24,7 @@ export {
 export {
   ChipList,
   type ChipListProps,
-  type ChipListItem,
+  type ChipListItemProps,
   type ChipListOrientation,
 } from "./components/ChipList";
 export {

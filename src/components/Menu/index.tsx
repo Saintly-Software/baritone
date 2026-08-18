@@ -124,9 +124,8 @@ function MenuItemAnchor({
  * Menu.Item — one action row. Renders as a real `<button>` (`onClick`) or a
  * real `<a>`/router link (`href`/`render`) via `InternalGenericButtonAnchor`,
  * wrapped in base-ui's `Menu.Item`/`Menu.LinkItem` so it gets the roving
- * keyboard focus, type-ahead, and `data-highlighted` wiring for free. Use it
- * standalone inside `<Menu>`, or — more commonly — pass its props as an entry
- * in `<Menu items={[...]} />`.
+ * keyboard focus, type-ahead, and `data-highlighted` wiring for free. Pass it
+ * as an entry in `<Menu items={[<Menu.Item …/>]} />`.
  */
 function MenuItem(props: MenuItemProps) {
   const { children, keepOpen = false } = props;
@@ -172,11 +171,11 @@ export interface MenuProps {
   /** The element that opens the menu — typically a `<Menu.Trigger>`. */
   trigger?: React.ReactNode;
   /**
-   * The rows to render, each the props for a `Menu.Item`. Falsy entries are
-   * skipped, so a row can be included conditionally inline without a wrapper —
-   * e.g. `canDelete && { children: "Delete", intent: "negative", onClick }`.
+   * The rows to render, each a `<Menu.Item>` element. Falsy entries are skipped,
+   * so a row can be included conditionally inline —
+   * e.g. `canDelete && <Menu.Item intent="negative" onClick={…}>Delete</Menu.Item>`.
    */
-  items: Array<MenuItemProps | null | false | undefined>;
+  items: Array<React.ReactElement<MenuItemProps> | null | false | undefined>;
   /** Controlled open state. */
   open?: RootProps["open"];
   /** Uncontrolled initial open state. */
@@ -203,17 +202,17 @@ export interface MenuProps {
 /**
  * Menu — a floating list of actions anchored to a trigger, built on base-ui's
  * `Menu` (roving keyboard focus, type-ahead, and dismissal handled for you).
- * Pass its rows as `items` (each a `Menu.Item`'s props); every row renders as a
- * real `<button>` or `<a>`/router link via `InternalGenericButtonAnchor`.
+ * Pass its rows as `items` (each a `<Menu.Item>`); every row renders as a real
+ * `<button>` or `<a>`/router link via `InternalGenericButtonAnchor`.
  *
  * @example
  * <Menu
  *   trigger={<Menu.Trigger>Actions</Menu.Trigger>}
  *   items={[
- *     { children: "Edit", onClick: () => edit() },
- *     { children: "Duplicate", onClick: () => duplicate() },
- *     { children: "View source", href: "/source" },
- *     { children: "Delete", intent: "negative", onClick: () => remove() },
+ *     <Menu.Item onClick={() => edit()}>Edit</Menu.Item>,
+ *     <Menu.Item onClick={() => duplicate()}>Duplicate</Menu.Item>,
+ *     <Menu.Item href="/source">View source</Menu.Item>,
+ *     <Menu.Item intent="negative" onClick={() => remove()}>Delete</Menu.Item>,
  *   ]}
  * />
  */
@@ -250,10 +249,8 @@ function MenuRoot({
             )}
           >
             {items
-              .filter((item): item is MenuItemProps => Boolean(item))
-              .map((item, index) => (
-                <MenuItem key={index} {...item} />
-              ))}
+              .filter((item): item is React.ReactElement<MenuItemProps> => Boolean(item))
+              .map((item, index) => React.cloneElement(item, { key: item.key ?? index }))}
           </BaseMenu.Popup>
         </BaseMenu.Positioner>
       </BaseMenu.Portal>

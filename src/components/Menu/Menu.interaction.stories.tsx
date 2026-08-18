@@ -24,9 +24,15 @@ export const OpensAndHighlightsItem: Story = {
     <Menu
       trigger={<Menu.Trigger>Actions</Menu.Trigger>}
       items={[
-        { children: "Edit", onClick: () => {} },
-        { children: "Duplicate", onClick: () => {} },
-        { children: "View source", onClick: () => {} },
+        <Menu.Item key="edit" onClick={() => {}}>
+          Edit
+        </Menu.Item>,
+        <Menu.Item key="duplicate" onClick={() => {}}>
+          Duplicate
+        </Menu.Item>,
+        <Menu.Item key="source" onClick={() => {}}>
+          View source
+        </Menu.Item>,
       ]}
     />
   ),
@@ -52,8 +58,12 @@ export const KeepOpenStaysOpen: Story = {
       <Menu
         trigger={<Menu.Trigger>Quantity: {count}</Menu.Trigger>}
         items={[
-          { children: "Increment", keepOpen: true, onClick: () => setCount((c) => c + 1) },
-          { children: "Reset", intent: "warning", onClick: () => setCount(0) },
+          <Menu.Item key="increment" keepOpen onClick={() => setCount((c) => c + 1)}>
+            Increment
+          </Menu.Item>,
+          <Menu.Item key="reset" intent="warning" onClick={() => setCount(0)}>
+            Reset
+          </Menu.Item>,
         ]}
       />
     );
@@ -96,8 +106,12 @@ function sideStory(side: NonNullable<MenuProps["side"]>): Story {
           side={side}
           trigger={<Menu.Trigger>Open {side}</Menu.Trigger>}
           items={[
-            { children: "Edit", onClick: () => {} },
-            { children: "Duplicate", onClick: () => {} },
+            <Menu.Item key="edit" onClick={() => {}}>
+              Edit
+            </Menu.Item>,
+            <Menu.Item key="duplicate" onClick={() => {}}>
+              Duplicate
+            </Menu.Item>,
           ]}
         />
       </div>

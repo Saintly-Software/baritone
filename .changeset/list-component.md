@@ -17,9 +17,8 @@ Add a `List` component (with a `List.Item` part) — a semantic list (`<ul>`, or
 - **`ordered`:** render an `<ol>` (semantic sequence) rather than a `<ul>`. The
   marker is stripped either way (it doesn't flow through flex/grid tracks), so
   `ordered` only changes the element.
-- **`items` or children:** pass an `items` array (each entry a `List.Item`'s
-  props, keyed by `id` falling back to index) or compose `List.Item` children;
-  the data array wins when provided.
+- **`items`:** pass an `items` array of `<List.Item>` elements (keyed by each
+  entry's `key`, falling back to index).
 - **Real list semantics:** the `<ul>`/`<ol>` margin, padding, and marker are
   reset so the layout drives all spacing, and a `role="list"` is kept explicitly
   (Safari strips it under `list-style: none`); each `List.Item` is an `<li>` with

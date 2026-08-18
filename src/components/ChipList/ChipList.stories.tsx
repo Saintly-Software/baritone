@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { Chip } from "../Chip";
 import { Icon } from "../Icon";
-import type { ChipListItem } from "./index";
 import { ChipList } from "./index";
 
 const TagGlyph = () => (
@@ -14,14 +13,14 @@ const TagGlyph = () => (
   </Icon>
 );
 
-const TAGS: ChipListItem[] = [
-  { id: "react", children: "React" },
-  { id: "typescript", children: "TypeScript" },
-  { id: "vite", children: "Vite" },
-  { id: "vanilla-extract", children: "vanilla-extract" },
-  { id: "base-ui", children: "base-ui" },
-  { id: "storybook", children: "Storybook" },
-  { id: "vitest", children: "Vitest" },
+const TAGS = [
+  <ChipList.Item key="react">React</ChipList.Item>,
+  <ChipList.Item key="typescript">TypeScript</ChipList.Item>,
+  <ChipList.Item key="vite">Vite</ChipList.Item>,
+  <ChipList.Item key="vanilla-extract">vanilla-extract</ChipList.Item>,
+  <ChipList.Item key="base-ui">base-ui</ChipList.Item>,
+  <ChipList.Item key="storybook">Storybook</ChipList.Item>,
+  <ChipList.Item key="vitest">Vitest</ChipList.Item>,
 ];
 
 const meta: Meta<typeof ChipList> = {
@@ -86,11 +85,17 @@ export const PerItemOverrides: Story = {
     intent: "neutral",
     saliency: "mid",
     items: [
-      { id: "stable", children: "Stable" },
-      { id: "breaking", children: "Breaking", intent: "negative", saliency: "high" },
-      { id: "shipped", children: "Shipped", intent: "positive" },
-      { id: "deprecated", children: "Deprecated", intent: "warning" },
-      { id: "internal", children: "Internal" },
+      <ChipList.Item key="stable">Stable</ChipList.Item>,
+      <ChipList.Item key="breaking" intent="negative" saliency="high">
+        Breaking
+      </ChipList.Item>,
+      <ChipList.Item key="shipped" intent="positive">
+        Shipped
+      </ChipList.Item>,
+      <ChipList.Item key="deprecated" intent="warning">
+        Deprecated
+      </ChipList.Item>,
+      <ChipList.Item key="internal">Internal</ChipList.Item>,
     ],
   },
 };
@@ -104,22 +109,19 @@ export const RichChips: Story = {
     intent: "primary",
     saliency: "mid",
     items: [
-      {
-        id: "tagged",
-        children: "Tagged",
-        leadAdornments: [<Chip.Adornment icon={<TagGlyph />} />],
-      },
-      {
-        id: "clickable",
-        children: "Clickable",
-        onClick: () => alert("filter by tag"),
-      },
-      {
-        id: "removable",
-        children: "Removable",
-        handleRemove: () => alert("removed"),
-      },
-    ] as ChipListItem[],
+      <ChipList.Item
+        key="tagged"
+        leadAdornments={[<Chip.Adornment key="tag" icon={<TagGlyph />} />]}
+      >
+        Tagged
+      </ChipList.Item>,
+      <ChipList.Item key="clickable" onClick={() => alert("filter by tag")}>
+        Clickable
+      </ChipList.Item>,
+      <ChipList.Item key="removable" handleRemove={() => alert("removed")}>
+        Removable
+      </ChipList.Item>,
+    ],
   },
 };
 
@@ -145,7 +147,11 @@ export const AllIntents: Story = {
   render: () => (
     <ChipList
       saliency="mid"
-      items={INTENTS.map((intent) => ({ id: intent, children: intent, intent }))}
+      items={INTENTS.map((intent) => (
+        <ChipList.Item key={intent} intent={intent}>
+          {intent}
+        </ChipList.Item>
+      ))}
     />
   ),
 };

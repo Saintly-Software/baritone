@@ -4,9 +4,10 @@
 
 Add a `ChipList` component for rendering a set of `Chip`s as a semantic list.
 
-- **`items`** — each entry is a `Chip`'s props (`ChipListItem`), so chips keep
-  their full API (adornments, clickable label, popover, remove "×"). Keyed by an
-  optional `id`, falling back to the array index.
+- **`items`** — each entry is a `<ChipList.Item>` element carrying a `Chip`'s
+  props (`ChipListItemProps`), so chips keep their full API (adornments, clickable
+  label, popover, remove "×"). Keyed by each entry's `key`, falling back to the
+  array index.
 - **`intent` / `saliency`** apply to every chip and can be overridden per item.
 - **`size`** applies to every chip and cannot be overridden per item; it also
   tunes the spacing between chips (smaller chips pack tighter).

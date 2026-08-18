@@ -32,13 +32,11 @@ export interface ListItemProps extends Omit<React.LiHTMLAttributes<HTMLLIElement
 }
 
 /**
- * List.Item — one list cell. Rendered automatically for each entry when you pass
- * the `items` array, or dropped in as `children` for element-composed lists
- * (`<List><List.Item>…</List.Item></List>`). It's a semantic `<li>` (with an
- * explicit `role="listitem"`, since `list-style: none` drops the implicit role
- * in Safari) that wraps arbitrary content. For grid layouts, `area` places the
- * item in a named `grid-template-areas` region. Use `render` to change the
- * element.
+ * List.Item — one list cell. Pass a `<List.Item>` per entry in the `List`'s
+ * `items` array. It's a semantic `<li>` (with an explicit `role="listitem"`,
+ * since `list-style: none` drops the implicit role in Safari) that wraps
+ * arbitrary content. For grid layouts, `area` places the item in a named
+ * `grid-template-areas` region. Use `render` to change the element.
  */
 function ListItem({ area, render, className, style, children, ref, ...rest }: ListItemProps) {
   return useRender({
@@ -61,7 +59,7 @@ function ListItem({ area, render, className, style, children, ref, ...rest }: Li
 ListItem.displayName = "List.Item";
 
 /** Props shared by both layouts. */
-interface ListBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "color"> {
+interface ListBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "color" | "children"> {
   /**
    * Render an ordered list (`<ol>`) rather than an unordered one (`<ul>`),
    * communicating sequence to assistive tech. The visual marker is stripped
@@ -70,17 +68,10 @@ interface ListBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "color">
    */
   ordered?: boolean;
   /**
-   * The items to render, each a `List.Item`'s props. Keyed by each entry's `id`
-   * (falling back to its index — supply `id` for a stable key). Omit and pass
-   * `List.Item` `children` instead for element-composed lists; when `items` is
-   * provided it wins.
+   * The rows to render, each a `<List.Item>` element. Keyed by each entry's
+   * `key` (falling back to its index — supply `key` for a stable identity).
    */
-  items?: ListItemProps[];
-  /**
-   * Element-composed form: `List.Item` elements (or any content). Ignored when
-   * `items` is provided (the data array wins).
-   */
-  children?: React.ReactNode;
+  items: React.ReactElement<ListItemProps>[];
   ref?: React.Ref<HTMLElement>;
 }
 
@@ -124,15 +115,6 @@ export interface ListGridProps extends ListBaseProps {
  */
 export type ListProps = ListFlexProps | ListGridProps;
 
-function renderItems(
-  items: ListItemProps[] | undefined,
-  children: React.ReactNode,
-): React.ReactNode {
-  // The data array wins when provided; otherwise render composed children.
-  if (items == null) return children;
-  return items.map((item, index) => <ListItem key={item.id ?? index} {...item} />);
-}
-
 /**
  * List — a semantic list (`<ul>`, or `<ol>` when `ordered`) whose items are laid
  * out with either flexbox or CSS grid. `layout="flex"` (default) delegates to
@@ -143,21 +125,27 @@ function renderItems(
  * discriminated union on `layout`, so only the knobs for the active layout
  * type-check.
  *
- * Provide items as the `items` array (each entry a `List.Item`'s props) or
- * compose them as `List.Item` `children`. The default `<ul>`/`<ol>` margin,
- * padding, and marker are reset so the layout drives all spacing; the list keeps
- * a real `role="list"` (Safari strips it under `list-style: none`).
+ * Provide the rows as the `items` array, each a `<List.Item>` element. The
+ * default `<ul>`/`<ol>` margin, padding, and marker are reset so the layout
+ * drives all spacing; the list keeps a real `role="list"` (Safari strips it
+ * under `list-style: none`).
  *
  * @example
  * // Flex: a spaced vertical stack.
- * <List direction="column" gap="2">
- *   <List.Item>First</List.Item>
- *   <List.Item>Second</List.Item>
- * </List>
+ * <List
+ *   direction="column"
+ *   gap="2"
+ *   items={[<List.Item key="1">First</List.Item>, <List.Item key="2">Second</List.Item>]}
+ * />
  *
  * @example
  * // Grid: three equal columns from a data array.
- * <List layout="grid" columns={3} gap="4" items={rows.map((r) => ({ id: r.id, children: r.label }))} />
+ * <List
+ *   layout="grid"
+ *   columns={3}
+ *   gap="4"
+ *   items={rows.map((r) => <List.Item key={r.id}>{r.label}</List.Item>)}
+ * />
  */
 /**
  * Every layout prop widened into one shape, so a single destructure can strip
@@ -196,14 +184,15 @@ function ListRoot(props: ListProps) {
     rows,
     areas,
     className,
-    children,
     ref,
     ...rest
   } = props as ResolvedListProps;
 
   const element = ordered ? <ol /> : <ul />;
   const listClassName = cx(listReset, className);
-  const content = renderItems(items, children);
+  // Each row keeps its own `key` where the consumer set one, else falls back to
+  // its position — mirrors `Menu` / `ButtonGroup`'s element-array handling.
+  const content = items.map((item, index) => React.cloneElement(item, { key: item.key ?? index }));
 
   if (layout === "grid") {
     return (

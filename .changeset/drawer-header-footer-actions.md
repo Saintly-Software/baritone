@@ -10,7 +10,7 @@ actions now live on the header and footer slots directly:
 
 - `<Drawer.Header actions={…} actionsLabel="…">` renders an overflow `Menu`
   behind an icon-only "more options" trigger at the header's end. Each entry is a
-  `Menu.Item`'s props (falsy entries are skipped). `actionsLabel` names the
+  `<Menu.Item>` element (falsy entries are skipped). `actionsLabel` names the
   trigger (default `"Actions"`). Use this for secondary, per-item actions.
 - `<Drawer.Footer actions={…}>` renders the primary button row as a joined
   `ButtonGroup` at the footer's end. Each entry is a `ButtonGroup.Item` element.
