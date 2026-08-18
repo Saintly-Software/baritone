@@ -212,6 +212,7 @@ export {
   ToggleGroup,
   type ToggleGroupProps,
   type ToggleGroupItemProps,
+  type ToggleGroupOrientation,
 } from "./components/ToggleGroup";
 export {
   Accordion,
