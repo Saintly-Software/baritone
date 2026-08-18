@@ -2,6 +2,7 @@
 import * as React from "react";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { keyedElements } from "../../utils/keyedElements";
 import { Chip, type ChipProps } from "../Chip";
 import { Popover } from "../Popover";
 import { chipListItem, chipListRoot } from "./chipList.css";
@@ -34,8 +35,12 @@ ChipListItem.displayName = "ChipList.Item";
 export type ChipListOrientation = "horizontal" | "vertical";
 
 export interface ChipListProps extends Omit<React.HTMLAttributes<HTMLUListElement>, "children"> {
-  /** The chips to render, each a `<ChipList.Item>` element. Keyed by `key`. */
-  items: React.ReactElement<ChipListItemProps>[];
+  /**
+   * The chips to render, each a `<ChipList.Item>` element (keyed by `key`,
+   * falling back to index). Falsy entries (`null` / `false` / `undefined`) are
+   * skipped, so a chip can be included conditionally inline.
+   */
+  items: Array<React.ReactElement<ChipListItemProps> | null | false | undefined>;
   /**
    * Default colour intent for every chip. A chip can override it via its own
    * item-level `intent`. Defaults to the `Chip` default (`neutral`).
@@ -139,9 +144,12 @@ export function ChipList({
   ref,
   ...rest
 }: ChipListProps) {
-  const overflows = max != null && items.length > max;
-  const visible = overflows ? items.slice(0, max) : items;
-  const remaining = overflows ? items.slice(max) : [];
+  // Resolve to keyed elements first (dropping falsy entries) so `max` counts and
+  // slices real chips, and the shared keying rule applies.
+  const resolved = keyedElements(items);
+  const overflows = max != null && resolved.length > max;
+  const visible = overflows ? resolved.slice(0, max) : resolved;
+  const remaining = overflows ? resolved.slice(max) : [];
 
   const seeMoreText =
     typeof seeMoreLabel === "function" ? seeMoreLabel(remaining.length) : seeMoreLabel;
@@ -155,14 +163,8 @@ export function ChipList({
       className={cx(chipListRoot({ orientation, size }), className)}
       {...rest}
     >
-      {visible.map((item, index) => (
-        <ChipListRow
-          key={item.key ?? index}
-          item={item}
-          intent={intent}
-          saliency={saliency}
-          size={size}
-        />
+      {visible.map((item) => (
+        <ChipListRow key={item.key} item={item} intent={intent} saliency={saliency} size={size} />
       ))}
 
       {/* The overflow chip: a popover trigger whose surface holds the hidden

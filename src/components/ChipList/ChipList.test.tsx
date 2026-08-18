@@ -96,6 +96,21 @@ describe("ChipList", () => {
     });
   });
 
+  it("skips falsy entries so a chip can be included conditionally inline", () => {
+    const showBeta = false;
+    render(
+      <ChipList
+        items={[
+          <ChipList.Item key="a">Alpha</ChipList.Item>,
+          showBeta && <ChipList.Item key="b">Beta</ChipList.Item>,
+          null,
+        ]}
+      />,
+    );
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.queryByText("Beta")).not.toBeInTheDocument();
+  });
+
   describe("max / see more", () => {
     it("shows every chip and no see-more chip when under max", () => {
       render(<ChipList items={TAGS} max={4} />);

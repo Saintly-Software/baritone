@@ -41,10 +41,11 @@ path are both replaced by a single `items` array of `<List.Item>` elements.
 <List items={[<List.Item key="a">Ada</List.Item>]} />
 ```
 
-Each row keeps its own `key` where set, otherwise falling back to its index —
-the same handling as `ButtonGroup`. Falsy entries in `Menu`'s `items` are still
-skipped, so conditional rows work inline
-(`canDelete && <Menu.Item …>Delete</Menu.Item>`).
+All three share one rule (a `keyedElements` helper): falsy entries (`null` /
+`false` / `undefined`) are skipped — so a row can be included conditionally
+inline (`canDelete && <Menu.Item …>Delete</Menu.Item>`) — and each surviving row
+keeps its own `key`, falling back to its _original_ index (stable when a
+conditional entry toggles).
 
 `Tabs` and `Accordion` intentionally keep their object-array `items`/`tabs`:
 they infer a generic `value` union across the entries to type-check

@@ -9,6 +9,7 @@ import {
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import { cx } from "../../utils/cx";
+import { keyedElements } from "../../utils/keyedElements";
 import { mergeProps, type RenderProp } from "../../utils/render";
 import type { ButtonProps } from "../Button";
 import {
@@ -248,9 +249,7 @@ function MenuRoot({
               className,
             )}
           >
-            {items
-              .filter((item): item is React.ReactElement<MenuItemProps> => Boolean(item))
-              .map((item, index) => React.cloneElement(item, { key: item.key ?? index }))}
+            {keyedElements(items)}
           </BaseMenu.Popup>
         </BaseMenu.Positioner>
       </BaseMenu.Portal>

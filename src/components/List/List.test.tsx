@@ -54,6 +54,21 @@ describe("List", () => {
     expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(2);
   });
 
+  it("skips falsy entries so rows can be included conditionally inline", () => {
+    const showSecond = false;
+    render(
+      <List
+        items={[
+          <List.Item key="a">First</List.Item>,
+          showSecond && <List.Item key="b">Second</List.Item>,
+          null,
+        ]}
+      />,
+    );
+    expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.queryByText("Second")).not.toBeInTheDocument();
+  });
+
   it("applies grid-template-columns for a numeric grid columns count", () => {
     render(<List layout="grid" columns={3} items={[<List.Item key="a">A</List.Item>]} />);
     // Grid sets the template inline, so it's readable in jsdom.

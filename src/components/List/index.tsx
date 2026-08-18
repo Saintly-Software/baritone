@@ -2,6 +2,7 @@
 import * as React from "react";
 import type { Atoms } from "../../styles/sprinkles.css";
 import { cx } from "../../utils/cx";
+import { keyedElements } from "../../utils/keyedElements";
 import { useRender, type RenderProp } from "../../utils/render";
 import { Flex, type FlexAlign, type FlexDirection, type FlexJustify } from "../Flex";
 import { Grid, type GridAreas, type GridJustify, type GridTracks } from "../Grid";
@@ -70,8 +71,10 @@ interface ListBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "color" 
   /**
    * The rows to render, each a `<List.Item>` element. Keyed by each entry's
    * `key` (falling back to its index — supply `key` for a stable identity).
+   * Falsy entries (`null` / `false` / `undefined`) are skipped, so a row can be
+   * included conditionally inline (`cond && <List.Item …/>`).
    */
-  items: React.ReactElement<ListItemProps>[];
+  items: Array<React.ReactElement<ListItemProps> | null | false | undefined>;
   ref?: React.Ref<HTMLElement>;
 }
 
@@ -190,9 +193,11 @@ function ListRoot(props: ListProps) {
 
   const element = ordered ? <ol /> : <ul />;
   const listClassName = cx(listReset, className);
-  // Each row keeps its own `key` where the consumer set one, else falls back to
-  // its position — mirrors `Menu` / `ButtonGroup`'s element-array handling.
-  const content = items.map((item, index) => React.cloneElement(item, { key: item.key ?? index }));
+  // Skip falsy entries and key each row (own `key`, else its original index) —
+  // the shared `items` rule, same as `Menu`. Like `Menu`, `List` renders the
+  // `<List.Item>` element itself (rather than reading its props the way
+  // `ButtonGroup` / `ChipList` treat their carriers).
+  const content = keyedElements(items);
 
   if (layout === "grid") {
     return (
