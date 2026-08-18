@@ -3,6 +3,7 @@ import { Toast as BaseToast } from "@base-ui/react/toast";
 import type { ToastManager } from "@base-ui/react/toast";
 import * as React from "react";
 import { ToastViewport } from "../Toast";
+import type { BaritoneToastManager } from "../Toast";
 
 export interface BaritoneProviderProps {
   children: React.ReactNode;
@@ -19,11 +20,13 @@ export interface BaritoneProviderProps {
    */
   toastLimit?: number;
   /**
-   * A toast manager created with `createToastManager()` for firing toasts from
-   * outside React (module scope, a store, an interceptor). Usually unnecessary —
-   * `useToast()` covers in-component use.
+   * A toast manager for firing toasts from outside React (module scope, a store,
+   * an interceptor). Usually unnecessary — `useToast()` covers in-component use.
+   * Prefer Baritone's `createToastManager()`, whose `add`/`update`/… take the
+   * design-system fields at the top level; a raw base-ui `ToastManager` is also
+   * accepted (the provider only reads its subscription channel).
    */
-  toastManager?: ToastManager;
+  toastManager?: BaritoneToastManager | ToastManager;
 }
 
 /**
@@ -62,7 +65,16 @@ export function BaritoneProvider({
   toastManager,
 }: BaritoneProviderProps) {
   return (
-    <BaseToast.Provider timeout={toastTimeout} limit={toastLimit} toastManager={toastManager}>
+    <BaseToast.Provider
+      timeout={toastTimeout}
+      limit={toastLimit}
+      // A `BaritoneToastManager` wraps a base-ui manager, exposing its private
+      // `' subscribe'` channel unchanged; the provider reads only that (its
+      // packing `add`/`update`/`promise` wrappers are for callers, not the
+      // provider). A raw `ToastManager` already matches. Narrowing the union to
+      // base-ui's `ToastManager` for the base-ui provider is therefore sound.
+      toastManager={toastManager as ToastManager | undefined}
+    >
       {children}
       <ToastViewport />
     </BaseToast.Provider>
