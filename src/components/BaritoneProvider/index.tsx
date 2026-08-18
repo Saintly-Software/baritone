@@ -20,11 +20,13 @@ export interface BaritoneProviderProps {
    */
   toastLimit?: number;
   /**
-   * A toast manager created with `createToastManager()` for firing toasts from
-   * outside React (module scope, a store, an interceptor). Usually unnecessary —
-   * `useToast()` covers in-component use.
+   * A toast manager for firing toasts from outside React (module scope, a store,
+   * an interceptor). Usually unnecessary — `useToast()` covers in-component use.
+   * Prefer Baritone's `createToastManager()`, whose `add`/`update`/… take the
+   * design-system fields at the top level; a raw base-ui `ToastManager` is also
+   * accepted (the provider only reads its subscription channel).
    */
-  toastManager?: BaritoneToastManager;
+  toastManager?: BaritoneToastManager | ToastManager;
 }
 
 /**
@@ -67,9 +69,10 @@ export function BaritoneProvider({
       timeout={toastTimeout}
       limit={toastLimit}
       // A `BaritoneToastManager` wraps a base-ui manager, exposing its private
-      // `' subscribe'` channel unchanged; the provider reads only that. The
+      // `' subscribe'` channel unchanged; the provider reads only that (its
       // packing `add`/`update`/`promise` wrappers are for callers, not the
-      // provider, so this narrowing to base-ui's `ToastManager` is sound.
+      // provider). A raw `ToastManager` already matches. Narrowing the union to
+      // base-ui's `ToastManager` for the base-ui provider is therefore sound.
       toastManager={toastManager as ToastManager | undefined}
     >
       {children}

@@ -109,26 +109,26 @@ export interface UseToastReturn {
  * wire it to the on-screen viewport, then call `add`/`update`/`close`/`promise`
  * from anywhere. Inside components, prefer {@link useToast}.
  *
- * Its methods take the same design-system options as {@link useToast}'s (the
- * `intent`/`saliency`/`icon`/`actions` fields packed for you) — with one caveat:
- * `update` replaces the toast's visual `data` wholesale rather than merging over
- * the live toast (a module-scope manager holds no reactive toast list to merge
- * against), so pass every visual field you want kept.
+ * Its `add`/`update`/`close`/`promise` are the same surface as {@link useToast}'s
+ * (they take the design-system `intent`/`saliency`/`icon`/`actions` fields packed
+ * for you), minus the reactive `toasts` list, plus base-ui's subscription
+ * channel — with two caveats:
+ *
+ * - `update` replaces the toast's visual `data` wholesale rather than merging over
+ *   the live toast (a module-scope manager holds no reactive toast list to merge
+ *   against), so pass every visual field you want kept.
+ * - Toasts only reach the viewport once `BaritoneProvider` has mounted and
+ *   subscribed. base-ui's manager buffers nothing, so an `add`/`promise` that runs
+ *   during module init or an SSR pass — before the provider commits — is dropped
+ *   silently. Fire in response to events (a request failing, a click), by which
+ *   point the provider is mounted.
  */
-export interface BaritoneToastManager {
+export interface BaritoneToastManager extends Omit<UseToastReturn, "toasts"> {
   /**
    * base-ui's private subscription channel, read by `BaritoneProvider` to
    * connect this manager to the viewport. Not called directly.
    */
   " subscribe": ToastManager<ToastData>[" subscribe"];
-  /** Show a toast; returns its id. */
-  add: (options: AddToastOptions) => string;
-  /** Update a live toast in place by id (replaces its visual `data` wholesale). */
-  update: (id: string, options: Partial<AddToastOptions>) => void;
-  /** Dismiss a toast by id, or the newest if omitted. */
-  close: (id?: string) => void;
-  /** Drive a loading → success/error toast from a promise; resolves to its value. */
-  promise: <Value>(promise: Promise<Value>, options: ToastPromiseOptions<Value>) => Promise<Value>;
 }
 
 /**
@@ -232,6 +232,9 @@ export function useToast(): UseToastReturn {
  * Create it once at module scope and hand it to `<BaritoneProvider>` so it reaches
  * the on-screen viewport:
  *
+ * Toasts fire once `BaritoneProvider` has mounted — see {@link BaritoneToastManager}
+ * for that and the `update` caveat.
+ *
  * @example
  * // toast.ts — module scope, no component needed
  * export const toasts = createToastManager();
@@ -239,7 +242,7 @@ export function useToast(): UseToastReturn {
  * // App root
  * <BaritoneProvider toastManager={toasts}>{children}</BaritoneProvider>
  *
- * // Anywhere — an interceptor, a query cache's onError, a plain function
+ * // In response to an event — an interceptor, a query cache's onError
  * toasts.add({ title: "Couldn't save", intent: "negative", priority: "high" });
  */
 export function createToastManager(): BaritoneToastManager {

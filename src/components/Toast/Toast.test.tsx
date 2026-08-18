@@ -226,6 +226,42 @@ describe("Toast", () => {
     expect(noticeEl?.className).toContain(noticeRecipe({ intent: "negative", saliency: "high" }));
   });
 
+  it("replaces the visual data wholesale on a module-scope manager's update", async () => {
+    // The manager has no reactive toast list to merge against, so — unlike
+    // useToast().update — a partial update drops the visual fields it omits.
+    // This is the documented caveat; pin it so a regression to merge-semantics
+    // (or a dropped pack() on the update path) can't pass silently.
+    const manager = createToastManager();
+    render(<BaritoneProvider toastManager={manager}>{null}</BaritoneProvider>);
+
+    const id = manager.add({
+      title: "Uploading",
+      intent: "primary",
+      icon: <span data-testid="icon" />,
+      actions: [
+        <Notice.Action key="cancel" onClick={() => {}}>
+          Cancel
+        </Notice.Action>,
+      ],
+      timeout: 0,
+    });
+
+    const toast = await screen.findByRole("dialog", { name: "Uploading" });
+    expect(within(toast).getByTestId("icon")).toBeInTheDocument();
+    expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+
+    // An intent-only update recolours the Notice but, replacing `data` wholesale,
+    // drops the previously-set icon and actions.
+    manager.update(id, { intent: "negative" });
+
+    const noticeEl = toast.querySelector<HTMLElement>('[role="presentation"]');
+    await waitFor(() =>
+      expect(noticeEl?.className).toContain(noticeRecipe({ intent: "negative", saliency: "high" })),
+    );
+    expect(within(toast).queryByTestId("icon")).not.toBeInTheDocument();
+    expect(within(toast).queryByRole("button", { name: "Cancel" })).not.toBeInTheDocument();
+  });
+
   it("throws a helpful error when useToast is used outside a provider", () => {
     function Orphan() {
       useToast();

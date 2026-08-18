@@ -23,8 +23,12 @@ way to reach the toast viewport, so consumers fell back to base-ui's raw
   toasts.add({ title: "Couldn't save", intent: "negative", priority: "high" });
   ```
 
-- `BaritoneProvider`'s `toastManager` prop is now typed `BaritoneToastManager`
-  (was base-ui's raw `ToastManager`).
+- `BaritoneProvider`'s `toastManager` prop now accepts `BaritoneToastManager |
+ToastManager`, so existing call sites passing a raw base-ui manager still
+  typecheck.
 - Note: a module-scope manager holds no reactive toast list, so its `update`
   replaces the toast's visual `data` wholesale rather than merging over the live
   toast — pass every visual field you want kept. `useToast().update` still merges.
+- Note: base-ui's manager buffers nothing, so toasts fired before
+  `BaritoneProvider` mounts (module init, an SSR pass) are dropped silently — fire
+  in response to events, by which point the provider is mounted.
