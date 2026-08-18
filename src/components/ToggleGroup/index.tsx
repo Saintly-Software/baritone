@@ -7,6 +7,8 @@ import {
   type InternalButtonHtmlAttrs,
 } from "../../internal/components/InternalButton";
 import type { FormState, Intent, LabelPosition, Saliency, Size } from "../../theme/constants";
+import { resolveWidth } from "../../styles/layoutProps";
+import { atoms } from "../../styles/sprinkles.css";
 import { cx } from "../../utils/cx";
 import {
   Field,
@@ -16,7 +18,10 @@ import {
   joinIds,
 } from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
-import { toggleGroupDisabled, toggleGroupRoot } from "./toggleGroup.css";
+import { toggleGroupDisabled, toggleGroupFillRow, toggleGroupRoot } from "./toggleGroup.css";
+
+/** Layout (and keyboard) direction of the segmented control. */
+export type ToggleGroupOrientation = "horizontal" | "vertical";
 
 /**
  * base-ui's composite reads this attribute — once, the first time it maps the
@@ -156,6 +161,32 @@ interface ToggleGroupSharedProps<T extends string> {
   /** Control size; matches `Button`. Default `md`. */
   size?: Size;
   /**
+   * Lay the segments out in a row (`horizontal`, default — the toolbar) or a
+   * column (`vertical` — a stacked segmented control). This drives *both* the
+   * paint (flex direction) and the keyboard: base-ui's roving focus follows the
+   * same axis, so Left/Right arrow between segments in a horizontal group and
+   * Up/Down in a vertical one (selection stays manual — Enter/Space). A vertical
+   * group stretches its segments to a shared width; pair it with `width="fill"`
+   * to make the whole column span a fixed-width container.
+   */
+  orientation?: ToggleGroupOrientation;
+  /**
+   * Make the group span its container instead of shrink-wrapping its segments.
+   * Omit (the default) and the group stays `inline-flex`, hugging its content —
+   * exactly as before this prop existed. `"fill"` makes it fill the available
+   * width: it applies the shared `full` width atom (the same `resolveWidth`
+   * source `Box` / `Flex` / `Button` use) *and* flips the wrapping `Field` to
+   * `fit: "fill"`, so the fill isn't swallowed by the field's own shrink-wrap.
+   * A vertical group in a fixed-width sidebar is the case that wants this; a
+   * filled horizontal toolbar grows its segments to share the width.
+   *
+   * Only `"fill"` is offered (not the full `fit` / `inherit` shorthand `Box` &
+   * co. take): the `Field` wrapper interposes as a shrink-wrapper, so `inherit`
+   * can't reach an ancestor's width through it and `fit` would only restate the
+   * default — both would be dead knobs here.
+   */
+  width?: "fill";
+  /**
    * Disable the whole group. Modelled with `aria-disabled` + a veto in the change
    * handler (never the native attribute), so every segment stays keyboard
    * reachable — you can still Tab in and arrow between them — but the value can't
@@ -272,9 +303,17 @@ export type ToggleGroupProps<T extends string> =
  * **Keyboard** (a toolbar-style roving tab stop, *not* a radio group — selection
  * is manual, not on focus): Tab moves into the group and lands on the *selected*
  * segment; the arrow keys move focus between segments *without* selecting; Enter
- * (or Space) selects the focused segment. While `disabled`, all of that still
- * works except the final selection — you can explore the group, you just can't
- * change its value.
+ * (or Space) selects the focused segment. The arrow *axis* follows
+ * `orientation` — Left/Right in a horizontal group, Up/Down in a vertical one —
+ * because base-ui's roving focus is wired from the same prop. While `disabled`,
+ * all of that still works except the final selection — you can explore the
+ * group, you just can't change its value.
+ *
+ * Lay the segments out in a row (`orientation="horizontal"`, the default) or a
+ * column (`orientation="vertical"`). A vertical group stretches its segments to a
+ * shared width; pair it with `width="fill"` to make the column span a
+ * fixed-width container (a sidebar), which also fills the wrapping `Field` in
+ * form-control mode.
  *
  * It doubles as a **labelled form control**: pass `label` (plus optional
  * `helpText`, a validation `state`, or `required`) and the
@@ -311,6 +350,26 @@ export type ToggleGroupProps<T extends string> =
  * </ToggleGroup>
  *
  * @example
+ * // Vertical: a stacked segmented control that fills a fixed-width sidebar.
+ * // Up/Down arrow between segments; `width="fill"` spans the container.
+ * const [tool, setTool] = React.useState<Tool>("select");
+ * <ToggleGroup
+ *   aria-label="Annotation tool"
+ *   orientation="vertical"
+ *   width="fill"
+ *   value={tool}
+ *   onChange={setTool}
+ * >
+ *   {({ ToggleGroupItem }) => (
+ *     <>
+ *       <ToggleGroupItem value="select">Select</ToggleGroupItem>
+ *       <ToggleGroupItem value="draw">Draw</ToggleGroupItem>
+ *       <ToggleGroupItem value="erase">Erase</ToggleGroupItem>
+ *     </>
+ *   )}
+ * </ToggleGroup>
+ *
+ * @example
  * // Clearable: start unselected, and let re-pressing the active segment clear it.
  * const [view, setView] = React.useState<View | null>(null);
  * <ToggleGroup aria-label="View" clearable value={view} onChange={setView}>
@@ -337,6 +396,8 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
     intent,
     saliency = "high",
     size,
+    orientation = "horizontal",
+    width,
     disabled: disabledProp = false,
     label,
     "aria-label": ariaLabel,
@@ -381,8 +442,10 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
       state={state}
       required={required}
       labelPosition={labelPosition}
-      // Shrink-wrap around the segmented row instead of spanning the line.
-      fit="content"
+      // Shrink-wrap around the segmented row (`content`) by default — but when the
+      // group is asked to `fill`, the `Field` has to span too, or the group's
+      // `width: 100%` would only fill the shrink-wrapped field, not the container.
+      fit={width === "fill" ? "fill" : "content"}
       disabled={disabled}
       slotProps={slotProps}
     >
@@ -395,6 +458,12 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
           <BaseToggleGroup
             ref={ref}
             value={groupValue}
+            // Wire the keyboard to match the paint: base-ui's composite reads this
+            // to choose the roving-focus axis, so Up/Down move between segments in a
+            // vertical group and Left/Right in a horizontal one. (base-ui exposes it
+            // as `data-orientation`; the element is `role="group"`, which — unlike
+            // `toolbar`/`radiogroup` — has no `aria-orientation`, so none is set.)
+            orientation={orientation}
             onValueChange={(next, details) => {
               // Veto every change when disabled — the whole control is read-only.
               // base-ui shares this `details` with the toggle, so `cancel()` stops
@@ -427,7 +496,19 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
             // order and stopping arrow navigation). So a disabled group stays fully
             // Tab/arrow reachable — see AGENTS.md.
             aria-disabled={disabled || undefined}
-            className={cx(toggleGroupRoot, disabled && toggleGroupDisabled, className)}
+            className={cx(
+              toggleGroupRoot({ orientation }),
+              // The width property itself comes from the shared shorthand resolver
+              // (the single source `Box` / `Flex` / `Button` use), so this never
+              // drifts from the other primitives. `resolveWidth(undefined)` is a
+              // no-op, so the unset default stays `inline-flex` shrink-wrap.
+              atoms({ width: resolveWidth(width) }),
+              // A filled horizontal toolbar grows its segments to share the width;
+              // a vertical column already shares it via `align-items: stretch`.
+              orientation === "horizontal" && width === "fill" && toggleGroupFillRow,
+              disabled && toggleGroupDisabled,
+              className,
+            )}
           >
             {children({
               // The stable generic item, narrowed to this group's `T`. The cast is

@@ -2,6 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
+import { resolveWidth } from "../../styles/layoutProps";
+import { atoms } from "../../styles/sprinkles.css";
+import { fieldRoot } from "../Field/field.css";
 import { ToggleGroup } from "./index";
 
 type View = "list" | "board" | "calendar";
@@ -12,10 +15,12 @@ function ViewToggle({
   value: initial = "list",
   onChange,
   disabled,
+  orientation,
 }: {
   value?: View;
   onChange?: (value: View, event: Event) => void;
   disabled?: boolean;
+  orientation?: "horizontal" | "vertical";
 }) {
   const [value, setValue] = React.useState<View>(initial);
   return (
@@ -27,6 +32,7 @@ function ViewToggle({
         onChange?.(next, event);
       }}
       disabled={disabled}
+      orientation={orientation}
     >
       {({ ToggleGroupItem }) => (
         <>
@@ -140,6 +146,110 @@ describe("ToggleGroup", () => {
 
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  describe("orientation", () => {
+    it("defaults to horizontal: Left/Right move focus, Up/Down don't", async () => {
+      const user = userEvent.setup();
+      render(<ViewToggle value="list" />);
+
+      await user.tab();
+      expect(screen.getByRole("button", { name: "List" })).toHaveFocus();
+
+      // Horizontal axis: Right advances...
+      await user.keyboard("{ArrowRight}");
+      expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
+
+      // ...and the cross axis (Down) is inert, so it can't move between segments.
+      await user.keyboard("{ArrowDown}");
+      expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
+    });
+
+    it("vertical: Up/Down move focus, Left/Right don't", async () => {
+      const user = userEvent.setup();
+      render(<ViewToggle value="list" orientation="vertical" />);
+
+      await user.tab();
+      expect(screen.getByRole("button", { name: "List" })).toHaveFocus();
+
+      // Vertical axis: Down advances between segments...
+      await user.keyboard("{ArrowDown}");
+      expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
+
+      // ...and the cross axis (Right) is inert now.
+      await user.keyboard("{ArrowRight}");
+      expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
+
+      // Up walks back.
+      await user.keyboard("{ArrowUp}");
+      expect(screen.getByRole("button", { name: "List" })).toHaveFocus();
+    });
+
+    it("reflects the axis on the group's data-orientation", () => {
+      const { rerender } = render(<ViewToggle value="list" />);
+      // The default toolbar is horizontal.
+      expect(screen.getByRole("group", { name: "View" })).toHaveAttribute(
+        "data-orientation",
+        "horizontal",
+      );
+
+      rerender(<ViewToggle value="list" orientation="vertical" />);
+      expect(screen.getByRole("group", { name: "View" })).toHaveAttribute(
+        "data-orientation",
+        "vertical",
+      );
+      // The group is `role="group"`, which — unlike `toolbar`/`radiogroup` — has no
+      // `aria-orientation`; the axis is conveyed by the roving-focus keys (asserted
+      // above) and `data-orientation`, not an ARIA attribute base-ui doesn't emit.
+      expect(screen.getByRole("group", { name: "View" })).not.toHaveAttribute("aria-orientation");
+    });
+
+    it("still lands Tab on the selected segment in a vertical group", async () => {
+      const user = userEvent.setup();
+      render(<ViewToggle value="board" orientation="vertical" />);
+
+      await user.tab();
+      expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
+    });
+  });
+
+  describe("width", () => {
+    // Guards the cross-component coupling `fit={width === "fill" ? …}` in
+    // `index.tsx`, which reaches from the group's own `width` into a *different*
+    // component (`Field`). Asserted through the shared class tokens each side
+    // actually emits, so it can't be silently dropped or inverted by a refactor.
+    function widthGroup(width?: "fill") {
+      return render(
+        <ToggleGroup<View> aria-label="View" width={width} value="list" onChange={() => {}}>
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem value="list">List</ToggleGroupItem>
+              <ToggleGroupItem value="board">Board</ToggleGroupItem>
+            </>
+          )}
+        </ToggleGroup>,
+      );
+    }
+
+    // The full-width atom the group carries, from the *shared* resolver — the same
+    // single source `Box` / `Flex` / `Button` use — so this asserts reuse, not a
+    // re-encoded literal.
+    const fillAtom = atoms({ width: resolveWidth("fill") });
+
+    it("spans the container and fills the wrapping Field when width='fill'", () => {
+      const { container } = widthGroup("fill");
+      // The group box takes the shared full-width atom...
+      expect(screen.getByRole("group", { name: "View" })).toHaveClass(fillAtom);
+      // ...and the wrapping Field flips to fit='fill' (the field root is the
+      // outermost element), so the fill isn't swallowed by the field's shrink-wrap.
+      expect(container.firstChild).toHaveClass(fieldRoot({ fit: "fill", labelPosition: "top" }));
+    });
+
+    it("shrink-wraps (Field fit='content', no width atom) when width is omitted", () => {
+      const { container } = widthGroup();
+      expect(screen.getByRole("group", { name: "View" })).not.toHaveClass(fillAtom);
+      expect(container.firstChild).toHaveClass(fieldRoot({ fit: "content", labelPosition: "top" }));
+    });
   });
 
   describe("clearable", () => {
@@ -373,6 +483,35 @@ describe("ToggleGroup", () => {
         "aria-required",
         "true",
       );
+    });
+
+    // A vertical group keeps every field affordance — the label still names it, the
+    // help text still wires through `aria-describedby`, invalid still flags — under
+    // an inline `labelPosition`, which is the awkward layout case.
+    it("keeps label / help / invalid wiring on a vertical group with an inline label", () => {
+      render(
+        <ToggleGroup<View>
+          label="Default view"
+          orientation="vertical"
+          labelPosition="start"
+          state="invalid"
+          helpText="Pick a view."
+          value="list"
+          onChange={() => {}}
+        >
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem value="list">List</ToggleGroupItem>
+              <ToggleGroupItem value="board">Board</ToggleGroupItem>
+            </>
+          )}
+        </ToggleGroup>,
+      );
+      const group = screen.getByRole("group", { name: "Default view" });
+      expect(group).toHaveAttribute("data-orientation", "vertical");
+      expect(group).toHaveAttribute("aria-invalid", "true");
+      const line = screen.getByText("Pick a view.");
+      expect(group.getAttribute("aria-describedby")).toBe(line.getAttribute("id"));
     });
   });
 });
