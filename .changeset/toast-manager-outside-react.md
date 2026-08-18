@@ -15,12 +15,15 @@ way to reach the toast viewport, so consumers fell back to base-ui's raw
   design-system fields (`intent` / `saliency` / `icon` / `actions`) at the top
   level and packing them for you. Create one at module scope, hand it to
   `<BaritoneProvider toastManager={…}>` to connect it to the viewport, then fire
-  toasts from anywhere:
+  toasts from any event handler:
 
   ```ts
   // toast.ts — no component needed
   export const toasts = createToastManager();
-  toasts.add({ title: "Couldn't save", intent: "negative", priority: "high" });
+
+  export function reportSaveFailure() {
+    toasts.add({ title: "Couldn't save", intent: "negative", priority: "high" });
+  }
   ```
 
 - `BaritoneProvider`'s `toastManager` prop now accepts `BaritoneToastManager |
