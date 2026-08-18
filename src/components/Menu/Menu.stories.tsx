@@ -27,7 +27,7 @@ const meta: Meta<typeof Menu> = {
     docs: {
       description: {
         component:
-          "A floating list of actions anchored to a trigger, built on base-ui's Menu. Pass rows as `items`, each the props for a `Menu.Item`: `intent`, `icon`, `children` (the label), and one of `onClick` / `href` / `render` to make it act, link externally, or navigate via your router.",
+          "A floating list of actions anchored to a trigger, built on base-ui's Menu. Pass rows as `items`, each a `<Menu.Item>`: `intent`, `icon`, `children` (the label), and one of `onClick` / `href` / `render` to make it act, link externally, or navigate via your router.",
       },
     },
   },
@@ -48,25 +48,43 @@ export const KitchenSink: Story = {
       trigger={<Menu.Trigger>Actions</Menu.Trigger>}
       items={[
         // A plain (neutral) button row.
-        { children: "Rename", onClick: () => alert("Rename") },
+        <Menu.Item key="rename" onClick={() => alert("Rename")}>
+          Rename
+        </Menu.Item>,
         // A row with a leading icon.
-        { children: "Duplicate", icon: <DuplicateGlyph />, onClick: () => alert("Duplicate") },
+        <Menu.Item key="duplicate" icon={<DuplicateGlyph />} onClick={() => alert("Duplicate")}>
+          Duplicate
+        </Menu.Item>,
         // A link row — a real `<a href>`.
-        { children: "View source", href: "https://example.com/source" },
+        <Menu.Item key="source" href="https://example.com/source">
+          View source
+        </Menu.Item>,
         // One row per supported intent (neutral is covered by "Rename" above).
-        { children: "Share", intent: "secondary", onClick: () => alert("Share") },
-        { children: "Publish", intent: "positive", onClick: () => alert("Publish") },
-        { children: "Archive", intent: "warning", onClick: () => alert("Archive") },
-        {
-          children: "Delete",
-          intent: "negative",
-          icon: <TrashGlyph />,
-          onClick: () => alert("Delete"),
-        },
+        <Menu.Item key="share" intent="secondary" onClick={() => alert("Share")}>
+          Share
+        </Menu.Item>,
+        <Menu.Item key="publish" intent="positive" onClick={() => alert("Publish")}>
+          Publish
+        </Menu.Item>,
+        <Menu.Item key="archive" intent="warning" onClick={() => alert("Archive")}>
+          Archive
+        </Menu.Item>,
+        <Menu.Item
+          key="delete"
+          intent="negative"
+          icon={<TrashGlyph />}
+          onClick={() => alert("Delete")}
+        >
+          Delete
+        </Menu.Item>,
         // A disabled button row.
-        { children: "Billing", onClick: () => alert("Billing"), disabled: true },
+        <Menu.Item key="billing" onClick={() => alert("Billing")} disabled>
+          Billing
+        </Menu.Item>,
         // A disabled link row.
-        { children: "Documentation", href: "https://example.com/docs", disabled: true },
+        <Menu.Item key="docs" href="https://example.com/docs" disabled>
+          Documentation
+        </Menu.Item>,
       ]}
     />
   ),
@@ -104,9 +122,15 @@ export const CustomTrigger: Story = {
         />
       }
       items={[
-        { children: "Profile", onClick: () => {} },
-        { children: "Settings", href: "/settings" },
-        { children: "Sign out", intent: "negative", onClick: () => {} },
+        <Menu.Item key="profile" onClick={() => {}}>
+          Profile
+        </Menu.Item>,
+        <Menu.Item key="settings" href="/settings">
+          Settings
+        </Menu.Item>,
+        <Menu.Item key="signout" intent="negative" onClick={() => {}}>
+          Sign out
+        </Menu.Item>,
       ]}
     />
   ),

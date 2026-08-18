@@ -2,27 +2,45 @@
 import * as React from "react";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { keyedElements } from "../../utils/keyedElements";
 import { Chip, type ChipProps } from "../Chip";
 import { Popover } from "../Popover";
 import { chipListItem, chipListRoot } from "./chipList.css";
 
 /**
  * One entry in a `ChipList` — the props for a single `Chip`, minus `size`
- * (the list owns sizing for every chip, so it can't be set per item). The
- * optional `id` is used as the React key for the row; supply a stable, unique
- * one when the list can reorder, otherwise the array index is used.
+ * (the list owns sizing for every chip, so it can't be set per item). Supply a
+ * stable `key` on the element when the list can reorder, otherwise the array
+ * index is used.
  *
  * `intent` and `saliency` are still allowed here: they override the list-level
  * defaults for just this chip.
  */
-export type ChipListItem = Omit<ChipProps, "size">;
+export type ChipListItemProps = Omit<ChipProps, "size">;
+
+/**
+ * `ChipList.Item` — a **configuration element**, not a rendered one. It only
+ * carries props: `ChipList` reads them off the elements you pass in `items` and
+ * renders each as a `<Chip>` in its own `<li>` itself (so it can apply the
+ * list's shared sizing/intent and collapse the overflow behind a "See more"
+ * chip). Rendering an `Item` on its own emits nothing; it's meaningful only
+ * inside a `ChipList`'s `items`.
+ */
+export function ChipListItem(_props: ChipListItemProps): React.ReactNode {
+  return null;
+}
+ChipListItem.displayName = "ChipList.Item";
 
 /** Layout direction of the chip list. */
 export type ChipListOrientation = "horizontal" | "vertical";
 
 export interface ChipListProps extends Omit<React.HTMLAttributes<HTMLUListElement>, "children"> {
-  /** The chips to render, each a `ChipListItem` (a `Chip`'s props). Keyed by `id`. */
-  items: ChipListItem[];
+  /**
+   * The chips to render, each a `<ChipList.Item>` element (keyed by `key`,
+   * falling back to index). Falsy entries (`null` / `false` / `undefined`) are
+   * skipped, so a chip can be included conditionally inline.
+   */
+  items: Array<React.ReactElement<ChipListItemProps> | null | false | undefined>;
   /**
    * Default colour intent for every chip. A chip can override it via its own
    * item-level `intent`. Defaults to the `Chip` default (`neutral`).
@@ -68,12 +86,12 @@ function ChipListRow({
   saliency,
   size,
 }: {
-  item: ChipListItem;
+  item: React.ReactElement<ChipListItemProps>;
   intent?: Intent;
   saliency?: Saliency;
   size?: Size;
 }) {
-  const { intent: itemIntent, saliency: itemSaliency, ...chipProps } = item;
+  const { intent: itemIntent, saliency: itemSaliency, ...chipProps } = item.props;
   return (
     // `list-style: none` can drop the implicit listitem role in Safari, so the
     // role is set explicitly to keep the list semantics the request calls for.
@@ -90,8 +108,8 @@ function ChipListRow({
 
 /**
  * ChipList — renders a set of chips as a semantic list, flowed in a wrapping row
- * (default) or stacked in a column. Each chip is supplied as a `ChipListItem`
- * (the props for a `Chip`); the list applies shared `intent` / `saliency` (each
+ * (default) or stacked in a column. Each chip is supplied as a `<ChipList.Item>`
+ * (a `Chip`'s props); the list applies shared `intent` / `saliency` (each
  * overridable per item) and `size` (applied to every chip and not overridable,
  * which also sets the spacing between chips).
  *
@@ -107,10 +125,10 @@ function ChipListRow({
  *   saliency="mid"
  *   max={3}
  *   items={[
- *     { children: "React" },
- *     { children: "Critical", intent: "negative", saliency: "high" },
- *     { children: "TypeScript" },
- *     { children: "Vite" },
+ *     <ChipList.Item key="react">React</ChipList.Item>,
+ *     <ChipList.Item key="critical" intent="negative" saliency="high">Critical</ChipList.Item>,
+ *     <ChipList.Item key="ts">TypeScript</ChipList.Item>,
+ *     <ChipList.Item key="vite">Vite</ChipList.Item>,
  *   ]}
  * />
  */
@@ -126,9 +144,12 @@ export function ChipList({
   ref,
   ...rest
 }: ChipListProps) {
-  const overflows = max != null && items.length > max;
-  const visible = overflows ? items.slice(0, max) : items;
-  const remaining = overflows ? items.slice(max) : [];
+  // Resolve to keyed elements first (dropping falsy entries) so `max` counts and
+  // slices real chips, and the shared keying rule applies.
+  const resolved = keyedElements(items);
+  const overflows = max != null && resolved.length > max;
+  const visible = overflows ? resolved.slice(0, max) : resolved;
+  const remaining = overflows ? resolved.slice(max) : [];
 
   const seeMoreText =
     typeof seeMoreLabel === "function" ? seeMoreLabel(remaining.length) : seeMoreLabel;
@@ -142,14 +163,8 @@ export function ChipList({
       className={cx(chipListRoot({ orientation, size }), className)}
       {...rest}
     >
-      {visible.map((item, index) => (
-        <ChipListRow
-          key={item.id ?? index}
-          item={item}
-          intent={intent}
-          saliency={saliency}
-          size={size}
-        />
+      {visible.map((item) => (
+        <ChipListRow key={item.key} item={item} intent={intent} saliency={saliency} size={size} />
       ))}
 
       {/* The overflow chip: a popover trigger whose surface holds the hidden
@@ -181,3 +196,4 @@ export function ChipList({
 }
 
 ChipList.displayName = "ChipList";
+ChipList.Item = ChipListItem;

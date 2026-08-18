@@ -10,7 +10,7 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Edit" }, { children: "Delete" }]}
+        items={[<Menu.Item key="edit">Edit</Menu.Item>, <Menu.Item key="delete">Delete</Menu.Item>]}
       />,
     );
 
@@ -22,7 +22,12 @@ describe("Menu", () => {
   });
 
   it("renders the trigger as a Button with the right popup wiring", () => {
-    render(<Menu trigger={<Menu.Trigger>Actions</Menu.Trigger>} items={[{ children: "Edit" }]} />);
+    render(
+      <Menu
+        trigger={<Menu.Trigger>Actions</Menu.Trigger>}
+        items={[<Menu.Item key="edit">Edit</Menu.Item>]}
+      />,
+    );
     const trigger = screen.getByRole("button", { name: "Actions" });
     expect(trigger.tagName).toBe("BUTTON");
     expect(trigger).toHaveAttribute("aria-haspopup");
@@ -32,7 +37,14 @@ describe("Menu", () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
     render(
-      <Menu trigger={<Menu.Trigger>Open</Menu.Trigger>} items={[{ children: "Edit", onClick }]} />,
+      <Menu
+        trigger={<Menu.Trigger>Open</Menu.Trigger>}
+        items={[
+          <Menu.Item key="edit" onClick={onClick}>
+            Edit
+          </Menu.Item>,
+        ]}
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "Open" }));
@@ -48,7 +60,11 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Docs", href: "https://example.com" }]}
+        items={[
+          <Menu.Item key="docs" href="https://example.com">
+            Docs
+          </Menu.Item>,
+        ]}
       />,
     );
 
@@ -63,7 +79,11 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Edit", onClick: () => {} }]}
+        items={[
+          <Menu.Item key="edit" onClick={() => {}}>
+            Edit
+          </Menu.Item>,
+        ]}
       />,
     );
 
@@ -80,7 +100,11 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Billing", onClick, disabled: true }]}
+        items={[
+          <Menu.Item key="billing" onClick={onClick} disabled>
+            Billing
+          </Menu.Item>,
+        ]}
       />,
     );
 
@@ -96,7 +120,7 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Edit" }]}
+        items={[<Menu.Item key="edit">Edit</Menu.Item>]}
         open
         modal={false}
       />,
@@ -110,7 +134,11 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Increment", keepOpen: true, onClick }]}
+        items={[
+          <Menu.Item key="increment" keepOpen onClick={onClick}>
+            Increment
+          </Menu.Item>,
+        ]}
       />,
     );
 
@@ -128,7 +156,10 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Edit" }, { children: "Duplicate" }]}
+        items={[
+          <Menu.Item key="edit">Edit</Menu.Item>,
+          <Menu.Item key="duplicate">Duplicate</Menu.Item>,
+        ]}
       />,
     );
 
@@ -146,8 +177,14 @@ describe("Menu", () => {
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
         items={[
-          { children: "Edit", onClick: () => {} },
-          canDelete && { children: "Delete", intent: "negative", onClick: () => {} },
+          <Menu.Item key="edit" onClick={() => {}}>
+            Edit
+          </Menu.Item>,
+          canDelete && (
+            <Menu.Item key="delete" intent="negative" onClick={() => {}}>
+              Delete
+            </Menu.Item>
+          ),
           null,
           undefined,
         ]}
@@ -165,7 +202,11 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={MENU_ITEM_INTENTS.map((intent) => ({ children: intent, intent }))}
+        items={MENU_ITEM_INTENTS.map((intent) => (
+          <Menu.Item key={intent} intent={intent}>
+            {intent}
+          </Menu.Item>
+        ))}
       />,
     );
 
@@ -185,7 +226,11 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger render={<button type="button">Custom</button>} />}
-        items={[{ children: "Edit", onClick: () => {} }]}
+        items={[
+          <Menu.Item key="edit" onClick={() => {}}>
+            Edit
+          </Menu.Item>,
+        ]}
       />,
     );
 
@@ -201,7 +246,7 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger openOnHover>Hover</Menu.Trigger>}
-        items={[{ children: "Edit" }]}
+        items={[<Menu.Item key="edit">Edit</Menu.Item>]}
       />,
     );
 
@@ -214,7 +259,7 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Edit" }, { children: "Delete" }]}
+        items={[<Menu.Item key="edit">Edit</Menu.Item>, <Menu.Item key="delete">Delete</Menu.Item>]}
       />,
     );
 
@@ -231,7 +276,7 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Edit" }, { children: "Delete" }]}
+        items={[<Menu.Item key="edit">Edit</Menu.Item>, <Menu.Item key="delete">Delete</Menu.Item>]}
       />,
     );
 
@@ -250,7 +295,11 @@ describe("Menu", () => {
     render(
       <Menu
         trigger={<Menu.Trigger>Open</Menu.Trigger>}
-        items={[{ children: "Edit" }, { children: "Duplicate" }, { children: "Delete" }]}
+        items={[
+          <Menu.Item key="edit">Edit</Menu.Item>,
+          <Menu.Item key="duplicate">Duplicate</Menu.Item>,
+          <Menu.Item key="delete">Delete</Menu.Item>,
+        ]}
       />,
     );
 

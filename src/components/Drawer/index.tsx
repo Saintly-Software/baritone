@@ -266,7 +266,7 @@ export interface DrawerHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElem
   /**
    * Overflow actions for the header, rendered as a `Menu` behind an icon-only
    * "more options" trigger placed at the header's end. Each entry is a
-   * `Menu.Item`'s props (see {@link MenuProps.items}); falsy entries are skipped.
+   * `<Menu.Item>` element (see {@link MenuProps.items}); falsy entries are skipped.
    * Use this for secondary, per-item actions — the footer's `actions` is for the
    * primary button row.
    */

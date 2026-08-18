@@ -2,15 +2,10 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { Chip } from "../Chip";
-import type { ChipListItem } from "./index";
 import { ChipList } from "./index";
 
-const TAGS: ChipListItem[] = [
-  { id: "a", children: "Alpha" },
-  { id: "b", children: "Beta" },
-  { id: "c", children: "Gamma" },
-  { id: "d", children: "Delta" },
-];
+const LABELS = ["Alpha", "Beta", "Gamma", "Delta"];
+const TAGS = LABELS.map((label) => <ChipList.Item key={label}>{label}</ChipList.Item>);
 
 describe("ChipList", () => {
   it("renders a list with one listitem per chip", () => {
@@ -19,8 +14,8 @@ describe("ChipList", () => {
     expect(list.tagName).toBe("UL");
     const items = within(list).getAllByRole("listitem");
     expect(items).toHaveLength(TAGS.length);
-    for (const tag of TAGS) {
-      expect(screen.getByText(tag.children as string)).toBeInTheDocument();
+    for (const label of LABELS) {
+      expect(screen.getByText(label)).toBeInTheDocument();
     }
   });
 
@@ -54,8 +49,10 @@ describe("ChipList", () => {
         <ChipList
           intent="neutral"
           items={[
-            { id: "x", children: "Inherits" },
-            { id: "y", children: "Overrides", intent: "negative", saliency: "high" },
+            <ChipList.Item key="x">Inherits</ChipList.Item>,
+            <ChipList.Item key="y" intent="negative" saliency="high">
+              Overrides
+            </ChipList.Item>,
           ]}
         />,
       );
@@ -70,9 +67,11 @@ describe("ChipList", () => {
         <ChipList
           size="sm"
           items={[
-            { id: "x", children: "A" },
-            // @ts-expect-error – size is intentionally omitted from ChipListItem.
-            { id: "y", children: "B", size: "lg" },
+            <ChipList.Item key="x">A</ChipList.Item>,
+            // @ts-expect-error – size is intentionally omitted from ChipListItemProps.
+            <ChipList.Item key="y" size="lg">
+              B
+            </ChipList.Item>,
           ]}
         />,
       );
@@ -83,12 +82,33 @@ describe("ChipList", () => {
   });
 
   describe("keys", () => {
-    it("renders all items even without an id (falls back to index)", () => {
+    it("renders all items even without a key (falls back to index)", () => {
       render(
-        <ChipList items={[{ children: "One" }, { children: "Two" }, { children: "Three" }]} />,
+        <ChipList
+          items={[
+            <ChipList.Item>One</ChipList.Item>,
+            <ChipList.Item>Two</ChipList.Item>,
+            <ChipList.Item>Three</ChipList.Item>,
+          ]}
+        />,
       );
       expect(screen.getAllByRole("listitem")).toHaveLength(3);
     });
+  });
+
+  it("skips falsy entries so a chip can be included conditionally inline", () => {
+    const showBeta = false;
+    render(
+      <ChipList
+        items={[
+          <ChipList.Item key="a">Alpha</ChipList.Item>,
+          showBeta && <ChipList.Item key="b">Beta</ChipList.Item>,
+          null,
+        ]}
+      />,
+    );
+    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    expect(screen.queryByText("Beta")).not.toBeInTheDocument();
   });
 
   describe("max / see more", () => {
@@ -143,7 +163,15 @@ describe("ChipList", () => {
     it("fires an item's onClick from its clickable label", async () => {
       const onClick = vi.fn();
       const user = userEvent.setup();
-      render(<ChipList items={[{ id: "x", children: "Filter", onClick }]} />);
+      render(
+        <ChipList
+          items={[
+            <ChipList.Item key="x" onClick={onClick}>
+              Filter
+            </ChipList.Item>,
+          ]}
+        />,
+      );
       await user.click(screen.getByRole("button", { name: "Filter" }));
       expect(onClick).toHaveBeenCalledOnce();
     });
@@ -151,7 +179,15 @@ describe("ChipList", () => {
     it("fires an item's handleRemove from its built-in remove button", async () => {
       const handleRemove = vi.fn();
       const user = userEvent.setup();
-      render(<ChipList items={[{ id: "x", children: "Tag", handleRemove }]} />);
+      render(
+        <ChipList
+          items={[
+            <ChipList.Item key="x" handleRemove={handleRemove}>
+              Tag
+            </ChipList.Item>,
+          ]}
+        />,
+      );
       await user.click(screen.getByRole("button", { name: "Remove" }));
       expect(handleRemove).toHaveBeenCalledOnce();
     });
@@ -164,7 +200,13 @@ describe("ChipList", () => {
       // chip should act on that chip alone, never trip the surrounding handler.
       render(
         <div onClick={onAncestor}>
-          <ChipList items={[{ id: "x", children: "Tag", handleRemove }]} />
+          <ChipList
+            items={[
+              <ChipList.Item key="x" handleRemove={handleRemove}>
+                Tag
+              </ChipList.Item>,
+            ]}
+          />
         </div>,
       );
       await user.click(screen.getByRole("button", { name: "Remove" }));
@@ -180,18 +222,20 @@ describe("ChipList", () => {
         <div onClick={onAncestor}>
           <ChipList
             items={[
-              {
-                id: "x",
-                children: "Tag",
-                trailAdornments: [
+              <ChipList.Item
+                key="x"
+                trailAdornments={[
                   <Chip.Adornment
+                    key="remove"
                     icon={<span>×</span>}
                     label="Remove"
                     onClick={onAdornment}
                     forcePropagation
                   />,
-                ],
-              },
+                ]}
+              >
+                Tag
+              </ChipList.Item>,
             ]}
           />
         </div>,

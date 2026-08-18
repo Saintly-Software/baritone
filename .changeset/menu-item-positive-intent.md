@@ -10,8 +10,12 @@ confirming/constructive (Publish, Approve, Restore), the counterpart to the
 <Menu
   trigger={<Menu.Trigger>Actions</Menu.Trigger>}
   items={[
-    { children: "Publish", intent: "positive", onClick: publish },
-    { children: "Delete", intent: "negative", onClick: remove },
+    <Menu.Item key="publish" intent="positive" onClick={publish}>
+      Publish
+    </Menu.Item>,
+    <Menu.Item key="delete" intent="negative" onClick={remove}>
+      Delete
+    </Menu.Item>,
   ]}
 />
 ```
