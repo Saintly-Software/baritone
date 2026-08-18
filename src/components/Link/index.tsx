@@ -149,9 +149,12 @@ export interface LabelledButtonLinkProps extends ButtonLinkCommonProps {
 export interface IconButtonLinkProps extends ButtonLinkCommonProps {
   /**
    * The single centred glyph — **required**, and the discriminant of this arm.
-   * Typically an `<Icon>`; inherits the link's text colour.
+   * Typically an `<Icon>`; inherits the link's text colour. Typed
+   * `NonNullable<React.ReactNode>` so a nullish value (e.g. a `cond ? <Icon/> :
+   * null`) can't slip through as the icon-only arm and render an *unnamed* anchor
+   * — the required `aria-label` is only wired up when a glyph is actually present.
    */
-  icon: React.ReactNode;
+  icon: NonNullable<React.ReactNode>;
   /**
    * Accessible name — **required**, because the link is icon-only and has no
    * visible text to name it (e.g. "Back to entry details"). The mirror image of

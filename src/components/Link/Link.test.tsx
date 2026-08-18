@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { Button } from "../Button";
 import { LinkProvider } from "../LinkProvider";
 import { Link } from "./index";
 
@@ -186,12 +187,23 @@ describe("Link", () => {
         expect(link).toHaveTextContent("");
       });
 
-      it("reuses the icon-only Button recipe (styled, not the bare inline-link class)", () => {
+      it("is pixel-identical to an icon-only Button: same recipe + square-treatment classes", () => {
+        // Render both at the same knobs; the icon-only link must carry every class
+        // an icon-only `Button` does (the shared recipe *and* the `buttonSquare`
+        // treatment), proving it reuses the styling path rather than duplicating it.
         render(<Link appearance="button" href="/x" icon={<span />} aria-label="Add" />);
-        // The button recipe (plus the square treatment) emits many more classes
-        // than the single inline `linkBase`.
-        const classes = screen.getByRole("link", { name: "Add" }).className.split(/\s+/);
-        expect(classes.length).toBeGreaterThan(1);
+        render(<Button icon={<span />} aria-label="Add button" />);
+        const linkClasses = new Set(
+          screen.getByRole("link", { name: "Add" }).className.split(/\s+/),
+        );
+        const buttonClasses = screen
+          .getByRole("button", { name: "Add button" })
+          .className.split(/\s+/)
+          .filter(Boolean);
+        // The button emits more than one class (recipe + square + focus ring)…
+        expect(buttonClasses.length).toBeGreaterThan(1);
+        // …and every one of them is present on the icon-only link.
+        for (const className of buttonClasses) expect(linkClasses).toContain(className);
       });
 
       it("is router-agnostic: renders a supplied link component via `render`", () => {
@@ -241,7 +253,7 @@ describe("Link", () => {
         expect(navigations).toEqual(["/dashboard"]);
       });
 
-      it("collapses a disabled icon-only link to an inert element that keeps its accessible name", async () => {
+      it("collapses a disabled icon-only link to an inert element whose name survives as content", async () => {
         const onClick = vi.fn();
         const user = userEvent.setup();
         render(
@@ -254,12 +266,17 @@ describe("Link", () => {
             onClick={onClick}
           />,
         );
-        // A disabled link has no honest HTML form, so it leaves the link a11y tree…
+        // A disabled link has no honest HTML form, so it leaves the link a11y tree
+        // and becomes a role-less inert element — like the labelled arm.
         expect(screen.queryByRole("link", { name: "Back" })).not.toBeInTheDocument();
-        // …but the aria-label survives on the inert element so it still has a name.
-        const inert = screen.getByLabelText("Back");
+        // The icon-only arm has no visible label, so the name is re-exposed as
+        // visually-hidden *content* (perceivable on a generic element) rather than
+        // an `aria-label` — which is prohibited on a role-less element (axe
+        // `aria-prohibited-attr`) and ignored by some AT.
+        const inert = screen.getByText("Back").closest("[aria-disabled]") as HTMLElement;
         expect(inert).toHaveAttribute("aria-disabled", "true");
         expect(inert.tagName).not.toBe("A");
+        expect(inert).not.toHaveAttribute("aria-label");
         await user.click(inert);
         expect(onClick).not.toHaveBeenCalled();
       });
@@ -276,27 +293,39 @@ describe("Link", () => {
             disabledReason="Sign in first"
           />,
         );
-        await user.hover(screen.getByLabelText("Back"));
+        await user.hover(screen.getByText("Back"));
         await waitFor(() => expect(screen.getByText("Sign in first")).toBeInTheDocument(), {
           timeout: 2000,
         });
       });
 
-      it("sets aria-busy while loading and keeps its accessible name", () => {
+      it("sets aria-busy while loading and keeps its name perceivable as content", () => {
         render(
           <Link appearance="button" href="/x" icon={<span />} aria-label="Redirecting" loading />,
         );
         // Loading makes the link inert (an in-flight nav shouldn't re-trigger), so
-        // like the labelled arm it collapses out of the link a11y tree — but the
-        // aria-label keeps naming it and aria-busy marks it in-flight.
-        const busy = screen.getByLabelText("Redirecting");
+        // like the labelled arm it collapses out of the link a11y tree — the name
+        // rides along as visually-hidden content and aria-busy marks it in-flight.
+        const busy = screen.getByText("Redirecting").closest("[aria-busy]") as HTMLElement;
         expect(busy).toHaveAttribute("aria-busy", "true");
+        expect(busy).not.toHaveAttribute("aria-label");
       });
 
       it("requires an aria-label on the icon-only arm", () => {
         // @ts-expect-error `aria-label` is required when `icon` is present (no visible name).
         render(<Link appearance="button" href="/x" icon={<span data-testid="no-label" />} />);
         expect(screen.getByTestId("no-label")).toBeInTheDocument();
+      });
+
+      it("rejects a nullish icon (it can't select the icon-only arm and render unnamed)", () => {
+        // `icon` is `NonNullable<React.ReactNode>`, so a `cond ? <Icon/> : null`
+        // can't slip through as the icon-only arm — which would forward no glyph
+        // and drop the required `aria-label`, producing an unnamed anchor.
+        // @ts-expect-error `icon` must not be null.
+        render(<Link appearance="button" href="/x" icon={null} aria-label="Back" />);
+        // @ts-expect-error `icon` must not be undefined.
+        render(<Link appearance="button" href="/x" icon={undefined} aria-label="Back" />);
+        expect(screen.getAllByRole("link").length).toBeGreaterThan(0);
       });
 
       it("rejects children, startIcon/endIcon, and width on the icon-only arm", () => {

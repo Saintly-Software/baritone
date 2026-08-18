@@ -125,6 +125,24 @@ describe("InternalGenericButtonAnchor", () => {
       expect(screen.getByText("Settings").tagName).toBe("DIV");
     });
 
+    // An icon-only disabled link's only child is an aria-hidden glyph, so its name
+    // lives in `aria-label`. That attribute is prohibited on the role-less inert
+    // <div> (ARIA generic role; axe `aria-prohibited-attr`), so the primitive
+    // re-exposes it as visually-hidden text content instead of forwarding it.
+    it("re-exposes a disabled link's aria-label as text content, not a prohibited attribute", () => {
+      render(
+        <InternalGenericButtonAnchor href="/x" disabled aria-label="Back">
+          <span aria-hidden>icon</span>
+        </InternalGenericButtonAnchor>,
+      );
+      const div = screen.getByText("Back").closest("[aria-disabled]") as HTMLElement;
+      expect(div.tagName).toBe("DIV");
+      // The name is perceivable as content…
+      expect(div).toHaveTextContent("Back");
+      // …and the prohibited attribute is gone.
+      expect(div).not.toHaveAttribute("aria-label");
+    });
+
     it("keeps a disabled button as an aria-disabled <button> and swallows its click", async () => {
       const onClick = vi.fn();
       const user = userEvent.setup();

@@ -16,10 +16,14 @@ const ArrowLeft = () => (
 );
 
 /**
- * Interaction coverage for `Link`. The first story validates (via real computed
- * styles) that an inline link inherits its container's typography; the next
- * asserts the disabled button-appearance link explains itself on hover; the chip
- * stories cover the chip-appearance's disabled tooltip and `LinkProvider` routing.
+ * Interaction coverage for `Link`. `InheritsTypography` validates (via real
+ * computed styles) that an inline link inherits its container's typography;
+ * `DisabledButtonTooltip` asserts the disabled button-appearance link explains
+ * itself on hover; the icon-only button stories check that an icon-only
+ * button-link is named solely by its `aria-label` when live
+ * (`IconOnlyButtonAccessibleName`) and that its disabled form stays perceivable
+ * and still explains itself (`DisabledIconOnlyButtonTooltip`); the chip stories
+ * cover the chip-appearance's disabled tooltip and `LinkProvider` routing.
  */
 const meta: Meta<typeof Link> = {
   title: "Interaction Tests/Link",
@@ -126,9 +130,13 @@ export const DisabledIconOnlyButtonTooltip: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // Inert: out of the link a11y tree, but the aria-label still names it.
+    // Inert: out of the link a11y tree (a role-less element), with its name
+    // re-exposed as visually-hidden content rather than a prohibited aria-label.
     expect(canvas.queryByRole("link")).toBeNull();
-    await userEvent.hover(canvas.getByLabelText("Back to entry details"));
+    const inert = canvas.getByText("Back to entry details").closest("[aria-disabled]");
+    expect(inert).not.toBeNull();
+    expect(inert).not.toHaveAttribute("aria-label");
+    await userEvent.hover(inert as HTMLElement);
     await waitFor(
       () => expect(within(document.body).getByText("Sign in first")).toBeInTheDocument(),
       { timeout: 3000 },
