@@ -14,6 +14,15 @@ const Sparkle = () => (
   </Icon>
 );
 
+// A left-arrow glyph for the icon-only "back" navigation stories.
+const ArrowLeft = () => (
+  <Icon>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M11 5l1.4 1.4L7.8 11H20v2H7.8l4.6 4.6L11 19l-7-7z" />
+    </svg>
+  </Icon>
+);
+
 const meta: Meta<typeof Link> = {
   title: "Components/Link",
   component: Link,
@@ -142,6 +151,58 @@ export const ButtonAsRouterLink: Story = {
     intent: "primary",
     children: "Open settings",
     render: <a href="/settings" data-router-link="" />,
+  },
+};
+
+/**
+ * Pass `icon` + `aria-label` (and no `children`) for the icon-only, square
+ * button-styled link — the anchor mirror of an icon-only `Button`. The
+ * `aria-label` is **required**: it's the accessible name, since there's no
+ * visible text. This is the honest way to name an icon-only navigation control —
+ * no need to smuggle a name in through the `render` element.
+ */
+export const ButtonIconOnly: Story = {
+  args: {
+    appearance: "button",
+    intent: "primary",
+    saliency: "high",
+    icon: <ArrowLeft />,
+    "aria-label": "Back to entry details",
+    href: "/entries/42",
+    children: undefined,
+  },
+};
+
+// The icon-only button-link stays a 1:1 square at every `size`, exactly like an
+// icon-only `Button`.
+export const ButtonIconOnlySizes: Story = {
+  render: () => (
+    <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+      {SIZES.map((size) => (
+        <Link
+          key={size}
+          appearance="button"
+          intent="primary"
+          size={size}
+          icon={<ArrowLeft />}
+          aria-label={`Back (${size})`}
+          href="https://example.com"
+        />
+      ))}
+    </div>
+  ),
+};
+
+// As an icon-only button-styled router link: `render` owns navigation, the square
+// recipe owns the look, and the required `aria-label` names it.
+export const ButtonIconOnlyAsRouterLink: Story = {
+  args: {
+    appearance: "button",
+    intent: "primary",
+    icon: <ArrowLeft />,
+    "aria-label": "Back to entry details",
+    render: <a href="/entries/42" data-router-link="" />,
+    children: undefined,
   },
 };
 

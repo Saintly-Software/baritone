@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { srOnly } from "../../../components/SrOnly/srOnly.css";
 import { RenderElement, type RenderProp } from "../../../utils/render";
 
 export interface InternalGenericButtonAnchorProps extends Omit<
@@ -69,6 +70,9 @@ export interface InternalGenericButtonAnchorProps extends Omit<
  * `aria-disabled` (so it stays focusable and can explain itself) and swallows its
  * click. Everything else — `className`, `style`, `data-*`, `aria-*`, `id`,
  * `tabIndex`, other handlers — passes straight through to the rendered element.
+ * The lone exception: an `aria-label` on the disabled-link `<div>` is re-exposed
+ * as visually-hidden text content instead (ARIA prohibits `aria-label` on a
+ * role-less element), so an icon-only disabled link keeps a perceivable name.
  *
  * **Internal by design — not exported from the package.** Like `InternalButton`,
  * it's a building block the system composes public components from.
@@ -121,8 +125,22 @@ export function InternalGenericButtonAnchor({
   // navigation and no click wired, just the passthrough props and an
   // `aria-disabled` hook for styling/AT. Covers both internal and external links.
   if (isLink && disabled) {
+    // A role-less `<div>` prohibits `aria-label` (ARIA `generic` role; axe flags
+    // `aria-prohibited-attr`, and some AT ignore it), so an *icon-only* link —
+    // whose only child is an `aria-hidden` glyph — would collapse to a nameless
+    // control. Re-expose the name as visually-hidden text *content* (which a
+    // generic element does surface) and drop the prohibited attribute. A labelled
+    // link passes no `aria-label`, so this only affects the icon-only arm; its
+    // visible children already carry the name.
+    const { "aria-label": ariaLabel, ...inertRest } = rest;
     return (
-      <div ref={ref as React.Ref<HTMLDivElement>} aria-disabled className={className} {...rest}>
+      <div
+        ref={ref as React.Ref<HTMLDivElement>}
+        aria-disabled
+        className={className}
+        {...inertRest}
+      >
+        {ariaLabel != null && <span className={srOnly}>{ariaLabel}</span>}
         {children}
       </div>
     );

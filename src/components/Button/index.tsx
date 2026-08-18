@@ -137,9 +137,12 @@ export interface IconButtonProps extends ButtonCommonProps {
   appearance?: "solid";
   /**
    * The single centred glyph — **required**, and the discriminant of this arm.
-   * Typically an `<Icon>`; inherits the button's text colour.
+   * Typically an `<Icon>`; inherits the button's text colour. Typed
+   * `NonNullable<React.ReactNode>` so a nullish value (e.g. a `cond ? <Icon/> :
+   * null`) can't slip through as the icon-only arm and render an *unnamed* button
+   * — the required `aria-label` is only wired up when a glyph is actually present.
    */
-  icon: React.ReactNode;
+  icon: NonNullable<React.ReactNode>;
   /**
    * Accessible name — **required**, because the button is icon-only and has no
    * visible text to name it (e.g. "Add to favourites"). The mirror image of a
