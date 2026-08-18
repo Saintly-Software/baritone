@@ -23,13 +23,21 @@ non-breaking — both default to today's behaviour.
   `aria-orientation`, so none is emitted; the axis is conveyed by the roving-focus
   keys and base-ui's `data-orientation`.
 
-- **`width`** — the same `fill` / `fit` / `inherit` shorthand `Box` / `Flex` /
-  `Button` take. The group is `inline-flex` and a labelled group double
+- **`width="fill"`** — make the group span its container instead of
+  shrink-wrapping. The group is `inline-flex` and a labelled group double
   shrink-wraps (the `Field` wrapper is `fit: "content"` too), so a vertical group
   in a fixed-width sidebar couldn't be made to fill from props. `width="fill"`
-  spans the container _and_ flips the wrapping `Field` to `fit: "fill"` so the
-  fill isn't swallowed by the shrink-wrapped field. Omit it and the group keeps
-  its natural shrink-to-content size, exactly as before.
+  applies the shared `full` width atom (the same `resolveWidth` source
+  `Box` / `Flex` / `Button` use — no re-encoded literal) _and_ flips the wrapping
+  `Field` to `fit: "fill"` so the fill isn't swallowed by the shrink-wrapped
+  field; a filled horizontal toolbar grows its segments to share the width. Omit
+  it and the group keeps its natural shrink-to-content size, exactly as before.
+
+  Only `"fill"` is offered — not the full `fit` / `inherit` shorthand `Box` &
+  co. take. The `Field` wrapper interposes as a shrink-wrapper, so `inherit`
+  can't reach an ancestor's width through it and `fit` would only restate the
+  default; both would be dead knobs, so they're left off the type rather than
+  shipped non-functional.
 
 ```tsx
 <ToggleGroup

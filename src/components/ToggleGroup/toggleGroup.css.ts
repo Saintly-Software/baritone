@@ -1,4 +1,4 @@
-import { style } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
@@ -14,11 +14,9 @@ import { vars } from "../../theme/contract.css";
  * `vertical` column stretches them so they share one width down the stack
  * instead of each hugging its own label.
  *
- * `width` is the optional fill knob — the same `fill` / `fit` / `inherit`
- * shorthand `Box` / `Flex` / `Button` take. It exists because the group is
- * `inline-flex` (it shrink-wraps its segments), so a vertical group in a
- * fixed-width sidebar couldn't be made to fill from props; `fill` lets it span
- * its container. Left unset, the group keeps its natural shrink-to-content size.
+ * The `width: 100%` for a filled group is applied as the shared `resolveWidth`
+ * sprinkles atom in `index.tsx` (the single source `Box` / `Flex` / `Button`
+ * use), so this recipe never re-encodes the shorthand — it owns only the axis.
  */
 export const toggleGroupRoot = recipe({
   base: {
@@ -30,13 +28,22 @@ export const toggleGroupRoot = recipe({
       horizontal: { flexDirection: "row", alignItems: "center" },
       vertical: { flexDirection: "column", alignItems: "stretch" },
     },
-    width: {
-      fill: { width: "100%" },
-      fit: { width: "fit-content" },
-      inherit: { width: "inherit" },
-    },
   },
   defaultVariants: { orientation: "horizontal" },
+});
+
+/**
+ * The layout *response* to `width="fill"` on a *horizontal* group: grow the
+ * segments so they share the filled width instead of sitting natural-width with a
+ * ragged trailing gap at the inline-start. Applied only for a filled horizontal
+ * toolbar (a vertical column already shares the width via `align-items: stretch`,
+ * and growing its children would stretch them along the *main*, vertical axis
+ * into tall buttons). The width atom can't express this, and vanilla-extract's
+ * `selectors` can't target children — hence a dedicated class + `globalStyle`.
+ */
+export const toggleGroupFillRow = style({});
+globalStyle(`${toggleGroupFillRow} > *`, {
+  flexGrow: 1,
 });
 
 /**

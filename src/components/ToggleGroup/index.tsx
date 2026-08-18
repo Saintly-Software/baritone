@@ -7,7 +7,8 @@ import {
   type InternalButtonHtmlAttrs,
 } from "../../internal/components/InternalButton";
 import type { FormState, Intent, LabelPosition, Saliency, Size } from "../../theme/constants";
-import type { WidthShorthand } from "../../styles/layoutProps";
+import { resolveWidth } from "../../styles/layoutProps";
+import { atoms } from "../../styles/sprinkles.css";
 import { cx } from "../../utils/cx";
 import {
   Field,
@@ -17,7 +18,7 @@ import {
   joinIds,
 } from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
-import { toggleGroupDisabled, toggleGroupRoot } from "./toggleGroup.css";
+import { toggleGroupDisabled, toggleGroupFillRow, toggleGroupRoot } from "./toggleGroup.css";
 
 /** Layout (and keyboard) direction of the segmented control. */
 export type ToggleGroupOrientation = "horizontal" | "vertical";
@@ -170,14 +171,21 @@ interface ToggleGroupSharedProps<T extends string> {
    */
   orientation?: ToggleGroupOrientation;
   /**
-   * Width of the group box — the same `fill` / `fit` / `inherit` shorthand
-   * `Box` / `Flex` / `Button` take. Omit (the default) and the group shrink-wraps
-   * its segments (`inline-flex`), same as before this prop existed. `fill` makes
-   * it span its container — the case a vertical group in a fixed-width sidebar
-   * wants — and also fills the wrapping `Field` in form-control mode, which
-   * otherwise shrink-wraps too.
+   * Make the group span its container instead of shrink-wrapping its segments.
+   * Omit (the default) and the group stays `inline-flex`, hugging its content —
+   * exactly as before this prop existed. `"fill"` makes it fill the available
+   * width: it applies the shared `full` width atom (the same `resolveWidth`
+   * source `Box` / `Flex` / `Button` use) *and* flips the wrapping `Field` to
+   * `fit: "fill"`, so the fill isn't swallowed by the field's own shrink-wrap.
+   * A vertical group in a fixed-width sidebar is the case that wants this; a
+   * filled horizontal toolbar grows its segments to share the width.
+   *
+   * Only `"fill"` is offered (not the full `fit` / `inherit` shorthand `Box` &
+   * co. take): the `Field` wrapper interposes as a shrink-wrapper, so `inherit`
+   * can't reach an ancestor's width through it and `fit` would only restate the
+   * default — both would be dead knobs here.
    */
-  width?: WidthShorthand;
+  width?: "fill";
   /**
    * Disable the whole group. Modelled with `aria-disabled` + a veto in the change
    * handler (never the native attribute), so every segment stays keyboard
@@ -489,7 +497,15 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
             // Tab/arrow reachable — see AGENTS.md.
             aria-disabled={disabled || undefined}
             className={cx(
-              toggleGroupRoot({ orientation, width }),
+              toggleGroupRoot({ orientation }),
+              // The width property itself comes from the shared shorthand resolver
+              // (the single source `Box` / `Flex` / `Button` use), so this never
+              // drifts from the other primitives. `resolveWidth(undefined)` is a
+              // no-op, so the unset default stays `inline-flex` shrink-wrap.
+              atoms({ width: resolveWidth(width) }),
+              // A filled horizontal toolbar grows its segments to share the width;
+              // a vertical column already shares it via `align-items: stretch`.
+              orientation === "horizontal" && width === "fill" && toggleGroupFillRow,
               disabled && toggleGroupDisabled,
               className,
             )}

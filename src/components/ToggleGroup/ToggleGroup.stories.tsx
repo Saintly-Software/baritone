@@ -59,7 +59,7 @@ const meta: Meta<typeof ViewToggle> = {
     saliency: { control: "inline-radio", options: SALIENCIES },
     size: { control: "inline-radio", options: SIZES },
     orientation: { control: "inline-radio", options: ["horizontal", "vertical"] },
-    width: { control: "inline-radio", options: [undefined, "fill", "fit", "inherit"] },
+    width: { control: "inline-radio", options: [undefined, "fill"] },
     disabled: { control: "boolean" },
   },
 };
@@ -161,6 +161,23 @@ export const VerticalFilled: Story = {
       }}
     >
       <ViewToggle orientation="vertical" width="fill" aria-label="View (filled sidebar)" />
+    </div>
+  ),
+};
+
+// A *horizontal* group asked to fill: the segments grow to share the width
+// (rather than huddling natural-width at the inline-start with a trailing gap).
+export const HorizontalFilled: Story = {
+  render: () => (
+    <div
+      style={{
+        width: 420,
+        padding: 16,
+        border: "1px dashed rgba(128,128,128,0.5)",
+        borderRadius: 8,
+      }}
+    >
+      <ViewToggle width="fill" aria-label="View (filled toolbar)" />
     </div>
   ),
 };

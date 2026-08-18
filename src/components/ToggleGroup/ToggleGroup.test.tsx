@@ -2,6 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
+import { resolveWidth } from "../../styles/layoutProps";
+import { atoms } from "../../styles/sprinkles.css";
+import { fieldRoot } from "../Field/field.css";
 import { ToggleGroup } from "./index";
 
 type View = "list" | "board" | "calendar";
@@ -207,6 +210,45 @@ describe("ToggleGroup", () => {
 
       await user.tab();
       expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
+    });
+  });
+
+  describe("width", () => {
+    // Guards the cross-component coupling `fit={width === "fill" ? …}` in
+    // `index.tsx`, which reaches from the group's own `width` into a *different*
+    // component (`Field`). Asserted through the shared class tokens each side
+    // actually emits, so it can't be silently dropped or inverted by a refactor.
+    function widthGroup(width?: "fill") {
+      return render(
+        <ToggleGroup<View> aria-label="View" width={width} value="list" onChange={() => {}}>
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem value="list">List</ToggleGroupItem>
+              <ToggleGroupItem value="board">Board</ToggleGroupItem>
+            </>
+          )}
+        </ToggleGroup>,
+      );
+    }
+
+    // The full-width atom the group carries, from the *shared* resolver — the same
+    // single source `Box` / `Flex` / `Button` use — so this asserts reuse, not a
+    // re-encoded literal.
+    const fillAtom = atoms({ width: resolveWidth("fill") });
+
+    it("spans the container and fills the wrapping Field when width='fill'", () => {
+      const { container } = widthGroup("fill");
+      // The group box takes the shared full-width atom...
+      expect(screen.getByRole("group", { name: "View" })).toHaveClass(fillAtom);
+      // ...and the wrapping Field flips to fit='fill' (the field root is the
+      // outermost element), so the fill isn't swallowed by the field's shrink-wrap.
+      expect(container.firstChild).toHaveClass(fieldRoot({ fit: "fill", labelPosition: "top" }));
+    });
+
+    it("shrink-wraps (Field fit='content', no width atom) when width is omitted", () => {
+      const { container } = widthGroup();
+      expect(screen.getByRole("group", { name: "View" })).not.toHaveClass(fillAtom);
+      expect(container.firstChild).toHaveClass(fieldRoot({ fit: "content", labelPosition: "top" }));
     });
   });
 
