@@ -304,11 +304,11 @@ describe("DataTable grouping", () => {
         getRowId={(p) => p.id}
       />,
     );
-    expect(within(implicit).getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
-      "Name",
-      "Role",
-      "Balance",
-    ]);
+    expect(
+      within(implicit)
+        .getAllByRole("columnheader")
+        .map((h) => h.textContent),
+    ).toEqual(["Name", "Role", "Balance"]);
 
     const { container: explicit } = render(
       <DataTable

@@ -387,10 +387,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     // intermediate group rows.
     const dataRowCount = row.getLeafRows().filter((r) => !r.getIsGrouped()).length;
     return (
-      <span
-        className={groupLabel}
-        style={assignInlineVars({ [groupDepthVar]: String(row.depth) })}
-      >
+      <span className={groupLabel} style={assignInlineVars({ [groupDepthVar]: String(row.depth) })}>
         <button
           type="button"
           onClick={row.getToggleExpandedHandler()}

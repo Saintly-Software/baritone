@@ -11,7 +11,7 @@ outline column instead of a separate grouped column.
 - **`"merge"`:** the grouped column(s) are not rendered as their own columns.
   The group label (value + expand/collapse toggle + count) is hosted in the
   first visible non-grouped column, and each leaf row renders that column's own
-  value, both indented by nesting depth — so a *Category → Subcategory*
+  value, both indented by nesting depth — so a _Category → Subcategory_
   breakdown reads straight down a single outline column. Non-grouped columns
   (e.g. a summed `amount`) keep rendering normally, aggregates and all.
   Multi-level `grouping` indents progressively.
