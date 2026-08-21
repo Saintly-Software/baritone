@@ -12,11 +12,26 @@ interface Person {
 
 // Kept at module scope so the references stay stable across renders — a fresh
 // `data`/`columns` array every render would throw away TanStack's row model.
+// Roles repeat so the grouping stories have something to gather.
 const people: Person[] = [
   { id: "1", name: "Ada Lovelace", email: "ada@example.com", role: "Engineering", balance: 4200 },
-  { id: "2", name: "Alan Turing", email: "alan@example.com", role: "Research", balance: 1875 },
-  { id: "3", name: "Grace Hopper", email: "grace@example.com", role: "Compilers", balance: 9600 },
-  { id: "4", name: "Katherine Johnson", email: "kj@example.com", role: "Trajectory", balance: 320 },
+  { id: "2", name: "Grace Hopper", email: "grace@example.com", role: "Engineering", balance: 9600 },
+  {
+    id: "3",
+    name: "Barbara Liskov",
+    email: "barbara@example.com",
+    role: "Engineering",
+    balance: 2750,
+  },
+  { id: "4", name: "Alan Turing", email: "alan@example.com", role: "Research", balance: 1875 },
+  { id: "5", name: "Katherine Johnson", email: "kj@example.com", role: "Research", balance: 320 },
+  {
+    id: "6",
+    name: "Edsger Dijkstra",
+    email: "edsger@example.com",
+    role: "Research",
+    balance: 5100,
+  },
 ];
 
 const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
@@ -31,10 +46,14 @@ const columns = col.columns([
   }),
   col.accessor("role", { header: "Role" }),
   // `meta.align` is DataTable's house column option (a v9 type-only meta slot).
+  // `aggregationFn` + `aggregatedCell` roll the column up on group-header rows —
+  // inert until a story turns grouping on.
   col.accessor("balance", {
     header: "Balance",
     meta: { align: "end" },
     cell: (info) => usd.format(info.getValue()),
+    aggregationFn: "sum",
+    aggregatedCell: (info) => usd.format(info.getValue()),
   }),
 ]);
 
@@ -73,6 +92,42 @@ export const Empty: Story = {
         data={[]}
         columns={columns}
         empty="No people yet."
+        getRowId={(p) => p.id}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Group rows by a column with `grouping`. Each distinct value gets a collapsible
+ * header row showing the group's label, its row count, and the balance column's
+ * per-group total (from its `aggregationFn`). Groups start expanded; click a
+ * chevron to collapse one.
+ */
+export const Grouped: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members by department"
+        data={people}
+        columns={columns}
+        grouping={["role"]}
+        getRowId={(p) => p.id}
+      />
+    </div>
+  ),
+};
+
+/** The same grouping, but every group starts collapsed via `defaultExpanded={false}`. */
+export const GroupedCollapsed: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members by department"
+        data={people}
+        columns={columns}
+        grouping={["role"]}
+        defaultExpanded={false}
         getRowId={(p) => p.id}
       />
     </div>
