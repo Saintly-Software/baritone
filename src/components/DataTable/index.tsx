@@ -196,6 +196,12 @@ export interface DataTableBaseProps<TData extends RowData> extends Omit<
    *   remaining column aggregates, the innermost grouped column stays on as the
    *   outline. Set the host column's `header` to name the outline (e.g.
    *   `"Category"`). Inert without `grouping`.
+   *
+   * `"merge"` assumes flat columns. It drops a grouped leaf at render time
+   * without touching column-visibility state, so a grouped leaf nested inside a
+   * column group leaves that group's parent header at its original `colSpan` —
+   * wider than the body. Use `"columns"` when your columns are nested under group
+   * headers.
    */
   groupDisplay?: "columns" | "merge";
   /**
@@ -250,8 +256,8 @@ const NO_GROUPING: string[] = [];
 
 /**
  * Shared empty set for the "no columns hidden" case (the default `"columns"`
- * presentation, and `"merge"` before any `grouping` is set) — one frozen
- * module-scope value keeps the `useMemo` reference steady across renders.
+ * presentation, and `"merge"` before any `grouping` is set) — one module-scope
+ * value, so the non-merge path allocates nothing per render.
  */
 const EMPTY_SET: ReadonlySet<string> = new Set();
 
