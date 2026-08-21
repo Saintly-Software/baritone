@@ -291,6 +291,300 @@ describe("DataTable grouping", () => {
     expect(screen.getByText("(2)")).toBeInTheDocument();
     expect(screen.getByText("(1)")).toBeInTheDocument();
   });
+
+  it("keeps the grouped column (default groupDisplay='columns') — a regression guard", () => {
+    // The default presentation must be unchanged: the grouped column stays its own
+    // column, so all three headers render and passing `groupDisplay="columns"`
+    // explicitly is identical to omitting it.
+    const { container: implicit } = render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        getRowId={(p) => p.id}
+      />,
+    );
+    expect(
+      within(implicit)
+        .getAllByRole("columnheader")
+        .map((h) => h.textContent),
+    ).toEqual(["Name", "Role", "Balance"]);
+
+    const { container: explicit } = render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        groupDisplay="columns"
+        getRowId={(p) => p.id}
+      />,
+    );
+    // Byte-for-byte: the explicit default renders the same table markup as omitting it.
+    expect(explicit.querySelector("table")!.outerHTML).toBe(
+      implicit.querySelector("table")!.outerHTML,
+    );
+  });
+});
+
+// Depth published by the merged label's inline `--groupDepth` var (via
+// assignInlineVars) — the numeric value in the element's `style` attribute.
+function labelDepth(el: HTMLElement): number {
+  const match = (el.getAttribute("style") ?? "").match(/:\s*(\d+)/);
+  return match ? Number(match[1]) : Number.NaN;
+}
+
+describe("DataTable grouping — groupDisplay='merge'", () => {
+  it("drops the grouped column and hosts the label in the first visible column", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />,
+    );
+    // One fewer column: the grouped "Role" header is gone; Name (the host) and
+    // Balance remain.
+    expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
+      "Name",
+      "Balance",
+    ]);
+  });
+
+  it("shows the group value + count and per-group aggregate on a group-header row", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />,
+    );
+    // The group label (toggle + value + count) is hosted in the Name column...
+    const toggle = screen.getByRole("button", { name: /Engineering/ });
+    const headerRow = toggle.closest("tr")!;
+    expect(within(headerRow).getByText("Engineering")).toBeInTheDocument();
+    expect(within(headerRow).getByText("(2)")).toBeInTheDocument();
+    // ...and the aggregated Balance total still renders on that same header row.
+    expect(within(headerRow).getByRole("cell", { name: "$138" })).toBeInTheDocument();
+  });
+
+  it("renders each leaf's own value in the host column, indented by depth", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />,
+    );
+    // The leaf's Name value lives in the host column, deeper than its group header.
+    const leaf = screen.getByText("Ada Lovelace");
+    expect(leaf.closest("td")).toBeInTheDocument();
+    const groupLabel = screen.getByRole("button", { name: /Engineering/ }).parentElement!;
+    expect(labelDepth(leaf)).toBeGreaterThan(labelDepth(groupLabel));
+  });
+
+  it("collapses and re-expands a group in merge mode", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />,
+    );
+    const collapse = screen.getByRole("button", { name: /Collapse Engineering/ });
+    expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
+
+    await user.click(collapse);
+    expect(screen.queryByText("Ada Lovelace")).not.toBeInTheDocument();
+    const expand = screen.getByRole("button", { name: /Expand Engineering/ });
+    expect(expand).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(expand);
+    expect(screen.getByText("Ada Lovelace")).toBeInTheDocument();
+  });
+
+  it("indents progressively across multi-level grouping", () => {
+    render(
+      <DataTable
+        aria-label="Employees"
+        data={employees}
+        columns={employeeColumns}
+        grouping={["region", "role"]}
+        groupDisplay="merge"
+        getRowId={(e) => e.id}
+      />,
+    );
+    // Only Name survives as a column (region + role are both grouped away).
+    expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Name"]);
+
+    const region = screen.getByRole("button", { name: /Americas/ }).parentElement!;
+    const role = screen.getByRole("button", { name: /Engineering/ }).parentElement!;
+    const leaf = screen.getByText("Ada Lovelace");
+    // Region (depth 0) < role sub-group (depth 1) < leaf (depth 2).
+    expect(labelDepth(region)).toBeLessThan(labelDepth(role));
+    expect(labelDepth(role)).toBeLessThan(labelDepth(leaf));
+  });
+
+  it("still shows the empty slot spanning the reduced column set", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={[]}
+        columns={groupedColumns}
+        grouping={["role"]}
+        groupDisplay="merge"
+        empty="No staff yet."
+        getRowId={(p) => p.id}
+      />,
+    );
+    // The grouped "Role" column is dropped, so the empty cell spans the two
+    // remaining columns (Name + Balance), not three.
+    expect(screen.getByRole("cell", { name: "No staff yet." })).toHaveAttribute("colspan", "2");
+  });
+
+  it("renders like the columns mode when grouping is absent (merge is inert)", () => {
+    const { container: merged } = render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />,
+    );
+    const { container: plain } = render(
+      <DataTable aria-label="Staff" data={staff} columns={groupedColumns} getRowId={(p) => p.id} />,
+    );
+    // With no `grouping`, merge changes nothing — same markup as the default.
+    expect(merged.querySelector("table")!.outerHTML).toBe(plain.querySelector("table")!.outerHTML);
+  });
+
+  it("honours meta.groupLabel to pick the host column", () => {
+    // Put the label on Balance instead of the first column (Name).
+    const hostBalance = col.columns([
+      col.accessor("name", { header: "Name" }),
+      col.accessor("role", { header: "Role" }),
+      col.accessor("balance", {
+        header: "Balance",
+        meta: { align: "end", groupLabel: true },
+        cell: (info) => `$${info.getValue()}`,
+        aggregationFn: "sum",
+      }),
+    ]);
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={hostBalance}
+        grouping={["role"]}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />,
+    );
+    // The toggle lives in the Balance column's group cell, not Name's. The group
+    // header row's first (Name) cell is empty; the group label sits in Balance.
+    const headerRow = screen.getByRole("button", { name: /Engineering/ }).closest("tr")!;
+    const cells = within(headerRow).getAllByRole("cell");
+    expect(within(cells[1]!).getByText("Engineering")).toBeInTheDocument();
+    expect(cells[0]!.textContent).toBe("");
+  });
+
+  it("keeps the aggregate: the default host skips an aggregated column", () => {
+    // Only two columns — the grouped `category` and a summed `amount`. The label
+    // must NOT hijack the aggregated column; instead the grouped column stays on
+    // as the outline so the per-group total still renders on the header row.
+    interface Line {
+      id: string;
+      category: string;
+      amount: number;
+    }
+    const lines: Line[] = [
+      { id: "1", category: "Housing", amount: 100 },
+      { id: "2", category: "Housing", amount: 40 },
+      { id: "3", category: "Food", amount: 25 },
+    ];
+    const lineCol = createDataTableColumnHelper<Line>();
+    const lineColumns = lineCol.columns([
+      lineCol.accessor("category", { header: "Category" }),
+      lineCol.accessor("amount", {
+        header: "Amount",
+        meta: { align: "end" },
+        cell: (info) => `$${info.getValue()}`,
+        aggregationFn: "sum",
+        aggregatedCell: (info) => `$${info.getValue()}`,
+      }),
+    ]);
+    render(
+      <DataTable
+        aria-label="Lines"
+        data={lines}
+        columns={lineColumns}
+        grouping={["category"]}
+        groupDisplay="merge"
+        getRowId={(l) => l.id}
+      />,
+    );
+    // Both columns stay (the grouped Category hosts the outline)...
+    expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
+      "Category",
+      "Amount",
+    ]);
+    // ...and the Housing header row shows both its label and the summed total.
+    const headerRow = screen.getByRole("button", { name: /Housing/ }).closest("tr")!;
+    expect(within(headerRow).getByText("Housing")).toBeInTheDocument();
+    expect(within(headerRow).getByRole("cell", { name: "$140" })).toBeInTheDocument();
+  });
+
+  it("still renders a usable host when every column is grouped", () => {
+    // With no non-grouped column left, the innermost grouped column stays on as
+    // the host — so group rows keep their toggle + label + count instead of
+    // collapsing to zero cells.
+    interface Pair {
+      id: string;
+      category: string;
+      subcategory: string;
+    }
+    const pairs: Pair[] = [
+      { id: "1", category: "Housing", subcategory: "Rent" },
+      { id: "2", category: "Housing", subcategory: "Utilities" },
+      { id: "3", category: "Food", subcategory: "Groceries" },
+    ];
+    const pairCol = createDataTableColumnHelper<Pair>();
+    const pairColumns = pairCol.columns([
+      pairCol.accessor("category", { header: "Category" }),
+      pairCol.accessor("subcategory", { header: "Subcategory" }),
+    ]);
+    render(
+      <DataTable
+        aria-label="Pairs"
+        data={pairs}
+        columns={pairColumns}
+        grouping={["category", "subcategory"]}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />,
+    );
+    // One outline column survives, and its group rows have a working toggle + count.
+    expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Subcategory"]);
+    const housing = screen.getByRole("button", { name: /Housing/ });
+    const housingRow = housing.closest("tr")!;
+    expect(within(housingRow).getAllByRole("cell").length).toBeGreaterThan(0);
+    expect(within(housingRow).getByText("(2)")).toBeInTheDocument();
+  });
 });
 
 /** The checkbox inside the body row that renders the given cell text. */

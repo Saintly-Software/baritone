@@ -110,6 +110,51 @@ export const GroupsToggleIndependently: Story = {
 };
 
 /**
+ * `groupDisplay="merge"`: the grouped column is dropped and its label shares the
+ * host column with each leaf. Collapsing still hides exactly that group's leaves,
+ * and the leaf value reads down the same column as the group value.
+ */
+export const MergedCollapsesAndExpands: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members by department"
+        data={people}
+        columns={columns}
+        grouping={["role"]}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // The grouped "Role" column is gone: only Name (the host) and Balance remain.
+    expect(canvas.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
+      "Name",
+      "Balance",
+    ]);
+
+    // The group label and the leaf value share the host (Name) column.
+    const collapse = canvas.getByRole("button", { name: "Collapse Engineering" });
+    expect(canvas.getByText("Ada Lovelace")).toBeInTheDocument();
+
+    await userEvent.click(collapse);
+    await waitFor(() => {
+      expect(canvas.queryByText("Ada Lovelace")).not.toBeInTheDocument();
+    });
+    const expand = canvas.getByRole("button", { name: "Expand Engineering" });
+    expect(expand).toHaveAttribute("aria-expanded", "false");
+
+    await userEvent.click(expand);
+    await waitFor(() => {
+      expect(canvas.getByText("Ada Lovelace")).toBeInTheDocument();
+    });
+  },
+};
+
+/**
  * A controlled, selectable table that mirrors the current selection into a
  * `data-testid` node, so the play functions can assert on the public
  * `onSelectionChange` output rather than reaching into the checkboxes.

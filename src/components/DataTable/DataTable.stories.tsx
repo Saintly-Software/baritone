@@ -135,6 +135,63 @@ export const GroupedCollapsed: Story = {
   ),
 };
 
+// A Category → Subcategory breakdown for the merged presentation: the grouped
+// `category` reads down the same indented column as each `subcategory` leaf, with
+// a summed `amount` alongside. Kept at module scope for a stable reference.
+interface Expense {
+  id: string;
+  category: string;
+  subcategory: string;
+  amount: number;
+}
+
+const expenses: Expense[] = [
+  { id: "1", category: "Housing", subcategory: "Rent", amount: 1800 },
+  { id: "2", category: "Housing", subcategory: "Utilities", amount: 240 },
+  { id: "3", category: "Housing", subcategory: "Insurance", amount: 120 },
+  { id: "4", category: "Food", subcategory: "Groceries", amount: 520 },
+  { id: "5", category: "Food", subcategory: "Dining out", amount: 180 },
+  { id: "6", category: "Transport", subcategory: "Fuel", amount: 160 },
+  { id: "7", category: "Transport", subcategory: "Transit pass", amount: 95 },
+];
+
+const expenseCol = createDataTableColumnHelper<Expense>();
+const expenseColumns = expenseCol.columns([
+  // The host column: its `header` names the merged outline, and its cells carry
+  // both the group value (on header rows) and each subcategory (on leaf rows).
+  expenseCol.accessor("subcategory", { header: "Category" }),
+  // Grouped away in `groupDisplay="merge"` — its value moves into the host column.
+  expenseCol.accessor("category", { header: "Category" }),
+  expenseCol.accessor("amount", {
+    header: "Amount",
+    meta: { align: "end" },
+    cell: (info) => usd.format(info.getValue()),
+    aggregationFn: "sum",
+    aggregatedCell: (info) => usd.format(info.getValue()),
+  }),
+]);
+
+/**
+ * `groupDisplay="merge"` renders the grouping as one indented outline column: the
+ * grouped `category` isn't a column of its own — its value, toggle, and count sit
+ * in the first visible column, and each `subcategory` leaf renders in that same
+ * column one level in. The summed `amount` still rolls up per group.
+ */
+export const GroupedMerged: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Spending by category"
+        data={expenses}
+        columns={expenseColumns}
+        grouping={["category"]}
+        groupDisplay="merge"
+        getRowId={(e) => e.id}
+      />
+    </div>
+  ),
+};
+
 /**
  * Row selection, controlled by id. `enableRowSelection` adds the leading checkbox
  * column; `selectedRowIds` + `onSelectionChange` own the state. The header box
