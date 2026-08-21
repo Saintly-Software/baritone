@@ -175,6 +175,12 @@ export type DataTableProps<TData extends RowData> = DataTableBaseProps<TData> & 
  */
 const NO_GROUPING: string[] = [];
 
+// Dev/test only, matching `Table` and Field's `assertExclusiveNames`: the naming
+// check is deterministic on props, so any render in dev/test/CI trips it long
+// before production — and the whole guard dead-code-eliminates out of the bundle.
+const isDev = (): boolean =>
+  typeof process === "undefined" || process.env.NODE_ENV !== "production";
+
 /**
  * DataTable — renders a set of columns and rows as a semantic `<table>`, built on
  * TanStack React Table v9 (headless: it owns the row/column model; we own the
@@ -227,7 +233,36 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     className,
     ref,
     ...rest
-  } = props as DataTableBaseProps<TData> & { caption?: React.ReactNode };
+  } = props as DataTableBaseProps<TData> & {
+    // `caption` and the aria names are pulled from the `DataTableName` union onto
+    // one runtime shape: `caption` renders as a `<caption>`, while `aria-label` /
+    // `aria-labelledby` stay in `rest` to forward onto the `<table>` and to feed
+    // the dev-only exclusivity check below.
+    caption?: React.ReactNode;
+    "aria-label"?: string;
+    "aria-labelledby"?: string;
+  };
+
+  // A visible `caption` and an `aria-label`/`aria-labelledby` name the table
+  // twice, and the aria value wins in the accessible name — so the table would
+  // show one name and announce another. The `DataTableName` union already makes
+  // this a type error, but reject it in dev for JS callers and type-casts too,
+  // mirroring `Table` and Field's `assertExclusiveNames` (a name mismatch is an
+  // a11y bug, not a condition to degrade through).
+  if (isDev()) {
+    const names = [
+      caption != null && "caption",
+      rest["aria-label"] != null && "aria-label",
+      rest["aria-labelledby"] != null && "aria-labelledby",
+    ].filter((v): v is string => typeof v === "string");
+    if (names.length > 1) {
+      throw new Error(
+        `[baritone] DataTable: \`${names.join("`, `")}\` are mutually exclusive — pass exactly ` +
+          "one. `aria-label`/`aria-labelledby` override the visible `caption` in the accessible " +
+          "name, so the table would show one name and announce another.",
+      );
+    }
+  }
 
   // Controlled grouping: the table reads `state.grouping` and never mutates it,
   // so passing the prop through (defaulting to a stable empty array so the ref
@@ -296,9 +331,13 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                   if (cell.getIsGrouped()) {
                     // The grouping cell: expand/collapse toggle, the group's value
                     // (through the column's own `cell`, so formatting matches the
-                    // body), then the number of rows it holds. Indented by depth so
-                    // nested groups step inward.
+                    // body), then the number of data rows it holds. Indented by depth
+                    // so nested groups step inward.
                     const expanded = row.getIsExpanded();
+                    // Count underlying data rows, not immediate children: with a
+                    // second grouping column `subRows` are sub-groups, so we flatten
+                    // to the leaves and drop the intermediate group rows.
+                    const dataRowCount = row.getLeafRows().filter((r) => !r.getIsGrouped()).length;
                     content = (
                       <span
                         className={groupLabel}
@@ -319,7 +358,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                         <span>
                           <table.FlexRender cell={cell} />
                         </span>
-                        <span className={groupCount}>({row.subRows.length})</span>
+                        <span className={groupCount}>({dataRowCount})</span>
                       </span>
                     );
                   } else if (cell.getIsAggregated()) {

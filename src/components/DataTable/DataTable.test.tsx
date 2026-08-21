@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
-import { createDataTableColumnHelper, DataTable } from "./index";
+import { describe, expect, it, vi } from "vitest";
+import { createDataTableColumnHelper, DataTable, type DataTableProps } from "./index";
 
 interface Person {
   id: string;
@@ -116,6 +116,32 @@ describe("DataTable", () => {
     expect(table.tagName).toBe("TABLE");
     expect(table.className).toContain("extra");
   });
+
+  it("throws in dev when a visible caption is combined with an aria name", () => {
+    // The `DataTableName` union already forbids this at compile time; the runtime
+    // guard catches JS callers and type-casts that slip past it. Cast to simulate
+    // one, and silence React's error logging for the expected throw.
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const withAriaLabel = {
+        caption: "People",
+        "aria-label": "Team",
+        data: people,
+        columns,
+      } as unknown as DataTableProps<Person>;
+      expect(() => render(<DataTable {...withAriaLabel} />)).toThrow(/mutually exclusive/);
+
+      const withAriaLabelledby = {
+        caption: "People",
+        "aria-labelledby": "h1",
+        data: people,
+        columns,
+      } as unknown as DataTableProps<Person>;
+      expect(() => render(<DataTable {...withAriaLabelledby} />)).toThrow(/mutually exclusive/);
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });
 
 // A dataset whose roles repeat, so grouping actually gathers rows, plus a
@@ -136,6 +162,28 @@ const groupedColumns = col.columns([
     aggregationFn: "sum",
     aggregatedCell: (info) => `$${info.getValue()}`,
   }),
+]);
+
+// A two-dimension dataset (region → role) for nested grouping: the Americas
+// region holds three data rows spread across two role sub-groups.
+interface Employee {
+  id: string;
+  region: string;
+  role: string;
+  name: string;
+}
+
+const employees: Employee[] = [
+  { id: "1", region: "Americas", role: "Engineering", name: "Ada Lovelace" },
+  { id: "2", region: "Americas", role: "Engineering", name: "Grace Hopper" },
+  { id: "3", region: "Americas", role: "Sales", name: "Tom Watson" },
+];
+
+const employeeCol = createDataTableColumnHelper<Employee>();
+const employeeColumns = employeeCol.columns([
+  employeeCol.accessor("region", { header: "Region" }),
+  employeeCol.accessor("role", { header: "Role" }),
+  employeeCol.accessor("name", { header: "Name" }),
 ]);
 
 describe("DataTable grouping", () => {
@@ -222,5 +270,24 @@ describe("DataTable grouping", () => {
     expect(screen.getByRole("button", { name: /Expand Engineering/ })).toBeInTheDocument();
     // ...and no leaf rows show.
     expect(screen.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
+  });
+
+  it("counts underlying data rows, not sub-groups, for nested grouping", () => {
+    render(
+      <DataTable
+        aria-label="Employees"
+        data={employees}
+        columns={employeeColumns}
+        grouping={["region", "role"]}
+        getRowId={(e) => e.id}
+      />,
+    );
+    // The Americas region holds 3 data rows across 2 role sub-groups (Engineering
+    // ×2, Sales ×1). Its header must count the 3 data rows, not the 2 sub-groups —
+    // so "(3)" is present, and "(2)" belongs solely to the Engineering sub-group
+    // (a lone match; the buggy direct-child count would show "(2)" twice).
+    expect(screen.getByText("(3)")).toBeInTheDocument();
+    expect(screen.getByText("(2)")).toBeInTheDocument();
+    expect(screen.getByText("(1)")).toBeInTheDocument();
   });
 });
