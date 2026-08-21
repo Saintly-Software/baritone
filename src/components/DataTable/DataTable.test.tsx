@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { createDataTableColumnHelper, DataTable } from "./index";
 
@@ -114,5 +115,112 @@ describe("DataTable", () => {
     const table = screen.getByTestId("tbl");
     expect(table.tagName).toBe("TABLE");
     expect(table.className).toContain("extra");
+  });
+});
+
+// A dataset whose roles repeat, so grouping actually gathers rows, plus a
+// balance column that rolls up to a per-group sum.
+const staff: Person[] = [
+  { id: "1", name: "Ada Lovelace", role: "Engineering", balance: 42 },
+  { id: "2", name: "Grace Hopper", role: "Engineering", balance: 96 },
+  { id: "3", name: "Alan Turing", role: "Research", balance: 18 },
+];
+
+const groupedColumns = col.columns([
+  col.accessor("name", { header: "Name" }),
+  col.accessor("role", { header: "Role" }),
+  col.accessor("balance", {
+    header: "Balance",
+    meta: { align: "end" },
+    cell: (info) => `$${info.getValue()}`,
+    aggregationFn: "sum",
+    aggregatedCell: (info) => `$${info.getValue()}`,
+  }),
+]);
+
+describe("DataTable grouping", () => {
+  it("renders a flat table (no group rows, no toggles) when grouping is omitted", () => {
+    render(
+      <DataTable aria-label="Staff" data={staff} columns={groupedColumns} getRowId={(p) => p.id} />,
+    );
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    const body = screen.getAllByRole("rowgroup")[1]!;
+    expect(within(body).getAllByRole("row")).toHaveLength(3);
+  });
+
+  it("inserts a collapsible header row per group, with a count and a rolled-up total", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        getRowId={(p) => p.id}
+      />,
+    );
+    // One toggle per distinct group value.
+    expect(screen.getByRole("button", { name: /Engineering/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Research/ })).toBeInTheDocument();
+    // The Engineering group holds two rows...
+    expect(screen.getByText("(2)")).toBeInTheDocument();
+    // ...and its balances sum on the group row (42 + 96 = 138).
+    expect(screen.getByRole("cell", { name: "$138" })).toBeInTheDocument();
+  });
+
+  it("starts expanded: the leaf rows under each group are visible", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        getRowId={(p) => p.id}
+      />,
+    );
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Grace Hopper" })).toBeInTheDocument();
+  });
+
+  it("collapses and re-expands a group when its toggle is clicked", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        getRowId={(p) => p.id}
+      />,
+    );
+    // Expanded by default — a toggle labelled "Collapse …".
+    const collapse = screen.getByRole("button", { name: /Collapse Engineering/ });
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+
+    await user.click(collapse);
+    // The Engineering leaves are gone; the header (now "Expand …") stays.
+    expect(screen.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("cell", { name: "Grace Hopper" })).not.toBeInTheDocument();
+    const expand = screen.getByRole("button", { name: /Expand Engineering/ });
+    expect(expand).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(expand);
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+  });
+
+  it("starts every group collapsed with defaultExpanded={false}", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        defaultExpanded={false}
+        getRowId={(p) => p.id}
+      />,
+    );
+    // Group headers are present but collapsed...
+    expect(screen.getByRole("button", { name: /Expand Engineering/ })).toBeInTheDocument();
+    // ...and no leaf rows show.
+    expect(screen.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
   });
 });
