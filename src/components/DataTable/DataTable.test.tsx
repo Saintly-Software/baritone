@@ -1,5 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createDataTableColumnHelper, DataTable, type DataTableProps } from "./index";
 
@@ -289,5 +290,205 @@ describe("DataTable grouping", () => {
     expect(screen.getByText("(3)")).toBeInTheDocument();
     expect(screen.getByText("(2)")).toBeInTheDocument();
     expect(screen.getByText("(1)")).toBeInTheDocument();
+  });
+});
+
+/** The checkbox inside the body row that renders the given cell text. */
+function rowCheckbox(name: string): HTMLInputElement {
+  const row = screen.getByText(name).closest("tr");
+  if (!row) throw new Error(`No row for ${name}`);
+  return within(row).getByRole("checkbox");
+}
+
+/** A controlled selectable table that surfaces its selection for assertions. */
+function ControlledSelection({ initial = [] }: { initial?: string[] }) {
+  const [selected, setSelected] = React.useState<string[]>(initial);
+  return (
+    <>
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        selectedRowIds={selected}
+        onSelectionChange={setSelected}
+      />
+      <output data-testid="selection">{[...selected].sort().join(",")}</output>
+    </>
+  );
+}
+
+describe("DataTable row selection", () => {
+  it("renders no checkbox column unless selection is enabled", () => {
+    render(
+      <DataTable aria-label="People" data={people} columns={columns} getRowId={(p) => p.id} />,
+    );
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+  });
+
+  it("adds a select-all header box and one box per row when enabled", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+      />,
+    );
+    expect(screen.getByRole("checkbox", { name: "Select all rows" })).toBeInTheDocument();
+    // One box per data row, all sharing the "Select row" name.
+    expect(screen.getAllByRole("checkbox", { name: "Select row" })).toHaveLength(people.length);
+  });
+
+  it("reports the selected ids and their rows through onSelectionChange", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    await user.click(rowCheckbox("Ada Lovelace"));
+    // ids first, then the matching rows from `data` (Ada is id "1").
+    expect(onSelectionChange).toHaveBeenLastCalledWith(["1"], [people[0]]);
+    expect(rowCheckbox("Ada Lovelace")).toBeChecked();
+  });
+
+  it("select-all toggles every selectable row", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    await user.click(screen.getByRole("checkbox", { name: "Select all rows" }));
+    const [ids] = onSelectionChange.mock.calls.at(-1)!;
+    expect([...ids].sort()).toEqual(["1", "2", "3"]);
+  });
+
+  it("shows the mixed state on the header box for a partial selection", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+      />,
+    );
+    await user.click(rowCheckbox("Ada Lovelace"));
+    const selectAll = screen.getByRole("checkbox", { name: "Select all rows" });
+    expect(selectAll).toBePartiallyChecked();
+    expect(selectAll).not.toBeChecked();
+  });
+
+  it("seeds the initial selection from defaultSelectedRowIds (uncontrolled)", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        defaultSelectedRowIds={["2"]}
+      />,
+    );
+    // Id "2" is Alan Turing.
+    expect(rowCheckbox("Alan Turing")).toBeChecked();
+    expect(rowCheckbox("Ada Lovelace")).not.toBeChecked();
+  });
+
+  it("drives checked state from selectedRowIds and updates via onSelectionChange (controlled)", async () => {
+    const user = userEvent.setup();
+    render(<ControlledSelection initial={["1"]} />);
+    expect(rowCheckbox("Ada Lovelace")).toBeChecked();
+
+    await user.click(rowCheckbox("Grace Hopper"));
+    // The parent applied the change: Grace (id "3") joined the selection.
+    expect(screen.getByTestId("selection")).toHaveTextContent("1,3");
+    expect(rowCheckbox("Grace Hopper")).toBeChecked();
+  });
+
+  it("locks non-selectable rows with aria-disabled (never the native attribute) and skips them in select-all", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        // Only rows with a balance over 20 are selectable — Alan (18) is not.
+        enableRowSelection={(p) => p.balance > 20}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    const alan = rowCheckbox("Alan Turing");
+    expect(alan).toHaveAttribute("aria-disabled", "true");
+    // Focusable, not removed from the tab order.
+    expect(alan).not.toBeDisabled();
+
+    // Clicking the locked box does nothing.
+    await user.click(alan);
+    expect(onSelectionChange).not.toHaveBeenCalled();
+
+    // Select-all covers only the selectable rows (Ada "1", Grace "3").
+    await user.click(screen.getByRole("checkbox", { name: "Select all rows" }));
+    const [ids] = onSelectionChange.mock.calls.at(-1)!;
+    expect([...ids].sort()).toEqual(["1", "3"]);
+  });
+
+  it("spans the selection column in the empty-state cell", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={[]}
+        columns={columns}
+        empty="No people yet."
+        getRowId={(p) => p.id}
+        enableRowSelection
+      />,
+    );
+    // 3 data columns + the selection column.
+    expect(screen.getByRole("cell", { name: "No people yet." })).toHaveAttribute("colspan", "4");
+  });
+
+  it("gives each group header a box that selects all of its rows", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    // The Engineering group's box lives in its header row (alongside the toggle).
+    const groupRow = screen.getByRole("button", { name: /Collapse Engineering/ }).closest("tr");
+    const groupBox = within(groupRow!).getByRole("checkbox");
+
+    await user.click(groupBox);
+    // Engineering holds Ada ("1") and Grace ("2"); Research is untouched.
+    const [ids] = onSelectionChange.mock.calls.at(-1)!;
+    expect([...ids].sort()).toEqual(["1", "2"]);
+    expect(groupBox).toBeChecked();
   });
 });

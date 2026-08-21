@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { createDataTableColumnHelper, DataTable } from "./index";
 
 /**
- * Interaction coverage for `DataTable`'s grouping. These run in a real browser
- * (unlike the jsdom unit tests), driving the expand/collapse toggles the way a
- * user would. Each story groups by `role`, then asserts that a group's toggle
- * hides and reveals exactly its own rows, that its accessible name and
- * `aria-expanded` flip, and that groups toggle independently of one another.
+ * Interaction coverage for `DataTable`'s grouping and row selection. These run in
+ * a real browser (unlike the jsdom unit tests), driving the toggles and checkboxes
+ * the way a user would — including Shift-click range selection, which needs a real
+ * pointer event carrying the modifier key.
  */
 interface Person {
   id: string;
@@ -106,5 +106,146 @@ export const GroupsToggleIndependently: Story = {
     // Research stays open — its rows are still there and its toggle still says "Collapse".
     expect(canvas.getByRole("cell", { name: "Alan Turing" })).toBeInTheDocument();
     expect(canvas.getByRole("button", { name: "Collapse Research" })).toBeInTheDocument();
+  },
+};
+
+/**
+ * A controlled, selectable table that mirrors the current selection into a
+ * `data-testid` node, so the play functions can assert on the public
+ * `onSelectionChange` output rather than reaching into the checkboxes.
+ */
+function SelectableTable({
+  grouping,
+  enableRowSelection = true,
+}: {
+  grouping?: string[];
+  enableRowSelection?: boolean | ((row: Person) => boolean);
+}) {
+  const [selected, setSelected] = React.useState<string[]>([]);
+  return (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        grouping={grouping}
+        enableRowSelection={enableRowSelection}
+        selectedRowIds={selected}
+        onSelectionChange={setSelected}
+      />
+      {/* Sorted so assertions don't depend on click order. */}
+      <p data-testid="selected">{[...selected].sort().join(",")}</p>
+    </div>
+  );
+}
+
+/** The checkbox inside the body row that renders the given name. */
+function checkboxForRow(canvasElement: HTMLElement, name: string): HTMLInputElement {
+  const row = within(canvasElement).getByText(name).closest("tr");
+  if (!row) throw new Error(`No row for ${name}`);
+  return within(row as HTMLElement).getByRole("checkbox") as HTMLInputElement;
+}
+
+/** Clicking a row's box selects it; clicking again clears it. */
+export const SelectsAndClearsARow: Story = {
+  render: () => <SelectableTable />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const selected = () => canvas.getByTestId("selected").textContent;
+
+    const graceBox = checkboxForRow(canvasElement, "Grace Hopper");
+    expect(graceBox).not.toBeChecked();
+
+    await userEvent.click(graceBox);
+    await waitFor(() => expect(selected()).toBe("2"));
+    expect(graceBox).toBeChecked();
+
+    await userEvent.click(graceBox);
+    await waitFor(() => expect(selected()).toBe(""));
+    expect(graceBox).not.toBeChecked();
+  },
+};
+
+/** The header box selects every row, then clears every row. */
+export const SelectAllTogglesEveryRow: Story = {
+  render: () => <SelectableTable />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const selectAll = canvas.getByRole("checkbox", { name: "Select all rows" });
+
+    await userEvent.click(selectAll);
+    await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe("1,2,3,4"));
+    expect(selectAll).toBeChecked();
+
+    await userEvent.click(selectAll);
+    await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe(""));
+    expect(selectAll).not.toBeChecked();
+  },
+};
+
+/** With only some rows selected, the header box shows the mixed (indeterminate) state. */
+export const HeaderGoesIndeterminateOnPartialSelection: Story = {
+  render: () => <SelectableTable />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const selectAll = canvas.getByRole("checkbox", { name: "Select all rows" });
+
+    await userEvent.click(checkboxForRow(canvasElement, "Ada Lovelace"));
+    await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe("1"));
+
+    // Some but not all → mixed, neither fully checked nor fully unchecked.
+    expect(selectAll).toBePartiallyChecked();
+    expect(selectAll).not.toBeChecked();
+  },
+};
+
+/** Shift-clicking a second box selects the inclusive range from the last one. */
+export const ShiftClickSelectsARange: Story = {
+  render: () => <SelectableTable />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Anchor on Ada (row 1) with a normal click.
+    await userEvent.click(checkboxForRow(canvasElement, "Ada Lovelace"));
+    await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe("1"));
+
+    // Shift-click Alan (row 3). A real Shift-click reaches React's `onChange` with
+    // `nativeEvent.shiftKey` set, which is what TanStack's range detector reads —
+    // so dispatch exactly that. (Holding Shift across userEvent's separate
+    // keyboard/pointer calls doesn't carry the modifier onto the click here.)
+    checkboxForRow(canvasElement, "Alan Turing").dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true, shiftKey: true }),
+    );
+
+    // The inclusive range fills in: Ada (1), Grace (2), Alan (3) — but not Katherine (4).
+    await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe("1,2,3"));
+    expect(checkboxForRow(canvasElement, "Katherine Johnson")).not.toBeChecked();
+  },
+};
+
+/** A group header's box selects (then clears) every row in that group at once. */
+export const GroupHeaderSelectsItsRows: Story = {
+  render: () => <SelectableTable grouping={["role"]} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const selected = () => canvas.getByTestId("selected").textContent;
+
+    // The Engineering group's box lives in its header row (with the toggle).
+    const engineeringRow = canvas
+      .getByRole("button", { name: "Collapse Engineering" })
+      .closest("tr");
+    const engineeringBox = within(engineeringRow as HTMLElement).getByRole("checkbox");
+
+    await userEvent.click(engineeringBox);
+    // Ada (1) + Grace (2) are Engineering; Research is untouched.
+    await waitFor(() => expect(selected()).toBe("1,2"));
+    expect(engineeringBox).toBeChecked();
+    // Overall selection is partial, so "select all" is indeterminate.
+    expect(canvas.getByRole("checkbox", { name: "Select all rows" })).toBePartiallyChecked();
+
+    await userEvent.click(engineeringBox);
+    await waitFor(() => expect(selected()).toBe(""));
+    expect(engineeringBox).not.toBeChecked();
   },
 };
