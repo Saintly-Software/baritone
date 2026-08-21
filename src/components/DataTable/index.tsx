@@ -415,6 +415,11 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   // The selection column, when present, adds one leaf to the grid — fold it into
   // the empty-state `colSpan` so the placeholder still spans the full width.
   const totalColumnCount = leafColumnCount + (selectionEnabled ? 1 : 0);
+  // Whether any row can actually be selected. With a predicate that excludes
+  // every row (or no rows at all), the "select all" box would be a focusable
+  // no-op, so lock it — mirroring the per-group box's `groupHasSelectableLeaves`.
+  const hasSelectableRows =
+    selectionEnabled && table.getFilteredRowModel().flatRows.some((row) => row.getCanSelect());
 
   return (
     <table ref={ref} className={cx(dataTableRoot, className)} {...rest}>
@@ -436,6 +441,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                   // model, so a lingering id that no longer maps to a row (the
                   // selection contract keeps those) can't fake a mixed header.
                   indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllRowsSelected()}
+                  readOnly={!hasSelectableRows}
                   onChange={table.getToggleAllRowsSelectedHandler()}
                   aria-label="Select all rows"
                 />
@@ -497,7 +503,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                         checked={row.getIsSelected()}
                         readOnly={!row.getCanSelect()}
                         onChange={row.getToggleSelectedHandler()}
-                        aria-label="Select row"
+                        aria-label={rowSelectLabel(row)}
                       />
                     )}
                   </td>
@@ -648,6 +654,20 @@ const vetoToggle = (event: React.MouseEvent<HTMLInputElement>): void => event.pr
 function groupRowLabel(row: { groupingValue?: unknown }): string {
   const value = row.groupingValue;
   return value == null || typeof value === "object" ? "group" : String(value);
+}
+
+/**
+ * The accessible name for a data row's selection box. A bare "Select row" is
+ * ambiguous when every row shares it, so lead with the row's first primitive
+ * cell value (typically its name/label column) — mirroring the group box's
+ * `Select all rows in <value>`. Falls back to "Select row" when that leading
+ * cell has no sensible string form (an element, an object, or empty).
+ */
+function rowSelectLabel<TData extends RowData>(row: Row<DataTableFeatures, TData>): string {
+  const value = row.getAllCells()[0]?.getValue();
+  return value == null || value === "" || typeof value === "object"
+    ? "Select row"
+    : `Select ${String(value)}`;
 }
 
 /**

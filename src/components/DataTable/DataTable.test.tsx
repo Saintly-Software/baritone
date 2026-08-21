@@ -338,8 +338,13 @@ describe("DataTable row selection", () => {
       />,
     );
     expect(screen.getByRole("checkbox", { name: "Select all rows" })).toBeInTheDocument();
-    // One box per data row, all sharing the "Select row" name.
-    expect(screen.getAllByRole("checkbox", { name: "Select row" })).toHaveLength(people.length);
+    // Each row's box carries a distinct, row-specific name (from its first cell)
+    // instead of a generic "Select row", so assistive tech can tell them apart.
+    // `getByRole` throws if a name is missing or duplicated, so this also asserts
+    // there's exactly one box per data row.
+    for (const person of people) {
+      expect(screen.getByRole("checkbox", { name: `Select ${person.name}` })).toBeInTheDocument();
+    }
   });
 
   it("reports the selected ids and their rows through onSelectionChange", async () => {
@@ -465,6 +470,31 @@ describe("DataTable row selection", () => {
     );
     // 3 data columns + the selection column.
     expect(screen.getByRole("cell", { name: "No people yet." })).toHaveAttribute("colspan", "4");
+  });
+
+  it("locks the select-all box when no row is selectable", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        // A predicate that excludes every row leaves nothing for select-all to do.
+        enableRowSelection={() => false}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    const selectAll = screen.getByRole("checkbox", { name: "Select all rows" });
+    // Locked via aria-disabled (never the native attribute), so it stays focusable.
+    expect(selectAll).toHaveAttribute("aria-disabled", "true");
+    expect(selectAll).not.toBeDisabled();
+    // The box reads as unchecked (its visual state follows the `checked` prop).
+    expect(selectAll).not.toBePartiallyChecked();
+    // Clicking the locked box is a no-op: no selection, no callback.
+    await user.click(selectAll);
+    expect(onSelectionChange).not.toHaveBeenCalled();
   });
 
   it("gives each group header a box that selects all of its rows", async () => {
