@@ -444,8 +444,13 @@ describe("DataTable row selection", () => {
     );
     const alan = rowCheckbox("Alan Turing");
     expect(alan).toHaveAttribute("aria-disabled", "true");
-    // Focusable, not removed from the tab order.
+    // Focusable, not removed from the tab order (the native attribute would yank
+    // it out). Tabbing from the previous row's box lands on it — AGENTS.md's
+    // enforced convention: a disabled control stays reachable by keyboard.
     expect(alan).not.toBeDisabled();
+    rowCheckbox("Ada Lovelace").focus();
+    await user.tab();
+    expect(alan).toHaveFocus();
 
     // Clicking the locked box does nothing.
     await user.click(alan);
@@ -455,6 +460,49 @@ describe("DataTable row selection", () => {
     await user.click(screen.getByRole("checkbox", { name: "Select all rows" }));
     const [ids] = onSelectionChange.mock.calls.at(-1)!;
     expect([...ids].sort()).toEqual(["1", "3"]);
+  });
+
+  it("never shows a non-selectable row as checked, even if its id is seeded selected", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        // Alan ("2", balance 18) is not selectable...
+        enableRowSelection={(p) => p.balance > 20}
+        // ...but a stale/seeded id still lists him as selected.
+        defaultSelectedRowIds={["2"]}
+      />,
+    );
+    const alan = rowCheckbox("Alan Turing");
+    expect(alan).toHaveAttribute("aria-disabled", "true");
+    // The locked box can't be cleared, so it must not read as checked.
+    expect(alan).not.toBeChecked();
+  });
+
+  it("owns its selection and reports both select and deselect when uncontrolled", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        // No `selectedRowIds` → the table owns selection in its own state.
+        enableRowSelection
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    await user.click(rowCheckbox("Ada Lovelace"));
+    expect(rowCheckbox("Ada Lovelace")).toBeChecked();
+    expect(onSelectionChange).toHaveBeenLastCalledWith(["1"], [people[0]]);
+
+    // Clicking again clears it — the internally-owned state updates both ways.
+    await user.click(rowCheckbox("Ada Lovelace"));
+    expect(rowCheckbox("Ada Lovelace")).not.toBeChecked();
+    expect(onSelectionChange).toHaveBeenLastCalledWith([], []);
   });
 
   it("spans the selection column in the empty-state cell", () => {
