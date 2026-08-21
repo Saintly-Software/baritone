@@ -7,14 +7,20 @@ import {
   createExpandedRowModel,
   createGroupedRowModel,
   flexRender,
+  functionalUpdate,
+  type OnChangeFn,
+  type Row,
   type RowData,
   rowAggregationFeature,
   rowExpandingFeature,
+  type RowSelectionState,
+  rowSelectionFeature,
   tableFeatures,
   useTable,
 } from "@tanstack/react-table";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import * as React from "react";
+import { InternalCheckbox } from "../../internal/components/InternalCheckbox";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { cx } from "../../utils/cx";
 import {
@@ -27,6 +33,8 @@ import {
   groupLabel,
   groupRow,
   groupToggle,
+  selectionCell,
+  selectionInput,
 } from "./dataTable.css";
 
 /**
@@ -45,20 +53,24 @@ export interface DataTableColumnMeta {
  * `columnGroupingFeature` (group state + grouped/aggregated cell APIs),
  * `rowExpandingFeature` (collapse/expand the groups), and `rowAggregationFeature`
  * (so a column's `aggregationFn` / `aggregatedCell` compute per group) — with
- * their two row-model slots. Sorting / filtering / pagination are further v9
- * plugins we can register here later. React's `useTable` injects its own
- * reactivity feature on top of this.
+ * their two row-model slots, plus `rowSelectionFeature` (the `rowSelection` state
+ * and per-row / select-all APIs behind the checkbox column). Sorting / filtering
+ * / pagination are further v9 plugins we can register here later. React's
+ * `useTable` injects its own reactivity feature on top of this.
  *
  * The features are always registered; with no `grouping` the grouped row model
- * is a pass-through, so a plain table pays nothing behaviourally. The
- * `columnMeta` slot is phantom at runtime (its value is stripped); only its type
- * is used, to type `columnDef.meta` as {@link DataTableColumnMeta}.
+ * is a pass-through, and with selection off (`enableRowSelection` unset) the
+ * selection option is forced `false`, so a plain table pays nothing
+ * behaviourally. The `columnMeta` slot is phantom at runtime (its value is
+ * stripped); only its type is used, to type `columnDef.meta` as
+ * {@link DataTableColumnMeta}.
  */
 export const dataTableFeatures = tableFeatures({
   columnMeta: {} as DataTableColumnMeta,
   columnGroupingFeature,
   rowExpandingFeature,
   rowAggregationFeature,
+  rowSelectionFeature,
   groupedRowModel: createGroupedRowModel(),
   expandedRowModel: createExpandedRowModel(),
   // The built-in aggregation registry, so a column's `aggregationFn: "sum"`
@@ -133,7 +145,7 @@ export interface DataTableBaseProps<TData extends RowData> extends Omit<
   /**
    * Derive a stable row id from each datum (e.g. `(row) => row.id`). Defaults to
    * the row's index; supply it whenever the data can reorder, so React keys and
-   * (later) row selection stay pinned to the row, not its position.
+   * row selection stay pinned to the row, not its position.
    */
   getRowId?: (row: TData, index: number) => string;
   /**
@@ -157,6 +169,38 @@ export interface DataTableBaseProps<TData extends RowData> extends Omit<
    * re-collapse an open table.
    */
   defaultExpanded?: boolean;
+  /**
+   * Turn on row selection: a leading checkbox column with a "select all" box in
+   * the header and a checkbox per row. Pass `true` to make every row selectable,
+   * or a predicate `(row) => boolean` to allow it only for some (the rest render
+   * a disabled box). Omit for no selection column at all.
+   *
+   * Strongly pair with a stable {@link getRowId} — selection is tracked by id, so
+   * without one it pins to the row *index* and mis-tracks when the data reorders.
+   * When `grouping` is on, each group header also gets a tri-state box that
+   * selects or clears its rows in one click.
+   */
+  enableRowSelection?: boolean | ((row: TData) => boolean);
+  /**
+   * The selected rows' ids (controlled). Pair with {@link onSelectionChange} and
+   * keep the reference stable across renders. Omit to let the table own selection
+   * internally (seed that with {@link defaultSelectedRowIds}). Ignored unless
+   * {@link enableRowSelection} is set.
+   */
+  selectedRowIds?: ReadonlyArray<string>;
+  /**
+   * Initial selected ids for the uncontrolled mode; the table then owns the
+   * selection. Ignored once {@link selectedRowIds} is provided (controlled), and
+   * only read on the first render.
+   */
+  defaultSelectedRowIds?: ReadonlyArray<string>;
+  /**
+   * Called after a selection change with the selected row ids and the matching
+   * rows from the current `data`. Fires in both controlled and uncontrolled
+   * modes. The ids are the source of truth — prefer them for persistence, since a
+   * selected id can outlive a row that's been paged or filtered out of `data`.
+   */
+  onSelectionChange?: (selectedRowIds: string[], selectedRows: TData[]) => void;
   /**
    * What to render when `data` is empty — shown as a single cell spanning every
    * column. With none, the body is simply empty (just the header shows).
@@ -185,8 +229,9 @@ const isDev = (): boolean =>
  * DataTable — renders a set of columns and rows as a semantic `<table>`, built on
  * TanStack React Table v9 (headless: it owns the row/column model; we own the
  * markup, styles, and a11y). Renders the columns you pass and, when `grouping` is
- * set, collapsible group-header rows; sorting / filtering / pagination are v9
- * features we can layer on later without changing this surface.
+ * set, collapsible group-header rows; with `enableRowSelection` it grows a
+ * leading checkbox column. Sorting / filtering / pagination are v9 features we
+ * can layer on later without changing this surface.
  *
  * Pass `data` and `columns` (build columns with {@link createDataTableColumnHelper}),
  * and name the table with `caption`, `aria-label`, or `aria-labelledby`. Set a
@@ -216,6 +261,19 @@ const isDev = (): boolean =>
  * ]);
  *
  * <DataTable caption="People" data={people} columns={columns} grouping={["role"]} />
+ *
+ * @example
+ * // Row selection, controlled by id (pair with a stable `getRowId`).
+ * const [selected, setSelected] = React.useState<string[]>([]);
+ * <DataTable
+ *   caption="People"
+ *   data={people}
+ *   columns={columns}
+ *   getRowId={(p) => p.id}
+ *   enableRowSelection
+ *   selectedRowIds={selected}
+ *   onSelectionChange={setSelected}
+ * />
  */
 export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   // `props` is a union over the naming arms; widen to a single shape to read the
@@ -228,6 +286,10 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     getRowId,
     grouping,
     defaultExpanded,
+    enableRowSelection,
+    selectedRowIds,
+    defaultSelectedRowIds,
+    onSelectionChange,
     empty,
     caption,
     className,
@@ -271,28 +333,114 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   // TanStack treats state as read-only.
   const groupingState = (grouping ?? NO_GROUPING) as string[];
 
+  // Selection is on whenever `enableRowSelection` is set (a `true` or a
+  // predicate); `false`/omitted leaves the whole column off and forces the table
+  // option `false` so no row is even implicitly selectable.
+  const selectionEnabled = enableRowSelection !== undefined && enableRowSelection !== false;
+  // Controlled when the consumer owns `selectedRowIds`; otherwise the table keeps
+  // its own selection, seeded once from `defaultSelectedRowIds` (mirrors
+  // `ToggleButton`'s controlled/uncontrolled split).
+  const isSelectionControlled = selectedRowIds !== undefined;
+  const [internalSelection, setInternalSelection] = React.useState<RowSelectionState>(() =>
+    idsToRowSelection(defaultSelectedRowIds),
+  );
+  // TanStack's selection map (`Record<id, true>`). In controlled mode it's derived
+  // from `selectedRowIds` (memoised on the array so the reference is stable when
+  // the ids are); otherwise it's the internally-owned state.
+  const controlledSelection = React.useMemo(
+    () => idsToRowSelection(selectedRowIds),
+    [selectedRowIds],
+  );
+  const rowSelection = isSelectionControlled ? controlledSelection : internalSelection;
+
+  // id → datum, so a selection change can hand back the selected rows (not just
+  // their ids) without walking the table. Keyed exactly like `getRowId`.
+  const dataById = React.useMemo(() => {
+    const map = new Map<string, TData>();
+    data.forEach((datum, index) => {
+      map.set(getRowId ? getRowId(datum, index) : String(index), datum);
+    });
+    return map;
+  }, [data, getRowId]);
+
+  // Group-header rows aren't independently selectable (their box drives their
+  // children instead), so only real data rows ever enter the selection map — its
+  // keys are exactly the selected data ids. A stable predicate keeps the table's
+  // selection memos from invalidating each render.
+  const rowCanSelect = React.useCallback(
+    (row: Row<DataTableFeatures, TData>): boolean => {
+      if (row.getIsGrouped()) return false;
+      return typeof enableRowSelection === "function" ? enableRowSelection(row.original) : true;
+    },
+    [enableRowSelection],
+  );
+
+  // Bridge TanStack's `Record<id, true>` updater to the public `string[]` API:
+  // resolve the next map, commit it locally when uncontrolled, and notify the
+  // consumer with the ids and their rows either way.
+  const handleRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>(
+    (updater) => {
+      const next = functionalUpdate(updater, rowSelection);
+      if (!isSelectionControlled) setInternalSelection(next);
+      const ids = Object.keys(next);
+      const rows = ids
+        .map((id) => dataById.get(id))
+        .filter((datum): datum is TData => datum !== undefined);
+      onSelectionChange?.(ids, rows);
+    },
+    [rowSelection, isSelectionControlled, dataById, onSelectionChange],
+  );
+
   const table = useTable({
     features: dataTableFeatures,
     data,
     columns,
     getRowId,
-    state: { grouping: groupingState },
+    state: { grouping: groupingState, rowSelection },
     // Seed the internally-owned expansion; `true` opens every group, `{}` starts
     // them all collapsed. Read once (initial state), so recomputing it is fine.
     initialState: { expanded: defaultExpanded === false ? {} : true },
     // Keep the author's column order — don't hoist grouped columns to the front.
     groupedColumnMode: false,
+    // Selection: `false` when off keeps the feature fully inert; otherwise the
+    // per-row predicate gates individual rows. We own `state.rowSelection`, so the
+    // change handler feeds the resolved map back (controlled) or into local state.
+    enableRowSelection: selectionEnabled ? rowCanSelect : false,
+    onRowSelectionChange: handleRowSelectionChange,
   });
 
   const rows = table.getRowModel().rows;
   const leafColumnCount = table.getAllLeafColumns().length;
+  const headerGroups = table.getHeaderGroups();
+  // The selection column, when present, adds one leaf to the grid — fold it into
+  // the empty-state `colSpan` so the placeholder still spans the full width.
+  const totalColumnCount = leafColumnCount + (selectionEnabled ? 1 : 0);
 
   return (
     <table ref={ref} className={cx(dataTableRoot, className)} {...rest}>
       {caption != null && <caption className={dataTableCaption}>{caption}</caption>}
       <thead>
-        {table.getHeaderGroups().map((group) => (
+        {headerGroups.map((group, groupIndex) => (
           <tr key={group.id}>
+            {/* The "select all" box. On a multi-row header (grouped column defs)
+                it spans every header row via `rowSpan`, rendered only once. */}
+            {selectionEnabled && groupIndex === 0 && (
+              <th
+                scope="col"
+                rowSpan={headerGroups.length > 1 ? headerGroups.length : undefined}
+                className={cx(cellRecipe({ header: true, align: "center" }), selectionCell)}
+              >
+                <SelectionCheckbox
+                  checked={table.getIsAllRowsSelected()}
+                  // `getIsSomePageRowsSelected` counts only selectable rows in the
+                  // model, so a lingering id that no longer maps to a row (the
+                  // selection contract keeps those) can't fake a mixed header.
+                  indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllRowsSelected()}
+                  onChange={table.getToggleAllRowsSelectedHandler()}
+                  aria-label="Select all rows"
+                />
+              </th>
+            )}
             {group.headers.map((header) => (
               <th
                 key={header.id}
@@ -313,7 +461,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
         {rows.length === 0 && empty != null ? (
           <tr>
             <td
-              colSpan={leafColumnCount > 0 ? leafColumnCount : undefined}
+              colSpan={totalColumnCount > 0 ? totalColumnCount : undefined}
               className={cellRecipe({ align: "center" })}
             >
               {empty}
@@ -322,8 +470,38 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
         ) : (
           rows.map((row) => {
             const isGroupRow = row.getIsGrouped();
+            // A group whose every leaf is excluded by the predicate can't be
+            // toggled — and `getIsAllSubRowsSelected` reports "all" for an empty
+            // selectable set — so lock its box instead of showing a checked no-op.
+            const groupHasSelectableLeaves =
+              isGroupRow && row.getLeafRows().some((leaf) => leaf.getCanSelect());
             return (
               <tr key={row.id} className={isGroupRow ? groupRow : undefined}>
+                {selectionEnabled && (
+                  <td className={cx(cellRecipe({ align: "center" }), selectionCell)}>
+                    {isGroupRow ? (
+                      // A group header's box selects or clears every row it holds,
+                      // and shows the tri-state (all / some / none) of its children.
+                      <SelectionCheckbox
+                        checked={groupHasSelectableLeaves && row.getIsAllSubRowsSelected()}
+                        indeterminate={groupHasSelectableLeaves && row.getIsSomeSelected()}
+                        readOnly={!groupHasSelectableLeaves}
+                        onChange={(event) => row.toggleSelected(event.target.checked)}
+                        aria-label={`Select all rows in ${groupRowLabel(row)}`}
+                      />
+                    ) : (
+                      // A data row's box. `getToggleSelectedHandler` gets the raw
+                      // change event, so Shift-click range selection works; a
+                      // non-selectable row (per the predicate) shows a locked box.
+                      <SelectionCheckbox
+                        checked={row.getIsSelected()}
+                        readOnly={!row.getCanSelect()}
+                        onChange={row.getToggleSelectedHandler()}
+                        aria-label="Select row"
+                      />
+                    )}
+                  </td>
+                )}
                 {row.getAllCells().map((cell) => {
                   const align = cell.column.columnDef.meta?.align ?? "start";
 
@@ -391,6 +569,76 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
 }
 
 DataTable.displayName = "DataTable";
+
+/** Build TanStack's `Record<id, true>` selection map from a list of ids. */
+function idsToRowSelection(ids: ReadonlyArray<string> | undefined): RowSelectionState {
+  const selection: RowSelectionState = {};
+  if (ids) for (const id of ids) selection[id] = true;
+  return selection;
+}
+
+interface SelectionCheckboxProps {
+  /** Whether the box is ticked. */
+  checked: boolean;
+  /** Show the "mixed" dash (a parent whose children are only partly selected). */
+  indeterminate?: boolean;
+  /**
+   * Lock the box (a non-selectable row): dim it and veto toggling, but keep it
+   * focusable and announce `aria-disabled` — never the native `disabled`
+   * attribute, which drops it from the tab order (the house convention; see
+   * AGENTS.md). base-ui's own `Checkbox` models disabled the same way.
+   */
+  readOnly?: boolean;
+  /** Toggle handler; receives the raw change event (Shift state included). */
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+  /** Accessible name — the box carries no visible label. */
+  "aria-label": string;
+}
+
+/**
+ * The checkbox in a selection cell: a real, focusable `<input type="checkbox">`
+ * (state, keyboard, accessible name) laid transparently over the presentational
+ * {@link InternalCheckbox} (the look, including the focus ring and the mixed
+ * dash). A native checkbox can only show "mixed" through the DOM `indeterminate`
+ * property — there's no attribute — so it's set from a ref whenever it changes.
+ */
+function SelectionCheckbox({
+  checked,
+  indeterminate = false,
+  readOnly = false,
+  onChange,
+  "aria-label": ariaLabel,
+}: SelectionCheckboxProps) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  React.useEffect(() => {
+    if (inputRef.current) inputRef.current.indeterminate = indeterminate;
+  }, [indeterminate]);
+
+  return (
+    <InternalCheckbox
+      size="sm"
+      checked={indeterminate ? "indeterminate" : checked}
+      disabled={readOnly}
+    >
+      <input
+        ref={inputRef}
+        type="checkbox"
+        className={selectionInput}
+        checked={checked}
+        readOnly={readOnly}
+        aria-disabled={readOnly || undefined}
+        // Drop the handler and veto the click when locked, so the box can't toggle
+        // yet stays focusable (`readOnly` suppresses React's controlled-input warning).
+        onChange={readOnly ? undefined : onChange}
+        onClick={readOnly ? vetoToggle : undefined}
+        aria-label={ariaLabel}
+      />
+    </InternalCheckbox>
+  );
+}
+
+/** Cancel a locked box's toggle without removing it from the tab order. */
+const vetoToggle = (event: React.MouseEvent<HTMLInputElement>): void => event.preventDefault();
 
 /**
  * A group's human-readable name, for the toggle's `aria-label`. Uses the row's

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import * as React from "react";
 import { Link } from "../Link";
 import { createDataTableColumnHelper, DataTable } from "./index";
 
@@ -132,4 +133,102 @@ export const GroupedCollapsed: Story = {
       />
     </div>
   ),
+};
+
+/**
+ * Row selection, controlled by id. `enableRowSelection` adds the leading checkbox
+ * column; `selectedRowIds` + `onSelectionChange` own the state. The header box
+ * selects all / clears all and goes indeterminate on a partial selection.
+ * Shift-click a second row to select the range between it and the last one.
+ */
+export const Selectable: Story = {
+  render: () => {
+    const [selected, setSelected] = React.useState<string[]>(["2"]);
+    return (
+      <div style={{ maxWidth: 640, display: "grid", gap: 12 }}>
+        <DataTable
+          caption="Team members"
+          data={people}
+          columns={columns}
+          getRowId={(p) => p.id}
+          enableRowSelection
+          selectedRowIds={selected}
+          onSelectionChange={setSelected}
+        />
+        <p style={{ margin: 0 }}>
+          Selected: {selected.length === 0 ? "none" : selected.join(", ")}
+        </p>
+      </div>
+    );
+  },
+};
+
+/**
+ * Uncontrolled selection: seed it with `defaultSelectedRowIds` and let the table
+ * own the state, observing changes through `onSelectionChange` (which still hands
+ * back the selected ids and their rows).
+ */
+export const SelectableUncontrolled: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        defaultSelectedRowIds={["1", "3"]}
+        onSelectionChange={(ids) => console.log("selected:", ids)}
+      />
+    </div>
+  ),
+};
+
+/**
+ * A predicate gates which rows are selectable — here, only rows with a balance
+ * over $1,000. Non-selectable rows (Katherine, at $320) show a locked (dimmed,
+ * `aria-disabled`) box that stays focusable, and "select all" skips them.
+ */
+export const SelectableSome: Story = {
+  render: () => {
+    const [selected, setSelected] = React.useState<string[]>([]);
+    return (
+      <div style={{ maxWidth: 640 }}>
+        <DataTable
+          caption="Team members (only rows over $1,000 selectable)"
+          data={people}
+          columns={columns}
+          getRowId={(p) => p.id}
+          enableRowSelection={(person) => person.balance > 1000}
+          selectedRowIds={selected}
+          onSelectionChange={setSelected}
+        />
+      </div>
+    );
+  },
+};
+
+/**
+ * Selection composes with grouping: each group header carries a tri-state box that
+ * selects or clears all of its rows at once, and reflects whether all, some, or
+ * none of them are selected.
+ */
+export const GroupedSelectable: Story = {
+  render: () => {
+    const [selected, setSelected] = React.useState<string[]>([]);
+    return (
+      <div style={{ maxWidth: 640 }}>
+        <DataTable
+          caption="Team members by department"
+          data={people}
+          columns={columns}
+          grouping={["role"]}
+          getRowId={(p) => p.id}
+          enableRowSelection
+          selectedRowIds={selected}
+          onSelectionChange={setSelected}
+        />
+      </div>
+    );
+  },
 };

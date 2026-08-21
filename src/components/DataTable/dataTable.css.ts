@@ -156,3 +156,32 @@ export const groupCount = style({
   color: vars.text.color.neutral.mid,
   fontWeight: vars.text.weight.default,
 });
+
+/**
+ * The leading selection column's cell (`<th>` / `<td>`), present only when
+ * selection is enabled. Shrinks to the checkbox — `width: 1%` + `nowrap` makes
+ * the column only as wide as its content — while the shared {@link cell} recipe
+ * still supplies the padding, divider, and (centred) alignment.
+ */
+export const selectionCell = style({
+  width: "1%",
+  whiteSpace: "nowrap",
+});
+
+/**
+ * The real `<input type="checkbox">` that owns each selection box's state,
+ * keyboard, and accessible name. Laid transparently over the presentational
+ * `InternalCheckbox` (which is `position: relative`) so pointer events — plain
+ * clicks and Shift-click ranges alike — land on the input directly, while its
+ * focus lights the box's `:focus-within` ring. Hidden via `opacity` (not
+ * `display`/`visibility`), so it stays focusable and in the a11y tree.
+ */
+export const selectionInput = style({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  margin: 0,
+  cursor: "inherit",
+  opacity: 0,
+});
