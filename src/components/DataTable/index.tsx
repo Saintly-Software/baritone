@@ -43,8 +43,10 @@ export interface DataTableColumnMeta {
    * In `groupDisplay="merge"`, marks this column as the host for the merged group
    * label — the column whose cells carry the group value + toggle + count on
    * header rows and the row's own value (indented by depth) on leaf rows. At most
-   * one column should set it; if none do, the first visible non-grouped column
-   * hosts the label. Ignored under the default `groupDisplay="columns"`.
+   * one column should set it; a grouped column may (it then stays visible as the
+   * outline instead of being dropped). If none set it, the first non-grouped,
+   * non-aggregated column hosts the label. Ignored under the default
+   * `groupDisplay="columns"`.
    */
   groupLabel?: boolean;
 }
@@ -173,13 +175,15 @@ export interface DataTableBaseProps<TData extends RowData> extends Omit<
    *   carry the label there and leaf rows leave it blank (a placeholder). The
    *   original layout.
    * - `"merge"`: the grouped column(s) are not rendered as their own columns.
-   *   Instead the group label (value + toggle + count) is hosted in the first
-   *   visible non-grouped column — or the column whose `meta.groupLabel` is
-   *   `true` — indented by nesting depth, and leaf rows render that column's own
-   *   value, indented to match. Non-grouped columns (e.g. an aggregated total)
-   *   still render as usual, giving a single indented outline column instead of a
-   *   blank leftmost column. Set the host column's `header` to name the outline
-   *   (e.g. `"Category"`). Inert without `grouping`.
+   *   Instead the group label (value + toggle + count) is hosted in one column,
+   *   indented by nesting depth, and leaf rows render that column's own value
+   *   indented to match — a single outline column instead of a blank leftmost one.
+   *   The host is the column whose `meta.groupLabel` is `true`, else the first
+   *   column that is neither grouped nor aggregated (so an aggregated total keeps
+   *   rolling up per group rather than being replaced by the label); if every
+   *   remaining column aggregates, the innermost grouped column stays on as the
+   *   outline. Set the host column's `header` to name the outline (e.g.
+   *   `"Category"`). Inert without `grouping`.
    */
   groupDisplay?: "columns" | "merge";
   /**
@@ -350,28 +354,39 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   // plain table, and none of the column-dropping below runs.
   const merge = groupDisplay === "merge" && groupingState.length > 0;
 
-  // The grouped columns are hidden in merge mode (their label moves into the host
-  // column). We keep TanStack's `groupedColumnMode: false` and drop them here at
-  // render time — that keeps the row model, aggregation, and (crucially) the
-  // grouped cell's own renderer intact, so the host can still format the group
-  // value through the grouped column's `cell`.
-  const groupedColumnIds = React.useMemo<ReadonlySet<string>>(
-    () => (merge ? new Set(groupingState) : EMPTY_SET),
-    [merge, groupingState],
-  );
-  const isHidden = (columnId: string): boolean => groupedColumnIds.has(columnId);
+  const groupingSet = merge ? new Set(groupingState) : EMPTY_SET;
+  const leafColumns = table.getAllLeafColumns();
 
-  // The column that hosts the merged group label: an explicit `meta.groupLabel`
-  // opt-in, else the first visible non-grouped column.
-  const hostColumnId = React.useMemo<string | undefined>(() => {
-    if (!merge) return undefined;
-    const visible = table.getAllLeafColumns().filter((c) => !isHidden(c.id));
-    return (visible.find((c) => c.columnDef.meta?.groupLabel === true) ?? visible[0])?.id;
-    // `table` is stable per render; recompute when the grouped set changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [merge, groupedColumnIds, table]);
+  // Pick the column that hosts the merged group label. In priority order:
+  //  1. an explicit `meta.groupLabel` opt-in — any column, even a grouped one;
+  //  2. else the first column that is neither grouped nor aggregated, so a column
+  //     with an `aggregationFn` keeps showing its per-group total instead of being
+  //     taken over by the label;
+  //  3. else the innermost grouped column itself, kept visible as the outline —
+  //     reached when every non-grouped column aggregates, or when *every* column
+  //     is grouped (so there's still a host, never a row of zero cells).
+  // `merge` guarantees at least one grouped column, so a host always exists.
+  // Computed inline (not memoised) so it can't drift from `columns`/`meta` while
+  // `grouping` holds steady.
+  let hostColumnId: string | undefined;
+  if (merge) {
+    const aggregatedIds = collectAggregatedIds(columns);
+    const explicit = leafColumns.find((c) => c.columnDef.meta?.groupLabel === true);
+    const firstPlain = leafColumns.find((c) => !groupingSet.has(c.id) && !aggregatedIds.has(c.id));
+    const grouped = leafColumns.filter((c) => groupingSet.has(c.id));
+    const innermostGrouped = grouped[grouped.length - 1];
+    hostColumnId = (explicit ?? firstPlain ?? innermostGrouped)?.id;
+  }
 
-  const leafColumnCount = table.getAllLeafColumns().filter((c) => !isHidden(c.id)).length;
+  // The grouped columns are dropped from the layout in merge mode — all except the
+  // one hosting the label, which stays on as the outline column. We keep
+  // TanStack's `groupedColumnMode: false` and filter here at render time, so the
+  // row model, aggregation, and (crucially) the grouped cell's own renderer stay
+  // intact and the host can format the group value through that column's `cell`.
+  const isHidden = (columnId: string): boolean =>
+    merge && groupingSet.has(columnId) && columnId !== hostColumnId;
+
+  const leafColumnCount = leafColumns.filter((c) => !isHidden(c.id)).length;
 
   // The group-label cluster — expand/collapse toggle, the group's value, and its
   // data-row count — indented by the row's depth. Shared by both presentations:
@@ -509,6 +524,35 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
 }
 
 DataTable.displayName = "DataTable";
+
+/**
+ * The ids of columns the author gave a per-group aggregate — those with an
+ * explicit `aggregationFn` or `aggregatedCell` in the column defs they passed.
+ * Used to keep such a column from becoming the default merged-label host (which
+ * would swallow its total).
+ *
+ * Read off the *authored* defs, not the resolved `column.columnDef`: v9 fills in
+ * a default `aggregationFn: "auto"` and a default `aggregatedCell` on every
+ * resolved column, so the resolved shape can't tell an intended aggregate from a
+ * plain column. Recurses into group columns' `columns`; a leaf's id is its
+ * explicit `id`, else its `accessorKey` (matching how the table derives it).
+ */
+function collectAggregatedIds<TData extends RowData>(
+  defs: ReadonlyArray<DataTableColumn<TData>>,
+  acc: Set<string> = new Set(),
+): Set<string> {
+  for (const def of defs) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ColumnDef is a union (group vs accessor vs display); probe structurally
+    const anyDef = def as any;
+    if (Array.isArray(anyDef.columns)) {
+      collectAggregatedIds(anyDef.columns, acc);
+    } else if (anyDef.aggregationFn != null || anyDef.aggregatedCell != null) {
+      const id: unknown = anyDef.id ?? anyDef.accessorKey;
+      if (typeof id === "string") acc.add(id);
+    }
+  }
+  return acc;
+}
 
 /**
  * A group's human-readable name, for the toggle's `aria-label`. Uses the row's

@@ -501,4 +501,87 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
     expect(within(cells[1]!).getByText("Engineering")).toBeInTheDocument();
     expect(cells[0]!.textContent).toBe("");
   });
+
+  it("keeps the aggregate: the default host skips an aggregated column", () => {
+    // Only two columns — the grouped `category` and a summed `amount`. The label
+    // must NOT hijack the aggregated column; instead the grouped column stays on
+    // as the outline so the per-group total still renders on the header row.
+    interface Line {
+      id: string;
+      category: string;
+      amount: number;
+    }
+    const lines: Line[] = [
+      { id: "1", category: "Housing", amount: 100 },
+      { id: "2", category: "Housing", amount: 40 },
+      { id: "3", category: "Food", amount: 25 },
+    ];
+    const lineCol = createDataTableColumnHelper<Line>();
+    const lineColumns = lineCol.columns([
+      lineCol.accessor("category", { header: "Category" }),
+      lineCol.accessor("amount", {
+        header: "Amount",
+        meta: { align: "end" },
+        cell: (info) => `$${info.getValue()}`,
+        aggregationFn: "sum",
+        aggregatedCell: (info) => `$${info.getValue()}`,
+      }),
+    ]);
+    render(
+      <DataTable
+        aria-label="Lines"
+        data={lines}
+        columns={lineColumns}
+        grouping={["category"]}
+        groupDisplay="merge"
+        getRowId={(l) => l.id}
+      />,
+    );
+    // Both columns stay (the grouped Category hosts the outline)...
+    expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
+      "Category",
+      "Amount",
+    ]);
+    // ...and the Housing header row shows both its label and the summed total.
+    const headerRow = screen.getByRole("button", { name: /Housing/ }).closest("tr")!;
+    expect(within(headerRow).getByText("Housing")).toBeInTheDocument();
+    expect(within(headerRow).getByRole("cell", { name: "$140" })).toBeInTheDocument();
+  });
+
+  it("still renders a usable host when every column is grouped", () => {
+    // With no non-grouped column left, the innermost grouped column stays on as
+    // the host — so group rows keep their toggle + label + count instead of
+    // collapsing to zero cells.
+    interface Pair {
+      id: string;
+      category: string;
+      subcategory: string;
+    }
+    const pairs: Pair[] = [
+      { id: "1", category: "Housing", subcategory: "Rent" },
+      { id: "2", category: "Housing", subcategory: "Utilities" },
+      { id: "3", category: "Food", subcategory: "Groceries" },
+    ];
+    const pairCol = createDataTableColumnHelper<Pair>();
+    const pairColumns = pairCol.columns([
+      pairCol.accessor("category", { header: "Category" }),
+      pairCol.accessor("subcategory", { header: "Subcategory" }),
+    ]);
+    render(
+      <DataTable
+        aria-label="Pairs"
+        data={pairs}
+        columns={pairColumns}
+        grouping={["category", "subcategory"]}
+        groupDisplay="merge"
+        getRowId={(p) => p.id}
+      />,
+    );
+    // One outline column survives, and its group rows have a working toggle + count.
+    expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Subcategory"]);
+    const housing = screen.getByRole("button", { name: /Housing/ });
+    const housingRow = housing.closest("tr")!;
+    expect(within(housingRow).getAllByRole("cell").length).toBeGreaterThan(0);
+    expect(within(housingRow).getByText("(2)")).toBeInTheDocument();
+  });
 });
