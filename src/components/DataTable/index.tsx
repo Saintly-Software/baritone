@@ -27,6 +27,7 @@ import {
   groupLabel,
   groupRow,
   groupToggle,
+  mergeLeafLabel,
 } from "./dataTable.css";
 
 /**
@@ -38,6 +39,14 @@ import {
 export interface DataTableColumnMeta {
   /** Horizontal alignment of the column's header and body cells. Default `start`. */
   align?: "start" | "center" | "end";
+  /**
+   * In `groupDisplay="merge"`, marks this column as the host for the merged group
+   * label — the column whose cells carry the group value + toggle + count on
+   * header rows and the row's own value (indented by depth) on leaf rows. At most
+   * one column should set it; if none do, the first visible non-grouped column
+   * hosts the label. Ignored under the default `groupDisplay="columns"`.
+   */
+  groupLabel?: boolean;
 }
 
 /**
@@ -158,6 +167,22 @@ export interface DataTableBaseProps<TData extends RowData> extends Omit<
    */
   defaultExpanded?: boolean;
   /**
+   * How grouped rows present, when `grouping` is set. Default `"columns"`.
+   *
+   * - `"columns"`: the grouped column stays its own column — group-header rows
+   *   carry the label there and leaf rows leave it blank (a placeholder). The
+   *   original layout.
+   * - `"merge"`: the grouped column(s) are not rendered as their own columns.
+   *   Instead the group label (value + toggle + count) is hosted in the first
+   *   visible non-grouped column — or the column whose `meta.groupLabel` is
+   *   `true` — indented by nesting depth, and leaf rows render that column's own
+   *   value, indented to match. Non-grouped columns (e.g. an aggregated total)
+   *   still render as usual, giving a single indented outline column instead of a
+   *   blank leftmost column. Set the host column's `header` to name the outline
+   *   (e.g. `"Category"`). Inert without `grouping`.
+   */
+  groupDisplay?: "columns" | "merge";
+  /**
    * What to render when `data` is empty — shown as a single cell spanning every
    * column. With none, the body is simply empty (just the header shows).
    */
@@ -174,6 +199,13 @@ export type DataTableProps<TData extends RowData> = DataTableBaseProps<TData> & 
  * on every pass; one frozen module-scope array keeps the reference steady.
  */
 const NO_GROUPING: string[] = [];
+
+/**
+ * Shared empty set for the "no columns hidden" case (the default `"columns"`
+ * presentation, and `"merge"` before any `grouping` is set) — one frozen
+ * module-scope value keeps the `useMemo` reference steady across renders.
+ */
+const EMPTY_SET: ReadonlySet<string> = new Set();
 
 // Dev/test only, matching `Table` and Field's `assertExclusiveNames`: the naming
 // check is deterministic on props, so any render in dev/test/CI trips it long
@@ -216,6 +248,32 @@ const isDev = (): boolean =>
  * ]);
  *
  * <DataTable caption="People" data={people} columns={columns} grouping={["role"]} />
+ *
+ * @example
+ * // `groupDisplay="merge"`: a single indented outline column. Group by Category,
+ * // list Subcategory rows in that same first column, and keep a summed Amount.
+ * // The grouped `category` column isn't rendered on its own; set the host
+ * // column's `header` ("Category") to name the outline.
+ * const col = createDataTableColumnHelper<Expense>();
+ * const columns = col.columns([
+ *   col.accessor("subcategory", { header: "Category" }),
+ *   col.accessor("category", { header: "Category" }),
+ *   col.accessor("amount", {
+ *     header: "Amount",
+ *     meta: { align: "end" },
+ *     cell: (info) => usd.format(info.getValue()),
+ *     aggregationFn: "sum",
+ *     aggregatedCell: (info) => usd.format(info.getValue()),
+ *   }),
+ * ]);
+ *
+ * <DataTable
+ *   caption="Spending by category"
+ *   data={expenses}
+ *   columns={columns}
+ *   grouping={["category"]}
+ *   groupDisplay="merge"
+ * />
  */
 export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   // `props` is a union over the naming arms; widen to a single shape to read the
@@ -228,6 +286,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     getRowId,
     grouping,
     defaultExpanded,
+    groupDisplay = "columns",
     empty,
     caption,
     className,
@@ -285,7 +344,67 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   });
 
   const rows = table.getRowModel().rows;
-  const leafColumnCount = table.getAllLeafColumns().length;
+
+  // Merge presentation only kicks in once there's something to group — with no
+  // `grouping` there are no group rows, so a "merge" table is byte-for-byte the
+  // plain table, and none of the column-dropping below runs.
+  const merge = groupDisplay === "merge" && groupingState.length > 0;
+
+  // The grouped columns are hidden in merge mode (their label moves into the host
+  // column). We keep TanStack's `groupedColumnMode: false` and drop them here at
+  // render time — that keeps the row model, aggregation, and (crucially) the
+  // grouped cell's own renderer intact, so the host can still format the group
+  // value through the grouped column's `cell`.
+  const groupedColumnIds = React.useMemo<ReadonlySet<string>>(
+    () => (merge ? new Set(groupingState) : EMPTY_SET),
+    [merge, groupingState],
+  );
+  const isHidden = (columnId: string): boolean => groupedColumnIds.has(columnId);
+
+  // The column that hosts the merged group label: an explicit `meta.groupLabel`
+  // opt-in, else the first visible non-grouped column.
+  const hostColumnId = React.useMemo<string | undefined>(() => {
+    if (!merge) return undefined;
+    const visible = table.getAllLeafColumns().filter((c) => !isHidden(c.id));
+    return (visible.find((c) => c.columnDef.meta?.groupLabel === true) ?? visible[0])?.id;
+    // `table` is stable per render; recompute when the grouped set changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [merge, groupedColumnIds, table]);
+
+  const leafColumnCount = table.getAllLeafColumns().filter((c) => !isHidden(c.id)).length;
+
+  // The group-label cluster — expand/collapse toggle, the group's value, and its
+  // data-row count — indented by the row's depth. Shared by both presentations:
+  // in `"columns"` mode it fills the grouped column's own cell, in `"merge"` mode
+  // the host column's cell on a group-header row. `valueNode` is the group value
+  // already rendered through the grouped column's `cell`, so formatting matches
+  // the body either way. A plain render helper (not a nested component) so it
+  // closes over `table`/state without remounting.
+  const renderGroupLabel = (row: (typeof rows)[number], valueNode: React.ReactNode) => {
+    const expanded = row.getIsExpanded();
+    // Count underlying data rows, not immediate children: with a second grouping
+    // column `subRows` are sub-groups, so we flatten to the leaves and drop the
+    // intermediate group rows.
+    const dataRowCount = row.getLeafRows().filter((r) => !r.getIsGrouped()).length;
+    return (
+      <span
+        className={groupLabel}
+        style={assignInlineVars({ [groupDepthVar]: String(row.depth) })}
+      >
+        <button
+          type="button"
+          onClick={row.getToggleExpandedHandler()}
+          aria-expanded={expanded}
+          aria-label={`${expanded ? "Collapse" : "Expand"} ${groupRowLabel(row)}`}
+          className={cx(groupToggle, focusRingRecipe({ type: "visible", offset: "sm" }))}
+        >
+          <ChevronGlyph expanded={expanded} />
+        </button>
+        <span>{valueNode}</span>
+        <span className={groupCount}>({dataRowCount})</span>
+      </span>
+    );
+  };
 
   return (
     <table ref={ref} className={cx(dataTableRoot, className)} {...rest}>
@@ -293,19 +412,23 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
       <thead>
         {table.getHeaderGroups().map((group) => (
           <tr key={group.id}>
-            {group.headers.map((header) => (
-              <th
-                key={header.id}
-                scope="col"
-                colSpan={header.colSpan > 1 ? header.colSpan : undefined}
-                className={cellRecipe({
-                  header: true,
-                  align: header.column.columnDef.meta?.align ?? "start",
-                })}
-              >
-                {header.isPlaceholder ? null : <table.FlexRender header={header} />}
-              </th>
-            ))}
+            {group.headers.map((header) =>
+              // Drop the grouped column's header in merge mode — it no longer has
+              // a column of its own.
+              isHidden(header.column.id) ? null : (
+                <th
+                  key={header.id}
+                  scope="col"
+                  colSpan={header.colSpan > 1 ? header.colSpan : undefined}
+                  className={cellRecipe({
+                    header: true,
+                    align: header.column.columnDef.meta?.align ?? "start",
+                  })}
+                >
+                  {header.isPlaceholder ? null : <table.FlexRender header={header} />}
+                </th>
+              ),
+            )}
           </tr>
         ))}
       </thead>
@@ -325,41 +448,27 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
             return (
               <tr key={row.id} className={isGroupRow ? groupRow : undefined}>
                 {row.getAllCells().map((cell) => {
+                  // Merge mode: the grouped columns have no column of their own —
+                  // their label lives in the host column instead.
+                  if (isHidden(cell.column.id)) return null;
+
                   const align = cell.column.columnDef.meta?.align ?? "start";
+                  const isHostCell = merge && cell.column.id === hostColumnId;
 
                   let content: React.ReactNode;
-                  if (cell.getIsGrouped()) {
-                    // The grouping cell: expand/collapse toggle, the group's value
-                    // (through the column's own `cell`, so formatting matches the
-                    // body), then the number of data rows it holds. Indented by depth
-                    // so nested groups step inward.
-                    const expanded = row.getIsExpanded();
-                    // Count underlying data rows, not immediate children: with a
-                    // second grouping column `subRows` are sub-groups, so we flatten
-                    // to the leaves and drop the intermediate group rows.
-                    const dataRowCount = row.getLeafRows().filter((r) => !r.getIsGrouped()).length;
-                    content = (
-                      <span
-                        className={groupLabel}
-                        style={assignInlineVars({ [groupDepthVar]: String(row.depth) })}
-                      >
-                        <button
-                          type="button"
-                          onClick={row.getToggleExpandedHandler()}
-                          aria-expanded={expanded}
-                          aria-label={`${expanded ? "Collapse" : "Expand"} ${groupRowLabel(row)}`}
-                          className={cx(
-                            groupToggle,
-                            focusRingRecipe({ type: "visible", offset: "sm" }),
-                          )}
-                        >
-                          <ChevronGlyph expanded={expanded} />
-                        </button>
-                        <span>
-                          <table.FlexRender cell={cell} />
-                        </span>
-                        <span className={groupCount}>({dataRowCount})</span>
-                      </span>
+                  if (cell.getIsGrouped() || (isHostCell && isGroupRow)) {
+                    // The group label: expand/collapse toggle, the group's value,
+                    // and its data-row count, indented by depth. In `"columns"`
+                    // mode this *is* the grouped column's cell; in `"merge"` mode
+                    // it's the host cell on a group-header row, and the value is
+                    // taken from this row's grouped cell so formatting still runs
+                    // through the grouped column's own `cell`.
+                    const valueCell = cell.getIsGrouped()
+                      ? cell
+                      : row.getAllCells().find((c) => c.getIsGrouped());
+                    content = renderGroupLabel(
+                      row,
+                      valueCell ? <table.FlexRender cell={valueCell} /> : null,
                     );
                   } else if (cell.getIsAggregated()) {
                     // A rolled-up value on a group row: prefer the column's
@@ -371,6 +480,18 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                   } else if (cell.getIsPlaceholder()) {
                     // A cell shadowed by the group above it — render nothing.
                     content = null;
+                  } else if (isHostCell) {
+                    // Merge mode, leaf row: the host column's own value, indented
+                    // to sit one level in from its group header so the outline
+                    // lines up.
+                    content = (
+                      <span
+                        className={mergeLeafLabel}
+                        style={assignInlineVars({ [groupDepthVar]: String(row.depth) })}
+                      >
+                        <table.FlexRender cell={cell} />
+                      </span>
+                    );
                   } else {
                     content = <table.FlexRender cell={cell} />;
                   }

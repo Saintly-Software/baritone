@@ -156,3 +156,14 @@ export const groupCount = style({
   color: vars.text.color.neutral.mid,
   fontWeight: vars.text.weight.default,
 });
+
+/**
+ * A leaf cell's value in the merged label column (`groupDisplay="merge"`),
+ * indented by the row's nesting depth (via {@link groupDepthVar}) so it lines up
+ * one level in from its group header. Inline padding on an inline box, so the
+ * cell's own text alignment and baseline are untouched — only a left offset is
+ * added ahead of the value.
+ */
+export const mergeLeafLabel = style({
+  paddingInlineStart: `calc(${groupDepthVar} * ${vars.space[4]})`,
+});
