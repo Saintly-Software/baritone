@@ -185,9 +185,9 @@ export const SelectableUncontrolled: Story = {
 };
 
 /**
- * A predicate gates which rows are selectable — here, only rows with a positive
- * balance. Non-selectable rows show a locked (dimmed, `aria-disabled`) box that
- * stays focusable, and "select all" skips them.
+ * A predicate gates which rows are selectable — here, only rows with a balance
+ * over $1,000. Non-selectable rows (Katherine, at $320) show a locked (dimmed,
+ * `aria-disabled`) box that stays focusable, and "select all" skips them.
  */
 export const SelectableSome: Story = {
   render: () => {
@@ -195,7 +195,7 @@ export const SelectableSome: Story = {
     return (
       <div style={{ maxWidth: 640 }}>
         <DataTable
-          caption="Team members (only funded rows selectable)"
+          caption="Team members (only rows over $1,000 selectable)"
           data={people}
           columns={columns}
           getRowId={(p) => p.id}

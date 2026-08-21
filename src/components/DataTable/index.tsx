@@ -432,7 +432,10 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
               >
                 <SelectionCheckbox
                   checked={table.getIsAllRowsSelected()}
-                  indeterminate={table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()}
+                  // `getIsSomePageRowsSelected` counts only selectable rows in the
+                  // model, so a lingering id that no longer maps to a row (the
+                  // selection contract keeps those) can't fake a mixed header.
+                  indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllRowsSelected()}
                   onChange={table.getToggleAllRowsSelectedHandler()}
                   aria-label="Select all rows"
                 />
@@ -467,6 +470,11 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
         ) : (
           rows.map((row) => {
             const isGroupRow = row.getIsGrouped();
+            // A group whose every leaf is excluded by the predicate can't be
+            // toggled — and `getIsAllSubRowsSelected` reports "all" for an empty
+            // selectable set — so lock its box instead of showing a checked no-op.
+            const groupHasSelectableLeaves =
+              isGroupRow && row.getLeafRows().some((leaf) => leaf.getCanSelect());
             return (
               <tr key={row.id} className={isGroupRow ? groupRow : undefined}>
                 {selectionEnabled && (
@@ -475,8 +483,9 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                       // A group header's box selects or clears every row it holds,
                       // and shows the tri-state (all / some / none) of its children.
                       <SelectionCheckbox
-                        checked={row.getIsAllSubRowsSelected()}
-                        indeterminate={row.getIsSomeSelected()}
+                        checked={groupHasSelectableLeaves && row.getIsAllSubRowsSelected()}
+                        indeterminate={groupHasSelectableLeaves && row.getIsSomeSelected()}
+                        readOnly={!groupHasSelectableLeaves}
                         onChange={(event) => row.toggleSelected(event.target.checked)}
                         aria-label={`Select all rows in ${groupRowLabel(row)}`}
                       />

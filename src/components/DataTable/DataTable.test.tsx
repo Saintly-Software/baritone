@@ -491,4 +491,71 @@ describe("DataTable row selection", () => {
     expect([...ids].sort()).toEqual(["1", "2"]);
     expect(groupBox).toBeChecked();
   });
+
+  it("keeps selected ids absent from data and reports only the matching rows", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        // "stale" matches no current row (e.g. paged/filtered out).
+        defaultSelectedRowIds={["stale"]}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    await user.click(rowCheckbox("Ada Lovelace"));
+    const [ids, rows] = onSelectionChange.mock.calls.at(-1)!;
+    // The stale id survives in the ids (the source of truth)...
+    expect([...ids].sort()).toEqual(["1", "stale"]);
+    // ...but only rows present in `data` come back (Ada is id "1").
+    expect(rows).toEqual([people[0]]);
+  });
+
+  it("does not show the header as mixed when only a stale id is selected", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        defaultSelectedRowIds={["stale"]}
+      />,
+    );
+    const selectAll = screen.getByRole("checkbox", { name: "Select all rows" });
+    // No real row is selected, so the header is neither checked nor mixed.
+    expect(selectAll).not.toBeChecked();
+    expect(selectAll).not.toBePartiallyChecked();
+    expect(rowCheckbox("Ada Lovelace")).not.toBeChecked();
+  });
+
+  it("locks a group header whose rows are all non-selectable", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        getRowId={(p) => p.id}
+        // Only balances over 50 are selectable: Engineering has Grace ($96),
+        // but Research holds only Alan ($18) — no selectable leaf.
+        enableRowSelection={(p) => p.balance > 50}
+      />,
+    );
+    const researchRow = screen.getByRole("button", { name: /Collapse Research/ }).closest("tr");
+    const researchBox = within(researchRow!).getByRole("checkbox");
+    // Its box is locked (not a checked no-op) and stays focusable via aria-disabled.
+    expect(researchBox).toHaveAttribute("aria-disabled", "true");
+    expect(researchBox).not.toBeChecked();
+
+    // Engineering has a selectable leaf, so its box stays active.
+    const engineeringRow = screen
+      .getByRole("button", { name: /Collapse Engineering/ })
+      .closest("tr");
+    expect(within(engineeringRow!).getByRole("checkbox")).not.toHaveAttribute("aria-disabled");
+  });
 });
