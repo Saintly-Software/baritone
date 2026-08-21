@@ -1,5 +1,280 @@
 # @saintly-software/baritone
 
+## 1.0.0-alpha.6
+
+### Minor Changes
+
+- a402252: Add row grouping to `DataTable` — pass `grouping` (an ordered list of column ids)
+  to gather rows under collapsible group headers.
+
+  - **`grouping` prop:** a controlled `ReadonlyArray<string>` of column ids. The
+    table groups by the first id, then by the second within each group, and so on;
+    omit it (or pass `[]`) for the flat table as before. It's controlled by design —
+    the table renders whatever you pass, so drive it from a "group by" control or a
+    static config — and the table owns only the expand/collapse state.
+  - **Collapsible groups:** each distinct value gets a header row carrying an
+    expand/collapse toggle (a real `<button>` with `aria-expanded` and an
+    `Expand`/`Collapse` label), the group's value, and its row count. Groups start
+    expanded; `defaultExpanded={false}` starts them all collapsed. Nested groups
+    indent by depth.
+  - **Per-group aggregates:** a column's `aggregationFn` (the built-in `"sum"`,
+    `"count"`, `"min"`, `"max"`, `"mean"`, … resolve by name, or pass your own) with
+    an optional `aggregatedCell` renders a rolled-up value on the group header rows.
+  - **Built on v9 feature plugins:** `columnGroupingFeature`, `rowExpandingFeature`,
+    and `rowAggregationFeature` (plus the grouped/expanded row models and the
+    built-in aggregation registry) now ship in `dataTableFeatures`. They're inert
+    without `grouping`, so a plain `DataTable` is unchanged. No new prop is required
+    and no existing call site needs to change — sorting / filtering / pagination
+    remain future plugins that slot in the same way.
+
+- 3a79bca: Standardise collection APIs on JSX `items`: `Menu`, `List`, and `ChipList` now
+  take an `items` array of `<X.Item>` **elements** rather than prop objects,
+  matching `ButtonGroup`. This unifies what `items` means across the library — an
+  array of `<Component.Item>` elements — and lets rows read as ordinary JSX.
+
+  **Breaking — `Menu`:**
+
+  ```tsx
+  // Before
+  <Menu trigger={…} items={[{ children: "Edit", onClick: edit }]} />
+  // After
+  <Menu trigger={…} items={[<Menu.Item key="edit" onClick={edit}>Edit</Menu.Item>]} />
+  ```
+
+  **Breaking — `ChipList`:** items are now `<ChipList.Item>` elements (a new
+  carrier part, like `ButtonGroup.Item`), and the item-props type `ChipListItem`
+  is renamed `ChipListItemProps`.
+
+  ```tsx
+  // Before
+  <ChipList items={[{ children: "React" }, { children: "Vite" }]} />
+  // After
+  <ChipList items={[
+    <ChipList.Item key="react">React</ChipList.Item>,
+    <ChipList.Item key="vite">Vite</ChipList.Item>,
+  ]} />
+  ```
+
+  **Breaking — `List`:** the object-array `items` and the `children`-composition
+  path are both replaced by a single `items` array of `<List.Item>` elements.
+
+  ```tsx
+  // Before (either form)
+  <List items={[{ id: "a", children: "Ada" }]} />
+  <List><List.Item>Ada</List.Item></List>
+  // After
+  <List items={[<List.Item key="a">Ada</List.Item>]} />
+  ```
+
+  All three share one rule (a `keyedElements` helper): falsy entries (`null` /
+  `false` / `undefined`) are skipped — so a row can be included conditionally
+  inline (`canDelete && <Menu.Item …>Delete</Menu.Item>`) — and each surviving row
+  keeps its own `key`, falling back to its _original_ index (stable when a
+  conditional entry toggles).
+
+  `Tabs` and `Accordion` intentionally keep their object-array `items`/`tabs`:
+  they infer a generic `value` union across the entries to type-check
+  `value`/`onChange`/`initialValue`, and that inference does not survive JSX
+  elements (whose props widen to `any`).
+
+- 4275338: Add an icon-only arm to `<Link appearance="button">` — a square, label-less
+  button-styled link carrying a single glyph — the anchor mirror of `Button`'s
+  icon-only look.
+
+  ```tsx
+  <Link
+    appearance="button"
+    icon={<Icon>…</Icon>}
+    aria-label="Back to entry details"
+    render={<RouterLink to="/entries/42" />}
+  />
+  ```
+
+  `ButtonLinkProps` is now discriminated on the presence of `icon`, exactly like
+  `Button` splits its labelled arms from `IconButtonProps`:
+
+  - **Labelled arm** (`LabelledButtonLinkProps`) is unchanged: `children` required,
+    `startIcon`/`endIcon`/`width` allowed, and `aria-label` a type error (the
+    visible label is the accessible name).
+  - **Icon-only arm** (`IconButtonLinkProps`) is selected by `icon` +
+    `aria-label`: `aria-label` is **required** (there's no visible text to name
+    it), and `children`/`startIcon`/`endIcon`/`width` are all `never`. `width`
+    drops out because the square treatment pins a 1:1 `aspect-ratio`, so `fill`
+    would inflate the link into a container-sized square. `icon` is typed
+    `NonNullable<React.ReactNode>` (the same tightening applied to `Button`'s
+    `IconButtonProps`), so a nullish value can't select the icon-only arm and
+    render an unnamed control.
+
+  > **Types (source-only migration; no runtime change).** `ButtonLinkProps` is now
+  > a union (`LabelledButtonLinkProps | IconButtonLinkProps`) rather than a single
+  > interface, and both arms are exported. If you `extend`ed `ButtonLinkProps`,
+  > extend `LabelledButtonLinkProps` instead; if you read
+  > `children`/`startIcon`/`endIcon`/`width` off a `ButtonLinkProps` value, narrow
+  > on `icon` first.
+
+  It reuses the existing styling path (`InternalButton` /
+  `InternalGenericButtonAnchor`) rather than duplicating the square recipe, so an
+  icon-only button-link is **pixel-identical** to an icon-only `Button` at the same
+  `intent`/`saliency`/`size`. Both destination seams still work — `href` for a
+  plain external `<a>`, `render` for a router link, and the ambient `LinkProvider`
+  when neither is set. `loading`, `disabled`, and `disabledReason` behave as on the
+  labelled button-link: disabled collapses to an inert, role-less element that keeps
+  the button styling and is out of the a11y tree as a link. Because the icon-only
+  arm has no visible text, its name is re-exposed there as visually-hidden
+  _content_ (`aria-label` is prohibited on a role-less element), so the disabled
+  control stays perceivable — matching how the labelled arm's visible text does.
+
+  This removes a footgun: an icon-only navigation control previously had to be
+  built by passing an `<Icon>` as `children` to the labelled arm — producing an
+  anchor with no accessible name — with the only fix being to smuggle an
+  `aria-label` in through the `render` element, sidestepping the very type
+  constraint meant to protect the name. `appearance="text"` stays label-only (a
+  bare underlined glyph reads as neither a link nor a button) and
+  `appearance="chip"` keeps its decorative `icon`/`trailIcon` alongside a required
+  label; neither gains an icon-only arm.
+
+- 0e4e264: Add a TanStack Form integration — import it from
+  `@saintly-software/baritone/form`. Like `/datatable`, it ships from its own entry
+  point, so `@tanstack/react-form` (a new **optional** peer dependency — install it
+  only if you import `/form`) is reached only through this subpath; importing anything
+  else from the package never references it. (`@tanstack/react-table` is now marked
+  optional too, to match `/datatable`'s subpath contract.)
+
+  - **Composition API (the blessed surface):** `useAppForm` gives you pre-bound
+    field components and a form-aware `SubmitButton`, so a field is
+    `<form.AppField name="email">{(field) => <field.TextInput label="Email" />}</form.AppField>`
+    with no `value` / `onChange` / error wiring by hand. Also exports `withForm`,
+    `withFieldGroup`, the shared `fieldContext` / `formContext`, and
+    `baritoneFieldComponents` / `baritoneFormComponents` for extending your own
+    `createFormHook`.
+  - **Render-prop adapters (the primitive underneath):** one `Form*` per control —
+    `FormTextInput`, `FormSelect`, `FormCheckbox`, `FormSwitch`, `FormCheckboxGroup`,
+    `FormRadioGroup`, `FormCombobox` — binding a TanStack field to the Baritone
+    control for use with the plain `form.Field` API (`<FormTextInput field={field}
+label="Email" />`). Every form control that composes `Field` is covered.
+  - **Errors become display, automatically:** a field's validation errors map onto
+    the control's `state="invalid"` + `helpText` (Baritone's one-message rule — no
+    `errorMessage` prop), gated by `showErrorsWhen` (`"touched"` default, or
+    `"always"`). `firstFieldErrorMessage` reads strings, `{ message }` issues
+    (Standard Schema, Zod, Valibot, …), and React nodes; `hasFieldError` decides
+    invalidity, so a real error with no display string still flips the control to
+    `invalid` rather than leaving it neutral while `canSubmit` is `false`. The blur of
+    every control that exposes one (`TextInput`, `Combobox`, `Select`) runs
+    `validators.onBlur`, and each adapter coalesces a value missing from
+    `defaultValues` so the control stays controlled.
+  - **`SubmitButton`** drives `type="submit"`, `loading` from `isSubmitting`, and
+    `disabled` from `canSubmit`, so it spins while submitting and disables while the
+    form can't submit.
+  - **`<Form form={form}>`** renders the `<form>` element itself — it prevents the
+    default and calls `form.handleSubmit()` on submit, lays its children out as a
+    vertical stack (it's a `Flex`, so `gap` / `direction` / `maxWidth` / spacing props
+    apply), and provides the form context so `SubmitButton` needs no wrapping
+    `<form.AppForm>`. Works with a plain `useForm()` too (no context, just the wired
+    element).
+
+  Adapters take a structural `FieldLike<T>` rather than the concrete `FieldApi`, so a
+  real TanStack field is assignable _and_ a value/control mismatch (e.g. a `number`
+  field on a text input) is a compile error. Nothing existing moves; every other
+  component still imports from the package root.
+
+- ebfc036: Add `createToastManager()` for firing toasts from outside React.
+
+  `useToast()` only works inside a component. Code that runs at module scope — a
+  fetch interceptor, a store, a TanStack Query `MutationCache`'s `onError` — had no
+  way to reach the toast viewport, so consumers fell back to base-ui's raw
+  `Toast.createToastManager` and hand-packed the design-system fields into its
+  `data` bag themselves (duplicating what `useToast().add` does internally).
+
+  - **`createToastManager()`** — returns a `BaritoneToastManager` with the same
+    `add` / `update` / `close` / `promise` surface as `useToast()`, taking the
+    design-system fields (`intent` / `saliency` / `icon` / `actions`) at the top
+    level and packing them for you. Create one at module scope, hand it to
+    `<BaritoneProvider toastManager={…}>` to connect it to the viewport, then fire
+    toasts from any event handler:
+
+    ```ts
+    // toast.ts — no component needed
+    export const toasts = createToastManager();
+
+    export function reportSaveFailure() {
+      toasts.add({
+        title: "Couldn't save",
+        intent: "negative",
+        priority: "high",
+      });
+    }
+    ```
+
+  - `BaritoneProvider`'s `toastManager` prop now accepts `BaritoneToastManager |
+ToastManager`, so existing call sites passing a raw base-ui manager still
+    typecheck.
+  - Note: a module-scope manager holds no reactive toast list, so its `update`
+    replaces the toast's visual `data` wholesale rather than merging over the live
+    toast — pass every visual field you want kept. `useToast().update` still merges.
+  - Note: base-ui's manager buffers nothing, so toasts fired before
+    `BaritoneProvider` mounts (module init, an SSR pass) are dropped silently — fire
+    in response to events, by which point the provider is mounted.
+
+- 7c89983: Add `orientation` (and a `width` fill knob) to `ToggleGroup`, so it can render as
+  a vertical segmented control instead of only a single-line toolbar. Additive and
+  non-breaking — both default to today's behaviour.
+
+  - **`orientation`** — `"horizontal"` (default, the toolbar) or `"vertical"` (a
+    stacked column). It drives _both_ halves at once:
+
+    - **Paint** comes from the recipe (a variant on the group's own class), not a
+      consumer `className` override: `vertical` lays the segments out in a column
+      and stretches them (`align-items: stretch`) so they share one width down the
+      stack instead of each hugging its own label. The `gap` token is unchanged.
+    - **Keyboard** is wired to match by passing the same orientation through to
+      base-ui's `ToggleGroup` roving focus, so Up/Down move between segments in a
+      vertical group and Left/Right in a horizontal one (selection stays manual —
+      Enter/Space). This fixes the old `className`-override workaround, which
+      silently desynced the _visual_ direction from the _keyboard_ direction (in a
+      column, Left/Right still moved focus and Up/Down didn't).
+
+    The group is `role="group"`, which — unlike `toolbar` / `radiogroup` — has no
+    `aria-orientation`, so none is emitted; the axis is conveyed by the roving-focus
+    keys and base-ui's `data-orientation`.
+
+  - **`width="fill"`** — make the group span its container instead of
+    shrink-wrapping. The group is `inline-flex` and a labelled group double
+    shrink-wraps (the `Field` wrapper is `fit: "content"` too), so a vertical group
+    in a fixed-width sidebar couldn't be made to fill from props. `width="fill"`
+    applies the shared `full` width atom (the same `resolveWidth` source
+    `Box` / `Flex` / `Button` use — no re-encoded literal) _and_ flips the wrapping
+    `Field` to `fit: "fill"` so the fill isn't swallowed by the shrink-wrapped
+    field; a filled horizontal toolbar grows its segments to share the width. Omit
+    it and the group keeps its natural shrink-to-content size, exactly as before.
+
+    Only `"fill"` is offered — not the full `fit` / `inherit` shorthand `Box` &
+    co. take. The `Field` wrapper interposes as a shrink-wrapper, so `inherit`
+    can't reach an ancestor's width through it and `fit` would only restate the
+    default; both would be dead knobs, so they're left off the type rather than
+    shipped non-functional.
+
+  ```tsx
+  <ToggleGroup
+    aria-label="Annotation tool"
+    orientation="vertical"
+    width="fill"
+    value={tool}
+    onChange={setTool}
+  >
+    {({ ToggleGroupItem }) => (
+      <>
+        <ToggleGroupItem value="select">Select</ToggleGroupItem>
+        <ToggleGroupItem value="draw">Draw</ToggleGroupItem>
+        <ToggleGroupItem value="erase">Erase</ToggleGroupItem>
+      </>
+    )}
+  </ToggleGroup>
+  ```
+
+  Form-control mode (a labelled group) lays out correctly in a column under every
+  `labelPosition` (`top` / `start` / `end`), with `helpText` and the `invalid`
+  state under the control as before.
+
 ## 1.0.0-alpha.5
 
 ### Minor Changes
