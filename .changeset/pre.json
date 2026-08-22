@@ -36,6 +36,7 @@
     "data-table-component",
     "datatable-group-display-merge",
     "datatable-grouping-support",
+    "datatable-row-detail-panels",
     "datatable-row-selection",
     "datatable-selection-a11y",
     "datatable-subpath-export",
