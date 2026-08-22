@@ -59,15 +59,6 @@
     "pub:version": "pnpm exec changeset version",
     "pub:release": "pnpm build && pnpm exec changeset publish"
   },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "oxlint -c .config/.oxlintrc.json --fix",
-      "oxfmt -c .config/.oxfmtrc.json"
-    ],
-    "*.md": [
-      "oxfmt -c .config/.oxfmtrc.json"
-    ]
-  },
   "devDependencies": {
     "@base-ui/react": "1.6.0",
     "@changesets/cli": "2.31.0",
@@ -120,6 +111,15 @@
     "@vanilla-extract/css": {
       "optional": true
     }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "oxlint -c .config/.oxlintrc.json --fix",
+      "oxfmt -c .config/.oxfmtrc.json"
+    ],
+    "*.md": [
+      "oxfmt -c .config/.oxfmtrc.json"
+    ]
   },
   "packageManager": "pnpm@11.8.0"
 }
