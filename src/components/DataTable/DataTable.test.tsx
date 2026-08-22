@@ -950,3 +950,320 @@ describe("DataTable row selection", () => {
     expect(within(engineeringRow!).getByRole("checkbox")).not.toHaveAttribute("aria-disabled");
   });
 });
+
+describe("DataTable row detail panels", () => {
+  // A panel keyed off the row's datum, so a test can assert the right row's data
+  // reached the renderer.
+  const detail = (p: Person) => <div>Detail for {p.name}</div>;
+
+  it("adds no expander column or toggle unless renderDetailPanel is provided", () => {
+    render(
+      <DataTable aria-label="People" data={people} columns={columns} getRowId={(p) => p.id} />,
+    );
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    // No leading expander column: only the three data columns.
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+  });
+
+  it("grows a leading expander column and a collapsed toggle per data row", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+      />,
+    );
+    // The extra (empty) expander header sits ahead of the three data columns.
+    expect(screen.getAllByRole("columnheader")).toHaveLength(4);
+    // Each data row has a toggle named from its own value, starting collapsed.
+    for (const person of people) {
+      const toggle = screen.getByRole("button", { name: `Expand details for ${person.name}` });
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+    }
+    // Nothing is rendered until a row is opened.
+    expect(screen.queryByText(/^Detail for/)).not.toBeInTheDocument();
+  });
+
+  it("reveals the panel on toggle and hides it again", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
+    expect(screen.getByText("Detail for Ada Lovelace")).toBeInTheDocument();
+
+    // The toggle flips to "Collapse" / aria-expanded=true and points at the panel.
+    const open = screen.getByRole("button", { name: "Collapse details for Ada Lovelace" });
+    expect(open).toHaveAttribute("aria-expanded", "true");
+    const panelId = open.getAttribute("aria-controls");
+    expect(panelId).toBeTruthy();
+    expect(document.getElementById(panelId!)).toHaveTextContent("Detail for Ada Lovelace");
+
+    await user.click(open);
+    expect(screen.queryByText("Detail for Ada Lovelace")).not.toBeInTheDocument();
+    // Collapsed again: no dangling aria-controls to an absent panel.
+    const collapsed = screen.getByRole("button", { name: "Expand details for Ada Lovelace" });
+    expect(collapsed).not.toHaveAttribute("aria-controls");
+  });
+
+  it("calls renderDetailPanel only for open rows, with that row's datum", async () => {
+    const user = userEvent.setup();
+    const render_ = vi.fn((p: Person) => <div>Detail for {p.name}</div>);
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={render_}
+      />,
+    );
+    // Never invoked while every panel is collapsed.
+    expect(render_).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
+    // Ada is people[0]; only her datum is passed.
+    expect(render_).toHaveBeenCalledWith(people[0]);
+    const openedFor = render_.mock.calls.map(([p]) => p);
+    expect(openedFor).toContain(people[0]);
+    expect(openedFor).not.toContain(people[1]);
+  });
+
+  it("toggles panels independently", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
+    await user.click(screen.getByRole("button", { name: "Expand details for Alan Turing" }));
+    expect(screen.getByText("Detail for Ada Lovelace")).toBeInTheDocument();
+    expect(screen.getByText("Detail for Alan Turing")).toBeInTheDocument();
+
+    // Closing one leaves the other open.
+    await user.click(screen.getByRole("button", { name: "Collapse details for Ada Lovelace" }));
+    expect(screen.queryByText("Detail for Ada Lovelace")).not.toBeInTheDocument();
+    expect(screen.getByText("Detail for Alan Turing")).toBeInTheDocument();
+  });
+
+  it("spans the panel across every column, including the expander", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
+    // 1 expander + 3 data columns.
+    const panelCell = screen.getByText("Detail for Ada Lovelace").closest("td");
+    expect(panelCell).toHaveAttribute("colspan", "4");
+  });
+
+  it("composes with selection: both leading columns, and the panel spans them", async () => {
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowSelection
+        renderDetailPanel={detail}
+      />,
+    );
+    // Ada's row carries both a checkbox and an expander toggle.
+    const adaRow = screen.getByText("Ada Lovelace").closest("tr")!;
+    expect(within(adaRow).getByRole("checkbox")).toBeInTheDocument();
+    const toggle = within(adaRow).getByRole("button", { name: "Expand details for Ada Lovelace" });
+
+    await user.click(toggle);
+    // expander + selection + 3 data columns.
+    const panelCell = screen.getByText("Detail for Ada Lovelace").closest("td");
+    expect(panelCell).toHaveAttribute("colspan", "5");
+  });
+
+  it("gives a detail toggle to data rows but not group headers", () => {
+    render(
+      <DataTable
+        aria-label="Staff"
+        data={staff}
+        columns={groupedColumns}
+        grouping={["role"]}
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+      />,
+    );
+    // The group header carries its group toggle but no detail toggle.
+    const groupHeaderRow = screen
+      .getByRole("button", { name: /Collapse Engineering/ })
+      .closest("tr");
+    expect(within(groupHeaderRow!).queryByRole("button", { name: /details for/ })).toBeNull();
+    // A data row under it does get one.
+    expect(
+      screen.getByRole("button", { name: "Expand details for Ada Lovelace" }),
+    ).toBeInTheDocument();
+  });
+
+  it("spans the empty slot across the expander column too", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={[]}
+        columns={columns}
+        empty="No people yet."
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+      />,
+    );
+    // 3 data columns + the expander column.
+    expect(screen.getByRole("cell", { name: "No people yet." })).toHaveAttribute("colspan", "4");
+  });
+
+  it("gates which rows get a toggle with an enableRowExpansion predicate", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+        // Only balances over 20 are expandable — Alan (18) is not.
+        enableRowExpansion={(p) => p.balance > 20}
+      />,
+    );
+    // The expander column still renders (its header is present)...
+    expect(screen.getAllByRole("columnheader")).toHaveLength(4);
+    // ...with a toggle on the eligible rows...
+    expect(
+      screen.getByRole("button", { name: "Expand details for Ada Lovelace" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Expand details for Grace Hopper" }),
+    ).toBeInTheDocument();
+    // ...but none on the excluded row (its expander cell is simply empty).
+    expect(screen.queryByRole("button", { name: "Expand details for Alan Turing" })).toBeNull();
+    const alanRow = screen.getByText("Alan Turing").closest("tr")!;
+    expect(within(alanRow).getAllByRole("cell")[0]).toBeEmptyDOMElement();
+  });
+
+  it("never opens a panel for a row the predicate excludes", async () => {
+    const user = userEvent.setup();
+    const render_ = vi.fn((p: Person) => <div>Detail for {p.name}</div>);
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={render_}
+        enableRowExpansion={(p) => p.balance > 20}
+      />,
+    );
+    // The eligible row still opens...
+    await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
+    expect(screen.getByText("Detail for Ada Lovelace")).toBeInTheDocument();
+    // ...and the excluded row is never rendered (no toggle exists to open it).
+    expect(render_.mock.calls.map(([p]) => p)).not.toContain(people[1]);
+  });
+
+  it("treats enableRowExpansion={true} like the default — every row expandable", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+        enableRowExpansion={true}
+      />,
+    );
+    for (const person of people) {
+      expect(
+        screen.getByRole("button", { name: `Expand details for ${person.name}` }),
+      ).toBeInTheDocument();
+    }
+  });
+
+  it("drops the whole feature with enableRowExpansion={false}, even with a renderer", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={detail}
+        enableRowExpansion={false}
+      />,
+    );
+    // No expander column and no toggles — the renderer is inert.
+    expect(screen.getAllByRole("columnheader")).toHaveLength(3);
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("names toggles by each row's own value in grouped mode, not the shared group value", () => {
+    // Grouped columns (region, role) carry the group's value on leaf rows, shared
+    // by every row in the group. The toggle name must fall through to the row's own
+    // distinguishing value (name) instead of labelling every Americas row alike.
+    render(
+      <DataTable
+        aria-label="Employees"
+        data={employees}
+        columns={employeeColumns}
+        grouping={["region", "role"]}
+        getRowId={(e) => e.id}
+        renderDetailPanel={(e) => <div>Detail for {e.name}</div>}
+      />,
+    );
+    // getByRole throws on a duplicated name, so this also asserts the labels are distinct.
+    expect(
+      screen.getByRole("button", { name: "Expand details for Ada Lovelace" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Expand details for Grace Hopper" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Expand details for Tom Watson" }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps panel ids valid and matched when getRowId returns values with spaces", async () => {
+    // A composite id with whitespace must not leak into the DOM id / aria-controls
+    // (an invalid id + a broken IDREF list). The panel id is keyed off render
+    // position, so the toggle's aria-controls still resolves to the panel.
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => `${p.name} #${p.id}`}
+        renderDetailPanel={detail}
+      />,
+    );
+    const toggle = screen.getByRole("button", { name: "Expand details for Ada Lovelace" });
+    await user.click(toggle);
+
+    const panelId = toggle.getAttribute("aria-controls");
+    expect(panelId).toBeTruthy();
+    // A valid HTML id has no whitespace, and the reference resolves to the panel.
+    expect(panelId).not.toMatch(/\s/);
+    expect(document.getElementById(panelId!)).toHaveTextContent("Detail for Ada Lovelace");
+  });
+});

@@ -193,6 +193,80 @@ export const GroupedMerged: Story = {
 };
 
 /**
+ * Give each row an expandable detail panel with `renderDetailPanel`. A leading
+ * chevron opens a full-width panel beneath the row, rendered from that row's
+ * datum (here a small profile). Panels start collapsed and toggle independently;
+ * the function runs only for open rows.
+ */
+export const WithDetailPanel: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={(person) => (
+          <dl
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto 1fr",
+              gap: "4px 16px",
+              margin: 0,
+            }}
+          >
+            <dt style={{ fontWeight: 600 }}>Email</dt>
+            <dd style={{ margin: 0 }}>
+              <Link href={`mailto:${person.email}`}>{person.email}</Link>
+            </dd>
+            <dt style={{ fontWeight: 600 }}>Role</dt>
+            <dd style={{ margin: 0 }}>{person.role}</dd>
+            <dt style={{ fontWeight: 600 }}>Balance</dt>
+            <dd style={{ margin: 0 }}>{usd.format(person.balance)}</dd>
+          </dl>
+        )}
+      />
+    </div>
+  ),
+};
+
+/**
+ * Gate which rows can expand with `enableRowExpansion` — a predicate mirroring
+ * `enableRowSelection`. Here only rows with a balance over $1,000 are expandable;
+ * the rest (Katherine, at $320) show no chevron at all.
+ */
+export const WithDetailPanelSome: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members (only rows over $1,000 expandable)"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        enableRowExpansion={(person) => person.balance > 1000}
+        renderDetailPanel={(person) => (
+          <dl
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto 1fr",
+              gap: "4px 16px",
+              margin: 0,
+            }}
+          >
+            <dt style={{ fontWeight: 600 }}>Email</dt>
+            <dd style={{ margin: 0 }}>
+              <Link href={`mailto:${person.email}`}>{person.email}</Link>
+            </dd>
+            <dt style={{ fontWeight: 600 }}>Role</dt>
+            <dd style={{ margin: 0 }}>{person.role}</dd>
+          </dl>
+        )}
+      />
+    </div>
+  ),
+};
+
+/**
  * Row selection, controlled by id. `enableRowSelection` adds the leading checkbox
  * column; `selectedRowIds` + `onSelectionChange` own the state. The header box
  * selects all / clears all and goes indeterminate on a partial selection.

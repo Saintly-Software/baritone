@@ -294,3 +294,71 @@ export const GroupHeaderSelectsItsRows: Story = {
     expect(engineeringBox).not.toBeChecked();
   },
 };
+
+/** Clicking a row's expander reveals its detail panel; clicking again hides it. */
+export const ExpandsAndCollapsesADetailPanel: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={(person) => <div>Balance: ${person.balance}</div>}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Collapsed to start: the toggle says "Expand" and no panel is on screen.
+    const expand = canvas.getByRole("button", { name: "Expand details for Ada Lovelace" });
+    expect(expand).toHaveAttribute("aria-expanded", "false");
+    expect(canvas.queryByText("Balance: $4200")).not.toBeInTheDocument();
+
+    // Open it — the panel appears and the toggle flips to "Collapse".
+    await userEvent.click(expand);
+    await waitFor(() => {
+      expect(canvas.getByText("Balance: $4200")).toBeInTheDocument();
+    });
+    const collapse = canvas.getByRole("button", { name: "Collapse details for Ada Lovelace" });
+    expect(collapse).toHaveAttribute("aria-expanded", "true");
+
+    // Close it again — the panel goes away.
+    await userEvent.click(collapse);
+    await waitFor(() => {
+      expect(canvas.queryByText("Balance: $4200")).not.toBeInTheDocument();
+    });
+  },
+};
+
+/** Opening one row's panel leaves every other row's panel closed. */
+export const DetailPanelsToggleIndependently: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Team members"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        renderDetailPanel={(person) => <div>Details: {person.name}</div>}
+      />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Open Ada's panel only.
+    await userEvent.click(canvas.getByRole("button", { name: "Expand details for Ada Lovelace" }));
+    await waitFor(() => {
+      expect(canvas.getByText("Details: Ada Lovelace")).toBeInTheDocument();
+    });
+
+    // Grace's panel stays shut, and her toggle is still collapsed.
+    expect(canvas.queryByText("Details: Grace Hopper")).not.toBeInTheDocument();
+    expect(canvas.getByRole("button", { name: "Expand details for Grace Hopper" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+  },
+};
