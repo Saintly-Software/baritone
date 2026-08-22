@@ -84,3 +84,27 @@ export const focusRingColorVar = createVar("focusRingColor");
  * margin to span the surface edge-to-edge.
  */
 export const surfacePaddingVar = createVar("surfacePadding");
+
+// ---------------------------------------------------------------------------
+// Control-sizing indirection vars. Each is the single hop between the open size
+// vocabularies (which set it per instance to a `var(--controlSize-<name>-<field>)`
+// / `var(--selectionSize-<name>-<field>)` the theme published) and the recipe base
+// (which reads it with a `fallbackVar` to the built-in `md` token). Mirrors the
+// `--text…` typography indirection above. Wired into the recipes in a later phase;
+// declared here so the seam is defined in one place. See `theme/controlSizes.ts`
+// and `theme/selectionSizes.ts`.
+// ---------------------------------------------------------------------------
+
+/** The *current control height* (Button/TextInput/Select/Combobox). */
+export const controlHeightVar = createVar("controlHeight");
+/** The *current control inline padding*. */
+export const controlPaddingInlineVar = createVar("controlPaddingInline");
+/** The *current control font-size*. */
+export const controlFontSizeVar = createVar("controlFontSize");
+/** The *current control gap* (icon↔label). */
+export const controlGapVar = createVar("controlGap");
+
+/** The *current selection-control box/track height* (Checkbox/Radio/Switch). */
+export const selectionBoxVar = createVar("selectionBox");
+/** The *current selection-control label font-size*. */
+export const selectionFontSizeVar = createVar("selectionFontSize");

@@ -66,6 +66,25 @@ export const lineHeight = {
   "9xl": "1",
 } as const;
 
+// Control (Button / TextInput / Select / Combobox) height ramp — one shared set of
+// heights so a button lines up beside an input at the same `size`. paddingInline,
+// gap, and fontSize are wired from the space + text-size scales in `defaultTokens`;
+// only the heights are authored here.
+export const controlHeight = {
+  sm: "2rem", // 32px
+  md: "2.5rem", // 40px
+  lg: "3rem", // 48px
+} as const;
+
+// Selection control (Checkbox / Radio / Switch) box-height ramp — independent of,
+// and much smaller than, the control ramp above. Each control derives its own inner
+// geometry (glyph / dot / switch width + thumb) from this box height.
+export const selectionBox = {
+  sm: "1rem", // 16px
+  md: "1.25rem", // 20px
+  lg: "1.5rem", // 24px
+} as const;
+
 export const space = {
   "0": "0",
   "1": "4px",

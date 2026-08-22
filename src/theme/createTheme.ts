@@ -1,6 +1,7 @@
 import { createTheme, globalStyle } from "@vanilla-extract/css";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { textFontVar, textLetterSpacingVar, textWeightVar } from "../styles/vars.css";
+import { controlSizeVars, type ControlSizeValue } from "./controlSizes";
 import { warnOnContrastIssues } from "./contrast";
 import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
 import { fontSizeVars, type SizeValue } from "./fontSizes";
@@ -8,6 +9,7 @@ import { fontFamilyVars, fontVarName, type FontName } from "./fonts";
 import { fontWeightVarName, fontWeightVars, type FontWeightName } from "./fontWeights";
 import { letterSpacingVarName, letterSpacingVars, type LetterSpacingName } from "./letterSpacings";
 import { lineHeightVars } from "./lineHeights";
+import { selectionSizeVars, type SelectionSizeValue } from "./selectionSizes";
 
 /**
  * The consumer-defined font vocabulary for a theme. Each entry publishes a
@@ -87,8 +89,46 @@ export interface LineHeightOptions {
   lineHeights?: Record<string, string>;
 }
 
+/**
+ * The consumer-defined *control size* vocabulary for a theme — the sizing analogue
+ * of {@link FontSizeOptions}, for the shared `Button` / `TextInput` / `Select` /
+ * `Combobox` ramp. Each entry publishes `--controlSize-<name>-<field>` custom
+ * properties; the `size` prop on the control family selects one by name. The
+ * built-in ramp (`sm`/`md`/`lg`) is always published, so it needs no entry here.
+ */
+export interface ControlSizeOptions {
+  /**
+   * Extra named control sizes. Each is a bundle of `height`, `paddingInline`,
+   * `fontSize`, and an optional `gap`, e.g.
+   * `{ cozy: { height: "2.25rem", paddingInline: "0.625rem", fontSize: "0.8125rem" } }`.
+   */
+  controlSizes?: Record<string, ControlSizeValue>;
+}
+
+/**
+ * The consumer-defined *selection-control size* vocabulary for a theme — the
+ * sibling of {@link ControlSizeOptions} for the `Checkbox` / `Radio` / `Switch`
+ * ramp. Each entry publishes `--selectionSize-<name>-<field>` custom properties.
+ */
+export interface SelectionSizeOptions {
+  /**
+   * Extra named selection sizes. Each carries a `controlBox` (box/track height) and
+   * a label `fontSize`, plus optional derived-geometry overrides
+   * (`glyph`/`switchWidth`/`switchThumb`), e.g.
+   * `{ cozy: { controlBox: "1.125rem", fontSize: "0.8125rem" } }`.
+   */
+  selectionSizes?: Record<string, SelectionSizeValue>;
+}
+
 export interface CreateThemeOptions
-  extends FontOptions, LetterSpacingOptions, FontSizeOptions, FontWeightOptions, LineHeightOptions {
+  extends
+    FontOptions,
+    LetterSpacingOptions,
+    FontSizeOptions,
+    FontWeightOptions,
+    LineHeightOptions,
+    ControlSizeOptions,
+    SelectionSizeOptions {
   /** Colour scheme. Sets `oklchOperator` (-1 light / +1 dark). */
   scheme: "light" | "dark";
   /** Label used in contrast warnings. */
@@ -184,8 +224,9 @@ export function createDesignSystemTheme(
   // class itself (not a second class) so the return value stays a single class,
   // safe for `classList.add`. `BaritoneTheme` sets the same via inline style. The
   // `--font-<name>` / `--fontSize-<name>` / `--fontWeight-<name>` /
-  // `--lineHeight-<name>` / `--letterSpacing-<name>` registries ride along on the
-  // same root so the open typographic props resolve against this theme's vocabulary.
+  // `--lineHeight-<name>` / `--letterSpacing-<name>` typographic registries plus the
+  // `--controlSize-<name>-*` / `--selectionSize-<name>-*` sizing registries ride along
+  // on the same root so the open props resolve against this theme's vocabulary.
   globalStyle(`.${themeClass}`, {
     isolation: "isolate",
     vars: {
@@ -194,6 +235,8 @@ export function createDesignSystemTheme(
       ...fontSizeVars(options.sizes),
       ...weightVars(options),
       ...lineHeightVars(options.lineHeights),
+      ...controlSizeVars(options.controlSizes),
+      ...selectionSizeVars(options.selectionSizes),
     },
   });
   return themeClass;
@@ -217,7 +260,9 @@ export function createInlineTheme(
     LetterSpacingOptions &
     FontSizeOptions &
     FontWeightOptions &
-    LineHeightOptions,
+    LineHeightOptions &
+    ControlSizeOptions &
+    SelectionSizeOptions,
 ): Record<string, string> {
   return {
     ...assignInlineVars(vars, withOperator(tokens, options.scheme)),
@@ -226,5 +271,7 @@ export function createInlineTheme(
     ...fontSizeVars(options.sizes),
     ...weightVars(options),
     ...lineHeightVars(options.lineHeights),
+    ...controlSizeVars(options.controlSizes),
+    ...selectionSizeVars(options.selectionSizes),
   };
 }

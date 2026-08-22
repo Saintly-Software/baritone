@@ -10,6 +10,8 @@ export {
   type FontSizeOptions,
   type FontWeightOptions,
   type LineHeightOptions,
+  type ControlSizeOptions,
+  type SelectionSizeOptions,
 } from "./createTheme";
 export { buildDefaultTokens, type BrandSeed } from "./defaultTokens";
 
@@ -61,6 +63,28 @@ export {
   type LineHeightName,
   type BuiltinLineHeightName,
 } from "./lineHeights";
+
+// The consumer-extensible control-sizing vocabularies (the sizing analogue of the
+// typographic seams above). `ControlSizeRegistry` / `SelectionSizeRegistry` are the
+// module-augmentation seams; `ControlSizeName` / `SelectionSizeName` are what the
+// matching `size` props accept.
+export {
+  controlSizeVarName,
+  controlSizeVars,
+  type ControlSizeRegistry,
+  type ControlSizeName,
+  type BuiltinControlSizeName,
+  type ControlSizeValue,
+} from "./controlSizes";
+export {
+  selectionSizeVarName,
+  selectionSizeVars,
+  type SelectionSizeRegistry,
+  type SelectionSizeName,
+  type BuiltinSelectionSizeName,
+  type SelectionSizeValue,
+} from "./selectionSizes";
+
 export { lightTheme, darkTheme } from "./defaultTheme.css";
 
 export {
