@@ -1,0 +1,5 @@
+# oxfmt honors .gitignore + .prettierignore (not the config's ignorePatterns).
+# Keep generated / transient state out of formatting — mirrors the oxlint
+# ignore in .config/.oxlintrc.json. (node_modules, dist, .dummy are already
+# covered by .gitignore, which oxfmt also reads.)
+.design-sync/

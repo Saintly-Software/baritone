@@ -13,6 +13,7 @@ import {
   joinIds,
 } from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
+import { srOnly } from "../SrOnly/srOnly.css";
 import { checkboxGroupRoot } from "./checkboxGroup.css";
 
 /** Layout direction of the option list. */
@@ -161,7 +162,11 @@ interface CheckboxGroupBaseProps<T> {
   labelPosition?: LabelPosition;
   /** Per-slot overrides for the label / help-text pieces. */
   slotProps?: FieldSlotProps;
-  /** Mark the group required — marks the label and sets the group `aria-required`. */
+  /**
+   * Mark the group required — shows the `Field`'s visual asterisk and announces
+   * "Required" via the group's description (`role="group"` can't take
+   * `aria-required`, and per-box would wrongly imply *every* box is required).
+   */
   required?: boolean;
   /** Disable the whole group. */
   disabled?: boolean;
@@ -255,6 +260,9 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     [size, state, disabled, value, toggle],
   );
 
+  // Announced-required id (see the group's `aria-describedby` below).
+  const requiredHintId = React.useId();
+
   return (
     <Field
       {...(nameProps as FieldLabellingProps)}
@@ -275,12 +283,24 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
           <div
             role="group"
             {...nameAttrs}
-            aria-describedby={joinIds(ariaDescribedby, describedBy)}
-            // The `Field` marks the label; the group carries the semantics. base-ui
-            // isn't involved here, so it's set by hand like the rest of the wiring.
-            aria-required={required || undefined}
+            // `role="group"` can't carry the announced-required half: ARIA doesn't
+            // support `aria-required` on it, and putting it per-item would wrongly
+            // mean *every* box is required. So `required` rides the group's
+            // description — a visually-hidden "Required" node wired into
+            // `aria-describedby`, alongside the visual asterisk the `Field` renders
+            // (AGENTS.md: "required goes on both").
+            aria-describedby={joinIds(
+              required ? requiredHintId : undefined,
+              ariaDescribedby,
+              describedBy,
+            )}
             className={cx(checkboxGroupRoot({ orientation }), className)}
           >
+            {required && (
+              <span id={requiredHintId} className={srOnly}>
+                Required
+              </span>
+            )}
             {children({
               // The stable generic item, narrowed to this group's `T`. The cast is
               // purely a type-level instantiation — the runtime function is the same.

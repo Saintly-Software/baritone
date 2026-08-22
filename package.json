@@ -53,7 +53,7 @@
     "build-storybook": "storybook build",
     "prepare": "playwright install chromium && husky",
     "lint": "pnpm lint:check --fix",
-    "lint:check": "pnpm exec oxlint -c .config/.oxlintrc.json",
+    "lint:check": "pnpm exec oxlint -c .config/.oxlintrc.json --max-warnings=0",
     "fmt": "pnpm exec oxfmt -c .config/.oxfmtrc.json",
     "fmt:check": "pnpm fmt --check",
     "pub:version": "pnpm exec changeset version",

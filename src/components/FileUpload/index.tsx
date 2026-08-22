@@ -342,6 +342,7 @@ export function FileUpload(props: FileUploadProps) {
       >
         {/* The drop target. Decorative content is inert; the overlaid input owns
             clicks + keyboard, and drops are caught here so they can be filtered. */}
+        {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- the overlaid `Field.Control` <input type="file"> below is the accessible control (keyboard + focus); this dropzone is a pointer/drag-only enhancement. */}
         <div
           className={cx(
             fileUploadDropzone({ state }),

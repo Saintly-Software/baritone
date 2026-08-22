@@ -1,11 +1,75 @@
 {
   "$schema": "../node_modules/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "oxc"],
+  "ignorePatterns": [".design-sync/**", ".dummy/**", "dist/**"],
+  "plugins": ["typescript", "unicorn", "oxc", "react", "jsx-a11y", "import", "promise", "vitest"],
   "categories": {
-    "correctness": "error"
+    "correctness": "error",
+    "suspicious": "warn"
   },
-  "rules": {},
+  "rules": {
+    // --- classic-runtime React rules that don't apply to this repo ---
+    // tsconfig uses `jsx: "react-jsx"` (automatic runtime), so `React` need not
+    // be in scope for JSX. This fires 2000+ pure false positives otherwise.
+    "react/react-in-jsx-scope": "off",
+
+    // Fire-and-forget terminal `.then()` handlers (deliberately `void`-ed) run
+    // side effects and don't return a value — only guard chains that continue.
+    "promise/always-return": ["warn", { "ignoreLastCallback": true }],
+
+    // --- jsx-a11y rules that fight intentional, documented patterns here ---
+    // Explicit `role="list"`/`"listitem"` on styled lists is a deliberate Safari
+    // fix (`list-style: none` drops the implicit list roles) — see the inline
+    // comments in CardList/List/SegmentedBar/ChipList. Removing them, as this
+    // rule demands, would regress accessibility.
+    "jsx-a11y/no-redundant-roles": "off",
+    // `role="img"` on a composite (MetricCard) and `role="group"` on a styled
+    // `div` (Button/CheckboxGroup) are the correct ARIA patterns and can't become
+    // semantic tags without breaking layout — the tag this rule wants doesn't fit.
+    "jsx-a11y/prefer-tag-over-role": "off",
+
+    // --- suspicious-category rules that fire on intentional domain code ---
+    // `l_`/`m_`/`s_` are canonical OKLab intermediates (Ottosson's matrices) in
+    // theme/color-math.ts; the underscore is spec notation, not a style slip.
+    "eslint/no-underscore-dangle": "off",
+    // Penalises intentionally-local helper functions (a readable React pattern);
+    // both current hits are deliberate locality choices, not hot-path concerns.
+    "unicorn/consistent-function-scoping": "off",
+
+    // --- vitest plugin: noise / false positives ---
+    // Pedantic style rule with 160+ hits (`vi.fn<() => void>()` everywhere).
+    "vitest/require-mock-type-parameters": "off",
+    // False positive: Vitest supports `expect(value, message)` as a 2nd arg.
+    "vitest/valid-expect": "off"
+  },
   "env": {
     "builtin": true
-  }
+  },
+  "overrides": [
+    {
+      // Stories and tests are demos / fixtures, not shipped UI. Relax the a11y
+      // and key rules that only earn their keep against real components; the
+      // component sources themselves are still linted at full strength.
+      "files": [
+        "**/*.stories.tsx",
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/_stories/**",
+        "**/test/**"
+      ],
+      "rules": {
+        "react/jsx-key": "off",
+        "react/no-unstable-nested-components": "off",
+        "unicorn/no-array-sort": "off",
+        "import/no-unassigned-import": "off",
+        "eslint/no-shadow": "off",
+        "jsx-a11y/anchor-has-content": "off",
+        "jsx-a11y/anchor-is-valid": "off",
+        "jsx-a11y/control-has-associated-label": "off",
+        "jsx-a11y/heading-has-content": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/no-static-element-interactions": "off",
+        "jsx-a11y/role-has-required-aria-props": "off"
+      }
+    }
+  ]
 }
