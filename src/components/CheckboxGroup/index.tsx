@@ -278,6 +278,11 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
             aria-describedby={joinIds(ariaDescribedby, describedBy)}
             // The `Field` marks the label; the group carries the semantics. base-ui
             // isn't involved here, so it's set by hand like the rest of the wiring.
+            // NOTE: ARIA lists `aria-required` as unsupported on role="group" (it is
+            // valid on RadioGroup's `radiogroup`). It's kept for parity with
+            // Radio/ToggleGroup and is harmless if ignored; requiredness is conveyed
+            // by the `Field` label above. Revisit if we standardise the convention.
+            // oxlint-disable-next-line jsx-a11y/role-supports-aria-props
             aria-required={required || undefined}
             className={cx(checkboxGroupRoot({ orientation }), className)}
           >
