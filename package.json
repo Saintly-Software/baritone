@@ -117,7 +117,7 @@
       "oxlint -c .config/.oxlintrc.json --fix",
       "oxfmt -c .config/.oxfmtrc.json"
     ],
-    "*.{json,md}": [
+    "*.{json,md,css}": [
       "oxfmt -c .config/.oxfmtrc.json"
     ]
   },
