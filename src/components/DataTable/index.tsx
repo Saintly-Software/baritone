@@ -664,16 +664,20 @@ function groupRowLabel(row: { groupingValue?: unknown }): string {
 
 /**
  * The accessible name for a data row's selection box. A bare "Select row" is
- * ambiguous when every row shares it, so lead with the row's first primitive
- * cell value (typically its name/label column) — mirroring the group box's
- * `Select all rows in <value>`. Falls back to "Select row" when that leading
- * cell has no sensible string form (an element, an object, or empty).
+ * ambiguous when every row shares it, so lead with the row's first cell that
+ * carries a usable primitive value (typically the name/label column, but skipping
+ * a leading display/empty cell) — mirroring the group box's `Select all rows in
+ * <value>`. Falls back to "Select row" only when no cell has a sensible string
+ * form (all empty, object-, or function-valued).
  */
 function rowSelectLabel<TData extends RowData>(row: Row<DataTableFeatures, TData>): string {
-  const value = row.getAllCells()[0]?.getValue();
-  return value == null || value === "" || typeof value === "object"
-    ? "Select row"
-    : `Select ${String(value)}`;
+  for (const cell of row.getAllCells()) {
+    const value = cell.getValue();
+    if (value != null && value !== "" && typeof value !== "object" && typeof value !== "function") {
+      return `Select ${String(value)}`;
+    }
+  }
+  return "Select row";
 }
 
 /**

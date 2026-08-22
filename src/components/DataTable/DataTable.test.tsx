@@ -347,6 +347,25 @@ describe("DataTable row selection", () => {
     }
   });
 
+  it("names a row from its first usable cell, skipping a leading empty/display cell", () => {
+    // A leading display column has no value, so the label must fall through to the
+    // next cell that carries a usable primitive (here, the name).
+    const withLeadingDisplay = col.columns([
+      col.display({ id: "spacer", header: "" }),
+      col.accessor("name", { header: "Name" }),
+    ]);
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={withLeadingDisplay}
+        getRowId={(p) => p.id}
+        enableRowSelection
+      />,
+    );
+    expect(screen.getByRole("checkbox", { name: "Select Ada Lovelace" })).toBeInTheDocument();
+  });
+
   it("reports the selected ids and their rows through onSelectionChange", async () => {
     const user = userEvent.setup();
     const onSelectionChange = vi.fn();
