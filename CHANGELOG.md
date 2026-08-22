@@ -1,5 +1,82 @@
 # @saintly-software/baritone
 
+## 1.0.0-alpha.7
+
+### Minor Changes
+
+- 305cbe9: Add `groupDisplay` to `DataTable` — render a grouped table as one indented
+  outline column instead of a separate grouped column.
+
+  - **`groupDisplay` prop:** `"columns"` (default) or `"merge"`. The default is
+    unchanged — the grouped column stays its own column, with the label on header
+    rows and a blank placeholder on leaves.
+  - **`"merge"`:** the grouped column(s) are not rendered as their own columns.
+    The group label (value + expand/collapse toggle + count) is hosted in one
+    column, and each leaf row renders that column's own value, both indented by
+    nesting depth — so a _Category → Subcategory_ breakdown reads straight down a
+    single outline column. Non-grouped columns (e.g. a summed `amount`) keep
+    rendering normally, aggregates and all. Multi-level `grouping` indents
+    progressively.
+  - **Choosing the host column:** by default the first non-grouped, non-aggregated
+    column hosts the label — so a column with an `aggregationFn`/`aggregatedCell`
+    keeps showing its per-group total rather than being replaced by the label; if
+    every remaining column aggregates, the innermost grouped column stays on as the
+    outline. Set a column's `meta.groupLabel: true` to host it elsewhere, and give
+    the host column a `header` (e.g. `"Category"`) to name the outline.
+  - **Non-breaking:** additive prop that defaults to today's behavior; existing
+    `DataTable` output and the prop surface are unchanged. The table keeps full
+    `<table>` semantics — indentation is visual only, and the toggle keeps its
+    `aria-expanded` and descriptive `aria-label`.
+
+- be7f0dc: Add row selection to `DataTable` — set `enableRowSelection` to grow a leading
+  checkbox column with a "select all" box in the header and a checkbox per row.
+
+  - **`enableRowSelection` prop:** `true` makes every row selectable, or pass a
+    predicate `(row) => boolean` to allow it only for some — the rest render a
+    locked box (dimmed + `aria-disabled`, never the native `disabled` attribute, so
+    it stays focusable per the house convention), and "select all" skips them.
+    Omit for no selection column, so an existing `DataTable` is unchanged.
+  - **Controlled or uncontrolled selection:** drive it with `selectedRowIds` +
+    `onSelectionChange` (controlled), or seed `defaultSelectedRowIds` and let the
+    table own the state (uncontrolled) — the same split as `ToggleButton`.
+    `onSelectionChange(ids, rows)` fires in both modes with the selected ids (the
+    source of truth — an id can outlive a row paged/filtered out of `data`) and the
+    matching rows from the current `data`. Pair with a stable `getRowId`.
+  - **Select-all + indeterminate:** the header box selects or clears every
+    selectable row and shows the mixed dash on a partial selection.
+  - **Shift-click ranges:** Shift-clicking a second box selects the inclusive range
+    from the last one, via TanStack's own range handler (React surfaces the
+    modifier through the change event's `nativeEvent`).
+  - **Composes with grouping:** each group header also carries a tri-state box that
+    selects or clears all of its rows at once and reflects all / some / none.
+  - **Built on the v9 `rowSelectionFeature`,** now registered in
+    `dataTableFeatures`. It's forced off (`enableRowSelection: false`) until you opt
+    in, and the checkbox reuses the presentational `InternalCheckbox` behind a real,
+    focusable `<input type="checkbox">`. No existing call site needs to change.
+
+### Patch Changes
+
+- 9a7731e: Fix several `DataTable` row-selection accessibility gaps:
+
+  - **Distinct per-row checkbox names.** Each row's selection box previously shared
+    the generic accessible name "Select row", so assistive-tech users couldn't tell
+    the rows apart. The box now leads with the row's first primitive cell value
+    (e.g. "Select Ada Lovelace"), mirroring the group box's `Select all rows in
+<value>`, and falls back to "Select row" when that cell has no sensible string
+    form.
+  - **Lock the "select all" box when nothing is selectable.** When an
+    `enableRowSelection` predicate excludes every row (or there are no rows), the
+    header box is now locked (dimmed + `aria-disabled`, still focusable) instead of
+    being a focusable no-op — matching the treatment already given to a group
+    header whose rows are all non-selectable.
+  - **A non-selectable row never reads as checked.** If a seeded/controlled id
+    points at a row the predicate excludes, its locked box no longer shows as
+    checked (it couldn't be cleared) — the checked state is now gated on the row
+    actually being selectable.
+  - **Larger tap target.** The per-row and select-all checkboxes now expose a 24px
+    hit target (the WCAG 2.2 SC 2.5.8 minimum) around the 16px visual box, so the
+    box is easier to hit on touch and for motor-impaired users.
+
 ## 1.0.0-alpha.6
 
 ### Minor Changes
