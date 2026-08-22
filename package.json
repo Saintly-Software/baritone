@@ -51,7 +51,7 @@
     "test:watch": "vitest --config .config/vitest.config.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "prepare": "playwright install chromium",
+    "prepare": "playwright install chromium && husky",
     "lint": "pnpm lint:check --fix",
     "lint:check": "pnpm exec oxlint -c .config/.oxlintrc.json",
     "fmt": "pnpm exec oxfmt -c .config/.oxfmtrc.json",
@@ -80,7 +80,9 @@
     "@vitejs/plugin-react": "6.0.2",
     "@vitest/browser": "4.1.9",
     "@vitest/browser-playwright": "4.1.9",
+    "husky": "9.1.7",
     "jsdom": "29.1.1",
+    "lint-staged": "17.3.0",
     "oxfmt": "0.56.0",
     "oxlint": "1.71.0",
     "playwright": "1.61.1",
@@ -109,6 +111,15 @@
     "@vanilla-extract/css": {
       "optional": true
     }
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "oxlint -c .config/.oxlintrc.json --fix",
+      "oxfmt -c .config/.oxfmtrc.json"
+    ],
+    "*.{json,md,css}": [
+      "oxfmt -c .config/.oxfmtrc.json"
+    ]
   },
   "packageManager": "pnpm@11.8.0"
 }
