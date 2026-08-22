@@ -3,6 +3,7 @@ import {
   INTENTS,
   LINE_HEIGHT_KEYS,
   SALIENCIES,
+  SIZES,
   SURFACE_SALIENCIES,
   TEXT_SIZES,
   type BorderWidthKey,
@@ -11,12 +12,14 @@ import {
   type LineHeightKey,
   type RadiusKey,
   type Saliency,
+  type Size,
   type SpaceKey,
   type TextSize,
 } from "./constants";
 import { vars, type ThemeTokensInput } from "./contract.css";
 import {
   borderWidth,
+  controlHeight,
   fontFamily,
   fontSizeAnchor,
   fontStep,
@@ -26,6 +29,7 @@ import {
   lineHeight,
   motion,
   radius,
+  selectionBox,
   space,
 } from "./scales";
 
@@ -138,6 +142,23 @@ export interface BrandSeed {
    * {@link BrandSeed.fontScale}'s `lineHeight`.
    */
   lineHeight?: Partial<Record<LineHeightKey, string>>;
+  /**
+   * Control-size ramp overrides (the shared `Button` / `TextInput` / `Select` /
+   * `Combobox` bundle), merged per-size over the built-ins. Redefine what
+   * `sm`/`md`/`lg` mean — height, inline padding, font-size, icon↔label gap —
+   * without editing the library. Brand-new size *names* are added via the
+   * `controlSizes` theme option instead (see {@link module:./controlSizes}).
+   */
+  controlSizeScale?: Partial<
+    Record<Size, Partial<{ height: string; paddingInline: string; fontSize: string; gap: string }>>
+  >;
+  /**
+   * Selection-control size ramp overrides (`Checkbox` / `Radio` / `Switch`),
+   * merged per-size over the built-ins. `controlBox` is the box/track height,
+   * `fontSize` the label. Brand-new names are added via the `selectionSizes` theme
+   * option (see {@link module:./selectionSizes}).
+   */
+  selectionSizeScale?: Partial<Record<Size, Partial<{ controlBox: string; fontSize: string }>>>;
 }
 
 /** Fully-resolved seed (defaults filled in) threaded through the colour math. */
@@ -427,6 +448,11 @@ function shadows(isDark: boolean) {
   };
 }
 
+// The space-scale key each control size uses for its inline padding. Kept here (not
+// in `scales`) because it maps the control ramp onto the shared spacing scale, so a
+// brand's `space` override flows through to control padding automatically.
+const CONTROL_PADDING: Record<Size, SpaceKey> = { sm: "2", md: "3", lg: "4" };
+
 // ---------------------------------------------------------------------------
 // Assembled default tokens
 // ---------------------------------------------------------------------------
@@ -478,6 +504,26 @@ export function buildDefaultTokens(
       color: formColor(seed, isDark),
       borderRadius: radiusScale.md,
       focus: focusRings(seed, isDark),
+    },
+    sizing: {
+      // Control ramp: heights are authored literals (`controlHeight`); padding/gap
+      // ride the spacing scale (so a brand `space` override flows through); fontSize
+      // references the text-size tokens (so a font-scale override flows through).
+      // `md` here is the *unified* control height (Button adopts it in Phase 1 and
+      // grows to meet inputs). A `BrandSeed.controlSizeScale` override wins per field.
+      control: record(SIZES, (size) => ({
+        height: brand.controlSizeScale?.[size]?.height ?? controlHeight[size],
+        paddingInline:
+          brand.controlSizeScale?.[size]?.paddingInline ?? spaceScale[CONTROL_PADDING[size]],
+        fontSize: brand.controlSizeScale?.[size]?.fontSize ?? vars.text.size[size].fontSize,
+        gap: brand.controlSizeScale?.[size]?.gap ?? spaceScale["2"],
+      })),
+      // Selection ramp: box height from `selectionBox` literals; label fontSize from
+      // the text-size tokens. Each control derives its inner geometry from the box.
+      selection: record(SIZES, (size) => ({
+        controlBox: brand.selectionSizeScale?.[size]?.controlBox ?? selectionBox[size],
+        fontSize: brand.selectionSizeScale?.[size]?.fontSize ?? vars.text.size[size].fontSize,
+      })),
     },
     text: {
       color: textColor(seed, isDark),

@@ -8,11 +8,13 @@
 import * as React from "react";
 import {
   createInlineTheme,
+  type ControlSizeOptions,
   type FontOptions,
   type FontSizeOptions,
   type FontWeightOptions,
   type LetterSpacingOptions,
   type LineHeightOptions,
+  type SelectionSizeOptions,
 } from "../../theme/createTheme";
 import type { ThemeTokensInput } from "../../theme/contract.css";
 import { useRender, type RenderProp } from "../../utils/render";
@@ -24,7 +26,9 @@ export interface BaritoneThemeProps
     LetterSpacingOptions,
     FontSizeOptions,
     FontWeightOptions,
-    LineHeightOptions {
+    LineHeightOptions,
+    ControlSizeOptions,
+    SelectionSizeOptions {
   /** Token values for this theme scope — e.g. from `buildDefaultTokens`. */
   tokens: ThemeTokensInput;
   /** Colour scheme; sets the oklch interaction direction (`-1` light / `+1` dark). */
@@ -72,6 +76,8 @@ export function BaritoneTheme({
   weights,
   defaultWeight,
   lineHeights,
+  controlSizes,
+  selectionSizes,
   render,
   style,
   ref,
@@ -96,6 +102,8 @@ export function BaritoneTheme({
       weights,
       defaultWeight,
       lineHeights,
+      controlSizes,
+      selectionSizes,
     }),
     ...style,
   };

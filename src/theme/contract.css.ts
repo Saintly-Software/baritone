@@ -8,6 +8,7 @@ import {
   RADIUS_KEYS,
   SALIENCIES,
   SHADOW_KEYS,
+  SIZES,
   SPACE_KEYS,
   SURFACE_SALIENCIES,
   TEXT_SIZES,
@@ -49,6 +50,26 @@ export const tokenShape = {
     })),
     borderRadius: s(),
     focus: record(INTENTS, () => s()),
+  },
+  // Control-sizing scales. Two independent, token-backed ramps the open
+  // `controlSizes` / `selectionSizes` vocabularies read through indirection vars
+  // (see `theme/controlSizes.ts`, `theme/selectionSizes.ts`). `control` is the
+  // shared Button/TextInput/Select/Combobox bundle — one height so a button lines
+  // up beside an input; `selection` is the smaller, independent Checkbox/Radio/
+  // Switch box-height + label-font ramp. Every leaf is a `var(--…)` reference so a
+  // brand can retune the built-in ramps via `BrandSeed.controlSizeScale` /
+  // `selectionSizeScale`.
+  sizing: {
+    control: record(SIZES, () => ({
+      height: s(),
+      paddingInline: s(),
+      fontSize: s(),
+      gap: s(),
+    })),
+    selection: record(SIZES, () => ({
+      controlBox: s(),
+      fontSize: s(),
+    })),
   },
   text: {
     color: record(INTENTS, () => record(SALIENCIES, () => s())),

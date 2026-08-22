@@ -357,6 +357,12 @@ export {
   textWeightVar,
   focusRingColorVar,
   surfacePaddingVar,
+  controlHeightVar,
+  controlPaddingInlineVar,
+  controlFontSizeVar,
+  controlGapVar,
+  selectionBoxVar,
+  selectionFontSizeVar,
 } from "./styles/vars.css";
 
 // Recipes (advanced: extend the system with new components of each type)
