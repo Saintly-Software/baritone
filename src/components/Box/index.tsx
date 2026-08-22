@@ -6,6 +6,8 @@ import {
   type ResponsiveVisibility,
   type WidthShorthand,
 } from "../../styles/layoutProps";
+import type { PositionProps } from "../../styles/positionProps";
+import type { SizingProps } from "../../styles/sizingProps";
 import { atoms } from "../../styles/sprinkles.css";
 import type { MarginProps, PaddingProps } from "../../styles/spacingProps";
 import { cx } from "../../utils/cx";
@@ -15,7 +17,12 @@ import { useRender } from "../../utils/render";
 export type BoxElement = "div" | "span" | "section" | "article";
 
 export interface BoxProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps, PaddingProps {
+  extends
+    Omit<React.HTMLAttributes<HTMLElement>, "color">,
+    MarginProps,
+    PaddingProps,
+    SizingProps,
+    PositionProps {
   /** Render as a different element tag. Default `div`. */
   as?: BoxElement;
   /** `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit`. */
@@ -39,13 +46,24 @@ export interface BoxProps
  * Box — a plain element primitive, so spacing doesn't have to reach for `atoms`
  * directly. Renders a `<div>` by default (pick another tag — `span`, `section`,
  * `article` — with `as`), with the margin (`m` / `mx` / …) and padding (`p` / `px`
- * / …) props wired straight to the spacing scale (each responsive-capable). It's
- * the layout-neutral sibling of `Flex`: no `display: flex`, just a box you can
- * pad, margin, and style.
+ * / …) props wired straight to the spacing scale, plus the height (`minHeight` /
+ * `height` / `maxHeight`, incl. the `screen` viewport-fill token) and positioning
+ * (`position` / `top` / `inset` / …) atoms (each responsive-capable). It's the
+ * layout-neutral sibling of `Flex`: no `display: flex`, just a box you can size,
+ * position, pad, margin, and style.
  */
 export function Box({
   as = "div",
   width,
+  height,
+  minHeight,
+  maxHeight,
+  position,
+  inset,
+  top,
+  right,
+  bottom,
+  left,
   hideOn,
   showOn,
   m,
@@ -82,6 +100,15 @@ export function Box({
               ? resolveDisplay(as === "span" ? "inline" : "block", hideOn, showOn)
               : undefined,
           width: resolveWidth(width),
+          height,
+          minHeight,
+          maxHeight,
+          position,
+          inset,
+          top,
+          right,
+          bottom,
+          left,
           m,
           mx,
           my,

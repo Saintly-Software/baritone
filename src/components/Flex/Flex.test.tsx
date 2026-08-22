@@ -66,6 +66,10 @@ describe("Flex", () => {
       { maxWidth: "12" as const },
       { minWidth: "12" as const },
       { minHeight: "full" as const },
+      { maxHeight: "screen" as const },
+      { position: "sticky" as const },
+      { top: "0" as const },
+      { inset: "4" as const },
       { p: "2" as const },
       { mx: "auto" as const },
     ]) {
@@ -215,6 +219,7 @@ describe("Flex.Item", () => {
       { height: "8" as const },
       { minWidth: "0" as const },
       { minHeight: "fit-content" as const },
+      { maxHeight: "screen" as const },
       { p: "2" as const },
     ]) {
       rerender(
