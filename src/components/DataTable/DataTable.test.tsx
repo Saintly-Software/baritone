@@ -1216,4 +1216,54 @@ describe("DataTable row detail panels", () => {
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
+
+  it("names toggles by each row's own value in grouped mode, not the shared group value", () => {
+    // Grouped columns (region, role) carry the group's value on leaf rows, shared
+    // by every row in the group. The toggle name must fall through to the row's own
+    // distinguishing value (name) instead of labelling every Americas row alike.
+    render(
+      <DataTable
+        aria-label="Employees"
+        data={employees}
+        columns={employeeColumns}
+        grouping={["region", "role"]}
+        getRowId={(e) => e.id}
+        renderDetailPanel={(e) => <div>Detail for {e.name}</div>}
+      />,
+    );
+    // getByRole throws on a duplicated name, so this also asserts the labels are distinct.
+    expect(
+      screen.getByRole("button", { name: "Expand details for Ada Lovelace" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Expand details for Grace Hopper" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Expand details for Tom Watson" }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps panel ids valid and matched when getRowId returns values with spaces", async () => {
+    // A composite id with whitespace must not leak into the DOM id / aria-controls
+    // (an invalid id + a broken IDREF list). The panel id is keyed off render
+    // position, so the toggle's aria-controls still resolves to the panel.
+    const user = userEvent.setup();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => `${p.name} #${p.id}`}
+        renderDetailPanel={detail}
+      />,
+    );
+    const toggle = screen.getByRole("button", { name: "Expand details for Ada Lovelace" });
+    await user.click(toggle);
+
+    const panelId = toggle.getAttribute("aria-controls");
+    expect(panelId).toBeTruthy();
+    // A valid HTML id has no whitespace, and the reference resolves to the panel.
+    expect(panelId).not.toMatch(/\s/);
+    expect(document.getElementById(panelId!)).toHaveTextContent("Detail for Ada Lovelace");
+  });
 });

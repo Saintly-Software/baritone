@@ -109,11 +109,12 @@ export const groupLabel = style({
 });
 
 /**
- * The expand/collapse toggle — a bare, focusable `<button>` (no button chrome)
- * wrapping the disclosure chevron. Sized to a comfortable target; pair it with
- * the shared `focusRingRecipe` in the component for the visible ring.
+ * The disclosure toggle — a bare, focusable `<button>` (no button chrome)
+ * wrapping the disclosure chevron. Shared by the group-header toggle and the row
+ * detail-panel toggle (see `DisclosureToggle`). Sized to a comfortable target;
+ * pair it with the shared `focusRingRecipe` in the component for the visible ring.
  */
-export const groupToggle = style({
+export const disclosureToggle = style({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
@@ -169,12 +170,13 @@ export const mergeLeafLabel = style({
 });
 
 /**
- * The leading selection column's cell (`<th>` / `<td>`), present only when
- * selection is enabled. Shrinks to the checkbox — `width: 1%` + `nowrap` makes
- * the column only as wide as its content — while the shared {@link cell} recipe
- * still supplies the padding, divider, and (centred) alignment.
+ * A leading utility column's cell (`<th>` / `<td>`) — the selection checkbox
+ * column and the detail-panel expander column both use it. Shrinks to its control:
+ * `width: 1%` + `nowrap` makes the column only as wide as its content, while the
+ * shared {@link cell} recipe still supplies the padding, divider, and (centred)
+ * alignment. One style for both so the two leading columns can't drift apart.
  */
-export const selectionCell = style({
+export const utilityCell = style({
   width: "1%",
   whiteSpace: "nowrap",
 });
@@ -203,17 +205,6 @@ export const selectionInput = style({
   margin: 0,
   cursor: "inherit",
   opacity: 0,
-});
-
-/**
- * The leading expander column's cell (`<th>` / `<td>`), present only when
- * `renderDetailPanel` is set. Like {@link selectionCell}, it shrinks to its
- * toggle — `width: 1%` + `nowrap` — while the shared {@link cell} recipe still
- * supplies the padding, divider, and (centred) alignment.
- */
-export const expanderCell = style({
-  width: "1%",
-  whiteSpace: "nowrap",
 });
 
 /**

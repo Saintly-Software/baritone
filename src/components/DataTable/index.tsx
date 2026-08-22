@@ -28,16 +28,15 @@ import {
   dataTableCaption,
   dataTableRoot,
   detailCell,
-  expanderCell,
+  disclosureToggle,
   groupChevron,
   groupCount,
   groupDepthVar,
   groupLabel,
   groupRow,
-  groupToggle,
   mergeLeafLabel,
-  selectionCell,
   selectionInput,
+  utilityCell,
 } from "./dataTable.css";
 
 /**
@@ -523,17 +522,18 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   //
   // The feature is on when a renderer is given and `enableRowExpansion` isn't a
   // hard `false` — matching how `enableRowSelection: false` fully disables
-  // selection, so a flag can drop the expander column without unwiring the renderer.
-  const detailEnabled = renderDetailPanel !== undefined && enableRowExpansion !== false;
-  // Which rows may expand — mirrors `rowCanSelect`. A predicate gates per row; a
-  // bare `true`/omitted opens every row (group rows are excluded at the call site,
-  // where `isGroupRow` is already in hand). Keyed on `enableRowExpansion` so a
-  // changed predicate re-evaluates, like the selection gate.
-  const rowCanExpand = React.useCallback(
-    (row: TData): boolean =>
-      typeof enableRowExpansion === "function" ? enableRowExpansion(row) : true,
-    [enableRowExpansion],
-  );
+  // selection, so a flag can drop the expander column without unwiring the
+  // renderer. `!= null` (not `!== undefined`) mirrors the other optional render
+  // props (`empty`, `caption`), so an explicit `renderDetailPanel={null}` from a
+  // JS caller disables the feature too, rather than rendering empty panels.
+  const detailEnabled = renderDetailPanel != null && enableRowExpansion !== false;
+  // Which rows may expand — mirrors `rowCanSelect`, minus its `useCallback`: this
+  // one is only ever called inline in the row map (nothing memoises on its
+  // identity, unlike `rowCanSelect`, which `useTable` reads), so a plain function
+  // is enough. A predicate gates per row; a bare `true`/omitted opens every row
+  // (group rows are excluded at the call site, where `isGroupRow` is in hand).
+  const rowCanExpand = (row: TData): boolean =>
+    typeof enableRowExpansion === "function" ? enableRowExpansion(row) : true;
   const [expandedDetailIds, setExpandedDetailIds] = React.useState<ReadonlySet<string>>(EMPTY_SET);
   const toggleDetail = React.useCallback((rowId: string) => {
     setExpandedDetailIds((prev) => {
@@ -544,9 +544,13 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     });
   }, []);
   // Scope the panels' ids to this table instance so two tables on one page don't
-  // collide (row ids are unique within a table, not across them).
+  // collide. Keyed off the row's render position, not `row.id`: a `getRowId` may
+  // return arbitrary strings (e.g. a composite name key with spaces), which would
+  // make an invalid DOM `id` and break `aria-controls` (a space-separated IDREF
+  // list) silently. The index is always a whitespace-free, per-table-unique token,
+  // and toggle + panel are rendered in the same iteration so they always agree.
   const detailBaseId = React.useId();
-  const detailPanelId = (rowId: string) => `${detailBaseId}-detail-${rowId}`;
+  const detailPanelId = (rowIndex: number) => `${detailBaseId}-detail-${rowIndex}`;
 
   const table = useTable({
     features: dataTableFeatures,
@@ -632,15 +636,11 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     const dataRowCount = row.getLeafRows().filter((r) => !r.getIsGrouped()).length;
     return (
       <span className={groupLabel} style={assignInlineVars({ [groupDepthVar]: String(row.depth) })}>
-        <button
-          type="button"
+        <DisclosureToggle
+          expanded={expanded}
           onClick={row.getToggleExpandedHandler()}
-          aria-expanded={expanded}
           aria-label={`${expanded ? "Collapse" : "Expand"} ${groupRowLabel(row)}`}
-          className={cx(groupToggle, focusRingRecipe({ type: "visible", offset: "sm" }))}
-        >
-          <ChevronGlyph expanded={expanded} />
-        </button>
+        />
         <span>{valueNode}</span>
         <span className={groupCount}>({dataRowCount})</span>
       </span>
@@ -653,14 +653,16 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
       <thead>
         {headerGroups.map((group, groupIndex) => (
           <tr key={group.id}>
-            {/* The expander column's header — an empty spacer over the per-row
-                toggles. On a multi-row header it spans every header row via
-                `rowSpan`, rendered only once. */}
+            {/* The expander column's header — a spacer over the per-row toggles,
+                named for screen-reader table navigation (it has no visible text).
+                On a multi-row header it spans every header row via `rowSpan`,
+                rendered only once. */}
             {detailEnabled && groupIndex === 0 && (
               <th
                 scope="col"
+                aria-label="Details"
                 rowSpan={headerGroups.length > 1 ? headerGroups.length : undefined}
-                className={cx(cellRecipe({ header: true, align: "center" }), expanderCell)}
+                className={cx(cellRecipe({ header: true, align: "center" }), utilityCell)}
               />
             )}
             {/* The "select all" box. On a multi-row header (grouped column defs)
@@ -669,7 +671,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
               <th
                 scope="col"
                 rowSpan={headerGroups.length > 1 ? headerGroups.length : undefined}
-                className={cx(cellRecipe({ header: true, align: "center" }), selectionCell)}
+                className={cx(cellRecipe({ header: true, align: "center" }), utilityCell)}
               >
                 <SelectionCheckbox
                   checked={table.getIsAllRowsSelected()}
@@ -714,7 +716,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
             </td>
           </tr>
         ) : (
-          rows.map((row) => {
+          rows.map((row, rowIndex) => {
             const isGroupRow = row.getIsGrouped();
             // A group whose every leaf is excluded by the predicate can't be
             // toggled — and `getIsAllSubRowsSelected` reports "all" for an empty
@@ -730,26 +732,19 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
               <React.Fragment key={row.id}>
                 <tr className={isGroupRow ? groupRow : undefined}>
                   {detailEnabled && (
-                    <td className={cx(cellRecipe({ align: "center" }), expanderCell)}>
+                    <td className={cx(cellRecipe({ align: "center" }), utilityCell)}>
                       {canExpand && (
-                        <button
-                          type="button"
+                        <DisclosureToggle
+                          expanded={detailOpen}
                           onClick={() => toggleDetail(row.id)}
-                          aria-expanded={detailOpen}
-                          aria-controls={detailOpen ? detailPanelId(row.id) : undefined}
+                          aria-controls={detailOpen ? detailPanelId(rowIndex) : undefined}
                           aria-label={rowExpandLabel(row, detailOpen)}
-                          className={cx(
-                            groupToggle,
-                            focusRingRecipe({ type: "visible", offset: "sm" }),
-                          )}
-                        >
-                          <ChevronGlyph expanded={detailOpen} />
-                        </button>
+                        />
                       )}
                     </td>
                   )}
                   {selectionEnabled && (
-                    <td className={cx(cellRecipe({ align: "center" }), selectionCell)}>
+                    <td className={cx(cellRecipe({ align: "center" }), utilityCell)}>
                       {isGroupRow ? (
                         // A group header's box selects or clears every row it holds,
                         // and shows the tri-state (all / some / none) of its children.
@@ -838,7 +833,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                       colSpan={totalColumnCount > 0 ? totalColumnCount : undefined}
                       className={detailCell}
                     >
-                      <div id={detailPanelId(row.id)}>{renderDetailPanel?.(row.original)}</div>
+                      <div id={detailPanelId(rowIndex)}>{renderDetailPanel?.(row.original)}</div>
                     </td>
                   </tr>
                 )}
@@ -968,11 +963,17 @@ function groupRowLabel(row: { groupingValue?: unknown }): string {
  * used to give a per-row control an unambiguous name. Returns `undefined` when no
  * cell has a sensible string form (all empty, object-, or function-valued), so
  * the caller can supply its own generic fallback.
+ *
+ * Skips grouped and placeholder cells: under grouping, the grouped column's cell
+ * carries the *group's* value (shared by every row in the group), so using it
+ * would give every row's control the same name. Skipping it falls through to the
+ * row's own first distinguishing value instead.
  */
 function rowPrimaryValue<TData extends RowData>(
   row: Row<DataTableFeatures, TData>,
 ): string | undefined {
   for (const cell of row.getAllCells()) {
+    if (cell.getIsGrouped() || cell.getIsPlaceholder()) continue;
     const value = cell.getValue();
     if (value != null && value !== "" && typeof value !== "object" && typeof value !== "function") {
       return String(value);
@@ -1008,9 +1009,9 @@ function rowExpandLabel<TData extends RowData>(
 }
 
 /**
- * The group disclosure chevron — decorative; the toggle `<button>` around it
- * carries the semantics. Points down when the group is expanded and rotates to
- * point right when collapsed (driven by `data-expanded`), mirroring `Accordion`.
+ * The disclosure chevron — decorative; the toggle `<button>` around it carries
+ * the semantics. Points down when expanded and rotates to point right when
+ * collapsed (driven by `data-expanded`), mirroring `Accordion`.
  */
 function ChevronGlyph({ expanded }: { expanded: boolean }) {
   return (
@@ -1030,5 +1031,46 @@ function ChevronGlyph({ expanded }: { expanded: boolean }) {
     >
       <path d="M6 9l6 6 6-6" />
     </svg>
+  );
+}
+
+interface DisclosureToggleProps {
+  /** Whether the disclosed content — a group's rows, or a row's detail panel — is open. */
+  expanded: boolean;
+  /** Toggle handler. `getToggleExpandedHandler()`'s `() => void` is accepted too. */
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  /** Accessible name — the toggle carries no visible label. */
+  "aria-label": string;
+  /**
+   * The id of the panel this toggle controls, when one is in the DOM (the detail
+   * panel, while open). Group toggles omit it — they show/hide rows in place, with
+   * no single controlled element to point at.
+   */
+  "aria-controls"?: string;
+}
+
+/**
+ * The bare, focusable disclosure button shared by the group-header toggle and the
+ * row detail-panel toggle — the button chrome, focus-ring pairing, and rotating
+ * {@link ChevronGlyph} in one place so the two can't drift. The semantics
+ * (`onClick`, name, optional `aria-controls`) are supplied per use.
+ */
+function DisclosureToggle({
+  expanded,
+  onClick,
+  "aria-label": ariaLabel,
+  "aria-controls": ariaControls,
+}: DisclosureToggleProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={expanded}
+      aria-controls={ariaControls}
+      aria-label={ariaLabel}
+      className={cx(disclosureToggle, focusRingRecipe({ type: "visible", offset: "sm" }))}
+    >
+      <ChevronGlyph expanded={expanded} />
+    </button>
   );
 }
