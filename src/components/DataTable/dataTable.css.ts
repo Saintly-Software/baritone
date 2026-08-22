@@ -204,3 +204,30 @@ export const selectionInput = style({
   cursor: "inherit",
   opacity: 0,
 });
+
+/**
+ * The leading expander column's cell (`<th>` / `<td>`), present only when
+ * `renderDetailPanel` is set. Like {@link selectionCell}, it shrinks to its
+ * toggle — `width: 1%` + `nowrap` — while the shared {@link cell} recipe still
+ * supplies the padding, divider, and (centred) alignment.
+ */
+export const expanderCell = style({
+  width: "1%",
+  whiteSpace: "nowrap",
+});
+
+/**
+ * A row's expanded detail panel — the single, full-width `<td>` (it spans every
+ * column via `colSpan`) rendered on the extra `<tr>` beneath an expanded row. A
+ * subtle neutral fill and its own bottom divider set the panel off as a nested
+ * block between its row and the next; the padding gives the consumer's content
+ * (whatever `renderDetailPanel` returns) room to breathe.
+ */
+export const detailCell = style({
+  padding: vars.space[4],
+  backgroundColor: vars.surface.color.neutral.low.default.bgc,
+  color: vars.text.color.neutral.mid,
+  borderBottomStyle: "solid",
+  borderBottomWidth: vars.borderWidth.thin,
+  borderBottomColor: vars.surface.color.neutral.low.default.border,
+});
