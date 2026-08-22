@@ -209,6 +209,22 @@ describe("CheckboxGroup", () => {
         "Pick any that apply",
       ]);
     });
+
+    // `role="group"` can't take `aria-required`, so a required group announces it
+    // through the description instead (the visible asterisk is `aria-hidden`).
+    it("announces required through the group's description", () => {
+      render(<Subscriptions required helpText="Pick any that apply" />);
+      const group = screen.getByRole("group");
+      expect(describedByText(group)).toEqual(["Required", "Pick any that apply"]);
+      // The hidden hint must not have an unsupported attribute or pollute the name.
+      expect(group).not.toHaveAttribute("aria-required");
+      expect(group).toHaveAccessibleName("Email me about");
+    });
+
+    it("adds no required hint when the group isn't required", () => {
+      render(<Subscriptions helpText="Pick any that apply" />);
+      expect(describedByText(screen.getByRole("group"))).toEqual(["Pick any that apply"]);
+    });
   });
 
   it("works with a numeric enum, not just strings", async () => {
