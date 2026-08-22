@@ -186,12 +186,20 @@ export const selectionCell = style({
  * clicks and Shift-click ranges alike — land on the input directly, while its
  * focus lights the box's `:focus-within` ring. Hidden via `opacity` (not
  * `display`/`visibility`), so it stays focusable and in the a11y tree.
+ *
+ * Centred over the box and floored at the WCAG 2.2 (SC 2.5.8) 24px minimum tap
+ * target, so it can extend past the smaller visual box into the cell's padding
+ * without enlarging the box itself.
  */
 export const selectionInput = style({
   position: "absolute",
-  inset: 0,
-  width: "100%",
-  height: "100%",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  // `max(…)` covers the box when it is larger, and floors the hit area at 1.5rem
+  // (24px) otherwise — the `size="sm"` box is only 1rem, below the a11y minimum.
+  width: "max(100%, 1.5rem)",
+  height: "max(100%, 1.5rem)",
   margin: 0,
   cursor: "inherit",
   opacity: 0,

@@ -632,8 +632,32 @@ describe("DataTable row selection", () => {
       />,
     );
     expect(screen.getByRole("checkbox", { name: "Select all rows" })).toBeInTheDocument();
-    // One box per data row, all sharing the "Select row" name.
-    expect(screen.getAllByRole("checkbox", { name: "Select row" })).toHaveLength(people.length);
+    // Each row's box carries a distinct, row-specific name (from its first cell)
+    // instead of a generic "Select row", so assistive tech can tell them apart.
+    // `getByRole` throws if a name is missing or duplicated, so this also asserts
+    // there's exactly one box per data row.
+    for (const person of people) {
+      expect(screen.getByRole("checkbox", { name: `Select ${person.name}` })).toBeInTheDocument();
+    }
+  });
+
+  it("names a row from its first usable cell, skipping a leading empty/display cell", () => {
+    // A leading display column has no value, so the label must fall through to the
+    // next cell that carries a usable primitive (here, the name).
+    const withLeadingDisplay = col.columns([
+      col.display({ id: "spacer", header: "" }),
+      col.accessor("name", { header: "Name" }),
+    ]);
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={withLeadingDisplay}
+        getRowId={(p) => p.id}
+        enableRowSelection
+      />,
+    );
+    expect(screen.getByRole("checkbox", { name: "Select Ada Lovelace" })).toBeInTheDocument();
   });
 
   it("reports the selected ids and their rows through onSelectionChange", async () => {
@@ -733,8 +757,13 @@ describe("DataTable row selection", () => {
     );
     const alan = rowCheckbox("Alan Turing");
     expect(alan).toHaveAttribute("aria-disabled", "true");
-    // Focusable, not removed from the tab order.
+    // Focusable, not removed from the tab order (the native attribute would yank
+    // it out). Tabbing from the previous row's box lands on it — AGENTS.md's
+    // enforced convention: a disabled control stays reachable by keyboard.
     expect(alan).not.toBeDisabled();
+    rowCheckbox("Ada Lovelace").focus();
+    await user.tab();
+    expect(alan).toHaveFocus();
 
     // Clicking the locked box does nothing.
     await user.click(alan);
@@ -744,6 +773,49 @@ describe("DataTable row selection", () => {
     await user.click(screen.getByRole("checkbox", { name: "Select all rows" }));
     const [ids] = onSelectionChange.mock.calls.at(-1)!;
     expect([...ids].sort()).toEqual(["1", "3"]);
+  });
+
+  it("never shows a non-selectable row as checked, even if its id is seeded selected", () => {
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        // Alan ("2", balance 18) is not selectable...
+        enableRowSelection={(p) => p.balance > 20}
+        // ...but a stale/seeded id still lists him as selected.
+        defaultSelectedRowIds={["2"]}
+      />,
+    );
+    const alan = rowCheckbox("Alan Turing");
+    expect(alan).toHaveAttribute("aria-disabled", "true");
+    // The locked box can't be cleared, so it must not read as checked.
+    expect(alan).not.toBeChecked();
+  });
+
+  it("owns its selection and reports both select and deselect when uncontrolled", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        // No `selectedRowIds` → the table owns selection in its own state.
+        enableRowSelection
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    await user.click(rowCheckbox("Ada Lovelace"));
+    expect(rowCheckbox("Ada Lovelace")).toBeChecked();
+    expect(onSelectionChange).toHaveBeenLastCalledWith(["1"], [people[0]]);
+
+    // Clicking again clears it — the internally-owned state updates both ways.
+    await user.click(rowCheckbox("Ada Lovelace"));
+    expect(rowCheckbox("Ada Lovelace")).not.toBeChecked();
+    expect(onSelectionChange).toHaveBeenLastCalledWith([], []);
   });
 
   it("spans the selection column in the empty-state cell", () => {
@@ -759,6 +831,31 @@ describe("DataTable row selection", () => {
     );
     // 3 data columns + the selection column.
     expect(screen.getByRole("cell", { name: "No people yet." })).toHaveAttribute("colspan", "4");
+  });
+
+  it("locks the select-all box when no row is selectable", async () => {
+    const user = userEvent.setup();
+    const onSelectionChange = vi.fn();
+    render(
+      <DataTable
+        aria-label="People"
+        data={people}
+        columns={columns}
+        getRowId={(p) => p.id}
+        // A predicate that excludes every row leaves nothing for select-all to do.
+        enableRowSelection={() => false}
+        onSelectionChange={onSelectionChange}
+      />,
+    );
+    const selectAll = screen.getByRole("checkbox", { name: "Select all rows" });
+    // Locked via aria-disabled (never the native attribute), so it stays focusable.
+    expect(selectAll).toHaveAttribute("aria-disabled", "true");
+    expect(selectAll).not.toBeDisabled();
+    // The box reads as unchecked (its visual state follows the `checked` prop).
+    expect(selectAll).not.toBePartiallyChecked();
+    // Clicking the locked box is a no-op: no selection, no callback.
+    await user.click(selectAll);
+    expect(onSelectionChange).not.toHaveBeenCalled();
   });
 
   it("gives each group header a box that selects all of its rows", async () => {

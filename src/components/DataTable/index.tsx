@@ -434,8 +434,11 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
 
   // Group-header rows aren't independently selectable (their box drives their
   // children instead), so only real data rows ever enter the selection map — its
-  // keys are exactly the selected data ids. A stable predicate keeps the table's
-  // selection memos from invalidating each render.
+  // keys are exactly the selected data ids. Memoised on `enableRowSelection`, so
+  // its identity is stable exactly when that prop is (a boolean, or a predicate
+  // the consumer keeps stable) — an inline predicate still changes each render and
+  // re-invalidates TanStack's selection memos. We deliberately key on it (rather
+  // than a latest-ref) so a changed predicate *does* re-evaluate selectability.
   const rowCanSelect = React.useCallback(
     (row: Row<DataTableFeatures, TData>): boolean => {
       if (row.getIsGrouped()) return false;
@@ -522,6 +525,11 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   // The selection column, when present, adds one leaf to the grid — fold it into
   // the empty-state `colSpan` so the placeholder still spans the full width.
   const totalColumnCount = leafColumnCount + (selectionEnabled ? 1 : 0);
+  // Whether any row can actually be selected. With a predicate that excludes
+  // every row (or no rows at all), the "select all" box would be a focusable
+  // no-op, so lock it — mirroring the per-group box's `groupHasSelectableLeaves`.
+  const hasSelectableRows =
+    selectionEnabled && table.getFilteredRowModel().flatRows.some((row) => row.getCanSelect());
 
   // The group-label cluster — expand/collapse toggle, the group's value, and its
   // data-row count — indented by the row's depth. Shared by both presentations:
@@ -573,6 +581,7 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                   // model, so a lingering id that no longer maps to a row (the
                   // selection contract keeps those) can't fake a mixed header.
                   indeterminate={table.getIsSomePageRowsSelected() && !table.getIsAllRowsSelected()}
+                  readOnly={!hasSelectableRows}
                   onChange={table.getToggleAllRowsSelectedHandler()}
                   aria-label="Select all rows"
                 />
@@ -634,11 +643,14 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
                       // A data row's box. `getToggleSelectedHandler` gets the raw
                       // change event, so Shift-click range selection works; a
                       // non-selectable row (per the predicate) shows a locked box.
+                      // Gate `checked` on `getCanSelect` too: a stale/seeded id for
+                      // a now-unselectable row stays in the selection map, but its
+                      // locked box must never read as checked (it can't be cleared).
                       <SelectionCheckbox
-                        checked={row.getIsSelected()}
+                        checked={row.getCanSelect() && row.getIsSelected()}
                         readOnly={!row.getCanSelect()}
                         onChange={row.getToggleSelectedHandler()}
-                        aria-label="Select row"
+                        aria-label={rowSelectLabel(row)}
                       />
                     )}
                   </td>
@@ -816,6 +828,24 @@ function collectAggregatedIds<TData extends RowData>(
 function groupRowLabel(row: { groupingValue?: unknown }): string {
   const value = row.groupingValue;
   return value == null || typeof value === "object" ? "group" : String(value);
+}
+
+/**
+ * The accessible name for a data row's selection box. A bare "Select row" is
+ * ambiguous when every row shares it, so lead with the row's first cell that
+ * carries a usable primitive value (typically the name/label column, but skipping
+ * a leading display/empty cell) — mirroring the group box's `Select all rows in
+ * <value>`. Falls back to "Select row" only when no cell has a sensible string
+ * form (all empty, object-, or function-valued).
+ */
+function rowSelectLabel<TData extends RowData>(row: Row<DataTableFeatures, TData>): string {
+  for (const cell of row.getAllCells()) {
+    const value = cell.getValue();
+    if (value != null && value !== "" && typeof value !== "object" && typeof value !== "function") {
+      return `Select ${String(value)}`;
+    }
+  }
+  return "Select row";
 }
 
 /**
