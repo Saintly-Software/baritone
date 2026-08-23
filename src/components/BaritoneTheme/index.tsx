@@ -7,6 +7,7 @@
 // mismatch.
 import * as React from "react";
 import {
+  type BorderWidthOptions,
   createInlineTheme,
   type FontOptions,
   type FontSizeOptions,
@@ -24,7 +25,8 @@ export interface BaritoneThemeProps
     LetterSpacingOptions,
     FontSizeOptions,
     FontWeightOptions,
-    LineHeightOptions {
+    LineHeightOptions,
+    BorderWidthOptions {
   /** Token values for this theme scope — e.g. from `buildDefaultTokens`. */
   tokens: ThemeTokensInput;
   /** Colour scheme; sets the oklch interaction direction (`-1` light / `+1` dark). */
@@ -72,6 +74,7 @@ export function BaritoneTheme({
   weights,
   defaultWeight,
   lineHeights,
+  borderWidths,
   render,
   style,
   ref,
@@ -96,6 +99,7 @@ export function BaritoneTheme({
       weights,
       defaultWeight,
       lineHeights,
+      borderWidths,
     }),
     ...style,
   };
