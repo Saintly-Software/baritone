@@ -2,7 +2,7 @@
 "@saintly-software/baritone": minor
 ---
 
-Make border width a consumer-extensible *open* vocabulary, mirroring `Text`'s
+Make border width a consumer-extensible _open_ vocabulary, mirroring `Text`'s
 `size` / `weight` / `font`. Divider's `thickness` prop is no longer limited to the
 built-in `thin` / `thick` steps — an app can publish its own named widths and select
 them by name.
@@ -19,7 +19,10 @@ them by name.
 
   ```ts
   declare module "@saintly-software/baritone" {
-    interface BorderWidthRegistry { hair: true; heavy: true }
+    interface BorderWidthRegistry {
+      hair: true;
+      heavy: true;
+    }
   }
   ```
 

@@ -26,7 +26,11 @@ const warnedUnsetVars = new Set<string>();
  * so it would report every themed element as unset. This is a real-browser aid (dev
  * server, Storybook), which is where the mistake shows up.
  */
-export function warnIfVarUnset(el: HTMLElement | null, cssVar: string, message: () => string): void {
+export function warnIfVarUnset(
+  el: HTMLElement | null,
+  cssVar: string,
+  message: () => string,
+): void {
   if (el == null || warnedUnsetVars.has(cssVar)) return;
   if (typeof navigator !== "undefined" && navigator.userAgent.includes("jsdom")) return;
   if (getComputedStyle(el).getPropertyValue(cssVar).trim() !== "") return;
