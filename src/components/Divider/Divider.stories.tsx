@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { CSSProperties } from "react";
 import { BORDER_WIDTH_KEYS, INTENTS, SALIENCIES } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Text } from "../Text";
@@ -129,7 +130,7 @@ export const IntentsAndSaliencies: Story = {
   ),
 };
 
-/** `thickness` picks a `borderWidth` token. */
+/** `thickness` picks a `borderWidth` — here the built-in `thin` / `thick` steps. */
 export const Thickness: Story = {
   render: (args) => (
     <>
@@ -139,6 +140,40 @@ export const Thickness: Story = {
         </Divider>
       ))}
     </>
+  ),
+};
+
+/**
+ * The `thickness` vocabulary is defined by the *consumer*, not Baritone — exactly
+ * like `Text`'s `size` / `font`. An app publishes widths as `--borderWidth-<name>`
+ * custom properties (via the theme's `borderWidths` option) and, for autocompletion
+ * + type-safety, declares those names by augmenting the `BorderWidthRegistry`
+ * interface. The built-in `thin` / `thick` steps are always available.
+ *
+ * This story fakes a consumer by declaring a couple of `--borderWidth-*` vars on the
+ * wrapper, so `thickness="hair"` / `"heavy"` resolve — exactly what a real theme
+ * would emit — while `thickness="thick"` uses the built-in.
+ */
+export const CustomThickness: Story = {
+  render: (args) => (
+    <div
+      style={
+        {
+          "--borderWidth-hair": "0.5px",
+          "--borderWidth-heavy": "4px",
+        } as CSSProperties
+      }
+    >
+      <Divider {...args} thickness="thick" my="4">
+        thick — a built-in
+      </Divider>
+      <Divider {...args} thickness="hair" my="4">
+        hair — a consumer-defined --borderWidth-hair
+      </Divider>
+      <Divider {...args} thickness="heavy" my="4">
+        heavy — a consumer-defined --borderWidth-heavy
+      </Divider>
+    </div>
   ),
 };
 

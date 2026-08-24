@@ -1,14 +1,25 @@
-import { createVar } from "@vanilla-extract/css";
+import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
-import { BORDER_WIDTH_KEYS, INTENTS, SALIENCIES } from "../../theme/constants";
+import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-// The rule's colour and thickness, funnelled through local vars so the recipe
-// base stays flat: each intent×saliency compound swaps the colour, each
-// `thickness` variant swaps the width, and the pieces that actually paint the
-// line (the element itself, or its two pseudo-element rules) just read them.
+// The rule's colour, funnelled through a local var so the recipe base stays flat:
+// each intent×saliency compound swaps the colour, and the pieces that actually paint
+// the line (the element itself, or its two pseudo-element rules) just read it.
 const line = createVar();
-const weight = createVar();
+
+/**
+ * The rule's thickness, set per instance by the `Divider` component to a
+ * `var(--borderWidth-<name>)` the active theme published — the `borderWidth`
+ * vocabulary is *open* (consumer-extensible), so it's an inline var, not a variant.
+ * See {@link module:../../theme/borderWidths}.
+ */
+export const dividerWeightVar = createVar("dividerWeight");
+
+// What the line-painting rules read for their cross-axis size. Falls back to the
+// `thin` token so a module-scope caller applying `dividerRoot(...)` as a bare class
+// (without the component's inline var) still gets a hairline rule.
+const weight = fallbackVar(dividerWeightVar, vars.borderWidth.thin);
 
 /**
  * Divider root. A flex line: unlabelled it paints the rule on its own box;
@@ -16,7 +27,7 @@ const weight = createVar();
  *
  * The colour reads `component.color[intent][saliency].default.border` — the
  * border ramp, so the rule sits at hairline weight against a surface at every
- * saliency — and the thickness reads the `borderWidth` tokens.
+ * saliency — and the thickness reads the `--borderWidth-<name>` the component sets.
  */
 export const dividerRoot = recipe({
   base: {
@@ -76,9 +87,6 @@ export const dividerRoot = recipe({
       (typeof SALIENCIES)[number],
       Record<string, never>
     >,
-    thickness: Object.fromEntries(
-      BORDER_WIDTH_KEYS.map((key) => [key, { vars: { [weight]: vars.borderWidth[key] } }]),
-    ) as Record<(typeof BORDER_WIDTH_KEYS)[number], { vars: Record<string, string> }>,
   },
   compoundVariants: [
     // The rule's cross-axis size — on the element's own box when unlabelled, on
@@ -123,7 +131,6 @@ export const dividerRoot = recipe({
     labelPosition: "center",
     intent: "neutral",
     saliency: "low",
-    thickness: "thin",
   },
 });
 

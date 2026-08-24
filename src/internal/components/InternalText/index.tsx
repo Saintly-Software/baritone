@@ -28,43 +28,7 @@ import { letterSpacingVarName } from "../../../theme/letterSpacings";
 import { lineHeightVarName } from "../../../theme/lineHeights";
 import { cx } from "../../../utils/cx";
 import { composeRefs, useRender, type RenderProp } from "../../../utils/render";
-
-// Prod-safe by construction: a browser production bundle replaces
-// `process.env.NODE_ENV` with `"production"`, so this folds to `false` and the
-// whole dev-only path (ref composition + effect) dead-code-eliminates. React is a
-// peer dep that already requires `process.env.NODE_ENV` to be defined, so reading
-// it unguarded is safe wherever this runs. (Deliberately not the
-// `typeof process === "undefined" || …` form — that returns `true` in a browser
-// where `process` is undefined, which would leak the dev path into production.)
-const isDev = (): boolean => process.env.NODE_ENV !== "production";
-
-// `--…-<name>` custom properties already warned about, so a page full of
-// `<Text size="…">` / `<Text font="…">` / … with the same unset name warns once,
-// not once per element. Keyed by the resolved CSS var, which is unique per
-// (prop, name) pair.
-const warnedUnsetVars = new Set<string>();
-
-/**
- * Dev-only guard shared by the open-ended typographic props (`size`, `weight`,
- * `lineHeight`, `font`, `letterSpacing`). When the prop names a `--…-<name>` the
- * active theme never published, that inner var is guaranteed-invalid, so the
- * `--text…` reference built on it collapses to the size recipe's *fallback* — the
- * theme's `md` size/leading, `default` weight, `sans` family, or `normal` tracking
- * — instead of doing anything visibly wrong. Easy to ship by accident (a typo, or a
- * name declared on the registry but never wired into the theme). So probe the
- * resolved value once per var and point the dev at the fix.
- *
- * Skipped under jsdom (unit tests): it doesn't resolve stylesheet custom
- * properties, so it would report every themed element as unset. This is a
- * real-browser aid (dev server, Storybook), which is where the mistake shows up.
- */
-function warnIfVarUnset(el: HTMLElement | null, cssVar: string, message: () => string): void {
-  if (el == null || warnedUnsetVars.has(cssVar)) return;
-  if (typeof navigator !== "undefined" && navigator.userAgent.includes("jsdom")) return;
-  if (getComputedStyle(el).getPropertyValue(cssVar).trim() !== "") return;
-  warnedUnsetVars.add(cssVar);
-  console.warn(message());
-}
+import { isDev, warnIfVarUnset } from "../../warnUnsetVar";
 
 function warnIfFontUnset(el: HTMLElement | null, name: string): void {
   warnIfVarUnset(

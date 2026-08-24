@@ -3,6 +3,7 @@ import { assignInlineVars } from "@vanilla-extract/dynamic";
 import { textFontVar, textLetterSpacingVar, textWeightVar } from "../styles/vars.css";
 import { warnOnContrastIssues } from "./contrast";
 import { vars, type DesignTokens, type ThemeTokensInput } from "./contract.css";
+import { borderWidthVars } from "./borderWidths";
 import { fontSizeVars, type SizeValue } from "./fontSizes";
 import { fontFamilyVars, fontVarName, type FontName } from "./fonts";
 import { fontWeightVarName, fontWeightVars, type FontWeightName } from "./fontWeights";
@@ -87,8 +88,26 @@ export interface LineHeightOptions {
   lineHeights?: Record<string, string>;
 }
 
+/**
+ * The consumer-defined border-width vocabulary for a theme, the rule-weight analogue
+ * of {@link FontSizeOptions}. Each entry publishes a `--borderWidth-<name>` custom
+ * property; a border-width prop (e.g. Divider's `thickness`) selects one by name. The
+ * built-in steps (`thin`, `thick`) are always published from the tokens, so they need
+ * no entry here.
+ */
+export interface BorderWidthOptions {
+  /** Extra named widths, e.g. `{ hair: "0.5px" }`. */
+  borderWidths?: Record<string, string>;
+}
+
 export interface CreateThemeOptions
-  extends FontOptions, LetterSpacingOptions, FontSizeOptions, FontWeightOptions, LineHeightOptions {
+  extends
+    FontOptions,
+    LetterSpacingOptions,
+    FontSizeOptions,
+    FontWeightOptions,
+    LineHeightOptions,
+    BorderWidthOptions {
   /** Colour scheme. Sets `oklchOperator` (-1 light / +1 dark). */
   scheme: "light" | "dark";
   /** Label used in contrast warnings. */
@@ -184,8 +203,9 @@ export function createDesignSystemTheme(
   // class itself (not a second class) so the return value stays a single class,
   // safe for `classList.add`. `BaritoneTheme` sets the same via inline style. The
   // `--font-<name>` / `--fontSize-<name>` / `--fontWeight-<name>` /
-  // `--lineHeight-<name>` / `--letterSpacing-<name>` registries ride along on the
-  // same root so the open typographic props resolve against this theme's vocabulary.
+  // `--lineHeight-<name>` / `--letterSpacing-<name>` / `--borderWidth-<name>`
+  // registries ride along on the same root so the open typographic and border props
+  // resolve against this theme's vocabulary.
   globalStyle(`.${themeClass}`, {
     isolation: "isolate",
     vars: {
@@ -194,6 +214,7 @@ export function createDesignSystemTheme(
       ...fontSizeVars(options.sizes),
       ...weightVars(options),
       ...lineHeightVars(options.lineHeights),
+      ...borderWidthVars(options.borderWidths),
     },
   });
   return themeClass;
@@ -207,8 +228,9 @@ export function createDesignSystemTheme(
  * to publish consumer families (`--font-<name>`) and `defaultFont` to pick the
  * family bare text uses; likewise `letterSpacings` / `defaultLetterSpacing` for
  * the tracking vocabulary, `sizes` for extra `--fontSize-<name>`, `weights` /
- * `defaultWeight` for the weight vocabulary, and `lineHeights` for extra
- * `--lineHeight-<name>` leadings.
+ * `defaultWeight` for the weight vocabulary, `lineHeights` for extra
+ * `--lineHeight-<name>` leadings, and `borderWidths` for extra `--borderWidth-<name>`
+ * rule weights.
  */
 export function createInlineTheme(
   tokens: ThemeTokensInput,
@@ -217,7 +239,8 @@ export function createInlineTheme(
     LetterSpacingOptions &
     FontSizeOptions &
     FontWeightOptions &
-    LineHeightOptions,
+    LineHeightOptions &
+    BorderWidthOptions,
 ): Record<string, string> {
   return {
     ...assignInlineVars(vars, withOperator(tokens, options.scheme)),
@@ -226,5 +249,6 @@ export function createInlineTheme(
     ...fontSizeVars(options.sizes),
     ...weightVars(options),
     ...lineHeightVars(options.lineHeights),
+    ...borderWidthVars(options.borderWidths),
   };
 }

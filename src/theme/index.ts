@@ -10,6 +10,7 @@ export {
   type FontSizeOptions,
   type FontWeightOptions,
   type LineHeightOptions,
+  type BorderWidthOptions,
 } from "./createTheme";
 export { buildDefaultTokens, type BrandSeed } from "./defaultTokens";
 
@@ -61,6 +62,17 @@ export {
   type LineHeightName,
   type BuiltinLineHeightName,
 } from "./lineHeights";
+
+// The consumer-extensible border-width vocabulary, the rule-weight analogue of the
+// typographic seams above. `BorderWidthRegistry` is the module-augmentation seam;
+// `BorderWidthName` is what a border-width prop (e.g. Divider's `thickness`) accepts.
+export {
+  borderWidthVarName,
+  borderWidthVars,
+  type BorderWidthRegistry,
+  type BorderWidthName,
+  type BuiltinBorderWidthName,
+} from "./borderWidths";
 export { lightTheme, darkTheme } from "./defaultTheme.css";
 
 export {

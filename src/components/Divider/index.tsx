@@ -1,12 +1,34 @@
 "use client";
 import { Separator as BaseSeparator } from "@base-ui/react/separator";
-import type * as React from "react";
+import { assignInlineVars } from "@vanilla-extract/dynamic";
+import * as React from "react";
+import { isDev, warnIfVarUnset } from "../../internal/warnUnsetVar";
 import { atoms } from "../../styles/sprinkles.css";
 import type { MarginProps } from "../../styles/spacingProps";
-import type { BorderWidthKey, Intent, Saliency } from "../../theme/constants";
+import { borderWidthVarName, type BorderWidthName } from "../../theme/borderWidths";
+import type { Intent, Saliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { composeRefs } from "../../utils/render";
 import { Text, type TextProps } from "../Text";
-import { dividerRoot } from "./divider.css";
+import { dividerRoot, dividerWeightVar } from "./divider.css";
+
+/**
+ * Dev-only guard: warn when `thickness` names a `--borderWidth-<name>` the active
+ * theme never published, so the rule silently falls back to the `thin` width. Mirrors
+ * the typographic guards in `InternalText`.
+ */
+function warnIfBorderWidthUnset(el: HTMLElement | null, name: string): void {
+  warnIfVarUnset(
+    el,
+    borderWidthVarName(name),
+    () =>
+      `[baritone] thickness="${name}": the CSS variable ${borderWidthVarName(name)} isn't set in ` +
+      `this element's theme, so the rule falls back to the \`thin\` width. Publish the width via ` +
+      `the theme's \`borderWidths\` option (e.g. \`borderWidths: { ${name}: '0.5px' }\` on ` +
+      "`createInlineTheme` / `createDesignSystemTheme` / `BaritoneTheme`), or use a built-in " +
+      "(`thin` / `thick`). Declare the name on `BorderWidthRegistry` for autocompletion.",
+  );
+}
 
 /** Which way the rule runs. */
 export type DividerOrientation = "horizontal" | "vertical";
@@ -35,8 +57,12 @@ export interface DividerProps
   intent?: Intent;
   /** Prominence of the rule within its intent. Default `low`. */
   saliency?: Saliency;
-  /** Rule thickness, from the `borderWidth` tokens. Default `thin`. */
-  thickness?: BorderWidthKey;
+  /**
+   * Rule thickness, by name. Built-ins `thin` (default) and `thick` are always
+   * available; other names are consumer-defined via the theme's `borderWidths`
+   * option + `BorderWidthRegistry`. Resolves to `var(--borderWidth-<name>)`.
+   */
+  thickness?: BorderWidthName;
   /**
    * Label sat in a gap in the rule ("OR", "Today"). A string renders as a `Text`
    * *and* becomes the divider's accessible name; pass `aria-label` alongside any
@@ -59,8 +85,8 @@ export interface DividerProps
  * `Chip` / `Button` — reading the `component` *border* ramp, so `neutral` / `low`
  * (the default) is the quiet hairline you want almost everywhere, and a louder
  * intent is there when the split itself is meaningful. `thickness` picks a
- * `borderWidth` token; the margin props (`my`, `mx`, …) space it from its
- * neighbours.
+ * `borderWidth` — a built-in (`thin` / `thick`) or a name the active theme
+ * published — and the margin props (`my`, `mx`, …) space it from its neighbours.
  *
  * Pass `children` to label it: the rule breaks around the label, positioned by
  * `labelPosition`. A `vertical` divider stretches to the height of a flex row.
@@ -78,6 +104,7 @@ export function Divider({
   labelPosition = "center",
   slotProps,
   className,
+  style,
   children,
   ref,
   m,
@@ -92,6 +119,25 @@ export function Divider({
 }: DividerProps) {
   const labelled = children != null && children !== false;
 
+  // `thickness` is an inline var, not a recipe variant, because the `borderWidth`
+  // vocabulary is open (consumer-extensible). Point the rule's weight at the
+  // `var(--borderWidth-<name>)` the active theme published; consumer `style` spreads
+  // last so it can still override.
+  const resolvedStyle = {
+    ...assignInlineVars({ [dividerWeightVar]: `var(${borderWidthVarName(thickness)})` }),
+    ...style,
+  };
+
+  // Dev-only: warn when `thickness` names a var the theme never published. Compose an
+  // internal ref onto the node so we can read its computed style after mount; in
+  // production this is a no-op and the consumer's `ref` passes through untouched.
+  const nodeRef = React.useRef<HTMLDivElement | null>(null);
+  const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
+  React.useEffect(() => {
+    if (!isDev()) return;
+    warnIfBorderWidthUnset(nodeRef.current, thickness);
+  }, [thickness]);
+
   // A `separator`'s children are presentational — a screen reader never reads
   // the visible label — so a string label doubles as the accessible name. Only
   // forward `aria-label` when we have one: base-ui's prop merge treats an
@@ -102,13 +148,14 @@ export function Divider({
 
   return (
     <BaseSeparator
-      ref={ref}
+      ref={mergedRef}
       orientation={orientation}
       className={cx(
-        dividerRoot({ orientation, labelled, labelPosition, intent, saliency, thickness }),
+        dividerRoot({ orientation, labelled, labelPosition, intent, saliency }),
         atoms({ m, mx, my, mt, mr, mb, ml }),
         className,
       )}
+      style={resolvedStyle}
       {...ariaProps}
       {...rest}
     >

@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { describe, expect, it } from "vitest";
 import { atoms } from "../../styles/sprinkles.css";
+import { borderWidthVarName } from "../../theme/borderWidths";
 import { dividerRoot } from "./divider.css";
 import { Divider } from "./index";
 
@@ -64,10 +65,20 @@ describe("Divider", () => {
     expect(screen.getByRole("separator")).toHaveClass(dividerRoot({ labelled: true }));
   });
 
-  it("applies the intent / saliency / thickness variants", () => {
-    render(<Divider intent="primary" saliency="high" thickness="thick" />);
+  it("applies the intent / saliency variants", () => {
+    render(<Divider intent="primary" saliency="high" />);
     expect(screen.getByRole("separator")).toHaveClass(
-      dividerRoot({ intent: "primary", saliency: "high", thickness: "thick" }),
+      dividerRoot({ intent: "primary", saliency: "high" }),
+    );
+  });
+
+  it("points the rule's weight var at the named borderWidth via `thickness`", () => {
+    // `thickness` is an inline var, not a variant, because the `borderWidth`
+    // vocabulary is open (consumer-extensible) — so it resolves to a
+    // `var(--borderWidth-<name>)` the active theme publishes.
+    render(<Divider thickness="thick" />);
+    expect(screen.getByRole("separator").getAttribute("style")).toContain(
+      `var(${borderWidthVarName("thick")})`,
     );
   });
 
