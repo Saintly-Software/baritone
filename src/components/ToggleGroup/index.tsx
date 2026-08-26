@@ -2,6 +2,7 @@
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup as BaseToggleGroup } from "@base-ui/react/toggle-group";
 import * as React from "react";
+import type { ButtonProps } from "../Button";
 import {
   InternalButton,
   type InternalButtonHtmlAttrs,
@@ -57,29 +58,103 @@ const ToggleGroupItemContext = React.createContext<ToggleGroupItemContextValue>(
   size: undefined,
 });
 
-export interface ToggleGroupItemProps<T extends string> {
+/**
+ * Props shared by *both* `ToggleGroupItem` arms — the labelled look and the
+ * icon-only one. Deliberately silent on `children`/`icon`/`startIcon`/`endIcon`/
+ * `aria-label`: those differ between a labelled segment (its visible text is the
+ * accessible name) and an icon-only one (a required `aria-label` is), so each arm
+ * redefines them. Mirrors `Button`'s `ButtonCommonProps` split.
+ */
+interface ToggleGroupItemCommonProps<T extends string> {
   /**
    * The value this segment selects. Constrained to the group's `T`, so a typo or
    * a value outside the union/enum is a compile error.
    */
   value: T;
+  /** Extra className merged onto the segment's `<button>`. */
+  className?: string;
+}
+
+/**
+ * The labelled segment (the default arm): a visible text label, optionally
+ * flanked by icons. Mirrors `Button`'s labelled arm — `startIcon`/`endIcon` sit
+ * before/after the label in a slot `InternalButton` lays out, so the icon/label
+ * gap and vertical alignment are owned once by the design system rather than by
+ * each caller's `children` composition. `icon` is absent here (its presence is
+ * what selects the icon-only arm).
+ */
+export interface ToggleGroupItemLabelledProps<
+  T extends string,
+> extends ToggleGroupItemCommonProps<T> {
   /**
    * The visible label. Defaults to the `value` itself (handy for string enums);
    * pass children for anything richer.
    */
   children?: React.ReactNode;
+  /** Icon before the label. Typically an `<Icon>`; inherits the segment's text colour. */
+  startIcon?: React.ReactNode;
+  /** Icon after the label. Typically an `<Icon>`; inherits the segment's text colour. */
+  endIcon?: React.ReactNode;
+  /**
+   * Unsupported on a labelled segment — pass `startIcon`/`endIcon` alongside the
+   * label instead. `icon` is the discriminant of the icon-only arm
+   * ({@link ToggleGroupItemIconOnlyProps}), which drops the visible label.
+   */
+  icon?: never;
   /**
    * An authored accessible name for the segment, for when the flattened text of
    * `children` would name it misleadingly — e.g. a label paired with a trailing
    * count `Badge` ("Comments" + "3" would otherwise announce as "Comments 3").
    * When set, it becomes the segment's whole accessible name, so it must still
    * contain the visible label text (WCAG 2.5.3 *Label in Name*). Leave it off
-   * when `children` already reads correctly (the common case).
+   * when `children` already reads correctly (the common case). It's *required* on
+   * the icon-only arm ({@link ToggleGroupItemIconOnlyProps}), which has no visible
+   * text to name it.
    */
   "aria-label"?: string;
-  /** Extra className merged onto the segment's `<button>`. */
-  className?: string;
 }
+
+/**
+ * The icon-only segment: a single centred glyph, no visible label — the mirror of
+ * `Button`'s icon-only arm ({@link IconButtonProps}). `icon` replaces the label
+ * (and is the union discriminant), so `aria-label` becomes **required**: it's the
+ * segment's only accessible name, exactly as on an icon-only `Button`.
+ */
+export interface ToggleGroupItemIconOnlyProps<
+  T extends string,
+> extends ToggleGroupItemCommonProps<T> {
+  /**
+   * The single centred glyph — **required**, and the discriminant of this arm.
+   * Typically an `<Icon>`; inherits the segment's text colour. Typed
+   * `NonNullable<React.ReactNode>` so a nullish value (e.g. a `cond ? <Icon/> :
+   * null`) can't slip through as the icon-only arm and render an *unnamed* segment
+   * — the required `aria-label` is only wired up when a glyph is actually present.
+   */
+  icon: NonNullable<React.ReactNode>;
+  /**
+   * Accessible name — **required**, because the segment is icon-only and has no
+   * visible text to name it (e.g. "Rhyme scheme"). The mirror of a labelled
+   * segment, where the same prop is an optional override of the visible label.
+   */
+  "aria-label": string;
+  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+  children?: never;
+  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+  startIcon?: never;
+  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+  endIcon?: never;
+}
+
+/**
+ * One segment's props, discriminated on the presence of `icon` — mirroring
+ * `Button`: a labelled segment ({@link ToggleGroupItemLabelledProps} — visible
+ * text with optional flanking icons) or an icon-only one
+ * ({@link ToggleGroupItemIconOnlyProps} — a single glyph named by a required
+ * `aria-label`).
+ */
+export type ToggleGroupItemProps<T extends string> =
+  | ToggleGroupItemLabelledProps<T>
+  | ToggleGroupItemIconOnlyProps<T>;
 
 /**
  * One segment, rendered as the very same `InternalButton` that powers `Button`.
@@ -88,19 +163,60 @@ export interface ToggleGroupItemProps<T extends string> {
  * drops to a neutral `low` (ghost) — so the chosen value reads as a filled block
  * among ghosts, exactly like `ToggleButton`'s pressed/unpressed.
  *
+ * Because it *is* an `InternalButton`, it inherits `Button`'s icon vocabulary for
+ * free: `startIcon`/`endIcon` flank the label in a slot the button lays out, and
+ * `icon` + a required `aria-label` render an icon-only segment (a square glyph) —
+ * this renderer just threads the arm's props straight through.
+ *
  * Stable module-level component (not re-created per render) so React reconciles
  * it normally; the type-narrowing to `T` happens purely where the group hands it
  * to the render-prop.
  */
-function ToggleGroupItem<T extends string>({
-  value,
-  children,
-  "aria-label": ariaLabel,
-  className,
-}: ToggleGroupItemProps<T>) {
+function ToggleGroupItem<T extends string>(props: ToggleGroupItemProps<T>) {
+  const { value, className } = props;
   const { selectedValue, intent, saliency, size } = React.useContext(ToggleGroupItemContext);
   const selected = value === selectedValue;
-  const content = children ?? value;
+
+  // The on/off look, shared by both arms: the selected segment takes the group's
+  // `intent` x `saliency`; an unselected one drops to a neutral `low` (ghost).
+  const colour = {
+    intent: selected ? intent : "neutral",
+    saliency: selected ? saliency : "low",
+    size,
+    className,
+  };
+
+  // `icon` is the union discriminant — its presence selects the icon-only arm.
+  // The `!= null` test mirrors `InternalButton`'s own icon-only check, so a
+  // nullish `icon` never lands here as an unnamed square. Build the exact `Button`
+  // shape for each arm and hand it straight to `InternalButton`, so the segment
+  // reuses `Button`'s icon/label layout (slot gap + vertical alignment owned
+  // there) rather than re-implementing it via `children`.
+  const consumerProps: ButtonProps =
+    props.icon != null
+      ? {
+          ...colour,
+          icon: props.icon,
+          // Icon-only: the required `aria-label` *is* the accessible name, so it
+          // rides `consumerProps` — `InternalButton` forwards `aria-label` only on
+          // the icon-only arm (a labelled button's name must be its visible text).
+          "aria-label": props["aria-label"],
+        }
+      : {
+          ...colour,
+          // Labelled: default the visible label to the `value` (handy for enums).
+          children: props.children ?? value,
+          startIcon: props.startIcon,
+          endIcon: props.endIcon,
+        };
+
+  // A *labelled* segment's authored `aria-label` can't ride `consumerProps`: on a
+  // labelled button `aria-label` is type-`never` and `InternalButton` drops it
+  // (the name there must be the visible label). So it rides the `htmlAttrs` seam,
+  // which is merged *under* the button's own props — which never set `aria-label`
+  // for a labelled button — letting the authored name survive. The icon-only arm
+  // already carries its `aria-label` on `consumerProps` above, so it's excluded.
+  const labelledAriaLabel = props.icon == null ? props["aria-label"] : undefined;
 
   return (
     <Toggle
@@ -112,28 +228,18 @@ function ToggleGroupItem<T extends string>({
       // that is the composite item, with no extra wrapper.
       render={(toggleProps) => (
         <InternalButton
-          consumerProps={{
-            intent: selected ? intent : "neutral",
-            saliency: selected ? saliency : "low",
-            size,
-            className,
-            children: content,
-          }}
+          consumerProps={consumerProps}
           htmlAttrs={
-            // Both the active-tab-stop marker and an authored `aria-label` ride
-            // this `htmlAttrs` seam rather than `consumerProps`: `InternalButton`
-            // strips `aria-label` off a text button's `consumerProps` (its name
-            // must be the visible label there), whereas `htmlAttrs` is merged
-            // *under* the button's own props — which never set `aria-label` here —
-            // so an authored name survives. data-* isn't statically known on
-            // base-ui's props, hence the localized cast (same pattern as the
-            // overlay triggers).
+            // The active-tab-stop marker and a labelled segment's authored
+            // `aria-label` ride this seam (see above); data-* isn't statically
+            // known on base-ui's props, hence the localized cast (same pattern as
+            // the overlay triggers).
             {
               ...toggleProps,
               // The selected segment carries the active-tab-stop marker, so Tab
               // focuses it rather than the first segment.
               ...(selected ? { [ACTIVE_COMPOSITE_ITEM_ATTR]: "" } : {}),
-              ...(ariaLabel != null ? { "aria-label": ariaLabel } : {}),
+              ...(labelledAriaLabel != null ? { "aria-label": labelledAriaLabel } : {}),
             } as InternalButtonHtmlAttrs
           }
         />
@@ -146,7 +252,9 @@ interface ToggleGroupSharedProps<T extends string> {
   /**
    * Render-prop children. Receives a `ToggleGroupItem` already bound to this
    * group's `T`, so every `<ToggleGroupItem value={...} />` is type-checked
-   * against the same union/enum the group's `value` came from.
+   * against the same union/enum the group's `value` came from. Each item takes
+   * `Button`'s icon vocabulary — `startIcon`/`endIcon` around the label, or `icon`
+   * + a required `aria-label` for an icon-only segment.
    */
   children: (props: {
     ToggleGroupItem: (props: ToggleGroupItemProps<T>) => React.ReactNode;
@@ -365,6 +473,18 @@ export type ToggleGroupProps<T extends string> =
  *       <ToggleGroupItem value="select">Select</ToggleGroupItem>
  *       <ToggleGroupItem value="draw">Draw</ToggleGroupItem>
  *       <ToggleGroupItem value="erase">Erase</ToggleGroupItem>
+ *     </>
+ *   )}
+ * </ToggleGroup>
+ *
+ * @example
+ * // Icons: `startIcon`/`endIcon` flank a label; `icon` + `aria-label` is icon-only.
+ * <ToggleGroup aria-label="Analyse by" value={mode} onChange={setMode}>
+ *   {({ ToggleGroupItem }) => (
+ *     <>
+ *       <ToggleGroupItem value="rhyme" startIcon={<Icon><Music /></Icon>}>Rhyme</ToggleGroupItem>
+ *       <ToggleGroupItem value="meter" startIcon={<Icon><Ruler /></Icon>}>Meter</ToggleGroupItem>
+ *       <ToggleGroupItem value="grid" aria-label="Grid" icon={<Icon><Grid /></Icon>} />
  *     </>
  *   )}
  * </ToggleGroup>

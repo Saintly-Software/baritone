@@ -148,6 +148,94 @@ describe("ToggleGroup", () => {
     expect(screen.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "true");
   });
 
+  describe("icons", () => {
+    it("renders startIcon/endIcon around the label, keeping the label as the name", () => {
+      render(
+        <ToggleGroup<View> aria-label="View" value="list" onChange={() => {}}>
+          {({ ToggleGroupItem }) => (
+            <ToggleGroupItem
+              value="list"
+              startIcon={<span data-testid="start-glyph" aria-hidden />}
+              endIcon={<span data-testid="end-glyph" aria-hidden />}
+            >
+              List
+            </ToggleGroupItem>
+          )}
+        </ToggleGroup>,
+      );
+      // The flanking icons are aria-hidden, so the visible label still names the
+      // segment — the icons are laid out inside the same button by InternalButton.
+      const button = screen.getByRole("button", { name: "List" });
+      expect(button).toContainElement(screen.getByTestId("start-glyph"));
+      expect(button).toContainElement(screen.getByTestId("end-glyph"));
+    });
+
+    it("renders an icon-only segment named by its required aria-label, with no visible text", () => {
+      render(
+        <ToggleGroup<View> aria-label="View" value="list" onChange={() => {}}>
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem
+                value="list"
+                aria-label="List view"
+                icon={<span data-testid="glyph" aria-hidden />}
+              />
+              <ToggleGroupItem value="board">Board</ToggleGroupItem>
+            </>
+          )}
+        </ToggleGroup>,
+      );
+      // Named by the required aria-label — there's no visible text to name it...
+      const iconOnly = screen.getByRole("button", { name: "List view" });
+      expect(iconOnly).toContainElement(screen.getByTestId("glyph"));
+      expect(iconOnly.textContent).toBe("");
+      // ...and it's still a real segment: the selected value reads as pressed.
+      expect(iconOnly).toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("selects an icon-only segment on click, like any other", async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <ToggleGroup<View> aria-label="View" value="list" onChange={onChange}>
+          {({ ToggleGroupItem }) => (
+            <>
+              <ToggleGroupItem value="list">List</ToggleGroupItem>
+              <ToggleGroupItem value="board" aria-label="Board" icon={<span aria-hidden />} />
+            </>
+          )}
+        </ToggleGroup>,
+      );
+
+      await user.click(screen.getByRole("button", { name: "Board" }));
+
+      expect(onChange).toHaveBeenCalledWith("board", expect.any(Event));
+    });
+
+    // Compile-time guards for the discriminated union — mirror `Button`: `icon`
+    // makes `aria-label` required and forbids `children`/`startIcon`/`endIcon`.
+    it("type-enforces the icon-only arm", () => {
+      render(
+        <ToggleGroup<View> aria-label="View" value="list" onChange={() => {}}>
+          {({ ToggleGroupItem }) => (
+            <>
+              {/* @ts-expect-error — icon-only requires an aria-label to name it. */}
+              <ToggleGroupItem value="list" icon={<span aria-hidden />} />
+              {/* @ts-expect-error — `icon` is mutually exclusive with `startIcon`/`endIcon`. */}
+              <ToggleGroupItem
+                value="board"
+                aria-label="Board"
+                icon={<span aria-hidden />}
+                startIcon={<span aria-hidden />}
+              />
+            </>
+          )}
+        </ToggleGroup>,
+      );
+      expect(screen.getAllByRole("button").length).toBeGreaterThan(0);
+    });
+  });
+
   describe("orientation", () => {
     it("defaults to horizontal: Left/Right move focus, Up/Down don't", async () => {
       const user = userEvent.setup();

@@ -8,10 +8,36 @@ import {
   SIZES,
 } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
+import { Icon } from "../Icon";
 import type { DistributiveOmit } from "../../utils/types";
 import { ToggleGroup } from "./index";
 
 type View = "list" | "board" | "calendar";
+
+// Throwaway glyphs so the icon stories have something to render. Each is an
+// `<Icon>` so it inherits the segment's text colour and sizing, exactly as a
+// consumer's icon would.
+const ListGlyph = () => (
+  <Icon>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+    </svg>
+  </Icon>
+);
+const BoardGlyph = () => (
+  <Icon>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M4 4h7v16H4zm9 0h7v16h-7z" />
+    </svg>
+  </Icon>
+);
+const CalendarGlyph = () => (
+  <Icon>
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2zM5 9h14v10H5z" />
+    </svg>
+  </Icon>
+);
 
 // The knobs both hosts forward, minus the naming: each host below picks exactly
 // one naming prop for itself, since they're mutually exclusive. `DistributiveOmit`
@@ -138,6 +164,72 @@ function ClearableViewToggle(props: ViewToggleKnobs & { "aria-label"?: string })
 
 export const Clearable: Story = {
   render: () => <ClearableViewToggle />,
+};
+
+// Labelled segments with a leading icon — the common case. The icon/label gap and
+// vertical alignment are owned by the shared button slot (`InternalButton`), so
+// callers don't hand-tune spacing inside `children`.
+function IconedViewToggle() {
+  const [value, setValue] = React.useState<View>("board");
+  return (
+    <ToggleGroup aria-label="View" value={value} onChange={setValue}>
+      {({ ToggleGroupItem }) => (
+        <>
+          <ToggleGroupItem value="list" startIcon={<ListGlyph />}>
+            List
+          </ToggleGroupItem>
+          <ToggleGroupItem value="board" startIcon={<BoardGlyph />}>
+            Board
+          </ToggleGroupItem>
+          <ToggleGroupItem value="calendar" startIcon={<CalendarGlyph />}>
+            Calendar
+          </ToggleGroupItem>
+        </>
+      )}
+    </ToggleGroup>
+  );
+}
+
+export const WithIcons: Story = {
+  render: () => <IconedViewToggle />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Segments take `Button`'s icon vocabulary: `startIcon`/`endIcon` flank the label in a slot the button lays out, so the icon/label spacing and alignment are handled once by the design system rather than per call.",
+      },
+    },
+  },
+};
+
+// Icon-only segments: `icon` replaces the label, so each segment's `aria-label`
+// is *required* and becomes its whole accessible name — the mirror of an
+// icon-only `Button`. Each button is squared to a 1:1 box.
+function IconOnlyViewToggle() {
+  const [value, setValue] = React.useState<View>("board");
+  return (
+    <ToggleGroup aria-label="View" value={value} onChange={setValue}>
+      {({ ToggleGroupItem }) => (
+        <>
+          <ToggleGroupItem value="list" aria-label="List" icon={<ListGlyph />} />
+          <ToggleGroupItem value="board" aria-label="Board" icon={<BoardGlyph />} />
+          <ToggleGroupItem value="calendar" aria-label="Calendar" icon={<CalendarGlyph />} />
+        </>
+      )}
+    </ToggleGroup>
+  );
+}
+
+export const IconOnly: Story = {
+  render: () => <IconOnlyViewToggle />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `icon` (and no `children`) for an icon-only segment. The `aria-label` is then **required** — it's the accessible name, since there's no visible text — exactly as on an icon-only `Button`.",
+      },
+    },
+  },
 };
 
 // The vertical arm: segments stacked in a column, arrow-navigated Up/Down. Left
