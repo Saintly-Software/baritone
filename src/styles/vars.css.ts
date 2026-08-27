@@ -9,6 +9,18 @@ import { createVar } from "@vanilla-extract/css";
 export const iconColorVar = createVar("iconColor");
 
 /**
+ * Shared CSS custom property carrying the *optical vertical alignment* an `Icon`
+ * should take when it flows inline inside text. `Text`/`Heading` (via the text
+ * colour recipe) set this alongside `--iconColor`, so an inline icon is nudged to
+ * sit centred against the text rather than on the baseline; `Icon` reads it,
+ * falling back to `baseline` when standalone or in a flex context (where
+ * `vertical-align` is a no-op anyway). The alignment analogue of
+ * {@link iconColorVar}: baritone owns the value, so callers don't hand-tune
+ * `vertical-align` per usage.
+ */
+export const iconVerticalAlignVar = createVar("iconAlign");
+
+/**
  * Shared CSS custom property holding the *ambient text colour*. The element-intent
  * recipes (`surface`, `component`) publish their resolved foreground here, and
  * `Text` reads it by default — so body copy placed inside a coloured surface or

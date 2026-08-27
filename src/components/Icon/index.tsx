@@ -26,6 +26,13 @@ export interface IconProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "
  * component like `Chip` (via the shared `--iconColor` variable); used standalone
  * it sources its colour from the `component` tokens for the given
  * intent/saliency.
+ *
+ * Flowing inline inside `Text`/`Heading` it also picks up an optical vertical
+ * alignment (via `--iconAlign`) so a glyph dropped mid-sentence or at a line's end
+ * sits centred against the copy rather than low on the baseline — no per-usage
+ * `verticalAlign` needed. Standalone and as a flex child it stays on `baseline`
+ * (where the parent's `align-items` already centres it). Horizontal spacing is
+ * genuinely context-dependent, so that's still the caller's to set.
  */
 export function Icon({
   intent,

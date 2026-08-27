@@ -4,6 +4,7 @@ import { INTENTS, SALIENCIES, TEXT_SIZES, TEXT_WEIGHTS } from "../../theme/const
 import { vars } from "../../theme/contract.css";
 import {
   iconColorVar,
+  iconVerticalAlignVar,
   textColorVar,
   textFontVar,
   textLetterSpacingVar,
@@ -29,11 +30,20 @@ const resolved = fallbackVar(override, fallbackVar(textColorVar, vars.text.color
  * `intent` and/or `saliency` overrides it with the matching `text.color` token.
  * This is the colour half of the old `textRecipe`; the other element types (e.g.
  * the `component` recipe) reuse the same colour+icon pattern.
+ *
+ * It also publishes `--iconAlign`, the optical vertical alignment an inline `Icon`
+ * takes inside text — so a glyph dropped mid-sentence sits centred against the copy
+ * instead of low on the baseline, without callers hand-tuning `vertical-align`. Only
+ * inline flow needs this: `Icon` reads it with a `baseline` fallback, and in flex
+ * contexts (`Button`, `Chip`, `Flex`) `vertical-align` is a no-op, so this is scoped
+ * to the text-flow recipe rather than the shared `--iconColor` set everywhere.
  */
 export const textIntentRecipe = recipe({
   base: {
     color: resolved,
-    vars: { [iconColorVar]: resolved },
+    // `-0.125em` nudges the 1em icon box down so its optical centre lines up with
+    // the surrounding text; baritone owns the exact value (see `--iconAlign`).
+    vars: { [iconColorVar]: resolved, [iconVerticalAlignVar]: "-0.125em" },
   },
   variants: {
     // Single-variant styles handle "intent and/or saliency": passing only one

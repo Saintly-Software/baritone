@@ -10,6 +10,22 @@ const StarSvg = () => (
   </svg>
 );
 
+const CornerDownLeftSvg = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    width="100%"
+    height="100%"
+  >
+    <polyline points="9 10 4 15 9 20" />
+    <path d="M20 4v7a4 4 0 0 1-4 4H4" />
+  </svg>
+);
+
 const meta: Meta<typeof Icon> = {
   title: "Components/Icon",
   component: Icon,
@@ -41,6 +57,33 @@ export const IntentsAndSaliencies: Story = {
         </Icon>
       )}
     </IntentSaliencyMatrix>
+  ),
+};
+
+/**
+ * Flowing inline inside `Text`, an `Icon` picks up an optical vertical alignment
+ * automatically (via `--iconAlign`), so a glyph mid-sentence or at a line's end sits
+ * centred against the copy instead of low on the baseline — no per-usage
+ * `verticalAlign`. Shown across sizes; horizontal spacing is still the caller's.
+ */
+export const InlineInText: Story = {
+  name: "Aligns inline within text",
+  render: () => (
+    <div style={{ display: "grid", gap: 12, maxWidth: 420 }}>
+      {(["sm", "md", "lg"] as const).map((size) => (
+        <Text key={size} render={<p />} style={{ whiteSpace: "pre-wrap" }}>
+          Press{" "}
+          <Icon size={size} label="return">
+            <CornerDownLeftSvg />
+          </Icon>{" "}
+          to send, or rate it{" "}
+          <Icon size={size}>
+            <StarSvg />
+          </Icon>{" "}
+          — the icon centres on the text at size {size}.
+        </Text>
+      ))}
+    </div>
   ),
 };
 

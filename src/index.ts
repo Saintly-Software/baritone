@@ -349,6 +349,7 @@ export {
 // Shared CSS variables (for advanced composition)
 export {
   iconColorVar,
+  iconVerticalAlignVar,
   textColorVar,
   textFontVar,
   textLetterSpacingVar,
