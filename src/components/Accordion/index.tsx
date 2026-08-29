@@ -87,9 +87,7 @@ function AccordionItemHeader({
       {/* Leading group (icon + text), and the flex spacer that pushes the chip to
           the end, so it's always rendered. */}
       <span className={accordionHeaderLeading}>
-        {icon != null && (
-          <span className={accordionHeaderIcon}>{renderIcon(icon, { state: {} })}</span>
-        )}
+        {icon != null && <span className={accordionHeaderIcon}>{renderIcon(icon)}</span>}
         <span className={accordionHeaderText}>
           <Text size="md">{title}</Text>
           {subtitle != null && (

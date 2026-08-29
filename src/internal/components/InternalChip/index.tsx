@@ -167,6 +167,7 @@ export function InternalChip({
   // label), and this chip-link is one anchor whose visible `children` *is* its
   // accessible name — so the wrappers are `aria-hidden` to keep any textual glyph
   // content out of that name, no matter what the caller passes.
+  const iconState = { intent, saliency, size, disabled };
   const chip = (
     <InternalGenericButtonAnchor
       {...(rest as InternalGenericButtonAnchorProps)}
@@ -180,13 +181,13 @@ export function InternalChip({
     >
       {icon != null && (
         <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
-          {renderIcon(icon, { state: { intent, saliency, size, disabled } })}
+          {renderIcon(icon, { state: iconState })}
         </span>
       )}
       <span className={chipLabelRecipe()}>{children}</span>
       {trailIcon != null && (
         <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
-          {renderIcon(trailIcon, { state: { intent, saliency, size, disabled } })}
+          {renderIcon(trailIcon, { state: iconState })}
         </span>
       )}
     </InternalGenericButtonAnchor>

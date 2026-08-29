@@ -152,7 +152,7 @@ export function Lockup({
     slots?.icon ??
     (icon != null
       ? renderIcon(icon, {
-          props: { size: "lg", ...slotProps?.icon },
+          props: { ...slotProps?.icon, size: iconSize },
           state: { size: iconSize },
         })
       : null);

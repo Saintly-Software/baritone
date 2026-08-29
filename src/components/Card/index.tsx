@@ -547,7 +547,7 @@ function CardHeader({
       {/* Leading group (icon + text) also acts as the flex spacer that pushes the
           trailing group to the end, so it's always rendered. */}
       <div className={cardHeaderLeading}>
-        {icon != null && <span className={cardHeaderIcon}>{renderIcon(icon, { state: {} })}</span>}
+        {icon != null && <span className={cardHeaderIcon}>{renderIcon(icon)}</span>}
         {hasText && (
           <div className={cardHeaderText}>
             {title != null && (

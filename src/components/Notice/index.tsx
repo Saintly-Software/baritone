@@ -210,6 +210,8 @@ function NoticeAction(props: NoticeActionProps) {
   // No children → the icon is the whole control, so it needs the `label` name.
   const iconOnly = children == null;
 
+  const iconState = { intent, saliency, size, disabled: inert };
+
   return (
     <InternalGenericButtonAnchor
       ref={ref}
@@ -229,10 +231,10 @@ function NoticeAction(props: NoticeActionProps) {
       {...rest}
     >
       {iconOnly ? (
-        renderIcon(icon, { state: { intent, saliency, size, disabled: inert } })
+        renderIcon(icon, { state: iconState })
       ) : (
         <>
-          {renderIcon(icon, { state: { intent, saliency, size, disabled: inert } })}
+          {renderIcon(icon, { state: iconState })}
           {children}
         </>
       )}

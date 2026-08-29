@@ -60,11 +60,10 @@ export interface MetricTrend {
 }
 
 /**
- * The state a MetricCard `icon` render function can branch on. The card resolves
- * no presentational icon state of its own — the leading glyph is decorative and
- * fixed (muted, `aria-hidden`, outside any interactive control), so `intent`,
- * `valueSize` and `disabled` never reach it — so this is empty; the
- * render-function form is still supported.
+ * The state a MetricCard `icon` render function can branch on. The leading glyph
+ * is decorative and fixed (muted, `aria-hidden`), so the card resolves no
+ * icon-relevant state of its own — empty today; the render-function form is
+ * still supported.
  */
 export type MetricCardIconState = Record<string, never>;
 
@@ -280,7 +279,7 @@ export function MetricCard(props: MetricCardProps) {
       <div className={metricRoot}>
         {icon != null && (
           <span className={metricIcon} aria-hidden="true">
-            {renderIcon(icon, { state: {} })}
+            {renderIcon(icon)}
           </span>
         )}
         {hero}

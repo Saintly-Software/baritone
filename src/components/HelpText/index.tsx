@@ -126,11 +126,12 @@ export function HelpText({
   // Auto glyph only for the attention intents when the caller didn't supply one.
   const attention = resolvedIntent === "warning" || resolvedIntent === "negative";
   const glyph = icon ?? (attention ? <WarningGlyph /> : null);
+  const iconSize = ICON_SIZE[variant];
   const iconNode = hideIcon
     ? null
     : renderIcon(glyph, {
-        props: { size: ICON_SIZE[variant] },
-        state: { intent: resolvedIntent, saliency: resolvedSaliency, size: ICON_SIZE[variant] },
+        props: { size: iconSize },
+        state: { intent: resolvedIntent, saliency: resolvedSaliency, size: iconSize },
       });
 
   const textProps = render ? { render } : { as: "p" as const };
