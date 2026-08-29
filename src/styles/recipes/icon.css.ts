@@ -2,7 +2,7 @@ import { createVar, fallbackVar } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
-import { iconColorVar } from "../vars.css";
+import { iconColorVar, iconVerticalAlignVar } from "../vars.css";
 
 // Standalone fallback colour (component token), used only when no ancestor has
 // set --iconColor.
@@ -22,6 +22,10 @@ export const iconRecipe = recipe({
     width: "1em",
     height: "1em",
     color: fallbackVar(iconColorVar, fallback),
+    // Inside `Text`/`Heading` this resolves to the published optical offset so an
+    // inline icon sits centred against the copy; standalone or as a flex child it
+    // falls back to `baseline` (and `vertical-align` is inert in flex anyway).
+    verticalAlign: fallbackVar(iconVerticalAlignVar, "baseline"),
   },
   variants: {
     intent: Object.fromEntries(INTENTS.map((intent) => [intent, {}])) as Record<
