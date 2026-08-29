@@ -29,7 +29,7 @@ export const cardListRoot = recipe({
 
 /**
  * Each list cell. `display: flex` so its single card stretches to the full width
- * of the row (`min-width: 0` lets long content shrink instead of overflowing).
+ * of the row; `min-width`/`min-height: 0` per `Flex`.
  */
 export const cardListItem = style({
   display: "flex",

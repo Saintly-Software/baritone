@@ -14,11 +14,7 @@ export const listReset = style({
   minHeight: 0, // see `Flex`
 });
 
-/**
- * Each item cell. `min-width: 0` lets long content shrink inside its track
- * instead of blowing the flex line / grid column out past the container (the
- * usual min-content overflow footgun).
- */
+/** Each item cell; `min-width`/`min-height: 0` per `Flex`. */
 export const listItem = style({
   minWidth: 0,
   minHeight: 0,

@@ -67,10 +67,9 @@ export const root = style({
 /**
  * The scroll container. base-ui already sets `overflow: scroll` and hides the
  * native scrollbars; this fills the root (as a flex child) and carries the
- * gradient fade mask (added per-orientation below). The `min-*: 0` pair is
- * load-bearing: it lets the viewport shrink below its content's size on either
- * axis, which is what actually produces the overflow scroll rather than the
- * content forcing the box to grow.
+ * gradient fade mask (added per-orientation below). The `min-*: 0` pair (per
+ * `Flex`) is load-bearing here: it lets the viewport shrink below its content so
+ * the box scrolls instead of the content growing it.
  */
 export const viewport = style({
   flex: "1 1 auto",
