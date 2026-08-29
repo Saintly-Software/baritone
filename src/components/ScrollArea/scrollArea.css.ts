@@ -48,6 +48,10 @@ export const root = style({
   // width for horizontal). Nothing is imposed here so the area drops into any
   // layout.
   boxSizing: "border-box",
+  // 0 so the area takes its parent's size and the viewport — not the page —
+  // scrolls; see `Flex`.
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /**

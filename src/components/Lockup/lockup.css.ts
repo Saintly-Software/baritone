@@ -12,12 +12,13 @@ export const lockupRoot = style({
   display: "flex",
   alignItems: "center",
   gap: vars.space[3],
+  minWidth: 0, // see `Flex`
+  minHeight: 0, // see `Flex`
 });
 
 /**
- * The text column — title stacked over subtitle. `minWidth: 0` lets the title
- * and subtitle truncate inside a constrained lockup instead of forcing the row
- * wider than its container.
+ * The text column — title stacked over subtitle. `min-width: 0` (per `Flex`)
+ * lets the title/subtitle truncate inside a constrained lockup.
  */
 export const lockupText = style({
   display: "flex",

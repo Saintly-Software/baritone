@@ -15,6 +15,8 @@ export const cardListRoot = recipe({
     margin: 0,
     padding: 0,
     listStyle: "none",
+    minWidth: 0, // see `Flex`
+    minHeight: 0, // see `Flex`
   },
   variants: {
     gap: Object.fromEntries(SPACE_KEYS.map((key) => [key, { gap: vars.space[key] }])) as Record<
@@ -27,12 +29,13 @@ export const cardListRoot = recipe({
 
 /**
  * Each list cell. `display: flex` so its single card stretches to the full width
- * of the row (`min-width: 0` lets long content shrink instead of overflowing).
+ * of the row; `min-width`/`min-height: 0` per `Flex`.
  */
 export const cardListItem = style({
   display: "flex",
   flexDirection: "column",
   minWidth: 0,
+  minHeight: 0,
 });
 
 export type CardListRootVariants = NonNullable<RecipeVariants<typeof cardListRoot>>;

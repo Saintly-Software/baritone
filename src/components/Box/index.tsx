@@ -82,6 +82,8 @@ export function Box({
               ? resolveDisplay(as === "span" ? "inline" : "block", hideOn, showOn)
               : undefined,
           width: resolveWidth(width),
+          minWidth: "0", // see `Flex`
+          minHeight: "0", // see `Flex`
           m,
           mx,
           my,

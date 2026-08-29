@@ -154,6 +154,9 @@ export function Grid({
           alignItems: align ? ALIGN[align] : undefined,
           justifyContent: justify ? JUSTIFY[justify] : undefined,
           gap,
+          // Mirrors the `minmax(0, 1fr)` used for this grid's own tracks — see `Flex`.
+          minWidth: "0",
+          minHeight: "0",
           m,
           mx,
           my,

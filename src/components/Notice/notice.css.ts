@@ -37,6 +37,8 @@ export const noticeRecipe = recipe({
     display: "flex",
     alignItems: "flex-start",
     gap: vars.space[3],
+    minWidth: 0, // see `Flex`
+    minHeight: 0, // see `Flex`
     boxSizing: "border-box",
     borderStyle: "solid",
     borderWidth: vars.borderWidth.thin,

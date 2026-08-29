@@ -22,6 +22,8 @@ export const cardRoot = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[4],
+  minWidth: 0, // see `Flex`
+  minHeight: 0, // see `Flex`
 });
 
 /**

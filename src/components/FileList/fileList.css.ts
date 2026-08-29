@@ -6,13 +6,14 @@ import { vars } from "../../theme/contract.css";
  * The list container — a column (default) or a wrapping row of file chips.
  * Mirrors `checkboxGroupRoot` / `radioGroupRoot` so stacked controls lay out
  * identically across the system, and resets the default `<ul>`
- * margin / padding / marker since this renders as a real list. `min-width: 0`
- * lets the chips (and their labels) shrink instead of overflowing the list.
+ * margin / padding / marker since this renders as a real list.
+ * `min-width`/`min-height: 0` per `Flex`.
  */
 export const fileListRoot = recipe({
   base: {
     display: "flex",
     minWidth: 0,
+    minHeight: 0,
     margin: 0,
     padding: 0,
     listStyle: "none",
@@ -32,12 +33,14 @@ export const fileListRoot = recipe({
 });
 
 /**
- * Each list cell. `min-width: 0` / `max-width: 100%` let the chip shrink so a
- * long filename can ellipsize rather than forcing the row wider than the list.
+ * Each list cell. `max-width: 100%` (with `min-width`/`min-height: 0` per
+ * `Flex`) lets the chip shrink so a long filename can ellipsize rather than
+ * forcing the row wider than the list.
  */
 export const fileListItem = style({
   display: "flex",
   minWidth: 0,
+  minHeight: 0,
   maxWidth: "100%",
 });
 
