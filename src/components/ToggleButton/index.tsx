@@ -6,6 +6,7 @@ import {
 } from "../../internal/components/InternalButton";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { renderIcon } from "../Icon/renderIcon";
 import { toggleButtonSquare } from "./toggleButton.css";
 
 /**
@@ -30,8 +31,9 @@ export interface ToggleButtonBaseProps {
    */
   "aria-label": PressedSlot<string>;
   /**
-   * The glyph shown as the button's content. Typically an `<Icon>`. May be a
-   * function of the pressed state, so the glyph can change with the toggle.
+   * The glyph shown as the button's content — a bare glyph (auto-wrapped in
+   * `Icon`) or an explicit `<Icon>`. May be a function of the pressed state, so
+   * the glyph can change with the toggle.
    */
   icon: PressedSlot<React.ReactNode>;
   /** Colour scheme of the pressed (on) state. Shared with `Button` / `Chip`. */
@@ -112,7 +114,7 @@ export type ToggleButtonProps = ToggleButtonBaseProps &
  *   value={muted}
  *   onChange={(next) => setMuted(next)}
  *   aria-label={(pressed) => (pressed ? "Unmute" : "Mute")}
- *   icon={(pressed) => <Icon>{pressed ? <MutedGlyph /> : <SoundGlyph />}</Icon>}
+ *   icon={(pressed) => (pressed ? <MutedGlyph /> : <SoundGlyph />)}
  *   intent="primary"
  * />
  *
@@ -121,7 +123,7 @@ export type ToggleButtonProps = ToggleButtonBaseProps &
  * <ToggleButton
  *   defaultValue
  *   aria-label="Pin"
- *   icon={<Icon><PinGlyph /></Icon>}
+ *   icon={<PinGlyph />}
  * />
  */
 export function ToggleButton(props: ToggleButtonProps) {
@@ -173,7 +175,8 @@ export function ToggleButton(props: ToggleButtonProps) {
         disabledReason,
         className: cx(toggleButtonSquare, className),
         ref,
-        children: resolvedIcon,
+        // A bare glyph is auto-wrapped in `Icon`; an explicit `<Icon>` passes through.
+        children: renderIcon(resolvedIcon),
       }}
       htmlAttrs={htmlAttrs}
     />
