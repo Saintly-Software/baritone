@@ -8,6 +8,7 @@ import {
 } from "../../internal/components/InternalGenericButtonAnchor";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { cx } from "../../utils/cx";
 import { keyedElements } from "../../utils/keyedElements";
 import { mergeProps, type RenderProp } from "../../utils/render";
@@ -32,11 +33,21 @@ type PositionerProps = React.ComponentProps<typeof BaseMenu.Positioner>;
  */
 export type MenuItemIntent = (typeof MENU_ITEM_INTENTS)[number];
 
+/** The row state a `Menu.Item` icon render function can branch on. */
+export interface MenuItemIconState {
+  intent: MenuItemIntent;
+  disabled: boolean;
+}
+
 export interface MenuItemProps {
   /** Colour intent for the row's icon/text and its highlight wash. Default `neutral`. */
   intent?: MenuItemIntent;
-  /** Leading glyph before the label — typically an `<Icon>`. */
-  icon?: React.ReactNode;
+  /**
+   * Leading glyph before the label. Pass a bare glyph (`icon={<PenLine />}`,
+   * auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
+   * `(props, state) => …` render function for full control.
+   */
+  icon?: IconSlot<MenuItemIconState>;
   /** The row's visible label — also its accessible name and keyboard type-ahead text. */
   children: string;
   /**
@@ -103,7 +114,7 @@ function MenuItemAnchor({
       <>
         {icon != null && (
           <span className={menuItemIcon} aria-hidden>
-            {icon}
+            {renderIcon(icon, { state: { intent, disabled } })}
           </span>
         )}
         {children}
