@@ -7,6 +7,9 @@ import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { RenderElement, type RenderProp } from "../../utils/render";
+import type { ButtonIconState } from "../Button";
+import type { ChipIconState } from "../Chip";
+import type { IconSlot } from "../Icon/renderIcon";
 import { useLinkRender } from "../LinkProvider";
 import { linkBase } from "./link.css";
 
@@ -103,10 +106,13 @@ interface ButtonLinkCommonProps extends Omit<
  * link, or `render` with your framework's link for client-side navigation.
  */
 export interface LabelledButtonLinkProps extends ButtonLinkCommonProps {
-  /** Icon placed before the label. Typically an `<Icon>`; inherits text colour. */
-  startIcon?: React.ReactNode;
-  /** Icon placed after the label. Typically an `<Icon>`; inherits text colour. */
-  endIcon?: React.ReactNode;
+  /**
+   * Icon before the label — a bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function. Inherits text colour.
+   */
+  startIcon?: IconSlot<ButtonIconState>;
+  /** Icon after the label — same forms as `startIcon`. Inherits text colour. */
+  endIcon?: IconSlot<ButtonIconState>;
   /**
    * `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit` — the
    * same knob `Box`/`Flex` and a `solid` `Button` take. `fill` stretches the
@@ -149,12 +155,13 @@ export interface LabelledButtonLinkProps extends ButtonLinkCommonProps {
 export interface IconButtonLinkProps extends ButtonLinkCommonProps {
   /**
    * The single centred glyph — **required**, and the discriminant of this arm.
-   * Typically an `<Icon>`; inherits the link's text colour. Typed
-   * `NonNullable<React.ReactNode>` so a nullish value (e.g. a `cond ? <Icon/> :
-   * null`) can't slip through as the icon-only arm and render an *unnamed* anchor
-   * — the required `aria-label` is only wired up when a glyph is actually present.
+   * A bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`, or a
+   * `(props, state)` render function; inherits the link's text colour. Typed
+   * `NonNullable` so a nullish value (e.g. a `cond ? <Icon/> : null`) can't slip
+   * through as the icon-only arm and render an *unnamed* anchor — the required
+   * `aria-label` is only wired up when a glyph is actually present.
    */
-  icon: NonNullable<React.ReactNode>;
+  icon: NonNullable<IconSlot<ButtonIconState>>;
   /**
    * Accessible name — **required**, because the link is icon-only and has no
    * visible text to name it (e.g. "Back to entry details"). The mirror image of
@@ -231,11 +238,12 @@ export interface ChipLinkProps extends Omit<
   width?: "fit" | "fill";
   /**
    * Decorative leading icon — a single non-interactive glyph before the label
-   * (like `Chip`'s `icon`). Typically an `<Icon>`; inherits the chip's colour.
+   * (like `Chip`'s `icon`). A bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function; inherits the chip's colour.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<ChipIconState>;
   /** Decorative trailing icon — mirrors `icon` (like `Chip`'s `trailIcon`). */
-  trailIcon?: React.ReactNode;
+  trailIcon?: IconSlot<ChipIconState>;
   /**
    * Disables the link. A disabled link has no honest HTML form, so it collapses
    * to an inert element (no navigation, out of the a11y tree as a link) while
