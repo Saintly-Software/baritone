@@ -12,10 +12,8 @@ export const lockupRoot = style({
   display: "flex",
   alignItems: "center",
   gap: vars.space[3],
-  // Shrink-friendly when the lockup itself is a flex/grid child, so a long
-  // title truncates rather than forcing the parent wider.
-  minWidth: 0,
-  minHeight: 0,
+  minWidth: 0, // see `Flex`
+  minHeight: 0, // see `Flex`
 });
 
 /**

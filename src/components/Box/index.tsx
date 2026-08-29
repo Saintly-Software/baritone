@@ -82,11 +82,8 @@ export function Box({
               ? resolveDisplay(as === "span" ? "inline" : "block", hideOn, showOn)
               : undefined,
           width: resolveWidth(width),
-          // Shrink-friendly by default: `0` min sizes so a Box used as a
-          // flex/grid child can shrink below its content instead of blowing the
-          // track out (the flexbox min-size footgun). A no-op outside flex/grid.
-          minWidth: "0",
-          minHeight: "0",
+          minWidth: "0", // see `Flex`
+          minHeight: "0", // see `Flex`
           m,
           mx,
           my,

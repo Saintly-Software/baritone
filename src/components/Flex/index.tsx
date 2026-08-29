@@ -275,11 +275,8 @@ export function FlexItem({
           flexShrink: shrink === undefined ? undefined : shrink ? 1 : 0,
           width,
           height,
-          // Default both min sizes to `0` (see `FlexRoot`) so this item shrinks
-          // below its content rather than forcing the line/column wider. Pass an
-          // explicit value — `minWidth="auto"` — to opt out.
-          minWidth: minWidth ?? "0",
-          minHeight: minHeight ?? "0",
+          minWidth: minWidth ?? "0", // see `FlexRoot`
+          minHeight: minHeight ?? "0", // see `FlexRoot`
           m,
           mx,
           my,

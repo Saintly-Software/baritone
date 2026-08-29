@@ -154,10 +154,7 @@ export function Grid({
           alignItems: align ? ALIGN[align] : undefined,
           justifyContent: justify ? JUSTIFY[justify] : undefined,
           gap,
-          // Shrink-friendly by default: `0` min sizes so a Grid nested as a
-          // flex/grid child can shrink below its content instead of blowing the
-          // parent track out (the flexbox min-size footgun). Mirrors the
-          // `minmax(0, 1fr)` this uses for its own tracks. A no-op at the root.
+          // Mirrors the `minmax(0, 1fr)` used for this grid's own tracks — see `Flex`.
           minWidth: "0",
           minHeight: "0",
           m,

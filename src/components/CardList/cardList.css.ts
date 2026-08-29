@@ -15,9 +15,8 @@ export const cardListRoot = recipe({
     margin: 0,
     padding: 0,
     listStyle: "none",
-    // Shrink-friendly when the list itself is a flex/grid child.
-    minWidth: 0,
-    minHeight: 0,
+    minWidth: 0, // see `Flex`
+    minHeight: 0, // see `Flex`
   },
   variants: {
     gap: Object.fromEntries(SPACE_KEYS.map((key) => [key, { gap: vars.space[key] }])) as Record<

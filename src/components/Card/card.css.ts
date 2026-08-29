@@ -22,11 +22,8 @@ export const cardRoot = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[4],
-  // Shrink-friendly when the card is a flex/grid child (e.g. one card in a row
-  // or a grid track): `0` min sizes let it narrow below its content instead of
-  // blowing the track out.
-  minWidth: 0,
-  minHeight: 0,
+  minWidth: 0, // see `Flex`
+  minHeight: 0, // see `Flex`
 });
 
 /**
