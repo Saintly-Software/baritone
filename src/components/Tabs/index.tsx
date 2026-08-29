@@ -5,7 +5,14 @@ import { componentTypographyRecipe } from "../../styles/recipes/component.css";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { tabsList, tabsListDisabled, tabsPanel, tabsTab, tabsTabDisabled } from "./tabs.css";
+
+/** The presentational state a `Tabs` icon render function can branch on. */
+export interface TabIconState {
+  /** Whether this tab is disabled — either on its own or via the whole group. */
+  disabled: boolean;
+}
 
 export interface TabsItemProps<T> {
   /**
@@ -21,10 +28,20 @@ export interface TabsItemProps<T> {
    * attribute), so it stays in the roving tab order while selection is vetoed.
    */
   disabled?: boolean;
-  /** Icon placed before the label. Typically an `<Icon>`; inherits text colour. */
-  leadIcon?: React.ReactNode;
-  /** Icon placed after the label. Typically an `<Icon>`; inherits text colour. */
-  trailIcon?: React.ReactNode;
+  /**
+   * Icon placed before the label; inherits text colour. Pass a bare glyph
+   * (`leadIcon={<Bell />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
+   * custom size/label, or a `(props, state) => …` render function for full
+   * control.
+   */
+  leadIcon?: IconSlot<TabIconState>;
+  /**
+   * Icon placed after the label; inherits text colour. Pass a bare glyph
+   * (`trailIcon={<Bell />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
+   * custom size/label, or a `(props, state) => …` render function for full
+   * control.
+   */
+  trailIcon?: IconSlot<TabIconState>;
 }
 
 interface TabsBaseProps<T> {
@@ -159,6 +176,7 @@ export function Tabs<const T>({
       >
         {tabs.map((tab) => {
           const tabDisabled = disabled || tab.disabled;
+          const iconState: TabIconState = { disabled: tabDisabled ?? false };
           return (
             <BaseTabs.Tab
               key={String(tab.value)}
@@ -174,9 +192,9 @@ export function Tabs<const T>({
                 focusRingRecipe({ type: "visible" }),
               )}
             >
-              {tab.leadIcon}
+              {renderIcon(tab.leadIcon, { state: iconState })}
               <span>{tab.label}</span>
-              {tab.trailIcon}
+              {renderIcon(tab.trailIcon, { state: iconState })}
             </BaseTabs.Tab>
           );
         })}

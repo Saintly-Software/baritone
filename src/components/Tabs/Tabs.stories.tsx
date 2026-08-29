@@ -4,16 +4,13 @@ import * as React from "react";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
 import type { Intent, Saliency } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
-import { Icon } from "../Icon";
 import { Tabs } from "./index";
 
-// A throwaway glyph so the lead/trail icon stories have something to render.
+// A throwaway bare glyph — passed as `leadIcon`/`trailIcon` and auto-wrapped in `Icon`.
 const Dot = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <circle cx="12" cy="12" r="6" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <circle cx="12" cy="12" r="6" />
+  </svg>
 );
 
 const VIEWS = [

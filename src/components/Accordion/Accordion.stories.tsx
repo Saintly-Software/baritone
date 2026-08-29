@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { Chip } from "../Chip";
-import { Icon } from "../Icon";
 import { Text } from "../Text";
 import { Accordion } from "./index";
 
@@ -25,11 +24,7 @@ const ITEMS = [
       <Accordion.ItemHeader
         title="Production"
         subtitle="api.example.com"
-        icon={
-          <Icon>
-            <ServerGlyph />
-          </Icon>
-        }
+        icon={<ServerGlyph />}
         chip={
           <Chip intent="positive" saliency="low" size="sm">
             Healthy
@@ -45,11 +40,7 @@ const ITEMS = [
       <Accordion.ItemHeader
         title="Staging"
         subtitle="staging.example.com"
-        icon={
-          <Icon>
-            <ServerGlyph />
-          </Icon>
-        }
+        icon={<ServerGlyph />}
         chip={
           <Chip intent="warning" saliency="low" size="sm">
             Degraded
@@ -66,11 +57,7 @@ const ITEMS = [
       <Accordion.ItemHeader
         title="Legacy"
         subtitle="Decommissioned"
-        icon={
-          <Icon>
-            <ServerGlyph />
-          </Icon>
-        }
+        icon={<ServerGlyph />}
         chip={
           <Chip intent="neutral" saliency="low" size="sm">
             Archived

@@ -4,6 +4,7 @@ import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import { surfaceRecipe } from "../../styles/recipes/surface.css";
 import { cx } from "../../utils/cx";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Text } from "../Text";
 import {
   accordionChevron,
@@ -22,13 +23,24 @@ import {
   accordionTrigger,
 } from "./accordion.css";
 
+/**
+ * The state an `Accordion.ItemHeader` icon render function can branch on. The
+ * header resolves no presentational icon state of its own, so this is empty — the
+ * render-function form is still supported for callers that need `props`.
+ */
+export type AccordionItemHeaderIconState = Record<string, never>;
+
 export interface AccordionItemHeaderProps {
   /** The item's title — the prominent line in the trigger. */
   title: React.ReactNode;
   /** Optional supporting line beneath the title. */
   subtitle?: React.ReactNode;
-  /** Leading glyph before the title — typically an `<Icon>`. */
-  icon?: React.ReactNode;
+  /**
+   * Leading glyph before the title. Pass a bare glyph (`icon={<ServerGlyph />}`,
+   * auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
+   * `(props, state) => …` render function for full control.
+   */
+  icon?: IconSlot<AccordionItemHeaderIconState>;
   /**
    * Trailing element after the title, before the chevron — typically a status
    * `<Chip>`. It sits inside the trigger button, so keep it decorative.
@@ -55,7 +67,7 @@ export interface AccordionItemHeaderProps {
  *   header: (
  *     <Accordion.ItemHeader
  *       title="Production"
- *       icon={<Icon><ServerGlyph /></Icon>}
+ *       icon={<ServerGlyph />}
  *       chip={<Chip intent="positive" saliency="low" size="sm">Healthy</Chip>}
  *     />
  *   ),
@@ -75,7 +87,9 @@ function AccordionItemHeader({
       {/* Leading group (icon + text), and the flex spacer that pushes the chip to
           the end, so it's always rendered. */}
       <span className={accordionHeaderLeading}>
-        {icon != null && <span className={accordionHeaderIcon}>{icon}</span>}
+        {icon != null && (
+          <span className={accordionHeaderIcon}>{renderIcon(icon, { state: {} })}</span>
+        )}
         <span className={accordionHeaderText}>
           <Text size="md">{title}</Text>
           {subtitle != null && (
