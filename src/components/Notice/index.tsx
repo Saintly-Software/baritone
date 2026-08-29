@@ -13,6 +13,7 @@ import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 import { Chip, type ChipProps } from "../Chip";
 import { Icon } from "../Icon";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Text } from "../Text";
 import {
   noticeActionRecipe,
@@ -140,19 +141,33 @@ interface NoticeActionCommonProps extends Omit<
   ref?: React.Ref<HTMLElement>;
 }
 
+/** The action state a `Notice.Action` icon render function can branch on. */
+export interface NoticeActionIconState {
+  intent?: Intent;
+  saliency?: Saliency;
+  size?: Size;
+  disabled: boolean;
+}
+
 /** A `Notice.Action` with a visible text label (optionally a leading icon). */
 export interface NoticeActionTextProps extends NoticeActionCommonProps {
   /** The visible text label (also the accessible name). */
   children: React.ReactNode;
-  /** Optional leading icon — typically an `<Icon>`; inherits the action's colour. */
-  icon?: React.ReactNode;
+  /**
+   * Optional leading icon — a bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function. Inherits the action's colour.
+   */
+  icon?: IconSlot<NoticeActionIconState>;
   label?: never;
 }
 
 /** An icon-only `Notice.Action` — a lone glyph with a required accessible name. */
 export interface NoticeActionIconOnlyProps extends NoticeActionCommonProps {
-  /** The glyph — typically an `<Icon>`. The action has no text. */
-  icon: React.ReactNode;
+  /**
+   * The glyph — a bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`, or a
+   * `(props, state)` render function. The action has no text.
+   */
+  icon: IconSlot<NoticeActionIconState>;
   /** Required accessible name for the icon-only action. */
   label: string;
   children?: never;
@@ -214,10 +229,10 @@ function NoticeAction(props: NoticeActionProps) {
       {...rest}
     >
       {iconOnly ? (
-        icon
+        renderIcon(icon, { state: { intent, saliency, size, disabled: inert } })
       ) : (
         <>
-          {icon}
+          {renderIcon(icon, { state: { intent, saliency, size, disabled: inert } })}
           {children}
         </>
       )}
@@ -276,6 +291,13 @@ function NoticeClose({
   );
 }
 
+/** The notice state a leading-`icon` render function can branch on. */
+export interface NoticeIconState {
+  intent?: Intent;
+  saliency?: Saliency;
+  disabled: boolean;
+}
+
 export interface NoticeProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "color">, MarginProps {
   /** Colour intent — the same palette as `Chip`/`Button`. Default `neutral`. */
@@ -302,11 +324,12 @@ export interface NoticeProps
    */
   disabled?: boolean;
   /**
-   * A leading icon. Pass any node (an `<svg>`/glyph) and it's wrapped in an
-   * `<Icon>` that inherits the notice's colour, or pass a `<Notice.Icon>` to tint
-   * the icon a different `intent`/`saliency`.
+   * A leading icon. Pass a bare glyph (an `<svg>`, auto-wrapped in a
+   * colour-inheriting `<Icon>`), an explicit `<Icon>`, or a `(props, state)`
+   * render function — or a `<Notice.Icon>` to tint the icon a different
+   * `intent`/`saliency`.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<NoticeIconState>;
   /** Supporting text rendered beneath the title. */
   description?: React.ReactNode;
   /**
@@ -369,15 +392,14 @@ function NoticeRoot({
   ml,
   ...rest
 }: NoticeProps) {
-  // A plain node is a glyph — wrap it in a colour-inheriting `<Icon>`; a
-  // `<Notice.Icon>` already is one (with its own intent/saliency), so pass it
-  // through untouched.
+  // A `<Notice.Icon>` already is a colour-tinting icon (with its own
+  // intent/saliency), so pass it through untouched; anything else goes through
+  // the shared `renderIcon` (bare glyph → colour-inheriting `<Icon>`, an explicit
+  // `<Icon>` through, or a render function).
   const iconNode =
-    icon == null ? null : React.isValidElement(icon) && icon.type === NoticeIcon ? (
-      icon
-    ) : (
-      <Icon>{icon}</Icon>
-    );
+    React.isValidElement(icon) && icon.type === NoticeIcon
+      ? icon
+      : renderIcon(icon, { state: { intent, saliency, disabled: disabled ?? false } });
 
   // A bare handler wraps into the default `<Notice.Close>`; a `<Notice.Close>`
   // element passes through so the caller can set its label/glyph.
