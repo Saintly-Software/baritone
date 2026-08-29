@@ -76,8 +76,8 @@ const responsiveProperties = defineProperties({
     minWidth: dimensionValues,
     minHeight: dimensionValues,
     textAlign: ["start", "center", "end", "left", "right"],
-    whiteSpace: ["normal", "nowrap", "pre-wrap"],
-    overflowWrap: ["normal", "break-word"],
+    whiteSpace: ["normal", "nowrap", "pre", "pre-wrap", "pre-line", "break-spaces"],
+    overflowWrap: ["normal", "break-word", "anywhere"],
     textTransform: ["none", "uppercase", "lowercase", "capitalize"],
     // NOTE: `letterSpacing` is deliberately *not* an atom. Its vocabulary is
     // consumer-defined and open-ended (see `theme/letterSpacings.ts`), so it can't

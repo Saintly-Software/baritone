@@ -15,8 +15,11 @@ const meta: Meta<typeof Heading> = {
     // "CustomFonts" story for how the open-ended `font` vocabulary works).
     font: { control: "select", options: ["sans", "mono"] },
     textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
-    whiteSpace: { control: "inline-radio", options: ["normal", "nowrap", "pre-wrap"] },
-    overflowWrap: { control: "inline-radio", options: ["normal", "break-word"] },
+    whiteSpace: {
+      control: "inline-radio",
+      options: ["normal", "nowrap", "pre", "pre-wrap", "pre-line", "break-spaces"],
+    },
+    overflowWrap: { control: "inline-radio", options: ["normal", "break-word", "anywhere"] },
     textTransform: {
       control: "select",
       options: ["none", "uppercase", "lowercase", "capitalize"],

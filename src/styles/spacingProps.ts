@@ -51,11 +51,18 @@ export interface TypographyAtomProps {
   /** `text-align` — logical `start`/`center`/`end` (RTL-safe) or physical `left`/`right`. */
   textAlign?: Atoms["textAlign"];
   /**
-   * `white-space` — `nowrap` to keep text on a single line, or `pre-wrap` to
-   * preserve newlines and runs of spaces in the content while still wrapping.
+   * `white-space` — controls collapsing and wrapping: `nowrap` keeps text on a
+   * single line; `pre` preserves newlines and spaces without wrapping; `pre-wrap`
+   * preserves them while still wrapping; `pre-line` collapses runs of spaces but
+   * keeps newlines; `break-spaces` is like `pre-wrap` but also wraps trailing
+   * spaces.
    */
   whiteSpace?: Atoms["whiteSpace"];
-  /** `overflow-wrap` — `break-word` to break long unbroken tokens. */
+  /**
+   * `overflow-wrap` — `break-word` breaks a long unbroken token only when it would
+   * overflow; `anywhere` also does so but lets the break count toward min-content
+   * sizing (so the element can shrink narrower).
+   */
   overflowWrap?: Atoms["overflowWrap"];
   /** `text-transform` — `uppercase`/`lowercase`/`capitalize` to recase the rendered text. */
   textTransform?: Atoms["textTransform"];
