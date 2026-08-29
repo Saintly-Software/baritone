@@ -175,7 +175,6 @@ export function ToggleButton(props: ToggleButtonProps) {
         disabledReason,
         className: cx(toggleButtonSquare, className),
         ref,
-        // A bare glyph is auto-wrapped in `Icon`; an explicit `<Icon>` passes through.
         children: renderIcon(resolvedIcon),
       }}
       htmlAttrs={htmlAttrs}

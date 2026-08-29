@@ -396,8 +396,7 @@ function NoticeRoot({
 }: NoticeProps) {
   // A `<Notice.Icon>` already is a colour-tinting icon (with its own
   // intent/saliency), so pass it through untouched; anything else goes through
-  // the shared `renderIcon` (bare glyph → colour-inheriting `<Icon>`, an explicit
-  // `<Icon>` through, or a render function).
+  // the shared `renderIcon`.
   const iconNode =
     React.isValidElement(icon) && icon.type === NoticeIcon
       ? icon
