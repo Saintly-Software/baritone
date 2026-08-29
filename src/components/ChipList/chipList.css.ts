@@ -17,6 +17,7 @@ export const chipListRoot = recipe({
   base: {
     display: "flex",
     minWidth: 0,
+    minHeight: 0,
     margin: 0,
     padding: 0,
     listStyle: "none",
@@ -42,6 +43,7 @@ export const chipListRoot = recipe({
 export const chipListItem = style({
   display: "flex",
   minWidth: 0,
+  minHeight: 0,
   maxWidth: "100%",
 });
 

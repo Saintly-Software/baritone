@@ -13,6 +13,7 @@ export const fileListRoot = recipe({
   base: {
     display: "flex",
     minWidth: 0,
+    minHeight: 0,
     margin: 0,
     padding: 0,
     listStyle: "none",
@@ -38,6 +39,7 @@ export const fileListRoot = recipe({
 export const fileListItem = style({
   display: "flex",
   minWidth: 0,
+  minHeight: 0,
   maxWidth: "100%",
 });
 

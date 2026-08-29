@@ -6,6 +6,9 @@ export const accordionRoot = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[2],
+  // Shrink-friendly when the accordion is a flex/grid child.
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /** Dim the whole stack when the group is disabled. */
@@ -20,6 +23,10 @@ export const accordionRootDisabled = style({
  */
 export const accordionItem = style({
   overflow: "hidden",
+  // Let the item shrink below its content in the column stack rather than
+  // widening the whole accordion.
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /** Dim a single disabled item (only when the group as a whole isn't disabled). */

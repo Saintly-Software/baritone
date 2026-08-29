@@ -10,6 +10,10 @@ export const listReset = style({
   margin: 0,
   padding: 0,
   listStyle: "none",
+  // Shrink-friendly when the list itself is a flex/grid child: `0` min sizes let
+  // it narrow/shorten below its content instead of blowing the parent out.
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /**
@@ -19,4 +23,5 @@ export const listReset = style({
  */
 export const listItem = style({
   minWidth: 0,
+  minHeight: 0,
 });

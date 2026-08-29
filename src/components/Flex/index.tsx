@@ -164,8 +164,13 @@ function FlexRoot({
           width: resolveWidth(width),
           height,
           maxWidth,
-          minWidth,
-          minHeight,
+          // Default both min sizes to `0` so a nested Flex can shrink below its
+          // content instead of blowing its parent out — the classic flexbox
+          // min-size footgun (`min-width`/`min-height` default to `auto`, i.e.
+          // the content size, on flex/grid items). Pass an explicit value —
+          // `minWidth="auto"` — to opt back into content-based minimums.
+          minWidth: minWidth ?? "0",
+          minHeight: minHeight ?? "0",
           m,
           mx,
           my,
@@ -270,8 +275,11 @@ export function FlexItem({
           flexShrink: shrink === undefined ? undefined : shrink ? 1 : 0,
           width,
           height,
-          minWidth,
-          minHeight,
+          // Default both min sizes to `0` (see `FlexRoot`) so this item shrinks
+          // below its content rather than forcing the line/column wider. Pass an
+          // explicit value — `minWidth="auto"` — to opt out.
+          minWidth: minWidth ?? "0",
+          minHeight: minHeight ?? "0",
           m,
           mx,
           my,

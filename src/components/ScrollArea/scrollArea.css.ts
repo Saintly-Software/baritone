@@ -48,6 +48,12 @@ export const root = style({
   // width for horizontal). Nothing is imposed here so the area drops into any
   // layout.
   boxSizing: "border-box",
+  // Shrink-friendly when the scroll area is a flex/grid child: `0` min sizes let
+  // it take the parent's size (so the viewport, not the page, scrolls) instead
+  // of the content forcing it open — the flexbox min-size footgun this
+  // component is most often bitten by.
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /**
