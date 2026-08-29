@@ -1,50 +1,43 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
-import { Icon } from "../Icon";
 import { Popover } from "../Popover";
 import { Text } from "../Text";
 import { Chip } from "./index";
 
 // Throwaway glyphs so the adornment stories have something to render.
 const TagGlyph = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-      <path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13.2V4h9.2l8.4 8.4a1 1 0 0 1 0 1z" />
-      <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" stroke="none" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+    <path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13.2V4h9.2l8.4 8.4a1 1 0 0 1 0 1z" />
+    <circle cx="7.5" cy="7.5" r="1.5" fill="currentColor" stroke="none" />
+  </svg>
 );
 
 const CloseGlyph = () => (
-  <Icon>
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.5}
-      strokeLinecap="round"
-      aria-hidden
-    >
-      <path d="M6 6l12 12M18 6L6 18" />
-    </svg>
-  </Icon>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2.5}
+    strokeLinecap="round"
+    aria-hidden
+  >
+    <path d="M6 6l12 12M18 6L6 18" />
+  </svg>
 );
 
 const ExternalGlyph = () => (
-  <Icon>
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M14 5h5v5M19 5l-9 9M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5" />
-    </svg>
-  </Icon>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <path d="M14 5h5v5M19 5l-9 9M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5" />
+  </svg>
 );
 
 const meta: Meta<typeof Chip> = {

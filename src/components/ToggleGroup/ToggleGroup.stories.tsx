@@ -8,35 +8,28 @@ import {
   SIZES,
 } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
-import { Icon } from "../Icon";
 import type { DistributiveOmit } from "../../utils/types";
 import { ToggleGroup } from "./index";
 
 type View = "list" | "board" | "calendar";
 
-// Throwaway glyphs so the icon stories have something to render. Each is an
-// `<Icon>` so it inherits the segment's text colour and sizing, exactly as a
-// consumer's icon would.
+// Throwaway glyphs so the icon stories have something to render. Each is a bare
+// `<svg>`: the segment's icon props wrap it in `<Icon>` internally, so it inherits
+// the segment's text colour and sizing, exactly as a consumer's glyph would.
 const ListGlyph = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
+  </svg>
 );
 const BoardGlyph = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M4 4h7v16H4zm9 0h7v16h-7z" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M4 4h7v16H4zm9 0h7v16h-7z" />
+  </svg>
 );
 const CalendarGlyph = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2zM5 9h14v10H5z" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2zM5 9h14v10H5z" />
+  </svg>
 );
 
 // The knobs both hosts forward, minus the naming: each host below picks exactly

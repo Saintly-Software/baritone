@@ -1,26 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
-import { Icon } from "../Icon";
 import { LinkProvider } from "../LinkProvider";
 import { Text } from "../Text";
 import { Link } from "./index";
 
 // A throwaway glyph so the icon stories have something to render.
 const Sparkle = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
+  </svg>
 );
 
 // A left-arrow glyph for the icon-only "back" navigation stories.
 const ArrowLeft = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M11 5l1.4 1.4L7.8 11H20v2H7.8l4.6 4.6L11 19l-7-7z" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M11 5l1.4 1.4L7.8 11H20v2H7.8l4.6 4.6L11 19l-7-7z" />
+  </svg>
 );
 
 const meta: Meta<typeof Link> = {
