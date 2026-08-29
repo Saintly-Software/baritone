@@ -29,6 +29,14 @@ describe("renderIcon", () => {
     expect(result.props["aria-hidden"]).toBe(true);
   });
 
+  it("spreads a host-supplied size onto the wrapped Icon", () => {
+    const result = renderIcon(<svg />, { props: { size: "lg" } }) as React.ReactElement<{
+      size?: string;
+    }>;
+
+    expect(result.props.size).toBe("lg");
+  });
+
   it("passes an existing Icon through, composing the slot className and letting the Icon's own props win", () => {
     const result = renderIcon(
       <Icon className="mine" size="lg">

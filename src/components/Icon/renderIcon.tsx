@@ -1,17 +1,23 @@
+import type { Size } from "../../theme/constants";
 import * as React from "react";
 import { mergeProps } from "../../utils/render";
 import { Icon } from "./index";
 
 /**
- * The presentational props a host applies to an icon slot — merged onto the
- * wrapping `Icon` (or handed to a render function to spread). Chrome only:
- * semantic state (intent/size/…) travels in the render function's `state` arg,
- * never here.
+ * The presentational props a host applies to an icon slot — spread onto the
+ * wrapping `Icon` (or handed to a render function to spread). Chrome only; the
+ * consumer's own props on an explicit `<Icon>` always win over these.
+ *
+ * `size` is here rather than in `state` because a few hosts intrinsically size
+ * their icon (`HelpText`, `Lockup`); they pass it so the default wrap keeps that
+ * size. Hosts that don't size their icon simply omit it — nothing is newly
+ * applied. The render function still sees the host's size via its `state` arg.
  */
 export interface IconRenderProps {
   className?: string;
   style?: React.CSSProperties;
   ref?: React.Ref<HTMLSpanElement>;
+  size?: Size;
   "aria-hidden"?: boolean;
 }
 
