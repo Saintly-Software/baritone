@@ -143,9 +143,17 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
   // text look). Ignore it on the text appearance even if a JS caller forces it.
   const isLoading = loading && !isText;
 
-  // The button's resolved state, handed to an icon render function to branch on.
-  const iconState: ButtonIconState = { intent, saliency, size, loading: isLoading, disabled };
+  // A loading button is non-interactive, so it reads as disabled to the anchor
+  // (below) and to an icon render function alike.
   const isDisabled = disabled || isLoading;
+  // The button's resolved state, handed to an icon render function to branch on.
+  const iconState: ButtonIconState = {
+    intent,
+    saliency,
+    size,
+    loading: isLoading,
+    disabled: isDisabled,
+  };
 
   // Chain the consumer's and the host's onClick. The disabled *guard* now lives in
   // `InternalGenericButtonAnchor` (it swallows the activation before this runs), so

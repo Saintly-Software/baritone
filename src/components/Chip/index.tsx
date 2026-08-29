@@ -13,14 +13,16 @@ import { chipLabelRecipe } from "./chip.css";
 import { chipAdornmentRecipe } from "./chipAdornment.css";
 
 /**
- * What a Chip publishes to its adornments. The adornment never needs the chip's
- * *intent* (it inherits the chip's colour via `--iconColor`, or overrides it
- * with its own `intent`), but it does need the chip's `saliency` to tint an
- * override at the right shade, the chip's `size` to scale its glyph to the box
- * it sits in, and the chip's `disabled` so a clickable adornment goes inert with
- * the chip.
+ * What a Chip publishes to its adornments. The adornment doesn't apply the chip's
+ * *intent* to its own colour (it inherits it via `--iconColor`, or overrides with
+ * its own `intent`), but it publishes the resolved `intent` so an icon render
+ * function can branch on the effective colour. It also needs the chip's `saliency`
+ * to tint an override at the right shade, the chip's `size` to scale its glyph to
+ * the box it sits in, and the chip's `disabled` so a clickable adornment goes
+ * inert with the chip.
  */
 interface ChipAdornmentContextValue {
+  intent?: Intent;
   saliency?: Saliency;
   size?: Size;
   disabled?: boolean;
@@ -231,6 +233,7 @@ function ChipCopyAdornment({ content }: { content: string }) {
 function ChipAdornment(props: ChipAdornmentProps) {
   const { icon, intent, label, onClick, href, disabled, render, forcePropagation } = props;
   const {
+    intent: chipIntent,
     saliency = "mid",
     size = "md",
     disabled: chipDisabled = false,
@@ -272,7 +275,9 @@ function ChipAdornment(props: ChipAdornmentProps) {
 
   const elementProps: Record<string, unknown> = {
     className,
-    children: renderIcon(icon, { state: { intent, saliency, size, disabled: inert } }),
+    children: renderIcon(icon, {
+      state: { intent: intent ?? chipIntent, saliency, size, disabled: inert },
+    }),
   };
 
   if (href != null) {
@@ -433,8 +438,8 @@ function ChipRoot({
   ...rest
 }: ChipProps) {
   const adornmentContext = React.useMemo<ChipAdornmentContextValue>(
-    () => ({ saliency, size, disabled }),
-    [saliency, size, disabled],
+    () => ({ intent, saliency, size, disabled }),
+    [intent, saliency, size, disabled],
   );
 
   // A clickable label is a real `<button>`; a disabled chip keeps it focusable
