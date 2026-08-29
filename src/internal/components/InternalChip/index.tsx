@@ -7,6 +7,8 @@ import {
   chipWidthRecipe,
 } from "../../../components/Chip/chip.css";
 import { chipAdornmentRecipe } from "../../../components/Chip/chipAdornment.css";
+import type { ChipIconState } from "../../../components/Chip";
+import { type IconSlot, renderIcon } from "../../../components/Icon/renderIcon";
 import {
   componentIntentRecipe,
   componentTypographyRecipe,
@@ -77,15 +79,15 @@ export interface InternalChipProps
     ChipBoxVariants {
   /**
    * Decorative leading icon — a single non-interactive glyph before the label,
-   * mirroring `Chip`'s `icon`. Typically an `<Icon>`; it inherits the chip's
-   * foreground colour.
+   * mirroring `Chip`'s `icon`. A bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function; inherits the chip's colour.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<ChipIconState>;
   /**
    * Decorative trailing icon — mirrors `icon` at the other end (`Chip`'s
-   * `trailIcon`). Typically an `<Icon>`; inherits the chip's colour.
+   * `trailIcon`). Same forms as `icon`; inherits the chip's colour.
    */
-  trailIcon?: React.ReactNode;
+  trailIcon?: IconSlot<ChipIconState>;
   /**
    * Disables the link. A disabled link has no honest HTML form, so it collapses
    * to an inert element (no navigation, out of the a11y tree as a link) while
@@ -178,13 +180,13 @@ export function InternalChip({
     >
       {icon != null && (
         <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
-          {icon}
+          {renderIcon(icon, { state: { intent, saliency, size, disabled } })}
         </span>
       )}
       <span className={chipLabelRecipe()}>{children}</span>
       {trailIcon != null && (
         <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
-          {trailIcon}
+          {renderIcon(trailIcon, { state: { intent, saliency, size, disabled } })}
         </span>
       )}
     </InternalGenericButtonAnchor>

@@ -7,6 +7,7 @@ import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { mergeProps, useRender, type RenderProp } from "../../utils/render";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import type { PopoverProps } from "../Popover";
 import { chipLabelRecipe } from "./chip.css";
 import { chipAdornmentRecipe } from "./chipAdornment.css";
@@ -27,13 +28,21 @@ interface ChipAdornmentContextValue {
 
 const ChipAdornmentContext = React.createContext<ChipAdornmentContextValue>({});
 
+/** The chip state an adornment/icon render function can branch on. */
+export interface ChipIconState {
+  intent?: Intent;
+  saliency?: Saliency;
+  size?: Size;
+  disabled: boolean;
+}
+
 interface ChipAdornmentBaseProps {
   /**
-   * The icon to render. Typically an `<Icon>` (or an `<svg>` drawn with
-   * `currentColor`); it inherits the chip's foreground unless `intent` overrides
-   * it.
+   * The icon to render — a bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function. It inherits the chip's
+   * foreground unless `intent` overrides it.
    */
-  icon: React.ReactNode;
+  icon: IconSlot<ChipIconState>;
   /**
    * Colour intent for this adornment. Defaults to the parent Chip's intent (the
    * adornment simply inherits its colour); set this to tint just this adornment
@@ -261,7 +270,10 @@ function ChipAdornment(props: ChipAdornmentProps) {
     onClick?.(event as React.MouseEvent<HTMLButtonElement>);
   };
 
-  const elementProps: Record<string, unknown> = { className, children: icon };
+  const elementProps: Record<string, unknown> = {
+    className,
+    children: renderIcon(icon, { state: { intent, saliency, size, disabled: inert } }),
+  };
 
   if (href != null) {
     elementProps.href = href;
@@ -336,17 +348,18 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
   loading?: boolean;
   /**
    * Shorthand for a leading icon — prepends a decorative `<Chip.Adornment>` as the
-   * *first* lead adornment, before any `leadAdornments`. Typically an `<Icon>`; it
+   * *first* lead adornment, before any `leadAdornments`. A bare glyph (auto-wrapped
+   * in `Icon`), an explicit `<Icon>`, or a `(props, state)` render function; it
    * inherits the chip's colour like any adornment.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<ChipIconState>;
   /**
    * Shorthand for a trailing icon — mirrors `icon` at the other end, appending a
    * decorative `<Chip.Adornment>` *after* any `trailAdornments` (and before the
-   * built-in `contentToCopy` / `handleRemove` buttons). Typically an `<Icon>`; it
+   * built-in `contentToCopy` / `handleRemove` buttons). Same forms as `icon`; it
    * inherits the chip's colour like any adornment.
    */
-  trailIcon?: React.ReactNode;
+  trailIcon?: IconSlot<ChipIconState>;
   /** Adornments rendered before the label — each a `<Chip.Adornment>`. */
   leadAdornments?: Array<React.ReactElement<ChipAdornmentProps>>;
   /** Adornments rendered after the label — each a `<Chip.Adornment>`. */
