@@ -18,7 +18,7 @@ export interface IconRenderProps {
   style?: React.CSSProperties;
   ref?: React.Ref<HTMLSpanElement>;
   size?: Size;
-  "aria-hidden"?: boolean;
+  "aria-hidden"?: React.AriaAttributes["aria-hidden"];
 }
 
 /**
