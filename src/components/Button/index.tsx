@@ -3,6 +3,17 @@ import * as React from "react";
 import { InternalButton } from "../../internal/components/InternalButton";
 import type { WidthShorthand } from "../../styles/layoutProps";
 import type { Intent, Saliency, Size, TextSize } from "../../theme/constants";
+import type { IconSlot } from "../Icon/renderIcon";
+
+/** The button state a `startIcon`/`endIcon`/`icon` render function can branch on. */
+export interface ButtonIconState {
+  intent?: Intent;
+  saliency?: Saliency;
+  /** Undefined on the text appearance, which sizes via `variant`. */
+  size?: Size;
+  loading: boolean;
+  disabled: boolean;
+}
 
 /**
  * Props shared by *every* `Button` arm — the labelled looks and the icon-only
@@ -53,10 +64,14 @@ export interface ButtonBaseProps extends ButtonCommonProps {
    * which has no visible text to name it.
    */
   "aria-label"?: never;
-  /** Icon placed before the label. Typically an `<Icon>`; inherits text colour. */
-  startIcon?: React.ReactNode;
-  /** Icon placed after the label. Typically an `<Icon>`; inherits text colour. */
-  endIcon?: React.ReactNode;
+  /**
+   * Icon before the label — a bare glyph (`startIcon={<Save />}`, auto-wrapped
+   * in `Icon`), an explicit `<Icon>`, or a `(props, state)` render function.
+   * Inherits text colour.
+   */
+  startIcon?: IconSlot<ButtonIconState>;
+  /** Icon after the label — same forms as `startIcon`. Inherits text colour. */
+  endIcon?: IconSlot<ButtonIconState>;
   /**
    * Unsupported on a labelled button — pass `startIcon`/`endIcon` alongside the
    * label instead. `icon` is the discriminant of the icon-only arm
@@ -137,12 +152,13 @@ export interface IconButtonProps extends ButtonCommonProps {
   appearance?: "solid";
   /**
    * The single centred glyph — **required**, and the discriminant of this arm.
-   * Typically an `<Icon>`; inherits the button's text colour. Typed
-   * `NonNullable<React.ReactNode>` so a nullish value (e.g. a `cond ? <Icon/> :
-   * null`) can't slip through as the icon-only arm and render an *unnamed* button
-   * — the required `aria-label` is only wired up when a glyph is actually present.
+   * A bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`, or a
+   * `(props, state)` render function; inherits the button's text colour. Typed
+   * `NonNullable` so a nullish value (e.g. a `cond ? <Icon/> : null`) can't slip
+   * through as the icon-only arm and render an *unnamed* button — the required
+   * `aria-label` is only wired up when a glyph is actually present.
    */
-  icon: NonNullable<React.ReactNode>;
+  icon: NonNullable<IconSlot<ButtonIconState>>;
   /**
    * Accessible name — **required**, because the button is icon-only and has no
    * visible text to name it (e.g. "Add to favourites"). The mirror image of a
