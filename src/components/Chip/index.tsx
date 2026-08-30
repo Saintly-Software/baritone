@@ -6,7 +6,7 @@ import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { mergeProps, useRender, type RenderProp } from "../../utils/render";
+import { mergeProps, RenderElement, useRender, type RenderProp } from "../../utils/render";
 import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import type { PopoverProps } from "../Popover";
 import { chipLabelRecipe } from "./chip.css";
@@ -273,12 +273,10 @@ function ChipAdornment(props: ChipAdornmentProps) {
     onClick?.(event as React.MouseEvent<HTMLButtonElement>);
   };
 
-  const elementProps: Record<string, unknown> = {
-    className,
-    children: renderIcon(icon, {
-      state: { intent: intent ?? chipIntent, saliency, size, disabled: inert },
-    }),
-  };
+  const iconNode = renderIcon(icon, {
+    state: { intent: intent ?? chipIntent, saliency, size, disabled: inert },
+  });
+  const elementProps: Record<string, unknown> = { className, children: iconNode };
 
   if (href != null) {
     elementProps.href = href;
@@ -296,11 +294,19 @@ function ChipAdornment(props: ChipAdornmentProps) {
     elementProps["aria-label"] = label;
   }
 
-  return useRender({
-    render: href != null ? render : undefined,
-    defaultElement: href != null ? "a" : onClick != null ? "button" : "span",
-    props: elementProps,
-  });
+  // A purely decorative adornment (not a button/link, unnamed) whose glyph
+  // resolved to nothing has nothing to show — omit it rather than render an empty
+  // adornment box. `RenderElement` (not the `useRender` hook) so this early return
+  // stays within the Rules of Hooks.
+  if (iconNode == null && !interactive && label == null) return null;
+
+  return (
+    <RenderElement
+      render={href != null ? render : undefined}
+      defaultElement={href != null ? "a" : onClick != null ? "button" : "span"}
+      props={elementProps}
+    />
+  );
 }
 
 export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "color" | "popover"> {

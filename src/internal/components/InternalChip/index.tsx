@@ -168,6 +168,10 @@ export function InternalChip({
   // accessible name — so the wrappers are `aria-hidden` to keep any textual glyph
   // content out of that name, no matter what the caller passes.
   const iconState = { intent, saliency, size, disabled };
+  // Guard each wrapper on the resolved node, not the raw slot: a slot that
+  // resolves to nothing shouldn't leave an empty adornment box behind.
+  const iconNode = renderIcon(icon, { state: iconState });
+  const trailIconNode = renderIcon(trailIcon, { state: iconState });
   const chip = (
     <InternalGenericButtonAnchor
       {...(rest as InternalGenericButtonAnchorProps)}
@@ -179,15 +183,15 @@ export function InternalChip({
       disabled={disabled}
       className={cx(chipBoxClassName({ intent, saliency, size, shape, width }), className)}
     >
-      {icon != null && (
+      {iconNode != null && (
         <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
-          {renderIcon(icon, { state: iconState })}
+          {iconNode}
         </span>
       )}
       <span className={chipLabelRecipe()}>{children}</span>
-      {trailIcon != null && (
+      {trailIconNode != null && (
         <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
-          {renderIcon(trailIcon, { state: iconState })}
+          {trailIconNode}
         </span>
       )}
     </InternalGenericButtonAnchor>

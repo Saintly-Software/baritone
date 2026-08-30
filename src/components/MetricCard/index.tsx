@@ -274,12 +274,15 @@ export function MetricCard(props: MetricCardProps) {
     </div>
   );
 
+  // Guard the wrapper on the resolved node, not the raw slot: a slot that resolves
+  // to nothing shouldn't leave an empty icon box behind.
+  const iconNode = renderIcon(icon);
   return (
     <Card as={as} ref={ref} className={cx(interactive && metricInteractive, className)} {...rest}>
       <div className={metricRoot}>
-        {icon != null && (
+        {iconNode != null && (
           <span className={metricIcon} aria-hidden="true">
-            {renderIcon(icon)}
+            {iconNode}
           </span>
         )}
         {hero}

@@ -82,12 +82,16 @@ function AccordionItemHeader({
   className,
   ref,
 }: AccordionItemHeaderProps) {
+  // Guard the wrapper on the resolved node, not the raw slot: a render function
+  // (or a conditional glyph) can resolve to nothing, which shouldn't leave an
+  // empty icon box behind.
+  const iconNode = renderIcon(icon);
   return (
     <span ref={ref} className={cx(accordionHeaderContent, className)}>
       {/* Leading group (icon + text), and the flex spacer that pushes the chip to
           the end, so it's always rendered. */}
       <span className={accordionHeaderLeading}>
-        {icon != null && <span className={accordionHeaderIcon}>{renderIcon(icon)}</span>}
+        {iconNode != null && <span className={accordionHeaderIcon}>{iconNode}</span>}
         <span className={accordionHeaderText}>
           <Text size="md">{title}</Text>
           {subtitle != null && (
