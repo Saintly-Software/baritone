@@ -1,17 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS } from "../../theme/constants";
-import { Icon } from "../Icon";
 import { MetricCard } from "./index";
 
-// Throwaway glyph so the icon stories have something to render.
+// Throwaway bare glyph — passed as `icon={<TargetGlyph />}` and auto-wrapped in `Icon`.
 const TargetGlyph = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="5" />
-      <circle cx="12" cy="12" r="1" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="5" />
+    <circle cx="12" cy="12" r="1" />
+  </svg>
 );
 
 const meta: Meta<typeof MetricCard> = {

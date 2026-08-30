@@ -7,6 +7,7 @@ import type { HeadingLevel, Intent, SurfaceSaliency } from "../../theme/constant
 import { cx } from "../../utils/cx";
 import { RenderElement, useRender, type RenderProp } from "../../utils/render";
 import { Heading } from "../Heading";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Text } from "../Text";
 import {
   cardActionsRecipe,
@@ -488,14 +489,25 @@ function CardPrimaryLink({
   });
 }
 
+/**
+ * State a `Card.Header` icon render function can branch on. The header resolves
+ * no icon-relevant presentational state of its own, so this is empty today —
+ * the render-function form is still supported.
+ */
+export type CardHeaderIconState = Record<string, never>;
+
 export interface CardHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
   /** Title text/content, rendered as a `Heading`. */
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
   /** Document-outline level for the rendered title heading. Default `3`. */
   level?: HeadingLevel;
-  /** Leading glyph before the title — typically an `<Icon>`. */
-  icon?: React.ReactNode;
+  /**
+   * Leading glyph before the title. Pass a bare glyph (`icon={<Star />}`,
+   * auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
+   * `(props, state) => …` render function for full control.
+   */
+  icon?: IconSlot<CardHeaderIconState>;
   /** Trailing element after the title — typically a status `<Chip>`. */
   chip?: React.ReactNode;
   ref?: React.Ref<HTMLDivElement>;
@@ -530,12 +542,14 @@ function CardHeader({
   // The collapsible trigger always needs a home in the trailing group, so render
   // it even without a chip / children.
   const hasTrailing = chip != null || children != null || collapsibleControl != null;
+  // Guard on the resolved node, not the raw slot — a slot can resolve to nothing.
+  const iconNode = renderIcon(icon);
   const content = (
     <>
       {/* Leading group (icon + text) also acts as the flex spacer that pushes the
           trailing group to the end, so it's always rendered. */}
       <div className={cardHeaderLeading}>
-        {icon != null && <span className={cardHeaderIcon}>{icon}</span>}
+        {iconNode != null && <span className={cardHeaderIcon}>{iconNode}</span>}
         {hasText && (
           <div className={cardHeaderText}>
             {title != null && (

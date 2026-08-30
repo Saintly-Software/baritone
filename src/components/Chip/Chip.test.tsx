@@ -56,6 +56,20 @@ describe("Chip", () => {
     expect(screen.getByTestId("chip").className).toContain("extra");
   });
 
+  it("omits a decorative shorthand adornment whose icon resolves to nothing", () => {
+    // A conditional shorthand glyph (`icon={cond && <Glyph/>}`) can resolve to
+    // `false`; the adornment should disappear, not render an empty spaced box.
+    render(
+      <Chip data-testid="chip" icon={false}>
+        Label
+      </Chip>,
+    );
+    const chip = screen.getByTestId("chip");
+    // Only the label element remains — no empty leading adornment.
+    expect(chip.children).toHaveLength(1);
+    expect(chip).toHaveTextContent("Label");
+  });
+
   describe("shape", () => {
     it("applies a distinct class for the pill shape vs. the default square", () => {
       render(

@@ -4,9 +4,15 @@ import type { HeadingLevel, Intent, Saliency, TextSize } from "../../theme/const
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 import { Heading } from "../Heading";
-import { Icon, type IconProps } from "../Icon";
+import type { IconProps } from "../Icon";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Text, type TextProps } from "../Text";
 import { lockupRoot, lockupText, lockupTextHidden } from "./lockup.css";
+
+/** The lockup state an `icon` render function can branch on. */
+export interface LockupIconState {
+  size: NonNullable<IconProps["size"]>;
+}
 
 /**
  * Props for the Lockup's title slot. It layers onto the title's own defaults
@@ -80,11 +86,11 @@ export interface LockupProps extends Omit<React.HTMLAttributes<HTMLElement>, "ti
    */
   subtitle?: React.ReactNode;
   /**
-   * The mark. Typically an `<svg>` drawn with `currentColor` (or an `<Icon>`'s
-   * children); the lockup wraps it in an `<Icon>` so it inherits the ambient
-   * colour and can be sized via `slotProps.icon`.
+   * The mark — a bare glyph (an `<svg>` drawn with `currentColor`, auto-wrapped in
+   * an `<Icon>` so it inherits the ambient colour and can be sized via
+   * `slotProps.icon`), an explicit `<Icon>`, or a `(props, state)` render function.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<LockupIconState>;
   /**
    * Visually hide the text column while keeping it in the accessible tree, for
    * an icon-only lockup that a screen reader still announces by its label.
@@ -141,13 +147,15 @@ export function Lockup({
   ref,
   ...rest
 }: LockupProps) {
+  const iconSize = slotProps?.icon?.size ?? "lg";
   const iconNode =
     slots?.icon ??
-    (icon != null ? (
-      <Icon size="lg" {...slotProps?.icon}>
-        {icon}
-      </Icon>
-    ) : null);
+    (icon != null
+      ? renderIcon(icon, {
+          props: { ...slotProps?.icon, size: iconSize },
+          state: { size: iconSize },
+        })
+      : null);
 
   const titleNode = slots?.title ?? (title != null ? renderTitle(title, slotProps?.title) : null);
 

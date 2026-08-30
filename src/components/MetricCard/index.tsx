@@ -5,6 +5,7 @@ import type { Intent, TextSize } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
 import { Card, type CardElement } from "../Card";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Text } from "../Text";
 import {
   metricHero,
@@ -58,6 +59,14 @@ export interface MetricTrend {
   label?: string;
 }
 
+/**
+ * The state a MetricCard `icon` render function can branch on. The leading glyph
+ * is decorative and fixed (muted, `aria-hidden`), so the card resolves no
+ * icon-relevant state of its own — empty today; the render-function form is
+ * still supported.
+ */
+export type MetricCardIconState = Record<string, never>;
+
 /** Props shared by every MetricCard mode (static / clickable / linkable). */
 interface MetricCardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick" | "title"> {
   /**
@@ -87,11 +96,13 @@ interface MetricCardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "o
    */
   trend?: MetricTrend;
   /**
-   * Optional leading glyph — typically an `<Icon>`. Treated as decorative
-   * (`aria-hidden`): the `label` already names the metric, so the icon would only
-   * add noise to a screen reader.
+   * Optional leading glyph, shown above the value. Pass a bare glyph
+   * (`icon={<Target />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for a
+   * custom size/label, or a `(props, state) => …` render function for full
+   * control. Treated as decorative (`aria-hidden`): the `label` already names the
+   * metric, so the icon would only add noise to a screen reader.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<MetricCardIconState>;
   /**
    * Tints the **value** (not the surface) — e.g. `positive` / `negative` for a
    * good / bad number. The label and caption keep the neutral text ramp.
@@ -263,12 +274,14 @@ export function MetricCard(props: MetricCardProps) {
     </div>
   );
 
+  // Guard on the resolved node, not the raw slot — a slot can resolve to nothing.
+  const iconNode = renderIcon(icon);
   return (
     <Card as={as} ref={ref} className={cx(interactive && metricInteractive, className)} {...rest}>
       <div className={metricRoot}>
-        {icon != null && (
+        {iconNode != null && (
           <span className={metricIcon} aria-hidden="true">
-            {icon}
+            {iconNode}
           </span>
         )}
         {hero}

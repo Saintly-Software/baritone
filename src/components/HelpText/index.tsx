@@ -3,9 +3,16 @@ import * as React from "react";
 import type { Intent, Saliency, Size, TextSize } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import type { RenderProp } from "../../utils/render";
-import { Icon } from "../Icon";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Text } from "../Text";
 import { helpTextRecipe } from "./helptext.css";
+
+/** The help-text state an `icon` render function can branch on. */
+export interface HelpTextIconState {
+  intent: Intent;
+  saliency: Saliency;
+  size: Size;
+}
 
 /** HelpText's own size scale — a subset of the body type ramp. Default `sm`. */
 export type HelpTextVariant = "xs" | "sm" | "md" | "lg";
@@ -62,11 +69,12 @@ export interface HelpTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "
   /** Type size (scales the message and the icon together). Default `sm`. */
   variant?: HelpTextVariant;
   /**
-   * A leading glyph — any node (an `<svg>`), wrapped in a colour-inheriting
-   * `<Icon>`. Omit to fall back to the auto warning glyph on the attention
-   * intents (`warning`/`negative`, incl. `invalid`); other intents show none.
+   * A leading glyph — a bare glyph (auto-wrapped in a colour-inheriting `<Icon>`
+   * sized to the `variant`), an explicit `<Icon>`, or a `(props, state)` render
+   * function. Omit to fall back to the auto warning glyph on the attention intents
+   * (`warning`/`negative`, incl. `invalid`); other intents show none.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<HelpTextIconState>;
   /** Drop the icon entirely, including the auto glyph. */
   hideIcon?: boolean;
   /** Convenience for a validation error: forces `negative` + the auto glyph. */
@@ -118,8 +126,13 @@ export function HelpText({
   // Auto glyph only for the attention intents when the caller didn't supply one.
   const attention = resolvedIntent === "warning" || resolvedIntent === "negative";
   const glyph = icon ?? (attention ? <WarningGlyph /> : null);
-  const iconNode =
-    hideIcon || glyph == null ? null : <Icon size={ICON_SIZE[variant]}>{glyph}</Icon>;
+  const iconSize = ICON_SIZE[variant];
+  const iconNode = hideIcon
+    ? null
+    : renderIcon(glyph, {
+        props: { size: iconSize },
+        state: { intent: resolvedIntent, saliency: resolvedSaliency, size: iconSize },
+      });
 
   const textProps = render ? { render } : { as: "p" as const };
 

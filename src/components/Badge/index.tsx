@@ -5,7 +5,15 @@ import { componentIntentRecipe } from "../../styles/recipes/component.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { useRender, type RenderProp } from "../../utils/render";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { badgeColorVar, badgeCustomColor, badgeRecipe } from "./badge.css";
+
+/** The badge state an `icon` render function can branch on. */
+export interface BadgeIconState {
+  intent?: Intent;
+  saliency?: Saliency;
+  size?: Size;
+}
 
 /** The badge silhouette: a fully-rounded pill/circle, or a softly-rounded square. */
 export type BadgeShape = "round" | "square";
@@ -77,8 +85,12 @@ export type BadgeColourProps = BadgeIntentColourProps | BadgeCustomColourProps;
 
 /** A badge whose content is a single icon — typically an `<Icon>` that inherits the badge's colour. */
 export interface BadgeIconProps extends BadgeBaseProps {
-  /** An icon to show in the badge. Inherits the badge's foreground via `--iconColor`. */
-  icon: React.ReactNode;
+  /**
+   * The badge's icon — a bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function. Inherits the badge's
+   * foreground via `--iconColor`.
+   */
+  icon: IconSlot<BadgeIconState>;
   count?: never;
   max?: never;
   text?: never;
@@ -132,7 +144,7 @@ export type BadgeProps = (BadgeIconProps | BadgeCountProps | BadgeTextProps | Ba
 // The content and colour props live on the union arms; widen once internally so
 // the body can read them without narrowing on each access.
 type BadgeAllProps = BadgeBaseProps & {
-  icon?: React.ReactNode;
+  icon?: IconSlot<BadgeIconState>;
   count?: number;
   max?: number;
   text?: string;
@@ -175,7 +187,7 @@ export function Badge(props: BadgeProps) {
   // Exactly one content kind wins, in priority order; none of them means blank.
   let content: React.ReactNode = null;
   if (icon != null) {
-    content = icon;
+    content = renderIcon(icon, { state: { intent, saliency, size } });
   } else if (count != null) {
     content = max != null && count > max ? `${max}+` : String(count);
   } else if (text != null) {

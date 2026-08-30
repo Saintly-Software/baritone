@@ -7,6 +7,8 @@ import {
   chipWidthRecipe,
 } from "../../../components/Chip/chip.css";
 import { chipAdornmentRecipe } from "../../../components/Chip/chipAdornment.css";
+import type { ChipIconState } from "../../../components/Chip";
+import { type IconSlot, renderIcon } from "../../../components/Icon/renderIcon";
 import {
   componentIntentRecipe,
   componentTypographyRecipe,
@@ -77,15 +79,15 @@ export interface InternalChipProps
     ChipBoxVariants {
   /**
    * Decorative leading icon — a single non-interactive glyph before the label,
-   * mirroring `Chip`'s `icon`. Typically an `<Icon>`; it inherits the chip's
-   * foreground colour.
+   * mirroring `Chip`'s `icon`. A bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function; inherits the chip's colour.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<ChipIconState>;
   /**
    * Decorative trailing icon — mirrors `icon` at the other end (`Chip`'s
-   * `trailIcon`). Typically an `<Icon>`; inherits the chip's colour.
+   * `trailIcon`). Same forms as `icon`; inherits the chip's colour.
    */
-  trailIcon?: React.ReactNode;
+  trailIcon?: IconSlot<ChipIconState>;
   /**
    * Disables the link. A disabled link has no honest HTML form, so it collapses
    * to an inert element (no navigation, out of the a11y tree as a link) while
@@ -165,6 +167,10 @@ export function InternalChip({
   // label), and this chip-link is one anchor whose visible `children` *is* its
   // accessible name — so the wrappers are `aria-hidden` to keep any textual glyph
   // content out of that name, no matter what the caller passes.
+  const iconState = { intent, saliency, size, disabled };
+  // Guard each wrapper on the resolved node, not the raw slot — a slot can resolve to nothing.
+  const iconNode = renderIcon(icon, { state: iconState });
+  const trailIconNode = renderIcon(trailIcon, { state: iconState });
   const chip = (
     <InternalGenericButtonAnchor
       {...(rest as InternalGenericButtonAnchorProps)}
@@ -176,15 +182,15 @@ export function InternalChip({
       disabled={disabled}
       className={cx(chipBoxClassName({ intent, saliency, size, shape, width }), className)}
     >
-      {icon != null && (
+      {iconNode != null && (
         <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
-          {icon}
+          {iconNode}
         </span>
       )}
       <span className={chipLabelRecipe()}>{children}</span>
-      {trailIcon != null && (
+      {trailIconNode != null && (
         <span aria-hidden="true" className={chipAdornmentRecipe({ size })}>
-          {trailIcon}
+          {trailIconNode}
         </span>
       )}
     </InternalGenericButtonAnchor>

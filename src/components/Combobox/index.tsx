@@ -15,6 +15,7 @@ import {
   type FieldSlotProps,
 } from "../Field";
 import { useIsFieldDisabled } from "../Fieldset";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import {
   adornment,
   chip,
@@ -51,16 +52,23 @@ import {
   virtualViewport,
 } from "./combobox.css";
 
+/** The row state a `ComboboxOption` icon render function can branch on. */
+export interface ComboboxOptionIconState {
+  disabled: boolean;
+}
+
 /** A single choice. `value` is what the form submits and `onValueChange` reports; `label` is what's shown. */
 export interface ComboboxOption {
   value: string;
   label: string;
   /**
-   * Optional glyph — typically an `<Icon>` — shown before the label in the list
-   * and above it (with the label as a caption) in the grid. Decorative: `label`
+   * Optional glyph shown before the label in the list and above it (with the
+   * label as a caption) in the grid. Pass a bare glyph (`icon={<Tag />}`,
+   * auto-wrapped in `Icon`), an explicit `<Icon>` for a custom size/label, or a
+   * `(props, state) => …` render function for full control. Decorative: `label`
    * stays the accessible name and the typeahead text, so search still works.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<ComboboxOptionIconState>;
   /** Renders the option but blocks selection (kept visible, `aria-disabled`). */
   disabled?: boolean;
 }
@@ -466,7 +474,7 @@ export function Combobox(props: ComboboxProps) {
     >
       {option.icon != null && !option.create && (
         <span className={itemIcon} aria-hidden>
-          {option.icon}
+          {renderIcon(option.icon, { state: { disabled: !!option.disabled } })}
         </span>
       )}
       <span className={itemLabel}>
@@ -512,7 +520,7 @@ export function Combobox(props: ComboboxProps) {
       >
         {hasIcon && (
           <span className={gridItemIcon} aria-hidden>
-            {option.icon}
+            {renderIcon(option.icon, { state: { disabled: !!option.disabled } })}
           </span>
         )}
         <span className={hasIcon ? gridItemCaption : gridItemLabel}>

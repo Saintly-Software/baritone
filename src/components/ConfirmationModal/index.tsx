@@ -5,6 +5,7 @@ import { InternalButton } from "../../internal/components/InternalButton";
 import type { Intent } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import type { ButtonProps, SolidButtonProps } from "../Button";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Modal, type ModalProps } from "../Modal";
 import {
   confirmationModalHeader,
@@ -42,6 +43,16 @@ export type ConfirmationConfirmProps = Omit<ActionProps, "intent"> & {
 /** Cancel-button props — the full `Button` intent range (defaults to `neutral`). */
 export type ConfirmationCancelProps = ActionProps;
 
+/**
+ * The already-resolved presentational state a `ConfirmationModal` icon render
+ * function branches on. The dialog tints its icon by intent, so it exposes that
+ * one resolved value.
+ */
+export interface ConfirmationModalIconState {
+  /** The dialog's resolved intent — the colour the icon is tinted to. */
+  intent: ConfirmationIntent;
+}
+
 export interface ConfirmationModalProps {
   /**
    * The title, shown beside the icon. Rendered through `Modal.Header` (base-ui's
@@ -51,10 +62,12 @@ export interface ConfirmationModalProps {
   /** The body — the question/consequences. Typically a short `Text` paragraph. */
   children?: React.ReactNode;
   /**
-   * A leading glyph, tinted to `intent`. Pass an `<Icon>` (its colour is
-   * overridden to match the intent); omit for no icon.
+   * A leading glyph, tinted to `intent`. Pass a bare glyph
+   * (`icon={<TriangleAlert />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
+   * a custom size/label, or a `(props, state) => …` render function for full
+   * control. Its colour is overridden to match the intent; omit for no icon.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<ConfirmationModalIconState>;
   /**
    * Colour of the icon and the confirm button. Default `negative` (the common
    * destructive-confirmation case). See {@link ConfirmationIntent}.
@@ -229,7 +242,7 @@ function ConfirmationModalRoot({
         <div className={confirmationModalHeader}>
           {icon != null && (
             <span className={cx(confirmationModalIconRecipe({ intent }), confirmationModalIcon)}>
-              {icon}
+              {renderIcon(icon, { state: { intent } })}
             </span>
           )}
           <Modal.Header title={header} level={level} />

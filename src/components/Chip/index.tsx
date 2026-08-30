@@ -6,20 +6,23 @@ import { InternalSpinner } from "../../internal/components/InternalSpinner";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { mergeProps, useRender, type RenderProp } from "../../utils/render";
+import { mergeProps, RenderElement, useRender, type RenderProp } from "../../utils/render";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import type { PopoverProps } from "../Popover";
 import { chipLabelRecipe } from "./chip.css";
 import { chipAdornmentRecipe } from "./chipAdornment.css";
 
 /**
- * What a Chip publishes to its adornments. The adornment never needs the chip's
- * *intent* (it inherits the chip's colour via `--iconColor`, or overrides it
- * with its own `intent`), but it does need the chip's `saliency` to tint an
- * override at the right shade, the chip's `size` to scale its glyph to the box
- * it sits in, and the chip's `disabled` so a clickable adornment goes inert with
- * the chip.
+ * What a Chip publishes to its adornments. The adornment doesn't apply the chip's
+ * *intent* to its own colour (it inherits it via `--iconColor`, or overrides with
+ * its own `intent`), but it publishes the resolved `intent` so an icon render
+ * function can branch on the effective colour. It also needs the chip's `saliency`
+ * to tint an override at the right shade, the chip's `size` to scale its glyph to
+ * the box it sits in, and the chip's `disabled` so a clickable adornment goes
+ * inert with the chip.
  */
 interface ChipAdornmentContextValue {
+  intent?: Intent;
   saliency?: Saliency;
   size?: Size;
   disabled?: boolean;
@@ -27,13 +30,21 @@ interface ChipAdornmentContextValue {
 
 const ChipAdornmentContext = React.createContext<ChipAdornmentContextValue>({});
 
+/** The chip state an adornment/icon render function can branch on. */
+export interface ChipIconState {
+  intent?: Intent;
+  saliency?: Saliency;
+  size?: Size;
+  disabled: boolean;
+}
+
 interface ChipAdornmentBaseProps {
   /**
-   * The icon to render. Typically an `<Icon>` (or an `<svg>` drawn with
-   * `currentColor`); it inherits the chip's foreground unless `intent` overrides
-   * it.
+   * The icon to render — a bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function. It inherits the chip's
+   * foreground unless `intent` overrides it.
    */
-  icon: React.ReactNode;
+  icon: IconSlot<ChipIconState>;
   /**
    * Colour intent for this adornment. Defaults to the parent Chip's intent (the
    * adornment simply inherits its colour); set this to tint just this adornment
@@ -222,6 +233,7 @@ function ChipCopyAdornment({ content }: { content: string }) {
 function ChipAdornment(props: ChipAdornmentProps) {
   const { icon, intent, label, onClick, href, disabled, render, forcePropagation } = props;
   const {
+    intent: chipIntent,
     saliency = "mid",
     size = "md",
     disabled: chipDisabled = false,
@@ -261,7 +273,10 @@ function ChipAdornment(props: ChipAdornmentProps) {
     onClick?.(event as React.MouseEvent<HTMLButtonElement>);
   };
 
-  const elementProps: Record<string, unknown> = { className, children: icon };
+  const iconNode = renderIcon(icon, {
+    state: { intent: intent ?? chipIntent, saliency, size, disabled: inert },
+  });
+  const elementProps: Record<string, unknown> = { className, children: iconNode };
 
   if (href != null) {
     elementProps.href = href;
@@ -279,11 +294,19 @@ function ChipAdornment(props: ChipAdornmentProps) {
     elementProps["aria-label"] = label;
   }
 
-  return useRender({
-    render: href != null ? render : undefined,
-    defaultElement: href != null ? "a" : onClick != null ? "button" : "span",
-    props: elementProps,
-  });
+  // A purely decorative adornment (not a button/link, unnamed) whose glyph
+  // resolved to nothing has nothing to show — omit it rather than render an empty
+  // adornment box. `RenderElement` (not the `useRender` hook) so this early return
+  // stays within the Rules of Hooks.
+  if (iconNode == null && !interactive && label == null) return null;
+
+  return (
+    <RenderElement
+      render={href != null ? render : undefined}
+      defaultElement={href != null ? "a" : onClick != null ? "button" : "span"}
+      props={elementProps}
+    />
+  );
 }
 
 export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "color" | "popover"> {
@@ -336,17 +359,18 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
   loading?: boolean;
   /**
    * Shorthand for a leading icon — prepends a decorative `<Chip.Adornment>` as the
-   * *first* lead adornment, before any `leadAdornments`. Typically an `<Icon>`; it
+   * *first* lead adornment, before any `leadAdornments`. A bare glyph (auto-wrapped
+   * in `Icon`), an explicit `<Icon>`, or a `(props, state)` render function; it
    * inherits the chip's colour like any adornment.
    */
-  icon?: React.ReactNode;
+  icon?: IconSlot<ChipIconState>;
   /**
    * Shorthand for a trailing icon — mirrors `icon` at the other end, appending a
    * decorative `<Chip.Adornment>` *after* any `trailAdornments` (and before the
-   * built-in `contentToCopy` / `handleRemove` buttons). Typically an `<Icon>`; it
+   * built-in `contentToCopy` / `handleRemove` buttons). Same forms as `icon`; it
    * inherits the chip's colour like any adornment.
    */
-  trailIcon?: React.ReactNode;
+  trailIcon?: IconSlot<ChipIconState>;
   /** Adornments rendered before the label — each a `<Chip.Adornment>`. */
   leadAdornments?: Array<React.ReactElement<ChipAdornmentProps>>;
   /** Adornments rendered after the label — each a `<Chip.Adornment>`. */
@@ -420,8 +444,8 @@ function ChipRoot({
   ...rest
 }: ChipProps) {
   const adornmentContext = React.useMemo<ChipAdornmentContextValue>(
-    () => ({ saliency, size, disabled }),
-    [saliency, size, disabled],
+    () => ({ intent, saliency, size, disabled }),
+    [intent, saliency, size, disabled],
   );
 
   // A clickable label is a real `<button>`; a disabled chip keeps it focusable

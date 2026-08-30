@@ -5,6 +5,7 @@ import { InternalButton } from "../../internal/components/InternalButton";
 import type { Intent, Saliency, Size } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { Icon } from "../Icon";
+import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Popover, type PopoverProps } from "../Popover";
 import { infoButtonSquare } from "./infoButton.css";
 
@@ -23,6 +24,14 @@ const defaultInfoIcon = (
   </Icon>
 );
 
+/** The trigger state an InfoButton `icon` render function can branch on. */
+export interface InfoButtonIconState {
+  intent: InfoButtonIntent;
+  saliency: Saliency;
+  size: Size;
+  disabled: boolean;
+}
+
 export interface InfoButtonProps {
   /**
    * Accessible name — **required**, because the button is icon-only and has no
@@ -38,8 +47,13 @@ export interface InfoButtonProps {
    * also becomes the popover's accessible name.
    */
   header?: React.ReactNode;
-  /** The trigger glyph. Defaults to an info "i" `<Icon>`. */
-  icon?: React.ReactNode;
+  /**
+   * The trigger glyph. Pass a bare glyph (`icon={<Info />}`, auto-wrapped in
+   * `Icon`), an explicit `<Icon>` for custom size/label, or a
+   * `(props, state) => …` render function for full control. Omit it for the
+   * default info "i" `<Icon>`.
+   */
+  icon?: IconSlot<InfoButtonIconState>;
   /** Colour scheme of the trigger. Shared with `Button` / `Chip`. Default `neutral`. */
   intent?: InfoButtonIntent;
   /** Prominence of the trigger. Default `low` (a ghost "i"). */
@@ -119,7 +133,9 @@ export function InfoButton({
             disabledReason,
             className: cx(infoButtonSquare, className),
             ref,
-            children: icon,
+            children: renderIcon(icon, {
+              state: { intent, saliency, size, disabled: disabled ?? false },
+            }),
           }}
           htmlAttrs={{ ...htmlAttrs, "aria-label": ariaLabel }}
         />

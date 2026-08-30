@@ -1,7 +1,8 @@
 "use client";
 import * as React from "react";
-import type { ButtonProps } from "../../../components/Button";
+import type { ButtonIconState, ButtonProps } from "../../../components/Button";
 import { useIsFieldDisabled } from "../../../components/Fieldset";
+import { renderIcon } from "../../../components/Icon/renderIcon";
 import {
   componentIntentRecipe,
   componentTypographyRecipe,
@@ -141,7 +142,18 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
   // `loading` is a solid-only feature (no chrome to overlay a spinner on the
   // text look). Ignore it on the text appearance even if a JS caller forces it.
   const isLoading = loading && !isText;
+
+  // A loading button is non-interactive, so it reads as disabled to the anchor
+  // (below) and to an icon render function alike.
   const isDisabled = disabled || isLoading;
+  // The button's resolved state, handed to an icon render function to branch on.
+  const iconState: ButtonIconState = {
+    intent,
+    saliency,
+    size,
+    loading: isLoading,
+    disabled: isDisabled,
+  };
 
   // Chain the consumer's and the host's onClick. The disabled *guard* now lives in
   // `InternalGenericButtonAnchor` (it swallows the activation before this runs), so
@@ -191,12 +203,12 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
       <>
         <span className={cx(buttonContent, isLoading && buttonContentLoading)}>
           {isIconOnly ? (
-            icon
+            renderIcon(icon, { state: iconState })
           ) : (
             <>
-              {startIcon}
+              {renderIcon(startIcon, { state: iconState })}
               {children}
-              {endIcon}
+              {renderIcon(endIcon, { state: iconState })}
             </>
           )}
         </span>

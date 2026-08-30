@@ -1,25 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
-import { Icon } from "../Icon";
 import { Button } from "./index";
 
-// A throwaway glyph so the start/end icon stories have something to render.
+// A throwaway bare glyph so the start/end icon stories have something to render;
+// the Button auto-wraps it in `<Icon>`.
 const Sparkle = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
+  </svg>
 );
 
-// A plus glyph for the icon-only stories.
+// A bare plus glyph for the icon-only stories; the Button auto-wraps it in `<Icon>`.
 const Plus = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" />
+  </svg>
 );
 
 const meta: Meta<typeof Button> = {

@@ -1,18 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Icon } from "../Icon";
 import { LinkProvider } from "../LinkProvider";
 import { Text } from "../Text";
 import { Link } from "./index";
 
 // A left-arrow glyph for the icon-only "back" navigation stories.
 const ArrowLeft = () => (
-  <Icon>
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M11 5l1.4 1.4L7.8 11H20v2H7.8l4.6 4.6L11 19l-7-7z" />
-    </svg>
-  </Icon>
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+    <path d="M11 5l1.4 1.4L7.8 11H20v2H7.8l4.6 4.6L11 19l-7-7z" />
+  </svg>
 );
 
 /**

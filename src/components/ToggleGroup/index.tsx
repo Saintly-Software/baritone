@@ -2,7 +2,8 @@
 import { Toggle } from "@base-ui/react/toggle";
 import { ToggleGroup as BaseToggleGroup } from "@base-ui/react/toggle-group";
 import * as React from "react";
-import type { ButtonProps } from "../Button";
+import type { ButtonIconState, ButtonProps } from "../Button";
+import type { IconSlot } from "../Icon/renderIcon";
 import {
   InternalButton,
   type InternalButtonHtmlAttrs,
@@ -91,10 +92,15 @@ export interface ToggleGroupItemLabelledProps<
    * pass children for anything richer.
    */
   children?: React.ReactNode;
-  /** Icon before the label. Typically an `<Icon>`; inherits the segment's text colour. */
-  startIcon?: React.ReactNode;
-  /** Icon after the label. Typically an `<Icon>`; inherits the segment's text colour. */
-  endIcon?: React.ReactNode;
+  /**
+   * Icon before the label — a bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>`, or a `(props, state)` render function. Inherits the segment's text
+   * colour. (Forwarded to the underlying `Button`, so its render function sees
+   * `ButtonIconState`.)
+   */
+  startIcon?: IconSlot<ButtonIconState>;
+  /** Icon after the label — same forms as `startIcon`. Inherits the segment's text colour. */
+  endIcon?: IconSlot<ButtonIconState>;
   /**
    * Unsupported on a labelled segment — pass `startIcon`/`endIcon` alongside the
    * label instead. `icon` is the discriminant of the icon-only arm
@@ -125,12 +131,13 @@ export interface ToggleGroupItemIconOnlyProps<
 > extends ToggleGroupItemCommonProps<T> {
   /**
    * The single centred glyph — **required**, and the discriminant of this arm.
-   * Typically an `<Icon>`; inherits the segment's text colour. Typed
-   * `NonNullable<React.ReactNode>` so a nullish value (e.g. a `cond ? <Icon/> :
-   * null`) can't slip through as the icon-only arm and render an *unnamed* segment
-   * — the required `aria-label` is only wired up when a glyph is actually present.
+   * A bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`, or a
+   * `(props, state)` render function; inherits the segment's text colour. Typed
+   * `NonNullable` so a nullish value (e.g. a `cond ? <Icon/> : null`) can't slip
+   * through as the icon-only arm and render an *unnamed* segment — the required
+   * `aria-label` is only wired up when a glyph is actually present.
    */
-  icon: NonNullable<React.ReactNode>;
+  icon: NonNullable<IconSlot<ButtonIconState>>;
   /**
    * Accessible name — **required**, because the segment is icon-only and has no
    * visible text to name it (e.g. "Rhyme scheme"). The mirror of a labelled

@@ -10,7 +10,8 @@ import * as React from "react";
 import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
 import type { Intent, SurfaceSaliency } from "../../theme/constants";
 import { cx } from "../../utils/cx";
-import { Notice } from "../Notice";
+import type { IconSlot } from "../Icon/renderIcon";
+import { Notice, type NoticeIconState } from "../Notice";
 import { toastNotice, toastRoot, toastViewport } from "./toast.css";
 
 /**
@@ -24,8 +25,11 @@ export interface ToastData {
   intent?: Intent;
   /** `high` (washed fill, default) or `low` (subtle) — the Notice's saliency. */
   saliency?: SurfaceSaliency;
-  /** A leading glyph (wrapped in an `<Icon>` by the Notice), or a `<Notice.Icon>`. */
-  icon?: React.ReactNode;
+  /**
+   * A leading icon for the `Notice` — a bare glyph (auto-wrapped in `Icon`), an
+   * explicit `<Icon>`, a `(props, state)` render function, or a `<Notice.Icon>`.
+   */
+  icon?: IconSlot<NoticeIconState>;
   /** Trailing action controls — typically `<Notice.Action>`s. */
   actions?: React.ReactNode[];
 }
@@ -51,8 +55,11 @@ export interface AddToastOptions {
   intent?: Intent;
   /** Notice saliency — `high` (default) or `low`. */
   saliency?: SurfaceSaliency;
-  /** A leading glyph, or a `<Notice.Icon>` to tint it a different intent. */
-  icon?: React.ReactNode;
+  /**
+   * A leading icon — a bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`,
+   * a `(props, state)` render function, or a `<Notice.Icon>` to tint it.
+   */
+  icon?: IconSlot<NoticeIconState>;
   /** Trailing action controls — typically `<Notice.Action>`s. */
   actions?: React.ReactNode[];
   /**
