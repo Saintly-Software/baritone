@@ -542,8 +542,7 @@ function CardHeader({
   // The collapsible trigger always needs a home in the trailing group, so render
   // it even without a chip / children.
   const hasTrailing = chip != null || children != null || collapsibleControl != null;
-  // Guard the wrapper on the resolved node, not the raw slot: a slot that resolves
-  // to nothing shouldn't leave an empty icon box behind.
+  // Guard on the resolved node, not the raw slot — a slot can resolve to nothing.
   const iconNode = renderIcon(icon);
   const content = (
     <>

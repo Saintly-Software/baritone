@@ -82,9 +82,7 @@ function AccordionItemHeader({
   className,
   ref,
 }: AccordionItemHeaderProps) {
-  // Guard the wrapper on the resolved node, not the raw slot: a render function
-  // (or a conditional glyph) can resolve to nothing, which shouldn't leave an
-  // empty icon box behind.
+  // Guard on the resolved node, not the raw slot — a slot can resolve to nothing.
   const iconNode = renderIcon(icon);
   return (
     <span ref={ref} className={cx(accordionHeaderContent, className)}>

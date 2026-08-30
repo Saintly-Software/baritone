@@ -168,8 +168,7 @@ export function InternalChip({
   // accessible name — so the wrappers are `aria-hidden` to keep any textual glyph
   // content out of that name, no matter what the caller passes.
   const iconState = { intent, saliency, size, disabled };
-  // Guard each wrapper on the resolved node, not the raw slot: a slot that
-  // resolves to nothing shouldn't leave an empty adornment box behind.
+  // Guard each wrapper on the resolved node, not the raw slot — a slot can resolve to nothing.
   const iconNode = renderIcon(icon, { state: iconState });
   const trailIconNode = renderIcon(trailIcon, { state: iconState });
   const chip = (
