@@ -1,6 +1,5 @@
-// Breakpoints are intentionally NOT part of the theme contract: CSS custom
-// properties cannot be used inside `@media` query conditions, so these must be
-// static literals. Sprinkles consumes them to build responsive conditions.
+// Breakpoints are NOT part of the theme contract — CSS custom properties can't be
+// used inside `@media` conditions, so these are static literals that Sprinkles consumes for responsive conditions.
 export const breakpoints = {
   sm: "640px",
   md: "768px",

@@ -36,13 +36,13 @@ function check(
 }
 
 /**
- * Build-time WCAG AA check over a theme's dev-supplied tokens. Returns the list
- * of foreground/background pairings that fail. Because tokens are dev-supplied,
- * the system warns rather than silently shipping low contrast.
+ * Build-time WCAG AA check over a theme's dev-supplied tokens. Returns the
+ * foreground/background pairings that fail, so the system warns rather than
+ * silently shipping low contrast.
  *
- * Low-saliency (transparent) component backgrounds and low-saliency text are
- * checked against the neutral low surface (the page background) as a best-effort
- * backing colour, and held to the 3:1 UI/large-text floor.
+ * Low-saliency (transparent) backgrounds and text are checked against the
+ * neutral low surface (page background) as a best-effort backing colour, held
+ * to the 3:1 UI/large-text floor.
  */
 export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
   const issues: ContrastIssue[] = [];
@@ -65,8 +65,8 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
     }
   }
 
-  // Component text over component background. Transparent (low) backgrounds are
-  // checked against the page background instead.
+  // Component text over component background (transparent "low" backgrounds
+  // check against the page background instead).
   for (const intent of INTENTS) {
     for (const saliency of SALIENCIES) {
       const block = tokens.component.color[intent][saliency].default;

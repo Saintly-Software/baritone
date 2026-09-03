@@ -30,9 +30,8 @@ describe("lineHeightVars", () => {
   });
 
   it("ignores built-in leading names but allows a size name (distinct namespace)", () => {
-    // Only the built-in leadings are reserved. A standalone leading may reuse a size
-    // name (`md`) without colliding — the size's paired leading is a separate
-    // `--sizeLineHeight-md` var.
+    // Only the built-in leadings are reserved; a standalone leading may reuse
+    // a size name (`md`) since its paired leading is a separate var.
     const out = lineHeightVars({ normal: "IGNORED", md: "1.4", airy: "2.2" });
     expect(out["--lineHeight-normal"]).toBe(vars.text.lineHeight.normal);
     expect(out["--lineHeight-md"]).toBe("1.4");

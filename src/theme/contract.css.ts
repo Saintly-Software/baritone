@@ -26,7 +26,7 @@ const colorTriplet = () => ({ bgc: s(), text: s(), border: s() });
 const stateBlock = () => ({ default: colorTriplet(), disabled: colorTriplet() });
 
 /**
- * The canonical token shape. This is the single source of truth for both the
+ * The canonical token shape — the single source of truth for both the
  * CSS-variable contract (`vars`) and the value type a theme author supplies
  * (`DesignTokens`).
  */
@@ -52,22 +52,20 @@ export const tokenShape = {
   },
   text: {
     color: record(INTENTS, () => record(SALIENCIES, () => s())),
-    // Per-size typography tokens. `fontSize` is calc-derived from `fontStep`
-    // (see `defaultTokens`) but overridable per size; `lineHeight` is a concrete
-    // per-size token. Both are applied together whenever a `size` is selected.
+    // Per-size typography tokens: `fontSize` is calc-derived from `fontStep`
+    // (see `defaultTokens`), overridable per size; `lineHeight` is concrete.
     size: record(TEXT_SIZES, () => ({ fontSize: s(), lineHeight: s() })),
-    // The two increment tokens that drive the font-size ramp: `lower` is the
-    // step across `xs`→`xl`, `upper` the step across `xl`→`9xl`.
+    // The two increment tokens driving the font-size ramp: `lower` spans
+    // xs→xl, `upper` spans xl→9xl.
     fontStep: { lower: s(), upper: s() },
     // Named `font-weight` steps selectable via the `weight` prop.
     weight: record(TEXT_WEIGHTS, () => s()),
     // Named letter-spacing (tracking) steps selectable via the `letterSpacing`
     // prop. `em`-based so a step scales with font-size across the whole ramp.
     letterSpacing: record(LETTER_SPACING_KEYS, () => s()),
-    // Named line-height (leading) steps selectable via the `lineHeight` prop.
-    // Unitless so a step scales with font-size. The per-size `size.lineHeight`
-    // above is a *separate* thing — the default `size` pairs with; this is the
-    // standalone override vocabulary.
+    // Named line-height (leading) steps selectable via the `lineHeight` prop,
+    // unitless so a step scales with font-size. Separate from the per-size
+    // `size.lineHeight` above, which is the default `size` pairs with.
     lineHeight: record(LINE_HEIGHT_KEYS, () => s()),
   },
   font: {

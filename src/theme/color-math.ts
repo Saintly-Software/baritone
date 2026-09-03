@@ -1,6 +1,5 @@
-// Pure colour math used by the build-time contrast checker. Converts the oklch
-// strings a theme is authored in into sRGB luminance so we can compute WCAG
-// contrast ratios. Kept dependency-free and side-effect-free.
+// Pure colour math for the build-time contrast checker: converts a theme's
+// oklch strings to sRGB luminance for WCAG contrast ratios. Dependency-free.
 
 export interface Oklch {
   l: number;
@@ -10,9 +9,9 @@ export interface Oklch {
 }
 
 /**
- * Parse an `oklch(L C H [/ A])` string. Returns `null` for values we can't
- * statically evaluate (e.g. `transparent`, or expressions containing var()/calc
- * such as the runtime relative-colour hover states — those aren't checkable).
+ * Parse an `oklch(L C H [/ A])` string (`transparent` included). Returns
+ * `null` for values that can't be statically evaluated — e.g. `var()`/`calc()`
+ * expressions like the runtime relative-colour hover states.
  */
 export function parseOklch(input: string): Oklch | null {
   const value = input.trim();
@@ -90,9 +89,8 @@ export function relativeLuminance(rgb: LinearRgb): number {
 }
 
 /**
- * Contrast ratio between two oklch colours. If the foreground is translucent it
- * is composited over the (assumed opaque) background first. Returns `null` when
- * either colour can't be parsed.
+ * Contrast ratio between two oklch colours (foreground composited over the
+ * assumed-opaque background first, if translucent). `null` if either can't be parsed.
  */
 export function contrastRatio(fg: string, bg: string): number | null {
   const fgColor = parseOklch(fg);

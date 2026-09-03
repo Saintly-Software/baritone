@@ -1,6 +1,5 @@
-// Canonical vocabulary for the design system. These tuples drive both the
-// theme contract shape and the generated recipe variants, so the type-safe
-// variant API and the CSS variables can never drift apart.
+// Canonical vocabulary for the design system: these tuples drive both the
+// theme contract and the generated recipe variants, so they can't drift apart.
 
 export const INTENTS = [
   "primary",
@@ -25,10 +24,8 @@ export const FORM_STATES = ["neutral", "warning", "invalid", "valid"] as const;
 export type FormState = (typeof FORM_STATES)[number];
 
 // The full typography size scale a `size` prop can take — a Tailwind-style ramp
-// shared by `Text` and `Heading`. The two components differ only in semantics
-// (Heading renders `h1`–`h6` and defaults to high saliency; Text renders body
-// tags), not in the sizes they can render. Mirrors the keys of the `text.size`
-// token scale.
+// shared by `Text` and `Heading` (they differ only in semantics, not in sizes
+// available). Mirrors the keys of the `text.size` token scale.
 export const TEXT_SIZES = [
   "xs",
   "sm",
@@ -51,9 +48,8 @@ export const TEXT_WEIGHTS = ["default", "semibold", "bold", "superbold"] as cons
 export type TextWeight = (typeof TEXT_WEIGHTS)[number];
 
 /**
- * Named letter-spacing (tracking) steps a `Text`/`Heading` can select via its
- * `letterSpacing` prop. Mirrors the keys of the `text.letterSpacing` token scale;
- * `normal` is the zero step (no added tracking).
+ * Named letter-spacing (tracking) steps for `Text`/`Heading`'s `letterSpacing`
+ * prop. Mirrors the `text.letterSpacing` token scale; `normal` is the zero step.
  */
 export const LETTER_SPACING_KEYS = [
   "tighter",
@@ -66,11 +62,10 @@ export const LETTER_SPACING_KEYS = [
 export type LetterSpacingKey = (typeof LETTER_SPACING_KEYS)[number];
 
 /**
- * Named line-height (leading) steps a `Text`/`Heading` can select via its
- * `lineHeight` prop. Mirrors the keys of the `text.lineHeight` token scale —
- * unitless multipliers (Tailwind's leading scale), so a step scales with the
- * font-size. Distinct from the per-size line-heights baked into `text.size`
- * (which `size` applies by default); this is the standalone override vocabulary.
+ * Named line-height (leading) steps for `Text`/`Heading`'s `lineHeight` prop —
+ * unitless multipliers (Tailwind's leading scale) mirroring `text.lineHeight`.
+ * Distinct from the per-size line-heights baked into `text.size` (`size`'s
+ * default); this is the standalone override vocabulary.
  */
 export const LINE_HEIGHT_KEYS = ["none", "tight", "snug", "normal", "relaxed", "loose"] as const;
 export type LineHeightKey = (typeof LINE_HEIGHT_KEYS)[number];
@@ -103,9 +98,8 @@ export const HEADING_LEVELS = [1, 2, 3, 4, 5, 6] as const;
 export type HeadingLevel = (typeof HEADING_LEVELS)[number];
 
 /**
- * Form `state` -> semantic `intent`. Drives the focus-ring colour and the
- * border/background token a control reads. `neutral` has no intent of its own,
- * so its focus ring borrows `primary` (per spec).
+ * Form `state` -> semantic `intent`, driving the focus-ring colour and the
+ * border/background token a control reads. `neutral` borrows `primary` (per spec).
  */
 export const FORM_STATE_INTENT: Record<FormState, Intent> = {
   neutral: "primary",
@@ -125,9 +119,8 @@ export const HEADING_LEVEL_SIZE: Record<HeadingLevel, TextSize> = {
 };
 
 /**
- * Default `font-weight` per heading level. Weight is orthogonal to `size` now
- * (there are no body/title families), so `Heading` applies this to keep each
- * level's customary weight; consumers override it via the `weight` prop.
+ * Default `font-weight` per heading level. Weight is orthogonal to `size` (no
+ * body/title families), so `Heading` applies this by default; override via `weight`.
  */
 export const HEADING_LEVEL_WEIGHT: Record<HeadingLevel, TextWeight> = {
   1: "bold",

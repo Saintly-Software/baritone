@@ -22,7 +22,7 @@ describe("fontFamilyVars", () => {
 
   it("ignores `sans`/`mono` entries so the built-ins stay token-backed", () => {
     const out = fontFamilyVars({ sans: "IGNORED", mono: "IGNORED", display: "kept" });
-    // Reserved names never shadow the token-backed values (otherwise bare text and
+    // Reserved names never shadow the token-backed values (else bare text and
     // `font="sans"` would diverge); the custom entry is still published.
     expect(out["--font-sans"]).toBe(vars.font.sans);
     expect(out["--font-mono"]).toBe(vars.font.mono);

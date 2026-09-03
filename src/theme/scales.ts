@@ -1,13 +1,11 @@
-// Raw, scheme-independent scale values. These are the numbers a default theme
-// is authored from; the contract turns them into CSS variables. Typography,
-// spacing, radius etc. do not change between light/dark, so they live here and
-// are reused by both schemes in the default theme.
+// Raw, scheme-independent scale values a default theme is authored from; the
+// contract turns them into CSS variables. Typography, spacing, radius etc.
+// don't change between light/dark, so they live here and are reused by both.
 
-// The font-size scale is defined by an anchor (the `md` step) plus two linear
-// increments — `lower` spans `xs`→`xl`, `upper` spans `xl`→`9xl`. The per-size
-// values are derived from these at token-build time (see `defaultTokens`). These
-// defaults reproduce Tailwind's font-sizes exactly for `xs`–`2xl`, then grow
-// linearly.
+// The font-size scale is an anchor (the `md` step) plus two linear increments
+// — `lower` spans `xs`→`xl`, `upper` spans `xl`→`9xl` — derived per-size at
+// token-build time (see `defaultTokens`). Reproduces Tailwind's font-sizes
+// exactly for `xs`–`2xl`, then grows linearly.
 export const fontSizeAnchor = "1rem"; // md
 export const fontStep = {
   lower: "0.125rem", // xs → xl step
@@ -22,10 +20,9 @@ export const fontWeight = {
   superbold: "800",
 } as const;
 
-// Letter-spacing (tracking) scale. `em`-based on purpose, so a step tracks the
-// font-size proportionally across the whole type ramp (0.05em reads the same at
-// `xs` and `9xl`). Values reproduce Tailwind's tracking scale; `normal` is the
-// zero step. `widest` (0.1em) is the go-to for small uppercase labels/eyebrows.
+// Letter-spacing (tracking) scale, `em`-based so a step tracks font-size
+// proportionally (0.05em reads the same at `xs` and `9xl`). Reproduces
+// Tailwind's tracking scale; `widest` (0.1em) suits small uppercase labels.
 export const letterSpacing = {
   tighter: "-0.05em",
   tight: "-0.025em",
@@ -35,10 +32,9 @@ export const letterSpacing = {
   widest: "0.1em",
 } as const;
 
-// Named line-height (leading) scale — unitless multipliers reproducing Tailwind's
-// `leading-*` steps, so a step scales with the font-size. This is the standalone
-// `lineHeight` prop's built-in vocabulary; it's distinct from the per-size
-// `lineHeight` below, which `size` applies as its paired default.
+// Named line-height (leading) scale — unitless multipliers reproducing
+// Tailwind's `leading-*` steps, so a step scales with font-size. The
+// standalone `lineHeight` prop's vocabulary; distinct from the per-size scale below.
 export const leading = {
   none: "1",
   tight: "1.25",
