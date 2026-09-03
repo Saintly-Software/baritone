@@ -123,7 +123,6 @@ export function HelpText({
     resolvedSaliency = "low";
   }
 
-  // Auto glyph only for the attention intents when the caller didn't supply one.
   const attention = resolvedIntent === "warning" || resolvedIntent === "negative";
   const glyph = icon ?? (attention ? <WarningGlyph /> : null);
   const iconSize = ICON_SIZE[variant];

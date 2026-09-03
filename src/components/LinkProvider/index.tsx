@@ -66,18 +66,12 @@ export type LinkRenderFn = (props: LinkRenderProps) => React.ReactNode;
  * subtree on full-page loads while routing everything else.
  */
 export function isInternalHref(href: string): boolean {
-  // Protocol-relative (`//cdn.example.com/…`) resolves against the current
-  // scheme but points at another origin — treat it as external.
+  // Protocol-relative — see doc above.
   if (href.startsWith("//")) return false;
-  // A fragment-only href (`#footnote-1`) is a same-document jump the browser
-  // owns, not a navigation. Routers with structured APIs mishandle it (TanStack
-  // Router resolves `to="#foo"` as a relative path), so leave it a plain `<a>`.
-  // A path that merely *carries* a fragment (`/a#foo`) is still a real
-  // navigation and stays internal — only a leading `#` is external.
+  // Fragment-only — see doc above.
   if (href.startsWith("#")) return false;
-  // A leading URL scheme (`scheme:` per RFC 3986 — ALPHA then any of
-  // ALPHA / DIGIT / `+` / `-` / `.`) marks an absolute or special-scheme URL
-  // (`mailto:`, `tel:`, `https:`, …): not something the router navigates.
+  // A leading URL scheme, per RFC 3986: ALPHA then any of ALPHA / DIGIT / `+` /
+  // `-` / `.` — see doc above.
   if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(href)) return false;
   return true;
 }

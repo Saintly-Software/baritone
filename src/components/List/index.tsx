@@ -45,11 +45,9 @@ function ListItem({ area, render, className, style, children, ref, ...rest }: Li
     defaultElement: "li",
     props: {
       ref,
-      // `list-style: none` can drop the implicit listitem role in Safari, so the
-      // role is set explicitly to keep the list semantics.
+      // Explicit role — see doc above (Safari drops the implicit one).
       role: "listitem",
       className: cx(listItem, className),
-      // Consumer `style` wins over the computed grid-area placement.
       style: area != null ? { gridArea: area, ...style } : style,
       children,
       ...rest,
@@ -193,10 +191,9 @@ function ListRoot(props: ListProps) {
 
   const element = ordered ? <ol /> : <ul />;
   const listClassName = cx(listReset, className);
-  // Skip falsy entries and key each row (own `key`, else its original index) —
-  // the shared `items` rule, same as `Menu`. Like `Menu`, `List` renders the
-  // `<List.Item>` element itself (rather than reading its props the way
-  // `ButtonGroup` / `ChipList` treat their carriers).
+  // Same `items` rule as `Menu` (see `items` doc above); like `Menu`, `List`
+  // renders the `<List.Item>` element itself, rather than reading its props
+  // the way `ButtonGroup` / `ChipList` treat their carriers.
   const content = keyedElements(items);
 
   if (layout === "grid") {

@@ -49,7 +49,6 @@ export const lightboxPopup = style({
   flexDirection: "column",
   alignItems: "center",
   gap: vars.space[3],
-  // Shrink to the image, but never past the padded viewport.
   maxWidth: "100%",
   maxHeight: "100%",
   transformOrigin: "center",

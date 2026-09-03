@@ -139,21 +139,13 @@ export function ToggleButton(props: ToggleButtonProps) {
     ref,
   } = props;
 
-  // Controlled when a `value` is supplied; otherwise the component tracks its own
-  // pressed state, seeded from `defaultValue`.
   const isControlled = props.value !== undefined;
   const [uncontrolledValue, setUncontrolledValue] = React.useState(props.defaultValue ?? false);
   const pressed = isControlled ? (props.value as boolean) : uncontrolledValue;
 
-  // Resolve the state-aware slots against the current pressed state.
   const resolvedLabel = typeof ariaLabel === "function" ? ariaLabel(pressed) : ariaLabel;
   const resolvedIcon = typeof icon === "function" ? icon(pressed) : icon;
 
-  // Toggle semantics go through the `htmlAttrs` seam, the same one an overlay
-  // `Trigger` uses. `aria-label` has to live here (InternalButton strips it from
-  // `consumerProps`), and the toggle `onClick` rides alongside so InternalButton's
-  // disabled guard gates it — a disabled toggle can't flip its state, and (only
-  // when uncontrolled) commit the next state locally before notifying `onChange`.
   const htmlAttrs: InternalButtonHtmlAttrs = {
     "aria-label": resolvedLabel,
     "aria-pressed": pressed,
@@ -168,7 +160,6 @@ export function ToggleButton(props: ToggleButtonProps) {
     <InternalButton
       consumerProps={{
         intent,
-        // intent/saliency describe the *on* look; *off* drops to a ghost.
         saliency: pressed ? saliency : "low",
         size,
         disabled,

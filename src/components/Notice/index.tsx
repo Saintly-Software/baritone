@@ -88,8 +88,7 @@ function NoticeIcon({ children, intent, saliency = "mid", size, label }: NoticeI
     <Icon
       size={size}
       label={label}
-      // With no `intent` the icon inherits the notice's `--iconColor`; with one,
-      // this class republishes `--iconColor` at the override token.
+      // See `intent` doc above.
       className={intent != null ? noticeIconRecipe({ intent, saliency }) : undefined}
     >
       {children}
@@ -402,14 +401,11 @@ function NoticeRoot({
       ? icon
       : renderIcon(icon, { state: { intent, saliency, disabled: disabled ?? false } });
 
-  // A bare handler wraps into the default `<Notice.Close>`; a `<Notice.Close>`
-  // element passes through so the caller can set its label/glyph.
+  // See `close` doc above.
   const closeNode =
     close == null ? null : typeof close === "function" ? <NoticeClose onClick={close} /> : close;
 
-  // A notice is a live region so assistive tech announces it when it appears or
-  // changes. Errors/warnings are assertive (`alert`); everything else is polite
-  // (`status`). Callers can override with their own `role` (and `aria-live`).
+  // Live-region role — see class doc above; also overridable via `aria-live`.
   const resolvedRole = role ?? (intent === "negative" || intent === "warning" ? "alert" : "status");
 
   const contextValue = React.useMemo<NoticeContextValue>(() => ({ disabled }), [disabled]);

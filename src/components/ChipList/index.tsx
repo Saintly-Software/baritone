@@ -93,8 +93,7 @@ function ChipListRow({
 }) {
   const { intent: itemIntent, saliency: itemSaliency, ...chipProps } = item.props;
   return (
-    // `list-style: none` can drop the implicit listitem role in Safari, so the
-    // role is set explicitly to keep the list semantics the request calls for.
+    // Same Safari role-stripping fix as the `<ul>` above.
     <li role="listitem" className={chipListItem}>
       <Chip
         {...chipProps}

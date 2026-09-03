@@ -232,7 +232,7 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     className,
   } = props as CheckboxGroupBaseProps<T> & FieldLabellingInput;
 
-  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
   const nameProps: FieldLabellingInput = {

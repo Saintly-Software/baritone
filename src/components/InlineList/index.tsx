@@ -70,11 +70,8 @@ export function InlineList({
   ref,
   ...rest
 }: InlineListProps) {
-  // `toArray` flattens fragments/arrays, drops `null` / `undefined` / booleans,
-  // and assigns stable keys. The extra `filter(Boolean)` also drops the *falsy
-  // leaves toArray keeps* — `0`, `""`, `NaN` — so a numeric guard like
-  // `{count && <Text/>}` (which yields `0` when empty) collapses away like the
-  // boolean form, and the separator count always matches the *rendered* items.
+  // Falsy children dropped, including toArray's `0`/`""`/`NaN` leaves — see
+  // doc above.
   const items = React.Children.toArray(children).filter(Boolean);
   // Nothing to lay out — render no element at all, rather than an empty box that
   // would still apply its margins (`mx` / `my` / …) as phantom spacing. Common
@@ -94,12 +91,8 @@ export function InlineList({
         const key = React.isValidElement(child) && child.key != null ? child.key : index;
         return (
           <React.Fragment key={key}>
-            {/* A ternary (not `&&`) so a falsy separator yields `null`, never a
-                stray render: `separator && …` would leak a `0` / `NaN` as text,
-                and any falsy value (`""` / `false`) means "no separator" here —
-                the same as `null`. `inert` alongside `aria-hidden` keeps the
-                separator fully out of reach: even an interactive delimiter node
-                can't be focused, clicked, or found. */}
+            {/* Ternary, not `&&`: `separator && …` would leak a falsy `separator`
+                (e.g. `0`) as text. aria-hidden/inert — see `separator` doc above. */}
             {index > 0 && separator ? (
               <span aria-hidden="true" inert>
                 {separator}

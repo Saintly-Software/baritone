@@ -233,9 +233,8 @@ export function MetricCard(props: MetricCardProps) {
 
   const interactive = href != null || onClick != null;
 
-  // The value figure — big, bold, high-saliency, and tinted by `intent`. Rendered
-  // on a plain `<span>` so it *looks* like a title without being one in the
-  // document outline. Weight is explicit now that it's independent of `size`.
+  // Big, bold, high-saliency span tinted by `intent` — not a heading (see
+  // `value` doc above). Weight is explicit now that it's independent of `size`.
   const valueNode = (
     <span
       className={cx(

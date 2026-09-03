@@ -184,8 +184,6 @@ function ToggleGroupItem<T extends string>(props: ToggleGroupItemProps<T>) {
   const { selectedValue, intent, saliency, size } = React.useContext(ToggleGroupItemContext);
   const selected = value === selectedValue;
 
-  // The on/off look, shared by both arms: the selected segment takes the group's
-  // `intent` x `saliency`; an unselected one drops to a neutral `low` (ghost).
   const colour = {
     intent: selected ? intent : "neutral",
     saliency: selected ? saliency : "low",
@@ -542,7 +540,7 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
   } = props as ToggleGroupClearableProps<T> & ToggleGroupSharedProps<T> & FieldLabellingInput;
 
   const invalid = state === "invalid";
-  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
   const nameProps: FieldLabellingInput = {

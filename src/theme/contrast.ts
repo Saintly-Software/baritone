@@ -86,8 +86,8 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
 }
 
 /**
- * Run the contrast check and `console.warn` any failures. Called by the theme
- * factory in non-production builds. Returns the issues for programmatic use.
+ * Run the contrast check and `console.warn` any failures found. Returns the
+ * issues too, for programmatic use.
  */
 export function warnOnContrastIssues(tokens: ThemeTokensInput, label = "theme"): ContrastIssue[] {
   const issues = findContrastIssues(tokens);
