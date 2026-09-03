@@ -60,7 +60,6 @@ export const cell = recipe({
         color: vars.text.color.neutral.high,
         fontWeight: vars.text.weight.semibold,
         whiteSpace: "nowrap",
-        // A heavier rule separates the header from the body.
         borderBottomWidth: vars.borderWidth.thick,
       },
       false: {
@@ -142,7 +141,6 @@ export const groupChevron = style({
   transitionProperty: "transform",
   transitionDuration: vars.motion.duration.fast,
   transitionTimingFunction: vars.motion.easing.standard,
-  // Collapsed by default (points right); the expanded row rotates it back down.
   transform: "rotate(-90deg)",
   selectors: {
     "&[data-expanded]": { transform: "rotate(0deg)" },

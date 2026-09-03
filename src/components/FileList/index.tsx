@@ -247,7 +247,6 @@ function FileListRoot({
   return (
     <FileListContext.Provider value={ctx}>
       <ul ref={ref} className={cx(fileListRoot({ orientation }), className)} {...rest}>
-        {/* The data array wins when provided; otherwise render composed children. */}
         {items != null ? items.map((info) => <FileListItem key={info.id} {...info} />) : children}
       </ul>
     </FileListContext.Provider>

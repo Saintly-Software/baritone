@@ -87,7 +87,6 @@ export function InternalSwitch({
     "data-unchecked": !checked ? "" : undefined,
   };
 
-  // A single glyph slot in the thumb whose contents swap with the state.
   const thumbIcon = checked ? activeIcon : inactiveIcon;
 
   return (

@@ -76,8 +76,6 @@ export interface FieldsetProps extends Omit<React.HTMLAttributes<HTMLFieldSetEle
  * </Fieldset>
  */
 export function Fieldset({ children, disabled = false, className, ...rest }: FieldsetProps) {
-  // Compose with any ancestor fieldset: an outer disabled fieldset stays disabled
-  // for inner controls even if the inner fieldset isn't itself disabled.
   const inheritedDisabled = useIsFieldDisabled();
   const groupDisabled = disabled || inheritedDisabled;
 

@@ -76,8 +76,7 @@ export function LoadingIndicator({
   // has a single value; it becomes a real switch once other variants land.
   void variant;
 
-  // Decorative when the caller hides it from the a11y tree — then we drop the
-  // status role and the SR label and let the host own the announcement.
+  // Decorative → drop status role + SR label (see doc above).
   const decorative = rest["aria-hidden"] === true || rest["aria-hidden"] === "true";
 
   return useRender({

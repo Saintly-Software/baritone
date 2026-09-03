@@ -61,7 +61,6 @@ export const noticeRecipe = recipe({
       Record<string, never>
     >,
     shape: {
-      // `square` keeps the shared component radius; `pill` fully rounds the ends.
       square: {},
       pill: { borderRadius: vars.radius.full },
     },
@@ -208,8 +207,7 @@ export const noticeClose = style({
   padding: 0,
   border: "none",
   background: "transparent",
-  // Follow the notice's foreground (published as `--iconColor`); fall back to
-  // neutral text for a `Notice.Close` used outside a notice.
+  // Fallback: neutral text when used outside a Notice (no `--iconColor` to inherit).
   color: fallbackVar(iconColorVar, vars.component.color.neutral.mid.default.text),
   borderRadius: vars.radius.full,
   lineHeight: 0,

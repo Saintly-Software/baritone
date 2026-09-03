@@ -414,10 +414,6 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     ref,
     ...rest
   } = props as DataTableBaseProps<TData> & {
-    // `caption` and the aria names are pulled from the `DataTableName` union onto
-    // one runtime shape: `caption` renders as a `<caption>`, while `aria-label` /
-    // `aria-labelledby` stay in `rest` to forward onto the `<table>` and to feed
-    // the dev-only exclusivity check below.
     caption?: React.ReactNode;
     "aria-label"?: string;
     "aria-labelledby"?: string;

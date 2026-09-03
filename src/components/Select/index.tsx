@@ -266,7 +266,7 @@ export function Select(props: SelectProps) {
       onChange: (value: never, event: Event) => void;
     };
 
-  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
   const nameProps: FieldLabellingInput = {

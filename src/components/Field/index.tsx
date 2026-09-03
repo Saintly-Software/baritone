@@ -362,7 +362,7 @@ export function Field(props: FieldProps) {
 
   assertExclusiveNames(nameProps, "Field");
 
-  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
 

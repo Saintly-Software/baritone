@@ -116,11 +116,9 @@ export function InfoButton({
   className,
   ref,
 }: InfoButtonProps) {
-  // The trigger is an icon-only button whose accessible name and popover-toggle
-  // wiring both arrive via `InternalButton`'s `htmlAttrs` seam: base-ui's
-  // `Popover.Trigger` computes the toggle props (onClick, aria-haspopup,
-  // aria-expanded, …) and hands them to `render`, and `aria-label` rides
-  // alongside because `InternalButton` strips it from `consumerProps`.
+  // See the htmlAttrs seam described above. `aria-label` rides alongside
+  // (rather than through `consumerProps`) because `InternalButton` strips it
+  // out of `consumerProps`.
   const trigger = (
     <BasePopover.Trigger
       render={(htmlAttrs) => (

@@ -158,7 +158,7 @@ type TextInputInternalProps = TextInputBaseProps &
  * />
  */
 export function TextInput(props: TextInputProps) {
-  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
 
   // The public API is a discriminated union; internally we read every field from

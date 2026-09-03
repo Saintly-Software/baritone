@@ -123,10 +123,9 @@ function ModalRoot({
   ...rest
 }: ModalProps) {
   const handleOpenChange: NonNullable<RootProps["onOpenChange"]> = (nextOpen, eventDetails) => {
-    // A disabled modal is non-dismissable: veto every close attempt (Escape, the
-    // close button). Outside-press is already disabled via `disablePointerDismissal`
-    // below. `cancel()` stops base-ui from acting on the event, so the panel stays
-    // open in both controlled and uncontrolled use.
+    // Disabled: veto every close attempt (see `disabled` doc above). `cancel()`
+    // stops base-ui from acting on the event, so the panel stays open in both
+    // controlled and uncontrolled use.
     if (disabled && !nextOpen) {
       eventDetails.cancel();
       return;
@@ -141,13 +140,11 @@ function ModalRoot({
       onOpenChange={handleOpenChange}
       handle={handle}
       modal={modal}
-      // Clicking outside never closes the modal (a deliberate constraint of this
-      // component); dismissal is via Escape or an explicit close control.
+      // Never closes on outside-press — see class doc above.
       disablePointerDismissal
     >
       {trigger}
       <BaseDialog.Portal>
-        {/* Always rendered, even when nested inside another modal/drawer. */}
         <BaseDialog.Backdrop forceRender className={modalBackdrop} />
         <BaseDialog.Viewport className={modalViewport}>
           <BaseDialog.Popup

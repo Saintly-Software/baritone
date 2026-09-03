@@ -256,7 +256,7 @@ export function FileUpload(props: FileUploadProps) {
     "aria-describedby": ariaDescribedby,
   } = props as FileUploadBaseProps & FieldLabellingInput;
 
-  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
   // Everything the control's focusable element needs from the field, in one

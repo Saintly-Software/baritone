@@ -110,7 +110,7 @@ export function Checkbox(props: CheckboxProps) {
   } = props as CheckboxBaseProps & FieldLabellingInput;
 
   const labelId = React.useId();
-  // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
+  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
 

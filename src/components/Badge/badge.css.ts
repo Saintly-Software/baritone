@@ -57,7 +57,6 @@ export const badgeRecipe = recipe({
       md: { ...inlineSize.md, minWidth: inlineSize.md.height },
       lg: { ...inlineSize.lg, minWidth: inlineSize.lg.height },
     },
-    // Corner radius: a fully-rounded pill/circle, or a softly-rounded square.
     shape: {
       round: { borderRadius: vars.radius.full },
       square: { borderRadius: vars.radius.sm },
