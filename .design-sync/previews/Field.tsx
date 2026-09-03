@@ -1,19 +1,16 @@
-// Owned preview. The repo's Field stories style the raw control with the
-// vanilla-extract recipes `formControlRecipe`/`focusRingRecipe`, imported from
-// styling SOURCE (`../../styles/recipes/*.css`) and CALLED AT MODULE TOP LEVEL
-// (`const controlClass = controlClassFor("neutral")`). The design-sync converter
-// bundles previews with esbuild (no VE compiler), so importing the story module
-// throws "Styles were unable to be assigned to a file" before any story renders —
+// Owned preview. The repo's Field stories style the raw control with vanilla-extract
+// recipes (`formControlRecipe`/`focusRingRecipe`) imported from styling source and
+// called at module top level. The design-sync converter bundles previews with esbuild
+// (no VE compiler), so importing that story module throws before any story renders —
 // the generated Field preview came up root-empty (validate ✗[RENDER]).
 //
-// This preview re-implements the same stories importing ONLY shipped bundle
-// exports, and reproduces the control's look inline from the exported `vars`
-// token contract — the very values `formControlRecipe({ state, size: "md" })`
-// reads — so nothing touches the VE runtime. `Field` itself (the label / help /
-// error / layout primitive) is the real shipped component; only the raw input's
-// skin is rebuilt here. Placeholder colour is the recipe's one ::placeholder
-// pseudo, which inline style can't set — the control shows the browser-default
-// placeholder, the sole intended delta from the storybook reference.
+// This preview reimplements the same stories using only shipped bundle exports,
+// reproducing the control's look inline from the exported `vars` token contract (the
+// same values `formControlRecipe({ state, size: "md" })` reads) so nothing touches the
+// VE runtime. `Field` itself is the real shipped component; only the raw input's skin
+// is rebuilt here. Placeholder colour is the recipe's `::placeholder` pseudo, which
+// inline style can't set — the control shows the browser-default placeholder, the
+// sole intended delta from the storybook reference.
 import * as React from "react";
 import { Field, Text, vars } from "@saintly-software/baritone";
 

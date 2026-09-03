@@ -139,9 +139,9 @@ export {
   type TableValue,
   type TableRowFor,
 } from "./components/Table";
-// `DataTable` is intentionally NOT re-exported here — it ships from its own entry
-// point (`@saintly-software/baritone/datatable`) so the main barrel never pulls in
-// the `@tanstack/react-table` peer dependency. See `src/datatable.ts`.
+// `DataTable` is intentionally NOT re-exported here — it ships from its own
+// entry point (`@saintly-software/baritone/datatable`) so the barrel never
+// pulls in the `@tanstack/react-table` peer dependency. See `src/datatable.ts`.
 export {
   MetricCard,
   type MetricCardProps,
@@ -323,15 +323,12 @@ export {
   type InaccessibleTooltipProps,
 } from "./components/InaccessibleTooltip";
 
-// `InternalTooltip` itself is intentionally NOT exported — it's the shared
-// tooltip *surface* that both public tooltips compose. The two exported
-// tooltips differ only in how their trigger is constrained:
-//   • `Tooltip` (above) mandates a `Tooltip.Trigger` button, so the hint is
-//     hover-, focus-, and tap-reachable — the accessible default.
-//   • `InaccessibleTooltip` attaches to an arbitrary element and leaves
-//     reachability to the caller — the bluntly-named escape hatch.
-// Either way, tooltip content must stay supplemental; anything a user actually
-// needs to read should use the exported `Popover` instead.
+// `InternalTooltip` itself is intentionally NOT exported — the shared surface
+// both public tooltips compose, differing only in trigger constraint:
+// `Tooltip` mandates a `Tooltip.Trigger` button (hover/focus/tap-reachable, the
+// accessible default); `InaccessibleTooltip` attaches to an arbitrary element
+// and leaves reachability to the caller. Content must stay supplemental — use
+// `Popover` for anything a user needs to read.
 
 // Theme: contract, factory, default themes, contrast tooling, vocabulary
 export * from "./theme";

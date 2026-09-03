@@ -5,20 +5,18 @@ import { playwright } from "@vitest/browser-playwright";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
-// Absolute path to the repo-root .storybook dir. The Storybook plugin resolves a
-// relative configDir against process.cwd(), which breaks when Vitest is invoked
-// from elsewhere (e.g. a git worktree), so pin it off this config's location.
+// Absolute path to the repo-root .storybook dir — a relative configDir resolves
+// against process.cwd(), which breaks when Vitest runs from elsewhere (e.g. a worktree).
 const storybookConfigDir = resolve(__dirname, "../.storybook");
 
 // Two test "kinds" live side by side as separate Vitest projects:
 //
 //   • unit      — fast component/logic tests (`*.test.{ts,tsx}`) in jsdom.
-//   • storybook — every `*.stories.tsx` rendered in a real Chromium browser via
-//                 Playwright, running each story's `play` function as an
-//                 interaction test (and a render smoke-test for the rest).
+//   • storybook — every `*.stories.tsx` rendered in real Chromium via Playwright,
+//                 running each story's `play` function as an interaction test.
 //
-// Run everything with `pnpm test`, or a single kind with
-// `pnpm test:unit` / `pnpm test:storybook` (`vitest --project <name>`).
+// Run everything with `pnpm test`, or one kind with `pnpm test:unit` /
+// `pnpm test:storybook`.
 export default defineConfig({
   test: {
     projects: [
@@ -35,11 +33,10 @@ export default defineConfig({
         },
       },
       {
-        // The Storybook plugin derives the test files from the `stories` glob in
-        // .storybook/main.ts and pulls in that config's Vite pipeline (incl.
-        // vanilla-extract via viteFinal). Since Storybook 10.3 it also applies
-        // the preview annotations (the theme decorator + parameters) itself, so
-        // no include/plugins/setupFiles are needed here.
+        // The Storybook plugin derives test files from the `stories` glob in
+        // .storybook/main.ts and pulls in that config's Vite pipeline (including
+        // vanilla-extract). Since Storybook 10.3 it also applies preview
+        // annotations itself, so no include/plugins/setupFiles are needed here.
         plugins: [storybookTest({ configDir: storybookConfigDir })],
         test: {
           name: "storybook",
