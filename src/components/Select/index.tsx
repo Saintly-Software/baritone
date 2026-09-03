@@ -40,8 +40,10 @@ export interface SelectOption {
   label: string;
   /** The value committed to `onChange`. */
   value: string;
-  /** Dim + skip this option. Modelled with `aria-disabled` (base-ui), not the
-   * native attribute, so it stays in the listbox's accessibility tree. */
+  /**
+   * Dim + skip this option. Uses `aria-disabled` (base-ui), not the native
+   * attribute, so it stays in the listbox's a11y tree.
+   */
   disabled?: boolean;
 }
 
@@ -53,10 +55,7 @@ export interface SelectOptionGroup {
   options: ReadonlyArray<SelectOption>;
 }
 
-/**
- * `options` accepts either a flat list or an array of `{ label, options }`
- * groups; this narrows which one you passed.
- */
+/** Narrows whether `options` is a flat list or an array of `{ label, options }` groups. */
 function isGrouped(
   options: ReadonlyArray<SelectOption> | ReadonlyArray<SelectOptionGroup>,
 ): options is ReadonlyArray<SelectOptionGroup> {
@@ -65,18 +64,17 @@ function isGrouped(
 }
 
 /**
- * Props common to both the single- and multi-select variants. The
- * `value`/`onChange`/`multiple` triad is intentionally *not* here — it's split
- * across the discriminated union below so the shapes can't drift (single is one
- * `string | null`, multiple is a `string[]`).
+ * Props common to both select variants. The `value`/`onChange`/`multiple` triad
+ * is deliberately not here — it's split across the discriminated union below so
+ * the shapes can't drift (single is `string | null`, multiple is `string[]`).
  */
 interface SelectBaseProps extends Omit<
   React.HTMLAttributes<HTMLButtonElement>,
   "color" | "defaultValue" | "value" | "onChange" | "aria-label" | "aria-labelledby"
 > {
   /**
-   * The options to choose from. Pass a flat `SelectOption[]`, or an array of
-   * `{ label, options }` groups to render options under headings.
+   * The options to choose from — a flat `SelectOption[]`, or an array of
+   * `{ label, options }` groups to render under headings.
    */
   options: ReadonlyArray<SelectOption> | ReadonlyArray<SelectOptionGroup>;
   /** Supplementary text beneath the control, wired as its accessible description. */
@@ -92,10 +90,9 @@ interface SelectBaseProps extends Omit<
   /** Text shown on the trigger when nothing is selected. */
   placeholder?: string;
   /**
-   * Dim + lock the control. Modelled with `aria-disabled` + base-ui's `readOnly`
-   * (not the native `disabled` attribute), so the trigger stays keyboard-focusable
-   * — e.g. it can still be tabbed to and explain itself — while choosing a
-   * different option is vetoed.
+   * Dim + lock the control. Uses `aria-disabled` + base-ui's `readOnly` (not the
+   * native `disabled` attribute), so the trigger stays focusable while choosing
+   * a different option is vetoed.
    */
   disabled?: boolean;
   /** Mark the field as required (sets `aria-required`). */
@@ -118,9 +115,8 @@ export interface SingleSelectProps extends SelectBaseProps {
   /** The selected value, or `null` when nothing is selected (controlled). */
   value: string | null;
   /**
-   * Called with the newly selected value (or `null` when cleared) first and the
-   * raw DOM event that drove the change second (base-ui's native `event`, or the
-   * clear button's).
+   * Called with the newly selected value (or `null` when cleared) first, then
+   * the raw DOM event that drove the change (base-ui's, or the clear button's).
    */
   onChange: (value: string | null, event: Event) => void;
 }
@@ -131,19 +127,17 @@ export interface MultipleSelectProps extends SelectBaseProps {
   /** The selected values (controlled). */
   value: string[];
   /**
-   * Called with the next selected-values array (after a toggle or clear) first
-   * and the raw DOM event that drove the change second (base-ui's native
-   * `event`, or the clear button's).
+   * Called with the next selected-values array (after a toggle or clear) first,
+   * then the raw DOM event that drove the change (base-ui's, or the clear button's).
    */
   onChange: (value: string[], event: Event) => void;
 }
 
 /**
- * Discriminated on `multiple`, so `value` and `onChange` stay in lockstep:
- * `multiple` ⇒ arrays, otherwise a lone `string | null`. TypeScript narrows both
- * from the single `multiple` flag, so a mismatched pair is a compile error.
- * Intersected with `FieldLabellingProps`, so exactly one of `label` /
- * `aria-label` / `aria-labelledby` may name the trigger.
+ * Discriminated on `multiple`, so `value`/`onChange` stay in lockstep: arrays
+ * when `multiple`, otherwise a lone `string | null` — a mismatched pair is a
+ * compile error. Intersected with `FieldLabellingProps`, so exactly one of
+ * `label`/`aria-label`/`aria-labelledby` may name the trigger.
  */
 export type SelectProps = (SingleSelectProps | MultipleSelectProps) & FieldLabellingProps;
 
@@ -209,19 +203,16 @@ function CheckGlyph() {
 
 /**
  * Select — a "form control" element type for picking from a list, built on
- * base-ui's `Select` (listbox semantics, keyboard navigation, typeahead, focus
- * management) and composing `Field` for the label / help / error layout and ARIA
- * wiring, like `TextInput` and `RadioGroup`. It takes a `state`, not
- * intent/saliency, and is named by exactly one of `label` / `aria-label` /
- * `aria-labelledby` (they're mutually exclusive — see `FieldLabellingProps`).
+ * base-ui's `Select` and composing `Field` for label/help/error layout, like
+ * `TextInput` and `RadioGroup`. Named by exactly one of `label`/`aria-label`/
+ * `aria-labelledby` (mutually exclusive — see `FieldLabellingProps`).
  *
- * It's discriminated on `multiple`: a single select commits one `string | null`;
- * a multi select commits a `string[]` and renders each option with a composed
- * `InternalCheckbox` reflecting whether it's chosen. Both offer a clear button
- * (suppress with `hideClearButton`).
+ * Discriminated on `multiple`: single commits `string | null`; multi commits
+ * `string[]` and renders each option with a composed `InternalCheckbox`. Both
+ * offer a clear button (suppress with `hideClearButton`).
  *
- * Disabled follows the system convention: `aria-disabled` + base-ui's `readOnly`
- * rather than the native `disabled` attribute, so the trigger stays focusable.
+ * Disabled uses `aria-disabled` + base-ui's `readOnly`, not the native
+ * `disabled` attribute, so the trigger stays focusable.
  *
  * @example
  * const [value, setValue] = React.useState<string | null>(null);
@@ -275,10 +266,9 @@ export function Select(props: SelectProps) {
     "aria-labelledby": ariaLabelledby,
   };
 
-  // The union is collapsed to a single runtime handler; the casts are safe
-  // because `multiple` decides which arm the caller wired. Both commit paths
-  // carry a raw DOM event: base-ui hands one through `details.event`, and the
-  // clear button forwards its click's `nativeEvent`.
+  // The union collapses to one runtime handler; casts are safe because `multiple`
+  // decides which arm the caller wired. Both paths carry a raw DOM event: base-ui's
+  // `details.event`, or the clear button's `nativeEvent`.
   const emit = onChange as (value: string | string[] | null, event: Event) => void;
   const handleValueChange = (next: string | string[] | null, details: { event: Event }) =>
     emit(next, details.event);
@@ -287,13 +277,12 @@ export function Select(props: SelectProps) {
 
   const hasValue = multiple ? (value as string[]).length > 0 : value != null;
   const showClear = !hideClearButton && hasValue && !disabled && !loading;
-  // Disabled and loading both lock the value the focusable way: base-ui's
-  // `readOnly` vetoes commits while `aria-disabled` carries the semantics.
+  // Disabled and loading lock the value the focusable way: `readOnly` vetoes
+  // commits, `aria-disabled` carries the semantics.
   const locked = disabled || loading;
 
-  // `options` may be flat or grouped. base-ui's `items` prop only needs the flat
-  // set (it maps a value back to its label for the trigger), so flatten for that;
-  // the grouped structure drives the rendered `Group`/`GroupLabel` sections.
+  // base-ui's `items` only needs the flat set (maps a value to the trigger's
+  // label); the grouped structure drives the rendered `Group`/`GroupLabel` sections.
   const flatOptions = isGrouped(options) ? options.flatMap((group) => group.options) : options;
 
   const renderItem = (option: SelectOption) => (

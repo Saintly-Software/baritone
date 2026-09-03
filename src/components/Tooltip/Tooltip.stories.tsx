@@ -4,10 +4,9 @@ import { Icon } from "../Icon";
 import { Tooltip } from "./index";
 
 /**
- * `Tooltip` is the system's **accessible** tooltip. Unlike `InaccessibleTooltip`,
- * its trigger is always a real `<Tooltip.Trigger>` button, so the hint is
- * reachable by hover, keyboard focus, *and* touch. Keep the content strictly
- * supplemental — for anything a user must read, use `Popover`.
+ * `Tooltip` is the system's **accessible** tooltip — unlike `InaccessibleTooltip`,
+ * its trigger is a real `<Tooltip.Trigger>` button reachable by hover, focus,
+ * *and* touch. Keep content supplemental; use `Popover` for anything a user must read.
  */
 const meta: Meta<typeof Tooltip> = {
   title: "Components/Tooltip",

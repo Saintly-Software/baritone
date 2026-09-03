@@ -31,8 +31,7 @@ type Story = StoryObj<typeof TextInput>;
 
 export const Playground: Story = {};
 
-// One message slot now: the copy changes with the state, rather than a help
-// line and an error line coexisting.
+// One message slot: the copy changes with state, rather than separate help and error lines.
 const STATE_MESSAGE: Record<FormState, string | undefined> = {
   neutral: undefined,
   warning: "This value seems unusual.",

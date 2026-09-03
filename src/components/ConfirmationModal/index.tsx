@@ -16,19 +16,17 @@ import {
 type RootProps = React.ComponentProps<typeof BaseDialog.Root>;
 
 /**
- * The intents a `ConfirmationModal` (and its confirm button) may take. A
- * confirmation is a deliberate, often destructive, decision — so the palette is
- * limited to the intents that read as "weigh this": `secondary` (a considered
- * choice), `warning` (proceed with care), and `negative` (destructive, the
- * default). `primary`/`positive`/`neutral` are intentionally excluded — a confirm
- * dialog should never look like a happy-path call to action.
+ * The intents a `ConfirmationModal` (and its confirm button) may take:
+ * `secondary` (a considered choice), `warning` (proceed with care), or
+ * `negative` (destructive, the default). `primary`/`positive`/`neutral` are
+ * excluded — a confirm dialog should never look like a happy-path CTA.
  */
 export type ConfirmationIntent = Extract<Intent, "secondary" | "warning" | "negative">;
 
 /**
- * Props for the confirm/cancel buttons. Built on the solid `Button` API, minus a
- * few knobs the dialog owns: `appearance` (always solid), and `children` is
- * optional here (each action has a sensible default label).
+ * Props for the confirm/cancel buttons: the solid `Button` API minus
+ * `appearance` (always solid). `children` is optional — each action has a
+ * default label.
  */
 type ActionProps = Omit<SolidButtonProps, "appearance" | "children"> & {
   /** Visible label. Defaults to `"Confirm"` / `"Cancel"`. */
@@ -44,9 +42,8 @@ export type ConfirmationConfirmProps = Omit<ActionProps, "intent"> & {
 export type ConfirmationCancelProps = ActionProps;
 
 /**
- * The already-resolved presentational state a `ConfirmationModal` icon render
- * function branches on. The dialog tints its icon by intent, so it exposes that
- * one resolved value.
+ * The resolved state a `ConfirmationModal` icon render function branches on —
+ * just the intent the dialog tints its icon by.
  */
 export interface ConfirmationModalIconState {
   /** The dialog's resolved intent — the colour the icon is tinted to. */
@@ -54,41 +51,32 @@ export interface ConfirmationModalIconState {
 }
 
 export interface ConfirmationModalProps {
-  /**
-   * The title, shown beside the icon. Rendered through `Modal.Header` (base-ui's
-   * `Dialog.Title`), so it also becomes the dialog's accessible name.
-   */
+  /** The title, shown beside the icon. Rendered via `Modal.Header`, so it also becomes the dialog's accessible name. */
   header?: React.ReactNode;
   /** The body — the question/consequences. Typically a short `Text` paragraph. */
   children?: React.ReactNode;
   /**
-   * A leading glyph, tinted to `intent`. Pass a bare glyph
-   * (`icon={<TriangleAlert />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
-   * a custom size/label, or a `(props, state) => …` render function for full
-   * control. Its colour is overridden to match the intent; omit for no icon.
+   * A leading glyph, tinted to `intent`. Pass a bare glyph (auto-wrapped in
+   * `Icon`), an explicit `<Icon>` for a custom size/label, or a render function
+   * for full control. Omit for no icon.
    */
   icon?: IconSlot<ConfirmationModalIconState>;
-  /**
-   * Colour of the icon and the confirm button. Default `negative` (the common
-   * destructive-confirmation case). See {@link ConfirmationIntent}.
-   */
+  /** Colour of the icon and confirm button. Default `negative`. See {@link ConfirmationIntent}. */
   intent?: ConfirmationIntent;
   /**
-   * The confirm action is in flight: the confirm button shows a spinner, and the
-   * dialog locks (Escape, cancel, and the confirm button can't dismiss it) until
-   * it clears. Pair with a controlled `open` so you can close it when the work
-   * resolves.
+   * The confirm action is in flight: the confirm button spins and the dialog
+   * locks (Escape/cancel/confirm can't dismiss it) until it clears. Pair with
+   * a controlled `open` to close it once the work resolves.
    */
   loading?: boolean;
   /**
    * Locks the dialog: both buttons go inert (`aria-disabled`, still focusable)
-   * and it can't be dismissed by any means. Use for an unmet precondition.
+   * and it can't be dismissed. Use for an unmet precondition.
    */
   disabled?: boolean;
   /**
-   * Confirm-button props (label, `intent`, `disabledReason`, `onClick`, …). Its
-   * `onClick` runs before the dialog closes; call `event.preventDefault()` in it
-   * to keep the dialog open (e.g. to run async work and close it yourself later).
+   * Confirm-button props (label, `intent`, `onClick`, …). `onClick` runs before
+   * the dialog closes; call `event.preventDefault()` to keep it open for async work.
    */
   confirm?: ConfirmationConfirmProps;
   /** Cancel-button props. Its `onClick` runs as the dialog dismisses. */
@@ -97,10 +85,7 @@ export interface ConfirmationModalProps {
   handleConfirm?: React.MouseEventHandler<HTMLButtonElement>;
   /** Shorthand for `cancel={{ onClick }}`. Chained after `cancel.onClick`. */
   handleCancel?: React.MouseEventHandler<HTMLButtonElement>;
-  /**
-   * The element that opens the dialog — typically a `<ConfirmationModal.Trigger>`.
-   * Required in uncontrolled use; optional when driving `open` yourself.
-   */
+  /** The element that opens the dialog — typically a `<ConfirmationModal.Trigger>`. Required unless you drive `open` yourself. */
   trigger?: React.ReactNode;
   /** Controlled open state. */
   open?: RootProps["open"];
@@ -132,22 +117,20 @@ function chain<E>(
 }
 
 /**
- * ConfirmationModal — a focused confirm/cancel dialog built on {@link Modal}. Use
- * it to gate a deliberate action (delete, discard, sign out) behind an explicit
+ * ConfirmationModal — a focused confirm/cancel dialog built on {@link Modal}.
+ * Gates a deliberate action (delete, discard, sign out) behind an explicit
  * "are you sure?".
  *
- * It's a thin preset over `Modal`: the surface, focus trap, Escape/backdrop
- * behaviour, and ARIA wiring all come from `Modal`. On top it lays out an
- * intent-tinted `icon` + `header`, the body, and a footer with a **cancel**
- * button (dismisses) and a **confirm** button (coloured by `intent`, `high`
- * saliency).
+ * A thin preset over `Modal`: the surface, focus trap, Escape/backdrop, and
+ * ARIA wiring come from there. On top it lays out an intent-tinted `icon` +
+ * `header`, the body, and a footer with a **cancel** button (dismisses) and a
+ * **confirm** button (coloured by `intent`, `high` saliency).
  *
- * Give it actions two ways: full {@link ConfirmationConfirmProps}/
- * {@link ConfirmationCancelProps} via `confirm`/`cancel`, or the
- * `handleConfirm`/`handleCancel` callback shorthands. Confirm dismisses the
- * dialog by default; for an async confirm, call `event.preventDefault()` in the
- * handler and close it yourself once the work resolves (`loading` shows the
- * spinner and locks the dialog meanwhile).
+ * Pass actions via `confirm`/`cancel` ({@link ConfirmationConfirmProps}/
+ * {@link ConfirmationCancelProps}) or the `handleConfirm`/`handleCancel`
+ * shorthands. Confirm dismisses by default; call `event.preventDefault()` for
+ * an async confirm and close it yourself once the work resolves (`loading`
+ * shows the spinner and locks the dialog meanwhile).
  *
  * @example
  * <ConfirmationModal
@@ -179,9 +162,8 @@ function ConfirmationModalRoot({
   className,
   ref,
 }: ConfirmationModalProps) {
-  // While busy (confirming or hard-disabled) the dialog is non-dismissable: Modal
-  // already vetoes Escape / close / backdrop when `disabled`, so route both states
-  // through it.
+  // While busy the dialog is non-dismissable: Modal already vetoes Escape/close/
+  // backdrop when `disabled`, so route both states through it.
   const busy = loading || disabled;
 
   const {
@@ -199,10 +181,9 @@ function ConfirmationModalRoot({
     ...cancelRest
   } = cancel ?? {};
 
-  // The confirm button closes the dialog after its handler runs — unless the
-  // handler calls `preventDefault()` (async-confirm escape hatch). We render it as
-  // a base-ui `Dialog.Close` purely to obtain the close callback, then gate it
-  // ourselves rather than letting the Close fire unconditionally.
+  // Closes the dialog after its handler runs, unless `preventDefault()` was
+  // called. Rendered as `Dialog.Close` only to obtain the close callback, which
+  // we gate ourselves rather than letting it fire unconditionally.
   const confirmButton = (
     <BaseDialog.Close
       render={(htmlAttrs) => {
@@ -271,9 +252,9 @@ function ConfirmationModalRoot({
 ConfirmationModalRoot.displayName = "ConfirmationModal";
 
 /**
- * The trigger that opens the dialog — a `Button` (all of Button's intents /
- * saliencies / sizes / icons). Must be passed via `<ConfirmationModal trigger=…>`
- * so it sits inside the dialog's context. The same part as `Modal.Trigger`.
+ * The trigger that opens the dialog — a `Button` with all of Button's intents,
+ * saliencies, sizes, and icons. Must be passed via `<ConfirmationModal trigger=…>`
+ * so it sits inside the dialog's context. Same part as `Modal.Trigger`.
  */
 export type ConfirmationModalTriggerProps = ButtonProps;
 
@@ -281,10 +262,7 @@ function ConfirmationModalTrigger(props: ConfirmationModalTriggerProps) {
   return <Modal.Trigger {...props} />;
 }
 
-/**
- * A control that dismisses the dialog from the body — e.g. an inline "keep it".
- * The same part as `Modal.Close`.
- */
+/** A control that dismisses the dialog from the body — e.g. an inline "keep it". Same part as `Modal.Close`. */
 export type ConfirmationModalCloseProps = ButtonProps;
 
 function ConfirmationModalClose(props: ConfirmationModalCloseProps) {

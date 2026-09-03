@@ -4,33 +4,32 @@ import { iconColorVar, textColorVar } from "../../styles/vars.css";
 import { INTENTS, SALIENCIES, SURFACE_SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-// Resolved colours are funnelled through local vars so the base style can stay
+// Resolved colours are funnelled through local vars so the base style stays
 // flat while the intent×saliency compound variants just set the values.
 const bgc = createVar();
 const fg = createVar();
 const bd = createVar();
 
 /**
- * A Notice's saliency maps onto the `component` saliency it borrows its palette
- * from — the same tokens `Chip`/`Button` use:
- *   - `high` → component **`mid`** (a washed fill, like a mid-saliency Button),
- *   - `low`  → component **`low`** (the subtle, near-transparent shade).
- * A Notice never uses the component's loud `high` fill — a callout shouldn't
- * shout like a primary button.
+ * A Notice's saliency maps onto the `component` saliency it borrows its
+ * palette from (same tokens as `Chip`/`Button`): `high` → component **`mid`**
+ * (a washed fill), `low` → component **`low`** (the subtle, near-transparent
+ * shade). Never the loud `high` fill — a callout shouldn't shout like a
+ * primary button.
  */
 const COMPONENT_SALIENCY = { high: "mid", low: "low" } as const;
 
 /**
- * Notice root recipe — a block-level callout that borrows the `component` colour
- * scheme (shared with `Chip`/`Button`) rather than the washed `surface` palette,
- * so `<Notice intent="warning">` matches a Button/Chip of the same intent at the
- * mapped saliency (see {@link COMPONENT_SALIENCY}). Unlike `componentIntentRecipe`
- * it's static (no hover/active) since a Notice is a container, not a control. The
- * resolved foreground is published as `--iconColor`/`--textColor` so a nested
+ * Notice root recipe — a block-level callout that borrows the `component`
+ * colour scheme (shared with `Chip`/`Button`) rather than the `surface`
+ * palette, so `<Notice intent="warning">` matches a same-intent Button/Chip
+ * at the mapped saliency (see {@link COMPONENT_SALIENCY}). Static (no
+ * hover/active), since a Notice is a container, not a control. The resolved
+ * foreground publishes as `--iconColor`/`--textColor` so a nested
  * `Icon`/`Text` matches automatically.
  *
- * The `shape` knob mirrors `Chip`: `square` (default) keeps the shared component
- * radius; `pill` fully rounds the ends.
+ * `shape` mirrors `Chip`: `square` (default) keeps the shared radius; `pill`
+ * fully rounds the ends.
  */
 export const noticeRecipe = recipe({
   base: {
@@ -50,8 +49,8 @@ export const noticeRecipe = recipe({
     vars: { [iconColorVar]: fg, [textColorVar]: fg },
   },
   variants: {
-    // Intent/saliency are pure selectors for the compound variants below; the
-    // colour is set there so the two axes stay in lockstep.
+    // Pure selectors — colour is set in the compound variants below so the
+    // two axes stay in lockstep.
     intent: Object.fromEntries(INTENTS.map((intent) => [intent, {}])) as Record<
       (typeof INTENTS)[number],
       Record<string, never>
@@ -65,15 +64,15 @@ export const noticeRecipe = recipe({
       pill: { borderRadius: vars.radius.full },
     },
     inline: {
-      // Block banner (default) fills its container width; `inline` shrinks the
-      // notice to its content so it can sit within a line of layout.
+      // Block (default) fills the container width; `inline` shrinks to its
+      // content so it can sit within a line of layout.
       false: {},
       true: { display: "inline-flex" },
     },
     disabled: {
-      // Dim the whole callout; its interactive parts (actions/close) also go inert
-      // via context. `opacity` on the container is fine — a Notice is presentational,
-      // not a form control, so there's no token'd disabled palette to reach for.
+      // Dims the whole callout (actions/close go inert separately via
+      // context). Plain `opacity` is fine — a Notice is presentational, not
+      // a form control with a token'd disabled palette.
       false: {},
       true: { opacity: 0.6 },
     },
@@ -109,7 +108,7 @@ export const noticeBody = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[1],
-  // Let a long title/description ellipsize rather than push the flex row wide.
+  // Lets a long title/description ellipsize instead of stretching the row.
   minWidth: 0,
   flex: 1,
 });
@@ -125,7 +124,7 @@ export const noticeHeader = style({
   alignItems: "center",
   gap: vars.space[2],
   flexWrap: "wrap",
-  // Let a long title truncate rather than shove the chip off the row.
+  // Lets a long title truncate instead of shoving the chip off the row.
   minWidth: 0,
 });
 
@@ -138,11 +137,10 @@ export const noticeActions = style({
 });
 
 /**
- * `Notice.Icon` colour override. By default a notice icon inherits the notice's
- * foreground through `--iconColor`; passing an `intent` republishes `--iconColor`
- * on the icon itself at the given `component` `intent`×`saliency` token, so the
- * `Icon`'s own `color` (which reads `--iconColor`) picks up the override. Mirrors
- * `chipAdornmentRecipe`'s intent-override mechanism.
+ * `Notice.Icon` colour override. By default the icon inherits the notice's
+ * foreground via `--iconColor`; passing `intent` republishes `--iconColor` on
+ * the icon at the given `component` token, which its own `color` then picks
+ * up. Mirrors `chipAdornmentRecipe`'s intent-override mechanism.
  */
 export const noticeIconRecipe = recipe({
   variants: {
@@ -168,11 +166,10 @@ export const noticeIconRecipe = recipe({
 export type NoticeIconRecipeVariants = NonNullable<RecipeVariants<typeof noticeIconRecipe>>;
 
 /**
- * `Notice.Action` layout tweak on top of the shared component scheme. The colour
- * (`componentIntentRecipe`), box + size (`componentTypographyRecipe`), and focus
- * ring are the same ones `Button` uses, so an action looks like a small button;
- * this recipe only squares the box for the icon-only form (equal padding, a 1:1
- * aspect) so a lone glyph isn't stretched wide by the size's inline padding.
+ * `Notice.Action` layout tweak on top of the shared component scheme. Colour,
+ * box/size, and focus ring are the same ones `Button` uses, so an action
+ * looks like a small button; this only squares the box for the icon-only
+ * form so a lone glyph isn't stretched wide by the size's inline padding.
  */
 export const noticeActionRecipe = recipe({
   base: {},
@@ -189,11 +186,10 @@ export type NoticeActionRecipeVariants = NonNullable<RecipeVariants<typeof notic
 
 /**
  * `Notice.Close` — the bare "×" dismiss button in the notice's top corner.
- * Chromeless (no fill or border): it inherits the notice's foreground through the
- * published `--iconColor` and just dims at rest, brightening on hover. A fixed
- * square keeps it a comfortable hit target. Mirrors the interactive
- * `chipAdornmentRecipe` look, standalone. Inert (`aria-disabled`) when a disabled
- * Notice makes it so — dimmer still, `not-allowed`.
+ * Chromeless: it inherits the notice's foreground via `--iconColor`, dimmed
+ * at rest and brightening on hover. A fixed square keeps it a comfortable
+ * hit target. Inert (`aria-disabled`) when a disabled Notice makes it so —
+ * dimmer still, `not-allowed`.
  */
 export const noticeClose = style({
   display: "inline-flex",

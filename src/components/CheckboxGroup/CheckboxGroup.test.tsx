@@ -7,8 +7,8 @@ import { CheckboxGroup } from "./index";
 
 type Topic = "product" | "billing" | "security";
 
-// A tiny controlled host mirroring the documented usage, so the type-safe
-// render-prop pattern is exercised exactly as a consumer would write it.
+// A tiny controlled host mirroring documented usage, so the type-safe
+// render-prop pattern is exercised as a consumer would write it.
 function Subscriptions({
   value: initial = [],
   onChange,
@@ -193,7 +193,7 @@ describe("CheckboxGroup", () => {
     it("keeps helpText wired when the state turns invalid", () => {
       render(<Subscriptions helpText="Pick any that apply" state="invalid" />);
       // The one line stays in `aria-describedby` across states — it changes
-      // colour, it doesn't leave and re-enter the description.
+      // colour, not leaves and re-enters the description.
       expect(describedByText(screen.getByRole("group"))).toEqual(["Pick any that apply"]);
     });
 

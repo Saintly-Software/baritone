@@ -21,14 +21,12 @@ export type CheckboxGroupOrientation = "vertical" | "horizontal";
 
 /**
  * Shared knobs the group hands down to every `CheckboxGroupItem` via context, so
- * an item never has to repeat the group's `size` / `state` / `disabled`, and the
- * item can read the current selection + toggle it without the group re-creating
- * a component per render. The render-prop only carries the *type* `T`; the
- * runtime config flows through here.
+ * an item never repeats the group's `size`/`state`/`disabled` and can read +
+ * toggle the selection without the group re-creating a component per render.
  *
- * The selection (`value` / `toggle`) is type-erased to `unknown` here on
- * purpose: the public `CheckboxGroupItem` is bound to the group's `T` at the
- * type level (see `CheckboxGroup`), so an item only ever feeds back a `T`.
+ * `value`/`toggle` are type-erased to `unknown` on purpose: the public
+ * `CheckboxGroupItem` is bound to the group's `T` at the type level, so an
+ * item only ever feeds back a `T`.
  */
 interface CheckboxGroupItemContextValue {
   size: Size;
@@ -77,16 +75,14 @@ function defaultLabel(value: unknown): React.ReactNode {
 }
 
 /**
- * One checkbox option. Stable module-level component (not re-created per render)
- * so React reconciles it normally; type-narrowing to `T` happens purely at the
- * type level where the group hands it to the render-prop.
+ * One checkbox option. A stable module-level component (not re-created per
+ * render) so React reconciles it normally; narrowing to `T` happens purely at
+ * the type level where the group hands it to the render-prop.
  *
- * Behaviourally it's the same row as the standalone `Checkbox` — base-ui's
- * `Checkbox.Root` owns the role / keyboard / form wiring, `InternalCheckbox`
- * owns the look, and the box is named explicitly with `aria-labelledby` because
- * base-ui's hidden `<input>` is `aria-hidden`. The only difference is that
- * checked state and toggling are driven by the group's selection array (via
- * context) instead of a local boolean.
+ * Same row as the standalone `Checkbox` (base-ui's `Checkbox.Root` for role/
+ * keyboard/form wiring, `InternalCheckbox` for the look, `aria-labelledby`
+ * since base-ui's hidden `<input>` is `aria-hidden`), except checked state and
+ * toggling come from the group's selection array via context.
  */
 function CheckboxGroupItem<T>({
   value,
@@ -102,9 +98,8 @@ function CheckboxGroupItem<T>({
     toggle,
   } = React.useContext(CheckboxGroupItemContext);
   const itemDisabled = groupDisabled || disabled;
-  // Membership decides checked state. Identity is `===` (via `includes`), which
-  // is exactly right for the strings / numbers / enums these options are meant
-  // to be; object values would compare by reference.
+  // Membership decides checked state, via `===` identity (`includes`) — right
+  // for the strings/numbers/enums these options are meant to hold.
   const checked = selected.includes(value);
   const labelId = React.useId();
   const content = children ?? defaultLabel(value);
@@ -114,13 +109,13 @@ function CheckboxGroupItem<T>({
       <BaseCheckbox.Root
         checked={checked}
         onCheckedChange={(next, details) => toggle(value, next, details.event)}
-        // `readOnly` + `aria-disabled` (not `disabled`) so a disabled box stays in
-        // the tab order and reachable, while base-ui vetoes the toggle.
+        // `readOnly` + `aria-disabled` (not `disabled`) keeps a disabled box
+        // reachable while base-ui vetoes the toggle.
         readOnly={itemDisabled}
         aria-disabled={itemDisabled || undefined}
         aria-labelledby={content != null ? labelId : undefined}
-        // base-ui now reports `data-readonly`, not `data-disabled`, so the box's
-        // dim is driven explicitly from the prop.
+        // base-ui reports `data-readonly`, not `data-disabled`, so dim is
+        // driven explicitly from the prop.
         render={
           <InternalCheckbox checked={checked} disabled={itemDisabled} state={state} size={size} />
         }
@@ -143,9 +138,9 @@ interface CheckboxGroupBaseProps<T> {
    */
   onChange: (value: T[], event: Event) => void;
   /**
-   * Render-prop children. Receives a `CheckboxGroupItem` already bound to this
-   * group's `T`, so every `<CheckboxGroupItem value={...} />` is type-checked
-   * against the same union/enum the group's `value` came from.
+   * Render-prop children, receiving a `CheckboxGroupItem` bound to this
+   * group's `T` — every `<CheckboxGroupItem value={...} />` is type-checked
+   * against it.
    */
   children: (props: {
     CheckboxGroupItem: (props: CheckboxGroupItemProps<T>) => React.ReactNode;
@@ -163,9 +158,9 @@ interface CheckboxGroupBaseProps<T> {
   /** Per-slot overrides for the label / help-text pieces. */
   slotProps?: FieldSlotProps;
   /**
-   * Mark the group required — shows the `Field`'s visual asterisk and announces
-   * "Required" via the group's description (`role="group"` can't take
-   * `aria-required`, and per-box would wrongly imply *every* box is required).
+   * Mark the group required: shows the `Field`'s asterisk and announces
+   * "Required" via the description — `role="group"` has no `aria-required`,
+   * and per-box would wrongly imply every box is required.
    */
   required?: boolean;
   /** Disable the whole group. */
@@ -183,21 +178,19 @@ interface CheckboxGroupBaseProps<T> {
 export type CheckboxGroupProps<T> = CheckboxGroupBaseProps<T> & FieldLabellingProps;
 
 /**
- * CheckboxGroup — a "form control" element type for picking *any number* of
- * values from a small set. It's the multi-select sibling of `RadioGroup`: same
- * `Field`-composed label / help / error layout, same type-safe compound API, but
- * the selection is an *array* and each option is an independent checkbox (no
- * roving focus — every box is its own tab stop).
+ * CheckboxGroup — a "form control" for picking *any number* of values from a
+ * small set. The multi-select sibling of `RadioGroup`: same `Field`-composed
+ * layout and type-safe compound API, but the selection is an array and each
+ * option is an independent checkbox (no roving focus — every box its own tab
+ * stop).
  *
- * It's a **type-safe compound component**: the group is generic over the value
- * type `T` (inferred from `value`), and hands the render-prop a
- * `CheckboxGroupItem` bound to that `T`. So the options can only ever be values
- * from the same union/enum — works for any enum, not just one. See
- * https://tkdodo.eu/blog/building-type-safe-compound-components
+ * A **type-safe compound component**: generic over the value type `T`
+ * (inferred from `value`), handing the render-prop a `CheckboxGroupItem`
+ * bound to that `T`, so options can only be values from the same union/enum.
+ * See https://tkdodo.eu/blog/building-type-safe-compound-components
  *
- * Each row is the same box + label as the standalone `Checkbox` (built on
- * base-ui's `Checkbox.Root` + `InternalCheckbox`); the group itself is a
- * labelled `role="group"`, so the whole control reads as one named set.
+ * Each row is the same box + label as the standalone `Checkbox`; the group
+ * itself is a labelled `role="group"`, so it reads as one named set.
  *
  * @example
  * type Topic = "product" | "billing" | "security";
@@ -241,8 +234,8 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     "aria-labelledby": ariaLabelledby,
   };
 
-  // `onChange` is referenced from `toggle` below; keep the latest in a ref so the
-  // memoised context value doesn't have to change identity on every `onChange`.
+  // Keep latest `onChange` in a ref so the memoised context value doesn't
+  // change identity on every `onChange`.
   const onChangeRef = React.useRef(onChange);
   onChangeRef.current = onChange;
 
@@ -274,21 +267,17 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
       slotProps={slotProps}
     >
       {/*
-        The group is a bare `<div role="group">`, which base-ui's field context
-        can't see — so, unlike `RadioGroup`, it takes its naming and description
-        wiring from the render prop by hand.
+        A bare `<div role="group">` that base-ui's field context can't see, so
+        it takes naming/description wiring from the render prop by hand.
       */}
       {({ nameAttrs, describedBy }) => (
         <CheckboxGroupItemContext.Provider value={itemContext}>
           <div
             role="group"
             {...nameAttrs}
-            // `role="group"` can't carry the announced-required half: ARIA doesn't
-            // support `aria-required` on it, and putting it per-item would wrongly
-            // mean *every* box is required. So `required` rides the group's
-            // description — a visually-hidden "Required" node wired into
-            // `aria-describedby`, alongside the visual asterisk the `Field` renders
-            // (AGENTS.md: "required goes on both").
+            // ARIA has no `aria-required` for `role="group"`, and per-item would
+            // wrongly imply every box is required — so `required` rides the
+            // group's description instead (AGENTS.md: "required goes on both").
             aria-describedby={joinIds(
               required ? requiredHintId : undefined,
               ariaDescribedby,
@@ -302,8 +291,8 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
               </span>
             )}
             {children({
-              // The stable generic item, narrowed to this group's `T`. The cast is
-              // purely a type-level instantiation — the runtime function is the same.
+              // The generic item narrowed to this group's `T` — a type-level
+              // cast only; the runtime function is the same.
               CheckboxGroupItem: CheckboxGroupItem as (
                 props: CheckboxGroupItemProps<T>,
               ) => React.ReactNode,

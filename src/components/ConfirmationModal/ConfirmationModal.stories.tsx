@@ -115,11 +115,9 @@ export const Controlled: Story = {
         >
           <Text render={<p />}>Your account and all associated data will be removed.</Text>
         </ConfirmationModal>
-        {/*
-          When you drive `open` yourself, the opener lives outside the dialog, so
-          it's a plain `Button` — not `ConfirmationModal.Trigger` (a base-ui
-          `Dialog.Trigger`, which must sit inside the dialog via the `trigger` prop).
-        */}
+        {/* Driving `open` yourself means the opener lives outside the dialog, so
+            it's a plain `Button`, not `ConfirmationModal.Trigger` (a base-ui
+            `Dialog.Trigger`, which must sit inside the dialog via `trigger`). */}
         <Button intent="negative" saliency="high" onClick={() => setOpen(true)}>
           Delete account
         </Button>

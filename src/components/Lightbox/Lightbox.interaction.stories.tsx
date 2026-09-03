@@ -4,9 +4,8 @@ import { Icon } from "../Icon";
 import { Lightbox } from "./index";
 
 /**
- * Interaction coverage for `Lightbox`. These stories drive the overlay with a
- * `play` function and assert the result, so they double as Storybook interaction
- * tests and Chromatic snapshot drivers.
+ * Interaction coverage for `Lightbox`. The `play` functions drive the overlay
+ * and assert the result, doubling as Storybook interaction tests and Chromatic snapshot drivers.
  */
 const ExpandGlyph = () => (
   <Icon>
@@ -38,9 +37,8 @@ const withTrigger = () => (
 );
 
 /**
- * Pressing the trigger opens the overlay and reveals the image at full size. The
- * overlay portals to the body, so the `play` queries the document, not the
- * canvas.
+ * Pressing the trigger opens the overlay and reveals the image at full size.
+ * It portals to the body, so `play` queries the document, not the canvas.
  */
 export const OpensFromTrigger: Story = {
   name: "Opens from the trigger",

@@ -1,10 +1,7 @@
-// NOTE: intentionally NOT a `"use client"` module. Unlike the other components
-// (which lean on base-ui hooks), this is a pure wrapper — it computes a set of
-// inline CSS custom properties from tokens and renders one element. Keeping it
-// server-compatible means it can go straight into an SSR root layout (e.g. a
-// Next.js Server Component) where per-tenant tokens are resolved on the server
-// and inlined into the first paint — no client boundary, no flash, no hydration
-// mismatch.
+// NOTE: intentionally NOT a `"use client"` module. Unlike other components,
+// this is a pure wrapper computing inline CSS vars from tokens, which keeps it
+// SSR-safe — per-tenant tokens resolve server-side with no client boundary,
+// flash, or hydration mismatch.
 import * as React from "react";
 import {
   type BorderWidthOptions,
@@ -33,8 +30,8 @@ export interface BaritoneThemeProps
   scheme: "light" | "dark";
   /**
    * Render as a different element (base-ui `render` pattern) instead of the
-   * default wrapping `<div>` — e.g. apply the theme straight onto your `<body>`
-   * to avoid an extra element: `render={<body />}`.
+   * default `<div>` — e.g. `render={<body />}` to apply the theme straight onto
+   * your `<body>`.
    */
   render?: RenderProp;
   ref?: React.Ref<HTMLDivElement>;
@@ -42,15 +39,15 @@ export interface BaritoneThemeProps
 
 /**
  * BaritoneTheme — apply a theme scope by mapping `tokens` to inline CSS custom
- * properties on an element. This is the runtime counterpart to the build-time
- * `createDesignSystemTheme` class: it needs neither the vanilla-extract compiler
+ * properties on an element. The runtime counterpart to the build-time
+ * `createDesignSystemTheme` class: needs neither the vanilla-extract compiler
  * nor a pre-generated class, so it suits brands whose values only arrive at
  * runtime (per-tenant colours, user-supplied tokens).
  *
- * Scopes nest — a subtree can be wrapped in its own `BaritoneTheme` to use a
- * different brand or `scheme`. Remember to import the pre-compiled stylesheet
- * once at your app root (`import "@saintly-software/baritone/styles.css"`); this
- * component only supplies the token *values*, not the component styles.
+ * Scopes nest — wrap a subtree in its own `BaritoneTheme` for a different brand
+ * or `scheme`. Import the pre-compiled stylesheet once at your app root
+ * (`import "@saintly-software/baritone/styles.css"`); this component only
+ * supplies the token *values*, not the component styles.
  *
  * @example
  * // Next.js App Router root layout (Server Component)
@@ -80,13 +77,11 @@ export function BaritoneTheme({
   ref,
   ...rest
 }: BaritoneThemeProps) {
-  // `isolation: isolate` makes this scope its own stacking context, so any
-  // z-indexed app content stays contained below the popups base-ui portals to
-  // the end of `<body>` (Tooltip/Popover/Menu/Select/Combobox/Modal/Drawer).
-  // Those surfaces therefore need no z-index of their own — they stack above the
-  // page by DOM order. Listed first so a consumer `style` can still override it.
-  // Consumer `style` spreads last so brand vars stay set while callers can still
-  // add layout styles (or deliberately override a single `--var`).
+  // `isolation: isolate` makes this scope its own stacking context, so
+  // z-indexed app content stays below the popups base-ui portals to `<body>`'s
+  // end (Tooltip/Popover/Menu/etc.) — those need no z-index of their own.
+  // Listed first so a consumer `style` can override it; `style` spreads last so
+  // brand vars stay set while callers can still add layout styles.
   const themeStyle = {
     isolation: "isolate" as const,
     ...createInlineTheme(tokens, {

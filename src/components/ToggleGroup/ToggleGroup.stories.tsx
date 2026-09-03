@@ -13,9 +13,9 @@ import { ToggleGroup } from "./index";
 
 type View = "list" | "board" | "calendar";
 
-// Throwaway glyphs so the icon stories have something to render. Each is a bare
-// `<svg>`: the segment's icon props wrap it in `<Icon>` internally, so it inherits
-// the segment's text colour and sizing, exactly as a consumer's glyph would.
+// Throwaway glyphs for the icon stories. Each is a bare `<svg>`; the segment's
+// icon props wrap it in `<Icon>` internally, so it inherits colour/sizing like
+// a consumer's glyph would.
 const ListGlyph = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z" />
@@ -32,20 +32,18 @@ const CalendarGlyph = () => (
   </svg>
 );
 
-// The knobs both hosts forward, minus the naming: each host below picks exactly
-// one naming prop for itself, since they're mutually exclusive. `DistributiveOmit`
-// (not the built-in `Omit`) is what keeps those arms apart while stripping them —
-// a plain `Omit` over a union collapses it into one object with every arm's keys.
-// `clearable` is stripped too: these hosts are strict single-select, so they never
-// forward it (leaving it in would drag `value`/`onChange` toward the nullable arm).
+// The knobs both hosts forward, minus naming (each host picks its own naming
+// prop) and `clearable` (these hosts are strict single-select).
+// `DistributiveOmit` — not the built-in `Omit` — keeps the naming union's arms
+// apart while stripping them; a plain `Omit` would collapse the union into one
+// object with every arm's keys.
 type ViewToggleKnobs = DistributiveOmit<
   React.ComponentProps<typeof ToggleGroup<View>>,
   "value" | "onChange" | "clearable" | "children" | "label" | "aria-label" | "aria-labelledby"
 >;
 
-// ToggleGroup is controlled, so the stories drive it from local state — the same
-// shape a consumer would use. This is the *toolbar* host: no visible label, so it
-// names itself with `aria-label`.
+// ToggleGroup is controlled, so the stories drive it from local state. This is
+// the *toolbar* host: no visible label, named via `aria-label`.
 function ViewToggle({
   "aria-label": ariaLabel = "View",
   ...props
@@ -112,9 +110,8 @@ export const Sizes: Story = {
   ),
 };
 
-// A labelled form-control host: same segmented control, now with a group label,
-// inline help, and validation wiring — the form-control mode from DES-40. Named
-// by a visible `label` instead of `aria-label`.
+// A labelled form-control host: adds a group label, inline help, and
+// validation wiring (the form-control mode from DES-40), named via `label`.
 function LabelledViewToggle({ label, ...props }: ViewToggleKnobs & { label: React.ReactNode }) {
   const [value, setValue] = React.useState<View>("board");
   return (
@@ -136,9 +133,8 @@ export const FormControl: Story = {
   ),
 };
 
-// A `clearable` host: starts with nothing selected, and re-pressing the active
-// segment clears it back to that empty state. `value` and `onChange` are widened
-// to `View | null`.
+// A `clearable` host: starts unselected, and re-pressing the active segment
+// clears it back to that state. `value`/`onChange` widen to `View | null`.
 function ClearableViewToggle(props: ViewToggleKnobs & { "aria-label"?: string }) {
   const { "aria-label": ariaLabel = "View", ...rest } = props;
   const [value, setValue] = React.useState<View | null>(null);
@@ -159,9 +155,8 @@ export const Clearable: Story = {
   render: () => <ClearableViewToggle />,
 };
 
-// Labelled segments with a leading icon — the common case. The icon/label gap and
-// vertical alignment are owned by the shared button slot (`InternalButton`), so
-// callers don't hand-tune spacing inside `children`.
+// Labelled segments with a leading icon — the common case. Icon/label spacing
+// is owned by the shared button slot, so callers don't hand-tune it.
 function IconedViewToggle() {
   const [value, setValue] = React.useState<View>("board");
   return (
@@ -195,9 +190,8 @@ export const WithIcons: Story = {
   },
 };
 
-// Icon-only segments: `icon` replaces the label, so each segment's `aria-label`
-// is *required* and becomes its whole accessible name — the mirror of an
-// icon-only `Button`. Each button is squared to a 1:1 box.
+// Icon-only segments: `icon` replaces the label, so `aria-label` is *required*
+// as the whole accessible name — mirrors icon-only `Button`. Squared to 1:1.
 function IconOnlyViewToggle() {
   const [value, setValue] = React.useState<View>("board");
   return (
@@ -225,16 +219,14 @@ export const IconOnly: Story = {
   },
 };
 
-// The vertical arm: segments stacked in a column, arrow-navigated Up/Down. Left
-// as an intrinsic-width (shrink-wrapped) group so the `align-items: stretch`
-// is visible — every segment shares the widest label's width.
+// The vertical arm: segments stacked in a column, arrow-navigated Up/Down.
+// Left shrink-wrapped so `align-items: stretch` is visible.
 export const Vertical: Story = {
   render: () => <ViewToggle orientation="vertical" aria-label="View (vertical)" />,
 };
 
-// A vertical group asked to *fill* a fixed-width sidebar — `width="fill"` spans
-// the container, and `align-items: stretch` makes each segment share that width.
-// The dashed box stands in for the sidebar.
+// A vertical group filling a fixed-width sidebar — `width="fill"` spans the
+// container, `align-items: stretch` shares that width. Dashed box = sidebar.
 export const VerticalFilled: Story = {
   render: () => (
     <div
@@ -250,8 +242,7 @@ export const VerticalFilled: Story = {
   ),
 };
 
-// A *horizontal* group asked to fill: the segments grow to share the width
-// (rather than huddling natural-width at the inline-start with a trailing gap).
+// A *horizontal* group asked to fill: segments grow to share the width.
 export const HorizontalFilled: Story = {
   render: () => (
     <div
@@ -267,9 +258,8 @@ export const HorizontalFilled: Story = {
   ),
 };
 
-// Sanity-check the `size` variants stacked in a column: the focus ring (an
-// `outline`, so it never shifts layout) must not clip against the segment above
-// or below. Tab into each group and arrow down to see the ring between segments.
+// Sanity-check `size` variants stacked in a column: the focus ring (an
+// `outline`, never shifting layout) must not clip against the segment above/below.
 export const VerticalSizes: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 24, justifyItems: "start" }}>
@@ -287,9 +277,8 @@ export const VerticalSizes: Story = {
 
 const LABEL_POSITIONS: LabelPosition[] = ["top", "start", "end"];
 
-// Form-control mode in a column, across every `labelPosition` — the awkward
-// layout case. The label, the inline help, and (in the second row) the invalid
-// state must all still sit where they should when the group itself is vertical.
+// Form-control mode across every `labelPosition` — the awkward layout case
+// where the label, help, and invalid state must still sit right when vertical.
 export const VerticalFormControl: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 32, justifyItems: "start" }}>

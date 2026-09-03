@@ -2,16 +2,16 @@ import { style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
-// The trigger's trailing zone holds the chevron (and, when busy, a spinner in its
-// place). The clear button is the same footprint, floated just inside it.
+// The trigger's trailing zone holds the chevron (or, when busy, a spinner).
+// The clear button shares that footprint, floated just inside it.
 const chevronZone = "1.25rem";
 const clearZone = "1.5rem";
 
 /**
- * Layout layer over the shared `formControlRecipe`: the trigger is a `<button>`,
- * so it needs the flex row (value on the start, chevron on the end) and the
- * start-aligned text that the base input recipe doesn't provide. Colour, sizing,
- * border, and the `aria-disabled` dimming all come from `formControlRecipe`.
+ * Layout layer over the shared `formControlRecipe`: adds the flex row (value
+ * on the start, chevron on the end) and start-aligned text a `<button>`
+ * trigger needs but the base input recipe doesn't provide. Colour, sizing,
+ * border, and `aria-disabled` dimming all come from `formControlRecipe`.
  */
 export const selectTrigger = style({
   display: "flex",
@@ -53,10 +53,9 @@ export const selectEndAdornments = style({
 });
 
 /**
- * An empty, in-flow spacer the size of the clear button. Keeping the reservation
- * in normal flow means the chevron stays pinned to the trigger's end and the
- * value text truncates before the (absolutely-positioned) clear button — no
- * per-size padding maths on the value itself.
+ * An empty, in-flow spacer the size of the clear button — keeps the chevron
+ * pinned to the trigger's end and lets the value text truncate before the
+ * (absolutely-positioned) clear button, with no per-size padding maths.
  */
 export const selectClearSlot = style({
   width: clearZone,
@@ -87,9 +86,9 @@ export const selectSpinner = style({
 });
 
 /**
- * The clear button, floated over the reserved slot just inside the chevron. Sits
- * outside the trigger `<button>` (a button can't nest a button) as a sibling in
- * `selectTriggerRow`; the `right` inset per size lands it left of the chevron.
+ * The clear button, floated over the reserved slot just inside the chevron.
+ * Sits outside the trigger `<button>` — a button can't nest a button — as a
+ * sibling in `selectTriggerRow`, with a per-size `right` inset.
  */
 export const selectClearButton = recipe({
   base: {
@@ -121,8 +120,8 @@ export const selectClearButton = recipe({
     },
   },
   variants: {
-    // `right` = the trigger's inline padding + the chevron zone + the gap, so the
-    // clear button sits exactly over its reserved slot for each control size.
+    // `right` = inline padding + chevron zone + gap, so the clear button
+    // sits exactly over its reserved slot for each size.
     size: {
       sm: { right: `calc(${vars.space[2]} + ${chevronZone} + ${vars.space[1]})` },
       md: { right: `calc(${vars.space[3]} + ${chevronZone} + ${vars.space[1]})` },
@@ -135,10 +134,10 @@ export const selectClearButton = recipe({
 export type SelectClearButtonVariants = NonNullable<RecipeVariants<typeof selectClearButton>>;
 
 /**
- * The popup surface. Colour/border/radius come from the shared `surfaceRecipe`
- * (neutral, low, padding `none`); this adds the elevation shadow, the
- * anchor-driven sizing, the scroll region, and the open/close transition. Inner
- * padding lives on `selectList` so it never fights the surface's own padding.
+ * The popup surface. Colour/border/radius come from the shared
+ * `surfaceRecipe`; this adds the elevation shadow, anchor-driven sizing, the
+ * scroll region, and the open/close transition. Inner padding lives on
+ * `selectList` so it never fights the surface's own padding.
  */
 export const selectPopup = style({
   boxSizing: "border-box",
@@ -170,10 +169,10 @@ export const selectList = style({
 });
 
 /**
- * A group of related options (base-ui's `Select.Group`). Purely a layout
- * wrapper; the visible heading is `selectGroupLabel` and the options render as
- * usual inside it. Consecutive groups get a little breathing room above their
- * heading (the first one sits flush with the popup's own padding).
+ * A group of related options (base-ui's `Select.Group`) — a layout wrapper;
+ * the visible heading is `selectGroupLabel`. Consecutive groups get a little
+ * breathing room above their heading (the first sits flush with the popup's
+ * own padding).
  */
 export const selectGroup = style({
   display: "flex",
@@ -185,9 +184,9 @@ export const selectGroup = style({
 });
 
 /**
- * The group heading (base-ui's `Select.GroupLabel`). A small, muted, semibold
- * eyebrow above the group's options; aligned to the same inline padding as an
- * option row so it reads as a section header rather than a selectable row.
+ * The group heading (base-ui's `Select.GroupLabel`) — a small, muted,
+ * semibold eyebrow aligned to the same inline padding as an option row, so
+ * it reads as a section header rather than a selectable row.
  */
 export const selectGroupLabel = style({
   paddingInline: vars.space[3],
@@ -200,9 +199,9 @@ export const selectGroupLabel = style({
 });
 
 /**
- * One option row. Highlighted (keyboard/pointer) and selected rows take the
- * washed neutral surface; disabled rows dim and go inert. `size` scales the
- * font and padding in step with the trigger.
+ * One option row. Highlighted/selected rows take the washed neutral
+ * surface; disabled rows dim and go inert. `size` scales font and padding
+ * to match the trigger.
  */
 export const selectItem = recipe({
   base: {

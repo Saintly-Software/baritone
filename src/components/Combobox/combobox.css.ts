@@ -24,12 +24,10 @@ export const wrapper = style({
 
 /**
  * The control box (base-ui's `Combobox.InputGroup`): a bordered, form-coloured
- * container that lays the input out in a row alongside the trigger/clear
- * adornments — and, in `multiple` mode, wraps the selected chips before the
- * input. Reuses the shared `form` tokens (background / border / placeholder /
- * focus) exactly like `formControlRecipe`, so it reads a `state` rather than
- * intent/saliency and publishes the focus-ring colour for the paired
- * `focusRingRecipe` (`type: "within"`).
+ * container laying the input out alongside the trigger/clear adornments — and,
+ * in `multiple` mode, wrapping selected chips before the input. Reuses the
+ * shared `form` tokens like `formControlRecipe`, publishing the focus-ring
+ * colour for the paired `focusRingRecipe` (`type: "within"`).
  */
 export const control = recipe({
   base: {
@@ -80,9 +78,8 @@ export const control = recipe({
       lg: { paddingInline: sizes.lg.px, fontSize: sizes.lg.font, gap: vars.space[2] },
     },
     /**
-     * `single` is a fixed-height row; `multiple` grows to fit wrapped chips
-     * (minimum one row tall) and adds vertical padding so the chips don't touch
-     * the border.
+     * `single` is a fixed-height row; `multiple` grows to fit wrapped chips (min
+     * one row) with vertical padding so chips don't touch the border.
      */
     layout: {
       single: {},
@@ -112,9 +109,9 @@ export const control = recipe({
 export type ControlVariants = NonNullable<RecipeVariants<typeof control>>;
 
 /**
- * The text input itself — bare (no border/background of its own); the `control`
- * box provides the chrome. Grows to fill the row and can shrink so wrapped chips
- * keep their space in `multiple` mode. Placeholder colour is read from the
+ * The text input itself — bare, no border/background of its own; the `control`
+ * box provides the chrome. Grows to fill the row and shrinks so wrapped chips
+ * keep their space in `multiple` mode. Placeholder colour reads the
  * `--placeholder` var the `control` recipe sets per state.
  */
 export const input = style({
@@ -150,10 +147,10 @@ export const adornment = style({
 });
 
 /**
- * The popup surface. Colour/border/padding come from the shared `surfaceRecipe`
- * (applied in the component); this adds elevation, the anchor-matched width, a
- * scroll cap, and a small open/close transition. `--anchor-width` and
- * `--available-height` are published by base-ui's positioner.
+ * The popup surface. Colour/border/padding come from the shared `surfaceRecipe`;
+ * this adds elevation, the anchor-matched width, a scroll cap, and a small
+ * open/close transition. `--anchor-width`/`--available-height` come from
+ * base-ui's positioner.
  */
 export const popup = style({
   boxSizing: "border-box",
@@ -186,9 +183,9 @@ export const list = style({
 });
 
 /**
- * A group of related options (base-ui's `Combobox.Group`). Just a vertical stack;
- * the heading is `groupLabel` and the options render beneath it. Consecutive
- * groups get a little space above their heading (the first sits flush).
+ * A group of related options (base-ui's `Combobox.Group`) — a vertical stack;
+ * the heading is `groupLabel`. Consecutive groups get space above their heading
+ * (the first sits flush).
  */
 export const group = style({
   display: "flex",
@@ -199,9 +196,9 @@ export const group = style({
 });
 
 /**
- * The group heading (base-ui's `Combobox.GroupLabel`). A small, muted, semibold
- * eyebrow, inset to line up with the option rows so it reads as a section header
- * rather than a selectable row.
+ * The group heading (base-ui's `Combobox.GroupLabel`) — a small, muted, semibold
+ * eyebrow, inset to line up with option rows so it reads as a header, not a
+ * selectable row.
  */
 export const groupLabel = style({
   paddingInline: vars.space[2],
@@ -217,9 +214,9 @@ const itemHover = createVar();
 const itemActive = createVar();
 
 /**
- * A single option row. Highlighted (`data-highlighted`, keyboard/pointer) and
- * selected (`data-selected`) get washes computed in oklch from the surface
- * background; disabled options dim and go inert (base-ui sets `aria-disabled`).
+ * A single option row. Highlighted (`data-highlighted`) and selected
+ * (`data-selected`) get oklch washes from the surface background; disabled
+ * options dim and go inert (`aria-disabled`).
  */
 export const item = style({
   vars: {
@@ -276,8 +273,8 @@ export const createPrefix = style({
 });
 
 /**
- * Status / empty rows (loading, error, no-results). Muted, centred-ish text;
- * errors switch to the negative colour. Shared padding matches an item row.
+ * Status/empty rows (loading, error, no-results). Muted text; errors switch to
+ * the negative colour. Padding matches an item row.
  */
 export const status = style({
   display: "flex",
@@ -374,23 +371,22 @@ export const chipRemove = style({
 });
 
 /**
- * Grid view (`columns`). The column count is a caller-chosen layout value the
- * recipe can't enumerate, so it reaches CSS as one dedicated custom property,
- * set inline via `assignInlineVars` — the same single-hole pattern the colour
- * escape hatches use. Rows read it through `gridTemplateColumns`.
+ * Grid view (`columns`). The column count is a caller-chosen value the recipe
+ * can't enumerate, so it reaches CSS as one custom property set inline via
+ * `assignInlineVars` — the same pattern the colour escape hatches use.
  */
 export const colsVar = createVar();
 
 /**
- * The row container in grid mode — the list of `Row`s, stacked with a little
- * breathing room. Composes `list` so the combined result is deterministic at
- * build time rather than depending on `cx` order at the call site.
+ * The row container in grid mode — `Row`s stacked with breathing room. Composes
+ * `list` so the result is deterministic at build time rather than depending on
+ * `cx` order at the call site.
  */
 export const gridList = style([list, { gap: vars.space[1] }]);
 
 /**
- * A group's grid body (`role="presentation"`): the stack of `Row`s under a group
- * heading. Mirrors `gridList`'s spacing so grouped and flat grids read the same.
+ * A group's grid body (`role="presentation"`) — `Row`s under a group heading,
+ * mirroring `gridList`'s spacing so grouped and flat grids match.
  */
 export const gridSection = style({
   display: "flex",
@@ -407,9 +403,8 @@ export const gridRow = style({
 
 /**
  * A grid cell (base-ui's `Combobox.Item`, `role="gridcell"`). A centred, rounded
- * tile that reuses the list item's oklch highlight/select washes; `data-selected`
- * also gets a border ring so selection survives without relying on colour alone
- * (the corner check is the other non-colour cue). Disabled cells dim and go inert.
+ * tile reusing the list item's oklch washes; `data-selected` also gets a border
+ * ring so selection doesn't rely on colour alone. Disabled cells dim and go inert.
  */
 export const gridItem = style({
   vars: {
@@ -472,8 +467,8 @@ export const gridItemSpan = style({
 
 /**
  * A grid cell that carries an icon — stacks the icon above the label caption
- * (the base cell centres a single line; here the two pieces column-stack). No
- * property overlaps the base recipe, so it layers cleanly.
+ * instead of the base cell's single centred line. No property overlaps the base
+ * recipe, so it layers cleanly.
  */
 export const gridItemWithIcon = style({
   flexDirection: "column",
@@ -482,8 +477,8 @@ export const gridItemWithIcon = style({
 
 /**
  * The icon shown in a grid cell (above the caption). `--iconColor: currentColor`
- * makes a passed `<Icon>` (or raw `<svg>`) follow the cell's text colour, so it
- * keeps contrast against the highlight / select wash.
+ * makes a passed `<Icon>`/`<svg>` follow the cell's text colour, keeping
+ * contrast against the highlight/select wash.
  */
 export const gridItemIcon = style({
   display: "inline-flex",

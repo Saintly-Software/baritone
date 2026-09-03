@@ -3,9 +3,9 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
 /**
- * The `<table>` itself. Collapsed borders so the shared cell rules read as one
- * grid, full width, and the neutral/mid body text + base body typography as the
- * default for every cell (a cell can still override via its own `Text`/`Link`).
+ * The `<table>` itself: collapsed borders so cell rules read as one grid, full
+ * width, neutral/mid body text as default (a cell can override via its own
+ * `Text`/`Link`).
  */
 export const tableRoot = style({
   width: "100%",
@@ -33,11 +33,10 @@ export const tableCaption = style({
 });
 
 /**
- * One header (`<th>`) or body (`<td>`) cell. The shared padding + bottom divider
- * live in `base`; `align` maps to `text-align` (a real recipe variant, not an
- * inline style, per the house rule that variants are the source of truth); and
- * `header` switches between the stronger header treatment (neutral/high,
- * semibold, thicker rule under the head) and the neutral/mid body cell.
+ * One header (`<th>`) or body (`<td>`) cell. Shared padding + bottom divider live
+ * in `base`; `align` maps to `text-align` (a recipe variant, not inline style,
+ * per the house rule that variants are the source of truth); `header` switches
+ * the stronger header treatment against the neutral/mid body cell.
  */
 export const cell = recipe({
   base: {

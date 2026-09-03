@@ -7,11 +7,10 @@ import { useAppForm } from "./formHook";
 
 /**
  * The TanStack Form integration (`@saintly-software/baritone/form`). The blessed
- * surface is the composition API: `useAppForm` gives you pre-bound field
- * components (`field.TextInput`, `field.Select`, …) and a form-aware
- * `SubmitButton`, so validation errors map to `state="invalid"` + `helpText`
- * automatically. The render-prop adapters (`FormTextInput`, …) are the primitive
- * underneath, for use with the plain `form.Field` API.
+ * surface is the composition API: `useAppForm` gives pre-bound field components
+ * (`field.TextInput`, `field.Select`, …) and a form-aware `SubmitButton`, mapping
+ * validation errors to `state="invalid"` + `helpText` automatically. The render-prop
+ * adapters (`FormTextInput`, …) are the primitive underneath, for the plain `form.Field` API.
  */
 const meta: Meta = {
   title: "Components/Form",
@@ -92,10 +91,9 @@ function SignupForm() {
 }
 
 /**
- * The composition API end to end — `useAppForm` with pre-bound `field.*`
- * components. Each field validates on change; the error replaces its `helpText`
- * and the control turns invalid once the field is touched. `SubmitButton` stays
- * disabled while the form can't submit.
+ * The composition API end to end — `useAppForm` with pre-bound `field.*` components.
+ * Each field validates on change; the error replaces `helpText` and the control turns
+ * invalid once touched. `SubmitButton` stays disabled while the form can't submit.
  */
 export const AppForm: Story = {
   render: () => <SignupForm />,

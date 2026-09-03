@@ -117,9 +117,8 @@ export const Invalid: Story = {
 };
 
 /**
- * Disabled: the dropzone dims and won't open the picker or accept drops, but the
- * input stays keyboard-focusable (`aria-disabled`, not the native attribute), and
- * staged chips dim with inert-but-focusable remove buttons.
+ * Disabled: the dropzone dims and won't open the picker or accept drops, but stays
+ * keyboard-focusable (`aria-disabled`); staged chips dim with focusable remove buttons.
  */
 export const Disabled: Story = {
   args: {

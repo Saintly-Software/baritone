@@ -5,10 +5,9 @@ import { Form } from "./Form";
 import { useAppForm } from "./formHook";
 
 /**
- * Interaction coverage for the TanStack Form integration. The `play` drives the
- * composition API (`useAppForm` + pre-bound `field.*` components) the way a user
- * would, asserting the error → `helpText` mapping, the submit-button gating, and a
- * successful submit — so it doubles as a Storybook interaction test.
+ * Interaction coverage for the TanStack Form integration: `play` drives the
+ * composition API (`useAppForm` + pre-bound `field.*` components) like a user
+ * would, asserting the error → `helpText` mapping, submit-button gating, and submit.
  */
 const meta: Meta = {
   title: "Interaction Tests/Form",
@@ -52,9 +51,8 @@ function SignupForm() {
 }
 
 /**
- * Type an invalid email → the error surfaces as the field's `helpText` and the
- * submit button disables. Fix it, accept the terms, and submit → the form reports
- * the collected values.
+ * Type an invalid email → the error surfaces as the field's `helpText` and submit
+ * disables. Fix it, accept the terms, and submit → the form reports the values.
  */
 export const ValidatesAndSubmits: Story = {
   name: "Error mapping, gating, and submit",

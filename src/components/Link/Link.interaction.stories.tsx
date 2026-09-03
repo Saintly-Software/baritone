@@ -13,14 +13,11 @@ const ArrowLeft = () => (
 );
 
 /**
- * Interaction coverage for `Link`. `InheritsTypography` validates (via real
- * computed styles) that an inline link inherits its container's typography;
- * `DisabledButtonTooltip` asserts the disabled button-appearance link explains
- * itself on hover; the icon-only button stories check that an icon-only
- * button-link is named solely by its `aria-label` when live
- * (`IconOnlyButtonAccessibleName`) and that its disabled form stays perceivable
- * and still explains itself (`DisabledIconOnlyButtonTooltip`); the chip stories
- * cover the chip-appearance's disabled tooltip and `LinkProvider` routing.
+ * Interaction coverage for `Link`: `InheritsTypography` checks an inline link
+ * inherits its container's typography; `DisabledButtonTooltip` checks the
+ * disabled button-appearance link explains itself on hover; the icon-only
+ * stories check accessible naming live and disabled; the chip stories cover
+ * the disabled tooltip and `LinkProvider` routing.
  */
 const meta: Meta<typeof Link> = {
   title: "Interaction Tests/Link",
@@ -31,9 +28,8 @@ export default meta;
 type Story = StoryObj<typeof Link>;
 
 /**
- * An inline link blends into surrounding copy: with no typography of its own it
- * inherits the container `Text`'s size and weight. The `play` asserts the link's
- * computed font-size and weight equal the container's.
+ * An inline link, with no typography of its own, inherits its container
+ * `Text`'s size and weight; the `play` asserts the computed values match.
  */
 export const InheritsTypography: Story = {
   render: () => (
@@ -79,8 +75,7 @@ export const DisabledButtonTooltip: Story = {
 
 /**
  * The icon-only button-appearance link is a real anchor named solely by its
- * required `aria-label` (there's no visible text). The `play` asserts the anchor
- * exposes that accessible name and carries no visible text content.
+ * required `aria-label`; the `play` asserts that name and the empty text content.
  */
 export const IconOnlyButtonAccessibleName: Story = {
   name: "Icon-only button link accessible name",
@@ -106,9 +101,8 @@ export const IconOnlyButtonAccessibleName: Story = {
 };
 
 /**
- * A disabled icon-only button-appearance link is inert (no longer a link) but
- * keeps its accessible name and still explains itself: hovering it opens the
- * `disabledReason` tooltip.
+ * A disabled icon-only button-appearance link is inert but keeps its
+ * accessible name and still explains itself via the `disabledReason` tooltip.
  */
 export const DisabledIconOnlyButtonTooltip: Story = {
   name: "Disabled icon-only button link tooltip",
@@ -171,9 +165,8 @@ export const DisabledChipTooltip: Story = {
 };
 
 /**
- * Under a `LinkProvider`, an internal chip-link routes through the app's router
- * while keeping the chip styling. The `play` asserts the routed anchor carries the
- * router marker and that clicking it navigates through the router (no full load).
+ * Under a `LinkProvider`, an internal chip-link routes through the app's
+ * router while keeping the chip styling — asserted end to end by the `play`.
  */
 export const ChipRoutesThroughProvider: Story = {
   name: "Chip link routes through LinkProvider",
@@ -187,8 +180,7 @@ export const ChipRoutesThroughProvider: Story = {
             href={href}
             data-router-link=""
             onClick={(event) => {
-              // Route through the "router" (record + prevent the full-page load)
-              // so a click is observable without leaving the story.
+              // "Route" through the fake router: record + prevent the full-page load.
               event.preventDefault();
               setNavigations((prev) => [...prev, href]);
             }}

@@ -2,11 +2,10 @@ import { style } from "@vanilla-extract/css";
 import { vars } from "../../theme/contract.css";
 
 /**
- * Lockup root — a horizontal "media object": the icon sits inline with the
- * text block and is centred against the block's full height, so a lone title or
- * a title + subtitle both stay vertically centred on the glyph. The gap is the
- * space between the icon and the text; the text's own title/subtitle spacing is
- * owned by `lockupText`.
+ * Lockup root — a horizontal "media object": the icon sits inline with the text
+ * block, centred against its full height so a lone title or a title + subtitle
+ * both stay centred on the glyph. `gap` is the icon-to-text space; title/subtitle
+ * spacing is owned by `lockupText`.
  */
 export const lockupRoot = style({
   display: "flex",
@@ -28,10 +27,9 @@ export const lockupText = style({
 });
 
 /**
- * `hideText` — visually hide the text column while keeping it in the accessible
- * tree, so the lockup reads as icon-only but a screen reader still announces the
- * title/subtitle. Taken out of flow (`position: absolute`) so the icon sits on
- * its own without the row's gap reserving space for the collapsed text.
+ * `hideText` — visually hides the text column while keeping it in the
+ * accessible tree, so the lockup reads as icon-only but is still announced.
+ * Taken out of flow so the icon sits alone, without the gap reserving space.
  */
 export const lockupTextHidden = style({
   position: "absolute",

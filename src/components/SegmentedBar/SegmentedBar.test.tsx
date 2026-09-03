@@ -93,8 +93,8 @@ describe("SegmentedBar", () => {
 
   it("keeps the legend in the accessibility tree when it is visually hidden", () => {
     render(<SegmentedBar aria-label="Areas" segments={SEGMENTS} showLegend={false} />);
-    // The track is a picture; the legend is the only thing carrying the numbers,
-    // so hiding it must never mean removing it.
+    // The track is a picture; the legend carries the numbers, so hiding it
+    // must never mean removing it.
     expect(legendRows()).toHaveLength(3);
     expect(screen.getByRole("list")).toHaveTextContent("Sanity");
   });

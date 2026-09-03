@@ -4,13 +4,11 @@ import { vars } from "../../theme/contract.css";
 
 /**
  * The list container — a wrapping row (default) or a column of chips. Mirrors
- * `fileListRoot` so stacked chips lay out identically across the system, and
- * resets the default `<ul>` margin / padding / marker since this renders as a
- * real list. `min-width`/`min-height: 0` per `Flex`.
+ * `fileListRoot` for consistent layout, and resets the default `<ul>`
+ * margin/padding/marker since this renders as a real list.
  *
- * The gap between chips is driven by `size`, so a list of `sm` chips packs
- * tighter than a list of `lg` ones — the chip `size` therefore tunes both the
- * chips themselves and the spacing around them.
+ * Gap between chips is driven by `size`, so `sm` chips pack tighter than `lg`
+ * ones — `size` tunes both the chips and the spacing around them.
  */
 export const chipListRoot = recipe({
   base: {
@@ -36,9 +34,8 @@ export const chipListRoot = recipe({
 });
 
 /**
- * Each list cell. `max-width: 100%` (with `min-width`/`min-height: 0` per
- * `Flex`) lets the chip shrink so a long label can ellipsize rather than forcing
- * the row wider than the list.
+ * Each list cell. `max-width: 100%` lets the chip shrink so a long label can
+ * ellipsize rather than forcing the row wider than the list.
  */
 export const chipListItem = style({
   display: "flex",

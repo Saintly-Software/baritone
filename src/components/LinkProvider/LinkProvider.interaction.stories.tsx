@@ -5,10 +5,9 @@ import { Link } from "../Link";
 import { LinkProvider, type LinkRenderProps } from "./index";
 
 /**
- * Interaction coverage for `LinkProvider` in a real browser: an internal `Link`
- * with no `render` of its own routes through the provider's mock router (clicking
- * it updates the client route without a full-page load), while an external link
- * stays an ordinary anchor.
+ * Interaction coverage for `LinkProvider`: an internal `Link` with no `render`
+ * routes through the mock router (click updates the route, no page load),
+ * while an external link stays an ordinary anchor.
  */
 const meta: Meta<typeof LinkProvider> = {
   title: "Interaction Tests/LinkProvider",
@@ -54,8 +53,8 @@ export const RoutesInternalLinks: Story = {
     const external = canvas.getByRole("link", { name: "External" });
     expect(external).toHaveAttribute("href", "https://example.com");
 
-    // Clicking the internal link routes through the provider (mock router updates
-    // the path); the browser never leaves the story frame.
+    // Clicking the internal link routes through the provider's mock router;
+    // the browser never leaves the story frame.
     expect(canvas.getByTestId("route")).toHaveTextContent("/");
     await userEvent.click(canvas.getByRole("link", { name: "Dashboard" }));
     await waitFor(() => expect(canvas.getByTestId("route")).toHaveTextContent("/dashboard"));

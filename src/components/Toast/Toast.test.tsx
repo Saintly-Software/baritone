@@ -229,8 +229,7 @@ describe("Toast", () => {
   it("replaces the visual data wholesale on a module-scope manager's update", async () => {
     // The manager has no reactive toast list to merge against, so — unlike
     // useToast().update — a partial update drops the visual fields it omits.
-    // This is the documented caveat; pin it so a regression to merge-semantics
-    // (or a dropped pack() on the update path) can't pass silently.
+    // This is the documented caveat; pin it against a merge-semantics regression.
     const manager = createToastManager();
     render(<BaritoneProvider toastManager={manager}>{null}</BaritoneProvider>);
 

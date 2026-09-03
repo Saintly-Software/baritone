@@ -7,11 +7,10 @@ import { cx } from "../../utils/cx";
 import { Text } from "../Text";
 import { Field } from "./index";
 
-// Field is a layout + ARIA primitive, not a styled control — the stories slot a
-// plainly-styled input into it (the same recipes `TextInput` uses) so the label /
-// help / error arrangement is what you're actually looking at. The field's `state`
-// drives its label / error text; colouring the *control* to match is the composing
-// component's job (here, the recipe `TextInput` would apply).
+// Field is a layout + ARIA primitive, not a styled control — stories slot a
+// plainly-styled input into it (`TextInput`'s recipes) so the label/help/error
+// arrangement is what's on display; colouring the control to match `state` is
+// the composing component's job.
 const controlClassFor = (state: FormState = "neutral") =>
   cx(formControlRecipe({ state, size: "md" }), focusRingRecipe({ type: "visible", offset: "sm" }));
 
@@ -65,9 +64,8 @@ export const Basic: Story = {
 };
 
 /**
- * `state="invalid"` renders the one `helpText` line negative, with `HelpText`'s
- * warning glyph, and marks the control `aria-invalid`. There's no separate
- * `errorMessage` — swap the copy for the error case yourself.
+ * `state="invalid"` renders `helpText` negative with `HelpText`'s warning glyph
+ * and marks the control `aria-invalid`. There's no separate `errorMessage` — swap the copy yourself.
  */
 export const Invalid: Story = {
   args: {
@@ -78,9 +76,8 @@ export const Invalid: Story = {
 };
 
 /**
- * `labelPosition` moves the label beside the control. `start` / `end` are
- * inline-logical (they flip in RTL) and align the label to the control's first
- * line of text; the help and error text stay under the *control*, not the label.
+ * `labelPosition` moves the label beside the control. `start`/`end` are
+ * inline-logical (flip in RTL); help/error text stays under the control, not the label.
  */
 export const Inline: Story = {
   render: () => (
@@ -100,10 +97,9 @@ export const Inline: Story = {
 };
 
 /**
- * `required` marks the label with an asterisk. It's the *visible* half only — the
- * marker is decorative and sits beside the `<label>`, never inside it, so the
- * control still announces "Email", not "Email star". Pass `required` to the
- * control too, for the announced half.
+ * `required` marks the label with a decorative asterisk — the *visible* half
+ * only; it sits beside the `<label>` so the control still announces "Email", not
+ * "Email star". Pass `required` to the control too for the announced half.
  */
 export const Required: Story = {
   args: {
@@ -113,8 +109,7 @@ export const Required: Story = {
   },
 };
 
-// One message slot now: the copy changes with the state, rather than a help
-// line and an error line coexisting.
+// One message slot: copy changes with the state, rather than separate help and error lines.
 const STATE_MESSAGE: Record<FormState, string | undefined> = {
   neutral: undefined,
   warning: "This address looks unusual.",
@@ -169,9 +164,8 @@ export const States: Story = {
 };
 
 /**
- * `info` hangs an `InfoButton` beside the label for the explanation that's too
- * long for help text. It sits *next to* the label, never inside it, so it stays
- * out of the control's accessible name.
+ * `info` hangs an `InfoButton` beside the label for an explanation too long for
+ * help text; it sits *next to* the label, never inside it, so it stays out of the accessible name.
  */
 export const WithInfo: Story = {
   args: {
@@ -187,10 +181,9 @@ export const WithInfo: Story = {
 };
 
 /**
- * The three ways to name a control are **mutually exclusive** — passing more than
- * one is a type error (and warns at runtime), because `aria-label` /
- * `aria-labelledby` would override the visible `label` and the control would show
- * one name while announcing another.
+ * The three ways to name a control are **mutually exclusive** — passing more
+ * than one is a type error (and warns at runtime), since `aria-label`/`aria-labelledby`
+ * would override the visible `label`, so the control announces a different name than it shows.
  */
 export const Naming: Story = {
   render: () => (
@@ -217,8 +210,8 @@ export const Naming: Story = {
 
 /**
  * base-ui wires its own components automatically, but a control it can't see —
- * here a bare `<div role="group">` — takes its wiring from the render-prop form
- * of `children`. This is how `CheckboxGroup` and `ToggleGroup` are built.
+ * here a bare `<div role="group">` — takes its wiring from the render-prop
+ * `children`, like `CheckboxGroup`/`ToggleGroup`.
  */
 export const CustomControl: Story = {
   render: () => (

@@ -65,23 +65,20 @@ export interface LightboxProps {
   /** Ref to the `<img>` element. */
   ref?: React.Ref<HTMLImageElement>;
   /**
-   * Optional content rendered below the image inside the overlay — e.g. a
-   * caption or custom controls. Sits on the dimmed backdrop, so style it for a
-   * dark surround.
+   * Optional content rendered below the image, inside the overlay — e.g. a
+   * caption or custom controls. Sits on the dimmed backdrop, so style it dark.
    */
   children?: React.ReactNode;
 }
 
 /**
  * Lightbox — opens an image at full size in a dialog centred over a dimmed
- * page. It opens from a `<Lightbox.Trigger>` (a `Button`) passed via `trigger`,
- * and is dismissed by clicking the backdrop, pressing Escape, or the built-in
- * close button in the image's corner. Clicking the image itself does not close
- * it.
+ * page. Opens from a `<Lightbox.Trigger>` (a `Button`) passed via `trigger`;
+ * dismissed by clicking the backdrop, pressing Escape, or the built-in close
+ * button. Clicking the image itself does not close it.
  *
- * Built on base-ui's `Dialog`, so the ARIA wiring and focus management are
- * handled for you: the overlay is modal (the backdrop is always rendered) and
- * takes its accessible name from `alt`.
+ * Built on base-ui's `Dialog` (ARIA wiring and focus management included): the
+ * overlay is modal and takes its accessible name from `alt`.
  */
 function LightboxRoot({
   src,
@@ -129,9 +126,8 @@ function LightboxRoot({
                 />
               )}
             />
-            {/* Empty string (not an absent attribute) when `alt` is omitted, so the
-                image is exposed as decorative rather than named from its src — the
-                dialog itself already carries the `alt || "Image"` name. */}
+            {/* Empty string (not absent) when `alt` is omitted, so the image reads
+                decorative rather than named from its src; the dialog already carries the name. */}
             <img ref={ref} className={cx(lightboxImage, className)} src={src} alt={alt ?? ""} />
             {children}
           </BaseDialog.Popup>
@@ -142,11 +138,9 @@ function LightboxRoot({
 }
 
 /**
- * The trigger that opens the lightbox. Renders a `Button` (so all of Button's
- * intents / saliencies / sizes / icons are available), wired up by base-ui so it
- * carries the right `aria-haspopup` / `aria-expanded` and toggles the lightbox.
- * Must be passed to `<Lightbox trigger={...} />` so it sits inside the
- * lightbox's context.
+ * The trigger that opens the lightbox. Renders a `Button` (all of Button's
+ * intents/saliencies/sizes/icons available), wired by base-ui with the right
+ * `aria-haspopup`/`aria-expanded`. Must be passed to `<Lightbox trigger={...} />`.
  */
 export type LightboxTriggerProps = ButtonProps;
 
@@ -166,8 +160,7 @@ export const Lightbox = Object.assign(LightboxRoot, {
   Trigger: LightboxTrigger,
   /**
    * Creates a detached imperative handle (base-ui's `createHandle`). Prefer
-   * `useOverlayHandle(Lightbox)` inside components; reach for this only when the
-   * handle must live outside React (module scope, detached triggers).
+   * `useOverlayHandle(Lightbox)` in components; use this only when the handle must live outside React.
    */
   createHandle: BaseDialog.createHandle,
 });

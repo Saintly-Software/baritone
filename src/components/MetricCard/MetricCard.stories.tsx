@@ -39,9 +39,9 @@ export default meta;
 type Story = StoryObj<typeof MetricCard>;
 
 /**
- * Every optional prop wired up at once — a leading icon, a caption, and a trend
- * badge — driven by the `args` controls. Tweak `intent` / `valueSize` in the
- * controls panel to see them tint the value and resize the figure.
+ * Every optional prop wired up at once — icon, caption, trend badge — driven
+ * by the `args` controls. Tweak `intent` / `valueSize` to see them tint the
+ * value and resize the figure.
  */
 export const KitchenSink: Story = {
   args: {
@@ -54,8 +54,8 @@ export const KitchenSink: Story = {
 };
 
 /**
- * `intent` tints the **value** (not the surface) — handy for a good / bad number.
- * The label and caption keep the neutral text ramp.
+ * `intent` tints the **value** (not the surface) — handy for a good/bad number.
+ * Label and caption keep the neutral text ramp.
  */
 export const Intents: Story = {
   render: () => (
@@ -69,11 +69,10 @@ export const Intents: Story = {
 };
 
 /**
- * A trend / delta badge (`trend`) shows the change since a baseline. The arrow is
- * decorative — the badge is announced as its text alternative ("increased 12%"),
- * never "up-pointing triangle". Sentiment colour defaults from the direction, but
- * for **inverted** metrics (churn, latency, cost) a fall is *good*, so pass
- * `sentiment` to keep a downward arrow green.
+ * A trend / delta badge (`trend`) shows the change since a baseline. The arrow
+ * is decorative — announced via its text alternative ("increased 12%"), never
+ * "up-pointing triangle". For **inverted** metrics (churn, latency, cost) a
+ * fall is *good*, so pass `sentiment` to keep a downward arrow green.
  */
 export const Trend: Story = {
   render: () => (

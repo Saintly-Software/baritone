@@ -48,8 +48,7 @@ describe("List", () => {
   });
 
   it("falls back to the index for an item without its own key", () => {
-    // No `key` on the elements — the list supplies the positional fallback, so
-    // both rows still render rather than colliding.
+    // No `key` here — the list's positional fallback keeps both rows from colliding.
     render(<List items={[<List.Item>First</List.Item>, <List.Item>Second</List.Item>]} />);
     expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(2);
   });
@@ -81,8 +80,8 @@ describe("List", () => {
   });
 
   it("drops inactive flex props when layout=grid (retained Storybook controls)", () => {
-    // A JS/Storybook caller can keep flex controls after switching to grid — the
-    // discriminated union can't stop that. They must not reach the DOM element.
+    // A JS caller can keep flex controls after switching to grid (the
+    // discriminated union can't stop that) — they must not reach the DOM.
     const props = {
       layout: "grid",
       columns: 2,

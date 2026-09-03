@@ -42,9 +42,8 @@ const COLORS: ComboboxOption[] = [
 ];
 
 /**
- * Interaction coverage for `Combobox`. The `play` functions open the popup and
- * exercise multi-select highlighting, list virtualization, the free-text "Add"
- * row, and the async error state.
+ * Interaction coverage for `Combobox` — opens the popup and exercises multi-select
+ * highlighting, list virtualization, the free-text "Add" row, and the async error state.
  */
 const meta: Meta<typeof Combobox> = {
   title: "Interaction Tests/Combobox",
@@ -230,8 +229,8 @@ export const AsyncSearchError: Story = {
   },
 };
 
-// A mock remote search that never resolves: any query leaves the popup in the
-// loading state, so the story captures the in-menu spinner.
+// A mock remote search that never resolves: any query leaves the popup loading,
+// so the story captures the in-menu spinner.
 function PendingSearchExample() {
   const [loading, setLoading] = React.useState(false);
 

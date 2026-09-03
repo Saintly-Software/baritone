@@ -27,9 +27,8 @@ export default meta;
 
 type Story = StoryObj<typeof Fieldset>;
 
-// A small controlled form so the stories exercise the fields the way a consumer
-// would. Toggle the fieldset's `disabled` control to watch every nested control
-// go inert (but stay focusable) in one move.
+// A small controlled form so stories exercise the fields as a consumer would;
+// toggling the fieldset's `disabled` sends every nested control inert at once.
 function ContactFields() {
   const [street, setStreet] = React.useState("");
   const [city, setCity] = React.useState("");

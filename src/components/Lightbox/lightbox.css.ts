@@ -3,8 +3,7 @@ import { vars } from "../../theme/contract.css";
 
 /**
  * Full-viewport dim layer behind the image. Darker than `Modal`'s scrim
- * (`0.32`) on purpose — a lightbox blacks out the page so the image reads as the
- * only thing on screen. Fades in on the enter frame and out on the exit frame.
+ * (`0.32`) on purpose — the image should read as the only thing on screen.
  */
 export const lightboxBackdrop = style({
   position: "fixed",
@@ -14,8 +13,7 @@ export const lightboxBackdrop = style({
   transitionDuration: vars.motion.duration.base,
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
-    // base-ui flags the enter ("starting") and exit ("ending") frames; fade the
-    // scrim on both.
+    // base-ui flags the enter ("starting") and exit ("ending") frames; fade the scrim on both.
     "&[data-starting-style], &[data-ending-style]": { opacity: 0 },
   },
   "@media": {
@@ -24,9 +22,8 @@ export const lightboxBackdrop = style({
 });
 
 /**
- * Fixed full-viewport layer that holds the popup and centres it over the
- * backdrop (a later sibling in the portal). The padding keeps the image — and
- * the close button pinned to its corner — off the screen edges.
+ * Fixed full-viewport layer that holds and centres the popup over the backdrop
+ * (a later sibling in the portal). Padding keeps the image and close button off the screen edges.
  */
 export const lightboxViewport = style({
   position: "fixed",
@@ -39,9 +36,8 @@ export const lightboxViewport = style({
 
 /**
  * The popup surface: an invisible box that hugs the image and anchors the
- * close button. Capped to the padded viewport so a large image can never
- * overflow the screen. The `data-starting-style` / `data-ending-style` frames
- * fade and scale it so it grows in and shrinks out from its centre.
+ * close button. Capped to the padded viewport so a large image never overflows.
+ * The starting/ending-style frames fade and scale it in/out from its centre.
  */
 export const lightboxPopup = style({
   position: "relative",
@@ -67,16 +63,14 @@ export const lightboxPopup = style({
 });
 
 /**
- * The full-size image. `object-fit: contain` keeps its aspect ratio while the
- * `max-*: 100%` caps fit it inside the popup (and thus the padded viewport), so
- * it scales down to fit without ever cropping or overflowing.
+ * The full-size image. `object-fit: contain` keeps its aspect ratio while
+ * `max-*: 100%` fits it inside the popup, scaling down without cropping.
  */
 export const lightboxImage = style({
   display: "block",
   maxWidth: "100%",
   maxHeight: "100%",
-  // Let the image shrink in the column flow so an optional caption below stays
-  // in view rather than being pushed off-screen.
+  // Lets the image shrink in the column flow so an optional caption stays in view rather than being pushed off-screen.
   minHeight: 0,
   width: "auto",
   height: "auto",
@@ -87,8 +81,7 @@ export const lightboxImage = style({
 
 /**
  * The dismiss control, pinned to the image's top-right corner. Kept inside the
- * popup (not the viewport) so it stays within the dialog's focus trap and a
- * click on it doesn't register as an outside-press.
+ * popup (not the viewport) so it stays in the focus trap and clicking it doesn't register as an outside-press.
  */
 export const lightboxClose = style({
   position: "absolute",

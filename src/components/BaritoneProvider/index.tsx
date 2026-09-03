@@ -8,43 +8,38 @@ import type { BaritoneToastManager } from "../Toast";
 export interface BaritoneProviderProps {
   children: React.ReactNode;
   /**
-   * Default milliseconds before a toast auto-dismisses. `0` keeps toasts until
-   * they're dismissed. Overridable per toast via `add({ timeout })`. base-ui
-   * default `5000`.
+   * Milliseconds before a toast auto-dismisses. `0` keeps it until dismissed.
+   * Overridable per toast via `add({ timeout })`. base-ui default `5000`.
    */
   toastTimeout?: number;
   /**
-   * Maximum number of toasts shown at once. Older ones past the limit are kept
-   * mounted but hidden (so they can animate away) until they expire. base-ui
-   * default `3`.
+   * Maximum toasts shown at once. Older ones past the limit stay mounted but
+   * hidden, so they can animate away, until they expire. base-ui default `3`.
    */
   toastLimit?: number;
   /**
-   * A toast manager for firing toasts from outside React (module scope, a store,
-   * an interceptor). Usually unnecessary — `useToast()` covers in-component use.
-   * Prefer Baritone's `createToastManager()`, whose `add`/`update`/… take the
-   * design-system fields at the top level; a raw base-ui `ToastManager` is also
-   * accepted (the provider only reads its subscription channel).
+   * A toast manager for firing toasts from outside React (module scope, a
+   * store, an interceptor). Usually unnecessary — `useToast()` covers
+   * in-component use. Prefer Baritone's `createToastManager()`; a raw base-ui
+   * `ToastManager` also works (the provider only reads its subscription channel).
    */
   toastManager?: BaritoneToastManager | ToastManager;
 }
 
 /**
- * BaritoneProvider — the client-side application provider for the design system.
- * Wrap your app in it once (inside your `BaritoneTheme`) and the global client
- * services it owns are set up for the whole tree.
+ * BaritoneProvider — the client-side application provider for the design
+ * system. Wrap your app in it once (inside `BaritoneTheme`) to set up the
+ * global client services for the whole tree.
  *
  * Today it sets up the **toast system**: it renders base-ui's `Toast.Provider`
- * around your app *and* mounts the toast viewport for you, so calling
- * `useToast().add(...)` anywhere below just works — there's no separate viewport
- * to place. It's the deliberate client-side counterpart to `BaritoneTheme`, which
- * stays a pure, server-renderable token wrapper (so it can live in an SSR root
- * layout); anything needing React state/context lives here instead.
+ * and mounts the toast viewport, so `useToast().add(...)` just works anywhere
+ * below. It's the client-side counterpart to `BaritoneTheme`, which stays a
+ * pure, server-renderable token wrapper; anything needing React state/context
+ * lives here instead.
  *
- * The viewport portals to `<body>`, so — like every other portalled surface in
- * the system (`Modal`/`Drawer`/`Popover`) — it resolves its theme tokens from the
- * theme class on `<body>`. Apply your `BaritoneTheme` such that `<body>` carries
- * the theme (e.g. `render={<body />}`) so toasts are themed too.
+ * The viewport portals to `<body>`, so — like other portalled surfaces
+ * (`Modal`/`Drawer`/`Popover`) — it resolves its theme from the class on
+ * `<body>`. Apply `BaritoneTheme` with `render={<body />}` so toasts are themed too.
  *
  * @example
  * // App root (a client component)
@@ -68,11 +63,10 @@ export function BaritoneProvider({
     <BaseToast.Provider
       timeout={toastTimeout}
       limit={toastLimit}
-      // A `BaritoneToastManager` wraps a base-ui manager, exposing its private
-      // `' subscribe'` channel unchanged; the provider reads only that (its
-      // packing `add`/`update`/`promise` wrappers are for callers, not the
-      // provider). A raw `ToastManager` already matches. Narrowing the union to
-      // base-ui's `ToastManager` for the base-ui provider is therefore sound.
+      // `BaritoneToastManager` wraps a base-ui manager, exposing its private
+      // subscribe channel unchanged; the provider reads only that (its
+      // add/update/promise wrappers are for callers). A raw `ToastManager`
+      // already matches, so narrowing the union here is sound.
       toastManager={toastManager as ToastManager | undefined}
     >
       {children}

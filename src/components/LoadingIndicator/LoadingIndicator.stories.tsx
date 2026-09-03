@@ -69,9 +69,8 @@ export const CustomLabel: Story = {
 };
 
 /**
- * Decorative: `aria-hidden` drops the `role="status"` live region and the
- * SR-only label, leaving a purely visual ring for contexts that announce the
- * busy state some other way (e.g. a host with `aria-busy`).
+ * Decorative: `aria-hidden` drops the `role="status"` live region and SR-only
+ * label, for a context that announces busy some other way (e.g. `aria-busy`).
  */
 export const Decorative: Story = {
   args: { "aria-hidden": true },

@@ -84,8 +84,7 @@ export const Sizes: Story = {
 
 /**
  * `shape` switches the chip's silhouette: `square` (default) keeps the shared
- * component radius — softly rounded corners — while `pill` fully rounds the ends
- * into a Bootstrap-style pill/badge.
+ * component radius, while `pill` fully rounds the ends into a badge shape.
  */
 export const Shapes: Story = {
   render: () => (
@@ -116,9 +115,8 @@ export const Disabled: Story = {
 };
 
 /**
- * `loading` replaces the chip's entire content — adornments and label — with a
- * centred spinner, and marks the chip `aria-busy` + inert. The chip keeps its
- * height; its width collapses to the spinner.
+ * `loading` replaces the chip's content — adornments and label — with a centred
+ * spinner and marks it `aria-busy` + inert. Height is kept; width collapses.
  */
 export const Loading: Story = {
   args: { loading: true, intent: "primary", saliency: "high", children: "Saving…" },
@@ -147,10 +145,9 @@ export const AsLink: Story = {
 };
 
 /**
- * Pass `onClick` to make the chip's text label itself clickable — it renders as
- * a real `<button>` (keyboard-focusable, Enter/Space-activated). Adornments keep
- * their own actions, so the label and a trailing "×" are separate hit targets. A
- * disabled chip's label goes inert but stays focusable (`aria-disabled`).
+ * Pass `onClick` to make the chip's label itself clickable — it renders as a
+ * real `<button>` (keyboard-focusable, Enter/Space-activated), independent of
+ * any adornment actions. A disabled label stays focusable (`aria-disabled`).
  */
 export const ClickableLabel: Story = {
   render: () => (
@@ -180,11 +177,9 @@ export const ClickableLabel: Story = {
 };
 
 /**
- * Pass a configured `<Popover>` to `popover` to open it from the chip's text
- * label. The label renders as a real `<button>` that base-ui wires as the
- * popover's trigger (`aria-haspopup` / `aria-expanded` / `aria-controls`), so it's
- * keyboard-operable. Adornments keep their own actions, and a disabled chip's
- * label stays focusable but won't open the popover.
+ * Pass a configured `<Popover>` to `popover` to open it from the chip's label.
+ * The label renders as a real `<button>` base-ui wires as the popover's trigger
+ * (keyboard-operable). A disabled chip's label stays focusable but won't open it.
  */
 export const WithPopover: Story = {
   render: () => (
@@ -235,9 +230,9 @@ export const WithPopover: Story = {
 };
 
 /**
- * Adornments are `Chip.Adornment`s passed to `leadAdornments` / `trailAdornments`.
- * Each is one of three kinds: a regular icon, a clickable `<button>` (`onClick`),
- * or a link `<a>` (`href`). They inherit the chip's colour.
+ * Adornments are `Chip.Adornment`s passed to `leadAdornments`/`trailAdornments`:
+ * a regular icon, a clickable `<button>` (`onClick`), or a link `<a>` (`href`).
+ * They inherit the chip's colour.
  */
 export const Adornments: Story = {
   render: () => (
@@ -289,8 +284,8 @@ export const Adornments: Story = {
 };
 
 /**
- * `icon` is a shorthand for a single leading `Chip.Adornment`: it always renders
- * as the *first* lead adornment, ahead of anything in `leadAdornments`.
+ * `icon` is a shorthand for a single leading `Chip.Adornment`: it always
+ * renders first, ahead of anything in `leadAdornments`.
  */
 export const IconShorthand: Story = {
   render: () => (
@@ -315,10 +310,9 @@ export const IconShorthand: Story = {
 };
 
 /**
- * `handleRemove` is a shortcut for the common "removable chip": supply it and the
- * chip appends a built-in clickable remove "×" as the *last* trailing adornment —
- * after any `trailAdornments` you pass — so you don't have to wire up the close
- * button yourself.
+ * `handleRemove` is a shortcut for the common "removable chip": the chip
+ * appends a built-in clickable remove "×" as the *last* trailing adornment,
+ * after any `trailAdornments` you pass.
  */
 export const Removable: Story = {
   render: () => (
@@ -382,9 +376,8 @@ export const AdornmentIntentOverride: Story = {
 };
 
 /**
- * `trailIcon` mirrors the lead `icon` shorthand at the other end: a decorative
- * trailing `Chip.Adornment` after any `trailAdornments`, before the built-in
- * copy / remove buttons.
+ * `trailIcon` mirrors the lead `icon` shorthand: a decorative trailing
+ * `Chip.Adornment` after `trailAdornments`, before the built-in copy/remove buttons.
  */
 export const TrailingIcon: Story = {
   render: () => (
@@ -409,8 +402,7 @@ export const TrailingIcon: Story = {
 
 /**
  * `contentToCopy` appends a built-in copy-to-clipboard adornment: a labelled
- * ("Copy") clickable `Chip.Adornment` that writes the string to the clipboard and
- * briefly shows a checkmark + "Copied" as success feedback.
+ * ("Copy") `Chip.Adornment` that copies the string and briefly confirms with a checkmark.
  */
 export const CopyToClipboard: Story = {
   render: () => (
@@ -429,8 +421,7 @@ export const CopyToClipboard: Story = {
 
 /**
  * `width` controls the chip's box: `fit` (default) hugs the content, `fill`
- * stretches to the container. In a fixed-width column the `fill` chips share one
- * edge and their labels truncate.
+ * stretches to the container and truncates a long label.
  */
 export const Width: Story = {
   render: () => (

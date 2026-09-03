@@ -1,12 +1,10 @@
 import { style } from "@vanilla-extract/css";
 
 /**
- * Visually-hidden-but-screen-reader-available. The classic clip/rect technique:
- * the element is collapsed to a 1×1px sliver, clipped away, and pulled out of
- * flow, so it takes up no visible space yet stays in the accessibility tree.
- *
- * Deliberately *not* `display: none` or `visibility: hidden` — both of those
- * remove the node from the a11y tree, which is the opposite of what we want.
+ * Visually-hidden-but-screen-reader-available: the classic clip/rect technique
+ * collapses the element to a 1×1px sliver, clipped and pulled out of flow, so it
+ * stays in the accessibility tree without taking visible space. Deliberately not
+ * `display: none`/`visibility: hidden` — both remove the node from the a11y tree.
  */
 export const srOnly = style({
   position: "absolute",

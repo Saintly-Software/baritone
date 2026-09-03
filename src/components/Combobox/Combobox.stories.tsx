@@ -23,8 +23,8 @@ function Glyph({ d, solid }: { d: string; solid?: boolean }) {
   );
 }
 
-// A handful of recognisable glyphs for the icon-grid story. `label` stays a real
-// word so typeahead still filters by name.
+// A handful of recognisable glyphs; `label` stays a real word so typeahead
+// still filters by name.
 const ICON_OPTIONS: ComboboxOption[] = [
   {
     value: "star",
@@ -251,8 +251,8 @@ interface StateRow {
   helpText?: string;
 }
 
-// Every validation state plus disabled — the combinations that used to be their
-// own stories, folded into one table.
+// Every validation state plus disabled, folded into one table (previously
+// separate stories).
 const stateRows: StateRow[] = [
   { label: "neutral" },
   { label: "warning", state: "warning", helpText: "Double-check this choice." },
@@ -332,9 +332,9 @@ export const GroupedMultiple: Story = {
 };
 
 /**
- * `columns` lays the options out as a grid instead of a single column — arrow keys
- * then move in two dimensions. Best for short, tile-like options (colours, icons,
- * emoji). Typing still filters, re-tiling the rows as the list narrows.
+ * `columns` lays the options out as a grid instead of a single column, so arrow
+ * keys move in two dimensions. Best for short, tile-like options (colours,
+ * icons, emoji); typing still filters as the list narrows.
  */
 export const Grid: Story = {
   args: {
@@ -368,9 +368,9 @@ export const GridMultiple: Story = {
 };
 
 /**
- * Options can carry an `icon` (typically an `<Icon>`). In the grid it sits above
- * the label caption; the `label` stays the accessible name, so typeahead still
- * filters by name (try "b" for Bell / Bookmark / Bolt).
+ * Options can carry an `icon` (typically an `<Icon>`), which sits above the
+ * label caption in the grid; `label` stays the accessible name, so typeahead
+ * still filters by it (try "b" for Bell / Bookmark / Bolt).
  */
 export const GridIcons: Story = {
   args: {

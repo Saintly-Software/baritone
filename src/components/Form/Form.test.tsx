@@ -20,8 +20,8 @@ import {
 import { Form } from "./Form";
 import { useAppForm } from "./formHook";
 
-// A minimal, deterministic stub of the slice `resolveFieldDisplay` reads — enough
-// to unit-test the gating without spinning up a whole form.
+// A minimal, deterministic stub of the slice `resolveFieldDisplay` reads —
+// enough to unit-test the gating without a whole form.
 const source = (errors: readonly unknown[], isTouched: boolean) => ({
   state: { meta: { errors, isTouched } },
 });
@@ -81,8 +81,8 @@ describe("resolveFieldDisplay", () => {
   });
 
   it("marks invalid (no help text) for a real error carrying no display string", () => {
-    // The field is invalid — `form.canSubmit` is false — so it must not render
-    // neutral just because no message could be extracted.
+    // Invalid because `form.canSubmit` is false — must not render neutral just
+    // because no message could be extracted.
     expect(
       resolveFieldDisplay(source([{ code: "too_short", minimum: 2 }], true), { helpText: "Hint" }),
     ).toEqual({ state: "invalid", helpText: undefined });
@@ -177,9 +177,8 @@ describe("useAppForm + pre-bound field components", () => {
 
     await user.type(email, "bad");
     expect(submit).toHaveAttribute("aria-disabled", "true");
-    // Focusable-disabled contract (AGENTS.md): the button models "disabled" with
-    // `aria-disabled`, never the native attribute, so it stays in the tab order and
-    // can still be focused while the form can't submit.
+    // Focusable-disabled contract (AGENTS.md): models "disabled" with
+    // `aria-disabled`, not the native attribute, so it stays tabbable while the form can't submit.
     expect(submit).not.toHaveAttribute("disabled");
     submit.focus();
     expect(submit).toHaveFocus();
@@ -299,8 +298,8 @@ describe("Form adapters (render-prop, across controls)", () => {
     );
     const trigger = screen.getByRole("combobox", { name: "Fruit" });
     trigger.focus();
-    // Moving focus away blurs the trigger → the adapter forwards it to handleBlur,
-    // which is also what would run a `validators.onBlur` on the field.
+    // Moving focus away blurs the trigger; the adapter forwards it to
+    // handleBlur, same as a `validators.onBlur` would run on the field.
     await user.click(screen.getByRole("button", { name: "outside" }));
     expect(handleBlur).toHaveBeenCalledTimes(1);
   });

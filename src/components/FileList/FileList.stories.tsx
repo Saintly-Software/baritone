@@ -76,10 +76,10 @@ const Interactive = ({
  * Everything at once — each section reacts to the shared controls (orientation,
  * intent, saliency, size):
  * - **Interactive + downloadable**: mixed file-type icons, per-item `download`
- *   flags and an `intent` override; the × removes and flagged files get a ↓.
+ *   flags, `intent` override; × removes, flagged files get a ↓.
  * - **Read-only**: no `onRemove`, so no remove buttons.
- * - **Disabled**: chips dim and buttons go inert (but stay focusable).
- * - **Long file names**: ellipsize when the list is width-constrained.
+ * - **Disabled**: chips dim, buttons inert but focusable.
+ * - **Long file names**: ellipsize when width-constrained.
  */
 export const KitchenSink: Story = {
   render: (args) => (
@@ -164,9 +164,8 @@ export const FileTypes: Story = {
 };
 
 /**
- * Per-item `download`: only files flagged `download` get a download button
- * (here the report and the export). `onRemove` stays keyed by `id`, so removing
- * one file leaves the rest — and their download buttons — intact.
+ * Per-item `download`: only files flagged `download` get a download button.
+ * `onRemove` stays keyed by `id`, so removing one file leaves the rest intact.
  */
 export const Downloadable: Story = {
   render: (args) => {
@@ -181,8 +180,8 @@ export const Downloadable: Story = {
         items={items}
         onRemove={(id) => setItems((cur) => cur.filter((f) => f.id !== id))}
         onDownload={(id) => {
-          // A real consumer would stream / save the File here; the story just
-          // proves the affordance is wired and keyed by `id`.
+          // A real consumer would stream/save the File here; this just proves
+          // the affordance is wired and keyed by `id`.
           const hit = items.find((f) => f.id === id);
           if (hit != null) window.alert(`Download ${hit.file.name}`);
         }}
@@ -192,9 +191,8 @@ export const Downloadable: Story = {
 };
 
 /**
- * Element composition: instead of the `items` array, drop `FileList.Item`
- * children in directly — mix per-item overrides (`download`, `intent`) while the
- * list still supplies the shared handlers and defaults.
+ * Element composition: drop `FileList.Item` children in directly instead of the
+ * `items` array, mixing per-item overrides while the list supplies shared handlers.
  */
 export const Composed: Story = {
   render: (args) => {

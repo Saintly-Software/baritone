@@ -19,8 +19,7 @@ describe("Link", () => {
   });
 
   it("is router-agnostic: renders a supplied link component and merges className", () => {
-    // Stand-in for a framework's link (Next.js / React Router / …): any
-    // component works as long as it ultimately renders an anchor.
+    // Stand-in for a router's link component; any component that renders an anchor works here.
     const RouterLink = ({ to, ...props }: { to: string; className?: string }) => (
       <a href={to} {...props} />
     );
@@ -189,8 +188,7 @@ describe("Link", () => {
 
       it("is pixel-identical to an icon-only Button: same recipe + square-treatment classes", () => {
         // Render both at the same knobs; the icon-only link must carry every class
-        // an icon-only `Button` does (the shared recipe *and* the `buttonSquare`
-        // treatment), proving it reuses the styling path rather than duplicating it.
+        // the icon-only `Button` does, proving it reuses rather than duplicates styling.
         render(<Link appearance="button" href="/x" icon={<span />} aria-label="Add" />);
         render(<Button icon={<span />} aria-label="Add button" />);
         const linkClasses = new Set(
@@ -267,12 +265,11 @@ describe("Link", () => {
           />,
         );
         // A disabled link has no honest HTML form, so it leaves the link a11y tree
-        // and becomes a role-less inert element — like the labelled arm.
+        // and becomes role-less and inert — like the labelled arm.
         expect(screen.queryByRole("link", { name: "Back" })).not.toBeInTheDocument();
         // The icon-only arm has no visible label, so the name is re-exposed as
-        // visually-hidden *content* (perceivable on a generic element) rather than
-        // an `aria-label` — which is prohibited on a role-less element (axe
-        // `aria-prohibited-attr`) and ignored by some AT.
+        // visually-hidden content rather than `aria-label`, which is prohibited on
+        // a role-less element (axe `aria-prohibited-attr`) and ignored by some AT.
         const inert = screen.getByText("Back").closest("[aria-disabled]") as HTMLElement;
         expect(inert).toHaveAttribute("aria-disabled", "true");
         expect(inert.tagName).not.toBe("A");
@@ -303,9 +300,8 @@ describe("Link", () => {
         render(
           <Link appearance="button" href="/x" icon={<span />} aria-label="Redirecting" loading />,
         );
-        // Loading makes the link inert (an in-flight nav shouldn't re-trigger), so
-        // like the labelled arm it collapses out of the link a11y tree — the name
-        // rides along as visually-hidden content and aria-busy marks it in-flight.
+        // Loading makes the link inert so an in-flight nav can't re-trigger; it
+        // collapses from the a11y tree, with the name riding as hidden content.
         const busy = screen.getByText("Redirecting").closest("[aria-busy]") as HTMLElement;
         expect(busy).toHaveAttribute("aria-busy", "true");
         expect(busy).not.toHaveAttribute("aria-label");
@@ -319,8 +315,7 @@ describe("Link", () => {
 
       it("rejects a nullish icon (it can't select the icon-only arm and render unnamed)", () => {
         // `icon` is `NonNullable<React.ReactNode>`, so a `cond ? <Icon/> : null`
-        // can't slip through as the icon-only arm — which would forward no glyph
-        // and drop the required `aria-label`, producing an unnamed anchor.
+        // can't slip through and drop the required `aria-label`, producing an unnamed anchor.
         // @ts-expect-error `icon` must not be null.
         render(<Link appearance="button" href="/x" icon={null} aria-label="Back" />);
         // @ts-expect-error `icon` must not be undefined.
@@ -403,8 +398,7 @@ describe("Link", () => {
       );
       expect(screen.getByTestId("lead")).toBeInTheDocument();
       expect(screen.getByTestId("trail")).toBeInTheDocument();
-      // Decorative glyphs are `aria-hidden`, so even textual icon content never
-      // leaks into the accessible name — it stays the visible label.
+      // Decorative glyphs are `aria-hidden`, so icon content never leaks into the accessible name.
       expect(screen.getByRole("link", { name: "Label" })).toBeInTheDocument();
     });
 
@@ -421,8 +415,8 @@ describe("Link", () => {
     });
 
     it("is keyboard-focusable and activates on Enter", async () => {
-      // Swallow the default so jsdom doesn't attempt a real navigation; the
-      // handler firing is what proves Enter activates the anchor.
+      // Swallow the default so jsdom doesn't navigate; the handler firing
+      // proves Enter activates the anchor.
       const onClick = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
       const user = userEvent.setup();
       render(

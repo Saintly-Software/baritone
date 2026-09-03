@@ -11,9 +11,8 @@ interface Person {
   balance: number;
 }
 
-// Kept at module scope so the references stay stable across renders — a fresh
-// `data`/`columns` array every render would throw away TanStack's row model.
-// Roles repeat so the grouping stories have something to gather.
+// Kept at module scope so references stay stable (a fresh array each render
+// would throw away TanStack's row model). Roles repeat for the grouping stories.
 const people: Person[] = [
   { id: "1", name: "Ada Lovelace", email: "ada@example.com", role: "Engineering", balance: 4200 },
   { id: "2", name: "Grace Hopper", email: "grace@example.com", role: "Engineering", balance: 9600 },
@@ -46,9 +45,8 @@ const columns = col.columns([
     cell: (info) => <Link href={`mailto:${info.getValue()}`}>{info.getValue()}</Link>,
   }),
   col.accessor("role", { header: "Role" }),
-  // `meta.align` is DataTable's house column option (a v9 type-only meta slot).
-  // `aggregationFn` + `aggregatedCell` roll the column up on group-header rows —
-  // inert until a story turns grouping on.
+  // `meta.align` is DataTable's house column option (a type-only v9 meta slot).
+  // `aggregationFn`/`aggregatedCell` roll up group rows — inert until grouping is on.
   col.accessor("balance", {
     header: "Balance",
     meta: { align: "end" },
@@ -100,10 +98,9 @@ export const Empty: Story = {
 };
 
 /**
- * Group rows by a column with `grouping`. Each distinct value gets a collapsible
- * header row showing the group's label, its row count, and the balance column's
- * per-group total (from its `aggregationFn`). Groups start expanded; click a
- * chevron to collapse one.
+ * Group rows by a column with `grouping`: each distinct value gets a
+ * collapsible header row with its label, row count, and per-group total.
+ * Groups start expanded.
  */
 export const Grouped: Story = {
   render: () => (
@@ -135,9 +132,8 @@ export const GroupedCollapsed: Story = {
   ),
 };
 
-// A Category → Subcategory breakdown for the merged presentation: the grouped
-// `category` reads down the same indented column as each `subcategory` leaf, with
-// a summed `amount` alongside. Kept at module scope for a stable reference.
+// Category → Subcategory breakdown for the merged presentation: `category` and
+// each `subcategory` leaf share one indented column, with a summed `amount`.
 interface Expense {
   id: string;
   category: string;
@@ -157,8 +153,8 @@ const expenses: Expense[] = [
 
 const expenseCol = createDataTableColumnHelper<Expense>();
 const expenseColumns = expenseCol.columns([
-  // The host column: its `header` names the merged outline, and its cells carry
-  // both the group value (on header rows) and each subcategory (on leaf rows).
+  // The host column: `header` names the merged outline; cells carry the group
+  // value (header rows) and each subcategory (leaf rows).
   expenseCol.accessor("subcategory", { header: "Category" }),
   // Grouped away in `groupDisplay="merge"` — its value moves into the host column.
   expenseCol.accessor("category", { header: "Category" }),
@@ -172,10 +168,9 @@ const expenseColumns = expenseCol.columns([
 ]);
 
 /**
- * `groupDisplay="merge"` renders the grouping as one indented outline column: the
- * grouped `category` isn't a column of its own — its value, toggle, and count sit
- * in the first visible column, and each `subcategory` leaf renders in that same
- * column one level in. The summed `amount` still rolls up per group.
+ * `groupDisplay="merge"` renders the grouping as one indented outline column:
+ * `category`'s value, toggle, and count sit in the first visible column, and
+ * each `subcategory` leaf renders one level in. `amount` still rolls up per group.
  */
 export const GroupedMerged: Story = {
   render: () => (
@@ -193,10 +188,9 @@ export const GroupedMerged: Story = {
 };
 
 /**
- * Give each row an expandable detail panel with `renderDetailPanel`. A leading
- * chevron opens a full-width panel beneath the row, rendered from that row's
- * datum (here a small profile). Panels start collapsed and toggle independently;
- * the function runs only for open rows.
+ * Give each row an expandable detail panel with `renderDetailPanel`: a leading
+ * chevron opens a full-width panel rendered from that row's datum. Panels
+ * start collapsed, toggle independently, and only render while open.
  */
 export const WithDetailPanel: Story = {
   render: () => (
@@ -231,9 +225,8 @@ export const WithDetailPanel: Story = {
 };
 
 /**
- * Gate which rows can expand with `enableRowExpansion` — a predicate mirroring
- * `enableRowSelection`. Here only rows with a balance over $1,000 are expandable;
- * the rest (Katherine, at $320) show no chevron at all.
+ * Gate which rows can expand with `enableRowExpansion`, a predicate mirroring
+ * `enableRowSelection`. Only rows over $1,000 are expandable here.
  */
 export const WithDetailPanelSome: Story = {
   render: () => (
@@ -267,10 +260,9 @@ export const WithDetailPanelSome: Story = {
 };
 
 /**
- * Row selection, controlled by id. `enableRowSelection` adds the leading checkbox
+ * Row selection, controlled by id: `enableRowSelection` adds the checkbox
  * column; `selectedRowIds` + `onSelectionChange` own the state. The header box
- * selects all / clears all and goes indeterminate on a partial selection.
- * Shift-click a second row to select the range between it and the last one.
+ * selects/clears all (indeterminate on partial); shift-click extends the range.
  */
 export const Selectable: Story = {
   render: () => {
@@ -295,9 +287,8 @@ export const Selectable: Story = {
 };
 
 /**
- * Uncontrolled selection: seed it with `defaultSelectedRowIds` and let the table
- * own the state, observing changes through `onSelectionChange` (which still hands
- * back the selected ids and their rows).
+ * Uncontrolled selection: seed with `defaultSelectedRowIds` and let the table
+ * own the state; `onSelectionChange` still reports the selected ids and rows.
  */
 export const SelectableUncontrolled: Story = {
   render: () => (
@@ -316,9 +307,9 @@ export const SelectableUncontrolled: Story = {
 };
 
 /**
- * A predicate gates which rows are selectable — here, only rows with a balance
- * over $1,000. Non-selectable rows (Katherine, at $320) show a locked (dimmed,
- * `aria-disabled`) box that stays focusable, and "select all" skips them.
+ * A predicate gates which rows are selectable — here, only rows over $1,000.
+ * Non-selectable rows show a locked, focusable (`aria-disabled`) box, and
+ * "select all" skips them.
  */
 export const SelectableSome: Story = {
   render: () => {
@@ -340,9 +331,8 @@ export const SelectableSome: Story = {
 };
 
 /**
- * Selection composes with grouping: each group header carries a tri-state box that
- * selects or clears all of its rows at once, and reflects whether all, some, or
- * none of them are selected.
+ * Selection composes with grouping: each group header carries a tri-state box
+ * that selects/clears its rows and reflects all/some/none selected.
  */
 export const GroupedSelectable: Story = {
   render: () => {

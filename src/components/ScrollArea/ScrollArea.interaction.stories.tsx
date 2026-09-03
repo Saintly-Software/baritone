@@ -3,11 +3,10 @@ import { expect, userEvent, waitFor } from "storybook/test";
 import { ScrollArea } from "./index";
 
 /**
- * Interaction coverage for `ScrollArea`, one story per supported orientation.
- * These run in a real browser (unlike the jsdom unit tests), so base-ui can
- * actually measure overflow and mount the scrollbars — which is what these
- * stories assert: the orientation mounts exactly the scrollbars it should, and
- * each stays hidden until the area is hovered, then fades back out on leave.
+ * Interaction coverage for `ScrollArea`, one story per orientation. Runs in a
+ * real browser (unlike the jsdom unit tests) so base-ui can measure overflow and
+ * mount scrollbars — asserting each orientation mounts exactly the scrollbars it
+ * should, hidden until hovered, fading out on leave.
  */
 const meta: Meta<typeof ScrollArea> = {
   title: "Interaction Tests/ScrollArea",

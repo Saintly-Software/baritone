@@ -3,8 +3,7 @@ import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Button } from "./index";
 
-// A throwaway bare glyph so the start/end icon stories have something to render;
-// the Button auto-wraps it in `<Icon>`.
+// Throwaway bare glyph so the start/end icon stories have something to render; auto-wrapped in `<Icon>`.
 const Sparkle = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
@@ -109,15 +108,13 @@ export const IconOnly: Story = {
 
 /**
  * `width` stretches or shrinks the button's box within its container. A button
- * is `inline-flex` and hugs its label by default (`fit`-like); `fill` takes the
- * container's full width — the full-width form submit or mobile CTA — keeping
- * the label centred.
+ * is `inline-flex` and hugs its label by default; `fill` takes the container's
+ * full width (form submit, mobile CTA) keeping the label centred.
  */
 export const Width: Story = {
   render: () => (
-    // `align-items: flex-start` so the *container* never stretches its children —
-    // otherwise (a default grid/stretch parent) an unset button fills the column
-    // on its own and `width` looks like it does nothing.
+    // `align-items: flex-start` so the container never stretches its children —
+    // otherwise a default stretch parent fills an unset button and `width` looks like a no-op.
     <div
       style={{
         display: "flex",

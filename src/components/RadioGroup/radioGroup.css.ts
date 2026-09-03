@@ -8,9 +8,8 @@ import { focusRingColorVar } from "../../styles/vars.css";
 // recipe `base` can read them and the `state` variant just swaps values.
 const bg = createVar();
 const bd = createVar();
-// `accent` is the selected colour (border + inner dot) and the focus-ring
-// colour. It mirrors `formControlRecipe`: a form `state` maps to a semantic
-// intent, and we read that intent's focus token.
+// `accent` is the selected colour (border + inner dot) and the focus-ring colour,
+// mirroring `formControlRecipe`: a form `state` maps to an intent's focus token.
 const accent = createVar();
 // Inner-dot diameter, set by the `size` variant and read by the indicator
 // (which is a child of the control, so the var cascades down).
@@ -64,10 +63,9 @@ export const radioItemDisabled = style({
 
 /**
  * The radio "dot" — a circular control built on base-ui's `Radio.Root`. Mirrors
- * `formControlRecipe`: it takes a form `state` (which drives the accent + focus
- * colour) and a `size`. base-ui flags selection with `data-checked` /
- * `data-unchecked`, so the border swaps from the neutral form border to the
- * accent when selected.
+ * `formControlRecipe`: a form `state` drives the accent/focus colour, `size` the
+ * dimensions. base-ui flags selection with `data-checked`/`data-unchecked`, so
+ * the border swaps from neutral to accent when selected.
  */
 export const radioControl = recipe({
   base: {
@@ -118,9 +116,8 @@ export const radioControl = recipe({
 });
 
 /**
- * The inner dot. Kept mounted (base-ui's `keepMounted`) so it can scale in *and*
- * out as `data-checked` toggles; its size comes from the `--dot` var the control
- * publishes, its colour from `--accent`.
+ * The inner dot. Kept mounted (`keepMounted`) so it can scale in and out as
+ * `data-checked` toggles; sized by the control's `--dot` var, coloured by `--accent`.
  */
 export const radioIndicator = style({
   width: dot,

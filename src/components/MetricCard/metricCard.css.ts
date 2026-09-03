@@ -4,8 +4,8 @@ import { vars } from "../../theme/contract.css";
 
 /**
  * The metric's internal layout — a tight vertical stack (optional icon, the
- * value + label unit, an optional caption). It's the single child of the `Card`,
- * so the card's own `gap` never applies and this owns all the internal spacing.
+ * value + label unit, an optional caption). The single child of `Card`, so
+ * this owns all internal spacing instead of the card's own `gap`.
  */
 export const metricRoot = style({
   display: "flex",
@@ -26,9 +26,9 @@ export const metricIcon = style({
 });
 
 /**
- * The value + label unit — a tight pair. In a static metric this is the plain
- * wrapper; an interactive metric swaps it for `metricOverlay`, which lays out the
- * same pair but *is* the card's one real control.
+ * The value + label unit — a tight pair. A static metric uses this plain
+ * wrapper; an interactive one swaps it for `metricOverlay`, the same pair
+ * that *is* the card's one real control.
  */
 export const metricHero = style({
   display: "flex",
@@ -38,10 +38,10 @@ export const metricHero = style({
 });
 
 /**
- * The trend / delta badge — the arrow glyph inline with its magnitude. Colour is
- * applied in the component (from the trend's sentiment), so `currentColor` flows
- * to the glyph's `fill`. It sits *under* an interactive card's transparent
- * overlay (like the caption), so a click on it still activates the card.
+ * The trend/delta badge — the arrow glyph inline with its magnitude. Colour
+ * comes from the component via `currentColor` into the glyph's `fill`. Sits
+ * under an interactive card's transparent overlay (like the caption), so a
+ * click on it still activates the card.
  */
 export const metricTrend = style({
   display: "inline-flex",
@@ -57,22 +57,21 @@ export const metricTrendGlyph = style({
 });
 
 /**
- * Positioning context for an interactive metric, so the hero control's `::after`
- * overlay can stretch across the whole card. Added to the `Card` root only when
- * the metric is clickable / linkable. Mirrors `Card`'s own `cardInteractive`.
+ * Positioning context so the hero control's `::after` overlay can stretch
+ * across the whole card. Added to `Card`'s root only when the metric is
+ * clickable/linkable; mirrors `Card`'s own `cardInteractive`.
  */
 export const metricInteractive = style({
   position: "relative",
 });
 
 /**
- * Interactive hero — the value + label rendered as the one real link / button.
- * Its `::after` is stretched across the whole card (the accessible card pattern
- * from https://inclusive-components.design/cards/) so the entire surface is a
- * single click target, while only the value + label name the control (the caption
- * lives outside it, so it isn't folded into that name). All the native link /
- * button chrome is reset so it looks exactly like the plain stat; the focus ring
- * is drawn on the stretched pseudo, so keyboard focus outlines the whole card.
+ * Interactive hero — the value + label rendered as the one real link/button.
+ * Its `::after` stretches across the whole card (the accessible card pattern:
+ * https://inclusive-components.design/cards/), so the whole surface is a click
+ * target while only the value + label name the control. Native chrome is
+ * reset to match the plain stat; the focus ring draws on the stretched
+ * pseudo, so focus outlines the whole card.
  */
 export const metricOverlay = style({
   display: "flex",

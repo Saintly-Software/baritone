@@ -30,8 +30,7 @@ describe("Field", () => {
       expect(screen.getByLabelText("Search").tagName).toBe("INPUT");
     });
 
-    // A control that shows one name and announces another is an a11y bug, not a
-    // condition to degrade through — so this throws rather than warning.
+    // Shows one name and announces another is an a11y bug — throws rather than warns.
     it("throws when label and aria-label are both passed", () => {
       expect(() =>
         render(
@@ -124,9 +123,8 @@ describe("Field", () => {
     });
   });
 
-  // There is one message slot, not two: `helpText` *is* the error line when
-  // `state="invalid"`. It stays in `aria-describedby` across every state —
-  // it changes colour rather than leaving and re-entering the description.
+  // One message slot, not two: `helpText` *is* the error line when invalid,
+  // staying in `aria-describedby` throughout and only changing colour.
   describe("validation", () => {
     it("renders the helpText as an error when invalid", () => {
       render(
@@ -193,16 +191,14 @@ describe("Field", () => {
       );
       const marker = screen.getByText("*");
       expect(marker).toBeInTheDocument();
-      // Decorative — the semantics live on the control, not the asterisk. (A real
-      // `<input>` gets the native `required`, which already implies them; base-ui
-      // uses `aria-required` for the controls that aren't native inputs.)
+      // Decorative — the semantics live on the control (a real `<input>`
+      // gets native `required`; base-ui gives non-native controls `aria-required`).
       expect(marker).toHaveAttribute("aria-hidden", "true");
       expect(screen.getByRole("textbox", { name: "Email" })).toBeRequired();
 
-      // The marker sits *beside* the `<label>`, not inside it, so the label's raw
-      // text is still exactly "Email". That's what keeps `getByLabelText("Email")`
-      // — which matches on textContent, not the accessible name — working for
-      // consumers who add `required`.
+      // The marker sits beside the `<label>`, not inside it, so its raw text
+      // stays "Email" — keeping `getByLabelText("Email")` (which matches
+      // textContent) working once `required` is added.
       expect(container.querySelector("label")).toHaveTextContent(/^Email$/);
       expect(screen.getByLabelText("Email").tagName).toBe("INPUT");
     });

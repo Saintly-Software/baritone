@@ -35,10 +35,9 @@ export default meta;
 type Story = StoryObj<typeof Modal>;
 
 /**
- * Every region at once — a header carrying a title and subtitle, a scrolling
- * body, and a footer with cancel / save actions — all driven by the toolbar
- * controls (`size`, `padding`, `loading`, `disabled`). Opens by default so the
- * panel is visible on load.
+ * Every region at once — header, scrolling body, and footer with cancel/save
+ * actions — driven by the toolbar controls. Opens by default so the panel is
+ * visible on load.
  */
 export const KitchenSink: Story = {
   args: { defaultOpen: true },
@@ -126,8 +125,7 @@ export const Loading: Story = {
 
 export const ImperativeClose: Story = {
   name: "Imperative close (async)",
-  // Behavioural demo of the imperative-close mechanism — kept as a test, hidden
-  // from the sidebar so the showcase stays focused on visual variants.
+  // Behavioural demo of the imperative-close mechanism; hidden from the sidebar.
   tags: ["!dev"],
   render: (args) => {
     const modal = useOverlayHandle(Modal);

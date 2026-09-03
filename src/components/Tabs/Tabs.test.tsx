@@ -11,8 +11,8 @@ const VIEWS = [
 ] as const;
 type View = (typeof VIEWS)[number]["value"];
 
-// A tiny controlled host mirroring the documented usage, so the type-safe
-// value/onChange pair is exercised exactly as a consumer would write it.
+// A tiny controlled host mirroring documented usage, so the type-safe
+// value/onChange pair is exercised as a consumer would write it.
 function Sections({
   value: initial = "overview",
   onChange,

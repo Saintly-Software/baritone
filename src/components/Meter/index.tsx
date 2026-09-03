@@ -8,12 +8,10 @@ import { Text, type TextProps } from "../Text";
 import { meterFillVar, meterHeader, meterIndicator, meterRoot, meterTrack } from "./meter.css";
 
 /**
- * Overrides for the meter's inner pieces. The three `Text` slots are partial:
- * you're layering props onto the slot's own defaults, so
- * `slotProps={{ value: { saliency: "high" }, label: { size: "md" } }}`
- * just re-tunes those pieces while the rest of the meter stays as-is. Set
- * `children` here to override a slot's content entirely (rarely needed — prefer
- * the top-level `label` / `description` props).
+ * Overrides for the meter's inner pieces. The three `Text` slots are partial —
+ * `slotProps={{ value: { saliency: "high" }, label: { size: "md" } }}` layers
+ * onto each slot's defaults. Set `children` to override a slot's content
+ * entirely (rarely needed — prefer the top-level `label`/`description` props).
  */
 export interface MeterSlotProps {
   /** Props for the label `Text` above the track. */
@@ -23,12 +21,10 @@ export interface MeterSlotProps {
   /** Props for the description `Text` beneath the track. */
   description?: Partial<TextProps>;
   /**
-   * Overrides for the filled indicator (the "bar"). Not a `Text` slot — the one
-   * knob here is `color`, an escape hatch that paints the bar any CSS colour,
-   * overriding `intent` × `saliency`. Accepts anything CSS `color` takes (a
-   * hex/rgb value, a custom property, `currentColor`). Prefer `intent` /
-   * `saliency` so the bar stays on the system palette — reach for this only when
-   * you genuinely need a colour outside it, and mind contrast against the track.
+   * Overrides for the filled indicator (the "bar"). The only knob is `color`,
+   * an escape hatch that paints the bar any CSS colour, overriding `intent` ×
+   * `saliency`. Prefer `intent`/`saliency` for the system palette; reach for
+   * this only when you need a colour outside it, and mind track contrast.
    */
   bar?: {
     /** Paint the indicator any CSS colour, overriding `intent` × `saliency`. */
@@ -42,22 +38,19 @@ export interface MeterProps {
   /** Prominence of the indicator's fill within its intent. Default `high`. */
   saliency?: Saliency;
   /**
-   * Visible label rendered above the track. base-ui wires it up as the meter's
-   * accessible name (`aria-labelledby`). To name the meter *without* a visible
-   * label, use `aria-label` / `aria-labelledby` instead.
+   * Visible label above the track, wired as the meter's accessible name
+   * (`aria-labelledby`). For no visible label, use `aria-label` instead.
    */
   label?: React.ReactNode;
   /**
-   * Supporting text rendered beneath the track (units, context, a caption). Wired
-   * to the meter as its `aria-describedby`, so screen readers announce it after
-   * the value.
+   * Supporting text beneath the track (units, context, a caption), wired as
+   * the meter's `aria-describedby` so it's announced after the value.
    */
   description?: React.ReactNode;
   /**
-   * Show the current value as text at the end of the header row. The displayed
-   * string is the formatted value (respecting `format` / `locale`), or whatever
-   * `formatValue` returns. Decorative — it's `aria-hidden`, the value already
-   * reaching assistive tech via `aria-valuenow` / `aria-valuetext`.
+   * Show the current value as text at the end of the header row (the
+   * formatted value, or whatever `formatValue` returns). Decorative and
+   * `aria-hidden` — the value already reaches AT via `aria-valuenow`/`aria-valuetext`.
    */
   showValue?: boolean;
   /**
@@ -83,10 +76,9 @@ export interface MeterProps {
   /** The current value; clamped to `[min, max]`. */
   value: number;
   /**
-   * Human-readable text alternative for the current value, announced by screen
-   * readers in place of the raw number. Either a fixed string (forwarded to
-   * base-ui as `aria-valuetext`) or a function of the formatted value and the raw
-   * value (forwarded as base-ui's `getAriaValueText`).
+   * Text alternative for the current value, announced in place of the raw
+   * number. A fixed string forwards to base-ui as `aria-valuetext`; a function
+   * of the formatted and raw value forwards as `getAriaValueText`.
    */
   "aria-valuetext"?: string | ((formattedValue: string, value: number) => string);
   /**
@@ -101,17 +93,15 @@ export interface MeterProps {
 /**
  * Meter — a static, read-only gauge for a value within a known range (storage
  * used, score, capacity), built on base-ui's `Meter` for the semantics
- * (`role="meter"`, the `aria-value*` wiring, the value→percentage math) with the
+ * (`role="meter"`, `aria-value*`, the value→percentage math) with the
  * system's colour scheme on top.
  *
- * The filled indicator is coloured by `intent` × `saliency` — the same vocabulary
- * as `Chip` / `Button` — reading the `text` colour ramp so the bar stays a solid,
- * visible ink at every saliency, over a neutral track. A `label` sits above the
- * track (opposite an optional `showValue` read-out) and an optional `description`
+ * The filled indicator is coloured by `intent` × `saliency` (same vocabulary
+ * as `Chip`/`Button`) over a neutral track. A `label` sits above the track
+ * (opposite an optional `showValue` read-out) and an optional `description`
  * sits below; each renders as a `Text` you can tune through `slotProps`.
  *
- * It is *not* a progress bar: use it for a measurement, not the completion of a
- * task.
+ * It is *not* a progress bar: use it for a measurement, not task completion.
  *
  * @example
  * <Meter label="Storage" value={72} showValue description="of your 100 GB quota" />
@@ -134,18 +124,15 @@ export function Meter({
   "aria-valuetext": ariaValueText,
   slotProps,
 }: MeterProps) {
-  // base-ui's `aria-valuetext` takes a *string*; a *function* is its
-  // `getAriaValueText`. Split the one prop across the two.
+  // base-ui's `aria-valuetext` takes a string; a function is `getAriaValueText`.
   const valueText = typeof ariaValueText === "string" ? ariaValueText : undefined;
   const getValueText = typeof ariaValueText === "function" ? ariaValueText : undefined;
 
   const generatedDescriptionId = React.useId();
   const descriptionId = description != null ? generatedDescriptionId : undefined;
 
-  // base-ui computes sensible defaults for `aria-labelledby` (the rendered
-  // `<Meter.Label>`) and `aria-valuetext` (the formatted value), and its prop
-  // merge treats an explicit `undefined` as an override — so only forward these
-  // when we actually have one, or we'd wipe the default association.
+  // base-ui defaults `aria-labelledby`/`aria-valuetext` on its own, and treats
+  // an explicit `undefined` as an override — so only forward these when set.
   const ariaProps: Record<string, string> = {};
   if (ariaLabel != null) ariaProps["aria-label"] = ariaLabel;
   if (ariaLabelledby != null) ariaProps["aria-labelledby"] = ariaLabelledby;

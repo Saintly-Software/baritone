@@ -3,9 +3,8 @@ import { expect, within } from "storybook/test";
 import { Text } from "./index";
 
 /**
- * Interaction coverage for `Text`, validated against real computed styles: a bare
- * `Text` resolves to its root typography defaults, and `intent`/`saliency` resolve
- * to a distinct colour.
+ * Interaction coverage for `Text`, checked against computed styles: a bare
+ * `Text` uses root typography defaults; `intent`/`saliency` resolve to a distinct colour.
  */
 const meta: Meta<typeof Text> = {
   title: "Interaction Tests/Text",

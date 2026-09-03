@@ -39,9 +39,8 @@ export const Inline: Story = {
   ),
 };
 
-// Router-agnostic: any component can be supplied via `render`. Here a plain
-// element stands in for a framework's link (Next.js `<Link>`, React Router
-// `<Link>`, TanStack Router, …) — it keeps the styling while owning navigation.
+// Router-agnostic: any component can be supplied via `render` — a plain element
+// stands in for a framework's link, keeping the styling while owning navigation.
 export const AsRouterLink: Story = {
   args: {
     children: "Go to the dashboard",
@@ -150,11 +149,9 @@ export const ButtonAsRouterLink: Story = {
 };
 
 /**
- * Pass `icon` + `aria-label` (and no `children`) for the icon-only, square
- * button-styled link — the anchor mirror of an icon-only `Button`. The
- * `aria-label` is **required**: it's the accessible name, since there's no
- * visible text. This is the honest way to name an icon-only navigation control —
- * no need to smuggle a name in through the `render` element.
+ * Pass `icon` + `aria-label` (no `children`) for the icon-only, square
+ * button-styled link — the anchor mirror of an icon-only `Button`. `aria-label`
+ * is **required** as the accessible name, since there's no visible text.
  */
 export const ButtonIconOnly: Story = {
   args: {
@@ -168,7 +165,7 @@ export const ButtonIconOnly: Story = {
   },
 };
 
-// The icon-only button-link stays a 1:1 square at every `size`, exactly like an
+// The icon-only button-link stays a 1:1 square at every `size`, like an
 // icon-only `Button`.
 export const ButtonIconOnlySizes: Story = {
   render: () => (
@@ -188,8 +185,8 @@ export const ButtonIconOnlySizes: Story = {
   ),
 };
 
-// As an icon-only button-styled router link: `render` owns navigation, the square
-// recipe owns the look, and the required `aria-label` names it.
+// As an icon-only, router-linked button: `render` owns navigation, the square
+// recipe owns the look, `aria-label` names it.
 export const ButtonIconOnlyAsRouterLink: Story = {
   args: {
     appearance: "button",
@@ -289,8 +286,8 @@ export const ChipFill: Story = {
 };
 
 /**
- * `icon` / `trailIcon` add **decorative** glyphs on each side of the label (like
- * `Chip`'s), inheriting the chip's colour. A chip-link stays one anchor — for an
+ * `icon` / `trailIcon` add **decorative** glyphs on each side of the label,
+ * inheriting the chip's colour. A chip-link stays one anchor — for an
  * interactive adornment (a remove "×"), use a `Chip`.
  */
 export const ChipWithIcons: Story = {
@@ -315,8 +312,8 @@ export const ChipExternalLink: Story = {
   },
 };
 
-// As a chip-styled router link: a per-link `render` owns navigation (and carries
-// typed router descriptors a string `href` can't express); the recipe owns the look.
+// As a chip-styled router link: `render` owns navigation (carrying typed router
+// descriptors a string `href` can't express); the recipe owns the look.
 export const ChipAsRouterLink: Story = {
   args: {
     appearance: "chip",
@@ -328,9 +325,8 @@ export const ChipAsRouterLink: Story = {
 };
 
 /**
- * Under a `LinkProvider`, an internal `href` routes through the app's router while
- * keeping the chip styling — no per-link `render` needed. (The stand-in router
- * here marks its anchors `data-router-link`.)
+ * Under a `LinkProvider`, an internal `href` routes through the app's router
+ * while keeping the chip styling — no per-link `render` needed.
  */
 export const ChipWithLinkProvider: Story = {
   render: () => (

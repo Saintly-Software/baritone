@@ -5,10 +5,9 @@ import { Text } from "../Text";
 import { LinkProvider, type LinkRenderProps } from "./index";
 
 /**
- * A tiny stand-in for a real router (Next.js / React Router / TanStack). It
- * intercepts clicks on internal links, prevents the full-page load, and records
- * the destination — so the demo can *show* client-side navigation happening
- * without leaving the Storybook frame. Swap this for your framework's `<Link>`.
+ * A tiny stand-in for a real router (Next.js / React Router / TanStack): it
+ * intercepts internal link clicks, records the destination, and shows
+ * client-side navigation without leaving Storybook. Swap for your framework's `<Link>`.
  */
 function useMockRouter() {
   const [path, setPath] = React.useState("/");

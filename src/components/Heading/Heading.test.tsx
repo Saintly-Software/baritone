@@ -31,8 +31,8 @@ describe("Heading", () => {
   });
 
   it("supports any size from the shared scale (same scale as Text)", () => {
-    // A Heading can render a small size like `xs` — Heading and Text share the
-    // full size scale and differ only in semantics.
+    // Heading can render a small size like `xs` — it shares the full scale with
+    // Text and differs only in semantics.
     render(
       <Heading level={2} size="xs">
         Tiny
@@ -49,8 +49,8 @@ describe("Heading", () => {
         Default
       </Heading>,
     );
-    // Weight is independent of size now; each level carries a customary default
-    // (level 2 is bold), applied via the `--textWeight` var.
+    // Weight is independent of size; each level carries a customary default
+    // (level 2 is bold) via the `--textWeight` var.
     expect(screen.getByTestId("h").getAttribute("style")).toContain(
       `var(${fontWeightVarName("bold")})`,
     );
@@ -103,9 +103,8 @@ describe("Heading", () => {
         Plain
       </Heading>,
     );
-    // `italic`, `textAlign`, and `whiteSpace` are each additive class atoms.
-    // (`size`/`weight`/`lineHeight`/`letterSpacing` are inline vars, not classes —
-    // covered above.)
+    // `italic`, `textAlign`, and `whiteSpace` are each additive class atoms
+    // (`size`/`weight`/`lineHeight`/`letterSpacing` are inline vars, covered above).
     const base = screen.getByTestId("h").className.split(" ").length;
     rerender(
       <Heading level={2} data-testid="h" italic textAlign="center" whiteSpace="nowrap">

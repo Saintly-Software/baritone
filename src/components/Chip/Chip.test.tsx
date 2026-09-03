@@ -9,8 +9,7 @@ describe("Chip", () => {
     render(<Chip data-testid="chip">Beta</Chip>);
     const chip = screen.getByTestId("chip");
     expect(chip.tagName).toBe("SPAN");
-    // The (string) label gets its own element so the chip can truncate it; it is
-    // not a raw text child of the root.
+    // The label gets its own element (for truncation) — not a raw text child of the root.
     const label = screen.getByText("Beta");
     expect(label).not.toBe(chip);
     expect(chip).toContainElement(label);
@@ -57,8 +56,8 @@ describe("Chip", () => {
   });
 
   it("omits a decorative shorthand adornment whose icon resolves to nothing", () => {
-    // A conditional shorthand glyph (`icon={cond && <Glyph/>}`) can resolve to
-    // `false`; the adornment should disappear, not render an empty spaced box.
+    // A conditional shorthand glyph (`icon={cond && <Glyph/>}`) resolving to
+    // `false` should disappear, not render an empty spaced box.
     render(
       <Chip data-testid="chip" icon={false}>
         Label

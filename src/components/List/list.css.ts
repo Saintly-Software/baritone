@@ -1,10 +1,9 @@
 import { style } from "@vanilla-extract/css";
 
 /**
- * Reset the browser's default `<ul>` / `<ol>` chrome — margin, padding, and the
- * bullet/number marker — so the flex or grid layout is the only thing spacing
- * the items. Markers don't flow well through flex/grid tracks, so `List` drops
- * them and leans on the layout (and `ordered` for the semantic element) instead.
+ * Resets the browser's default `<ul>`/`<ol>` chrome — margin, padding, marker —
+ * so flex/grid layout is the only thing spacing items. Markers don't flow well
+ * through flex/grid tracks, so `List` drops them (using `ordered` for semantics instead).
  */
 export const listReset = style({
   margin: 0,

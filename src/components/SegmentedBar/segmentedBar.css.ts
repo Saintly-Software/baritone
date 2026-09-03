@@ -4,25 +4,20 @@ import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
 // A segment's fill colour, funnelled through a local var so one recipe can paint
-// both of a segment's marks — the slice in the track and its legend swatch —
-// without either needing to know which intent won. Exported so the per-segment
-// `color` escape hatch can override it inline (an inline custom property
-// declaration wins over the recipe's class-based one).
+// both of a segment's marks (the slice and its legend swatch). Exported so the
+// per-segment `color` escape hatch can override it inline.
 export const segmentFillVar = createVar();
 const fill = segmentFillVar;
 
 /**
- * The gap between adjacent slices. Deliberately a gap in the track rather than a
- * border around each slice: a stroke would add a second edge colour to reason
- * about at every boundary, while a gap separates neighbours with the surface
- * already behind them. Kept small enough that it barely distorts the shares.
+ * The gap between adjacent slices. Deliberately a gap rather than a border
+ * around each slice — a stroke would add a second edge colour to reason about,
+ * while a gap just shows the surface behind. Kept small enough to barely
+ * distort the shares.
  */
 const SEGMENT_GAP = "2px";
 
-/**
- * SegmentedBar root — a vertical stack: optional header, the track, the legend.
- * Full-width so it flexes to whatever container it's dropped into.
- */
+/** SegmentedBar root — a vertical stack: optional header, the track, the legend. Full-width. */
 export const segmentedBarRoot = style({
   display: "flex",
   flexDirection: "column",
@@ -33,8 +28,8 @@ export const segmentedBarRoot = style({
 
 /**
  * The header row above the track — the label sits at the start, the optional
- * total read-out at the end. `space-between` pushes them apart and `baseline`
- * keeps their text on a shared line even when the two slots differ in size.
+ * total read-out at the end. `baseline` keeps their text on a shared line even
+ * when the two slots differ in size.
  */
 export const segmentedBarHeader = style({
   display: "flex",
@@ -45,10 +40,9 @@ export const segmentedBarHeader = style({
 
 /**
  * The track — the full range rail the slices sit in. Backed by the washed
- * `neutral` `mid` component fill, which shows through both the gaps between
- * slices and any remainder left when an explicit `total` exceeds the values.
- * `overflow: hidden` clips the outermost slices to the pill radius, so the bar
- * has round ends and square interior boundaries.
+ * `neutral` `mid` component fill, which shows through the gaps between slices
+ * and any remainder when an explicit `total` exceeds the values. `overflow:
+ * hidden` clips the outermost slices to the pill radius for round ends.
  */
 export const segmentedBarTrack = recipe({
   base: {
@@ -73,12 +67,11 @@ export type SegmentedBarTrackVariants = NonNullable<RecipeVariants<typeof segmen
 
 /**
  * Resolves a segment's colour into the shared `fill` var. Variants only — the
- * two marks that consume it (the slice, the legend swatch) bring their own
- * geometry — so one recipe keeps a segment's two marks in lockstep by
- * construction.
+ * slice and legend swatch bring their own geometry — so one recipe keeps a
+ * segment's two marks in lockstep.
  *
  * The fill reads `text.color[intent][saliency]`: the one colour ramp that's a
- * solid, visible ink at every saliency (the `component` fills go transparent at
+ * solid, visible ink at every saliency (`component` fills go transparent at
  * `low`), so neighbouring slices stay distinguishable at any level.
  */
 export const segmentedBarFill = recipe({
@@ -107,10 +100,10 @@ export const segmentedBarFill = recipe({
 export type SegmentedBarFillVariants = NonNullable<RecipeVariants<typeof segmentedBarFill>>;
 
 /**
- * One slice. Sized by `flex-grow` (set inline from the segment's share) against a
- * zero basis, so the slices always divide the track exactly — no percentage
+ * One slice. Sized by `flex-grow` (set inline from the segment's share) against
+ * a zero basis, so the slices always divide the track exactly — no percentage
  * rounding to reconcile. `minWidth` keeps a tiny-but-nonzero share from
- * collapsing into nothing; flexbox takes the difference out of the larger slices.
+ * collapsing to nothing; flexbox takes the difference from the larger slices.
  */
 export const segmentedBarSegment = style({
   flexBasis: 0,
@@ -126,8 +119,7 @@ export const segmentedBarSegment = style({
 
 /**
  * The unfilled remainder, when an explicit `total` is larger than the values sum
- * to. Paints nothing — it just reserves its share so the track's own background
- * shows through.
+ * to. Paints nothing — just reserves its share so the track's background shows through.
  */
 export const segmentedBarRemainder = style({
   flexBasis: 0,
@@ -144,10 +136,7 @@ export const segmentedBarLegend = style({
   padding: 0,
 });
 
-/**
- * A legend row: swatch, label, then the numerics pushed to the end (see
- * `segmentedBarLegendLabel`).
- */
+/** A legend row: swatch, label, then the numerics pushed to the end (see `segmentedBarLegendLabel`). */
 export const segmentedBarLegendRow = style({
   display: "flex",
   alignItems: "center",
@@ -155,26 +144,24 @@ export const segmentedBarLegendRow = style({
 });
 
 /**
- * The legend's label cell. It takes the free space (rather than the numerics
- * carrying a `margin-inline-start: auto`), so a long label truncates against the
+ * The legend's label cell. Takes the free space (rather than the numerics
+ * carrying `margin-inline-start: auto`), so a long label truncates against the
  * numbers instead of shoving them off the row.
  */
 export const segmentedBarLegendLabel = style({
   flex: "1 1 auto",
   minWidth: 0,
-  // The truncation trio: a single-line box (`nowrap`) whose overflow is clipped
-  // (`hidden`) and marked with an ellipsis. Without `nowrap` a long label wraps
-  // onto more lines instead of truncating, and the ellipsis never engages — the
-  // legend `Text` sets no `white-space` of its own, so this is the only source.
+  // The truncation trio: `nowrap` keeps it one line so `hidden` + ellipsis can
+  // engage. Without it a long label wraps instead of truncating — the legend
+  // `Text` sets no `white-space` of its own, so this is the only source.
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
 });
 
 /**
- * A numeric cell — the share and the value. Tabular figures so the digits line up
- * into columns down the legend, and `end` alignment so they stay flush right as
- * their widths differ.
+ * A numeric cell — the share and the value. Tabular figures line the digits up
+ * into columns down the legend; `end` alignment keeps them flush right.
  */
 export const segmentedBarLegendNumeric = style({
   flex: "none",
@@ -182,10 +169,7 @@ export const segmentedBarLegendNumeric = style({
   fontVariantNumeric: "tabular-nums",
 });
 
-/**
- * The legend swatch — the one mark carrying a segment's colour into the legend.
- * A squared-off dot, matching the slice it stands for.
- */
+/** The legend swatch — carries a segment's colour into the legend as a squared-off dot. */
 export const segmentedBarSwatch = style({
   flex: "none",
   width: "0.5625rem",

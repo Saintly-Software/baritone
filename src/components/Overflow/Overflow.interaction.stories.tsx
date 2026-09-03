@@ -4,17 +4,14 @@ import { Button } from "../Button";
 import { Overflow } from "./index";
 
 /**
- * Interaction coverage for `Overflow`. These run in a real browser (unlike the
- * jsdom unit tests), so base-ui can measure overflow, toggle its
- * `data-overflow-*` attributes, and the nav buttons can reveal + actually
- * scroll. Each story asserts three things: a nav button shows only when its edge
- * overflows, both edges reveal/hide at the extremes, and clicking a button moves
- * the viewport the right way.
+ * Interaction coverage for `Overflow`. Runs in a real browser (unlike the jsdom
+ * unit tests) so base-ui can measure overflow and the nav buttons can actually
+ * scroll. Each story asserts a button shows only when its edge overflows, both
+ * edges reveal/hide at the extremes, and clicking moves the viewport correctly.
  *
- * To stay deterministic, each story reaches an extreme with an *instant* manual
- * scroll (no animation in flight), asserts the button states there, and only
- * *then* clicks a nav button — so a button-driven smooth scroll is never racing
- * against a manual one.
+ * To stay deterministic, each story reaches an extreme with an instant manual
+ * scroll first, asserts button states, then clicks a nav button — so a
+ * button-driven smooth scroll never races a manual one.
  */
 const meta: Meta<typeof Overflow> = {
   title: "Interaction Tests/Overflow",
@@ -46,8 +43,7 @@ const opacity = (el: HTMLElement) => getComputedStyle(el).opacity;
 
 /**
  * Horizontal, item mode: only the end button shows at the start; jumping to the
- * end flips which button shows; clicking the (now visible) start button scrolls
- * back toward the start.
+ * end flips which shows, and clicking the (now visible) start button scrolls back.
  */
 export const Horizontal: Story = {
   render: () => (
@@ -58,8 +54,7 @@ export const Horizontal: Story = {
   play: async ({ canvasElement }) => {
     const { viewport, start, end } = parts(canvasElement, "Toolbar");
 
-    // At the start: nothing hidden to the left (start hidden), more to the right
-    // (end revealed).
+    // At the start: nothing hidden to the left (start hidden); more to the right (end revealed).
     await waitFor(() => expect(opacity(end)).toBe("1"));
     expect(opacity(start)).toBe("0");
     expect(viewport.scrollLeft).toBe(0);
@@ -104,8 +99,7 @@ export const HorizontalPage: Story = {
 
 /**
  * Vertical, item mode: only the down button shows at the top; jumping to the
- * bottom flips which button shows; clicking the (now visible) up button scrolls
- * back toward the top.
+ * bottom flips which shows, and clicking the (now visible) up button scrolls back.
  */
 export const Vertical: Story = {
   render: () => (

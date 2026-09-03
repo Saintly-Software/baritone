@@ -32,10 +32,10 @@ function FolderGlyph() {
 }
 
 /**
- * Kitchen sink — one card exercising the full surface in a single composition:
- * a header with a leading `icon` and trailing status `chip`, a collapsible
- * disclosure, full-bleed media (`Card.Bleed`), a `Card.Divider`, a key/value
- * `Card.Rows` group (including a rich title/action row), and footer actions.
+ * Kitchen sink — one card exercising the full surface: a header with a leading
+ * `icon` and trailing status `chip`, a collapsible disclosure, full-bleed media
+ * (`Card.Bleed`), a `Card.Divider`, a key/value `Card.Rows` group (with a rich
+ * title/action row), and footer actions.
  */
 export const KitchenSink: Story = {
   render: (args) => (
@@ -121,9 +121,8 @@ export const KitchenSink: Story = {
 
 /**
  * Clickable: the whole surface activates, but only the header title is the real
- * `<button>` (stretched over the card with an `::after` overlay) — so the
- * accessible name is just the title, not the whole card. Following
- * https://inclusive-components.design/cards/.
+ * `<button>` (stretched via an `::after` overlay), so the accessible name is
+ * just the title, not the whole card. See https://inclusive-components.design/cards/.
  */
 export const Clickable: Story = {
   render: (args) => {
@@ -150,8 +149,7 @@ export const Clickable: Story = {
 
 /**
  * Linkable: the header title is the one real `<a>`, stretched over the whole
- * surface — so the entire card navigates on click while only the title names the
- * link.
+ * surface, so the entire card navigates on click while only the title names the link.
  */
 export const Linkable: Story = {
   render: (args) => (
@@ -172,9 +170,8 @@ export const Linkable: Story = {
 /**
  * `selected` — the accented "chosen" state. The intended pattern is a real
  * control inside the card (here a `Checkbox`) that owns the state for assistive
- * tech; `selected` accents the surface edge to reinforce it for sighted users, so
- * selection is never conveyed by colour alone. Toggle a box to see the accent
- * follow it.
+ * tech; `selected` just reinforces it visually, so selection is never conveyed
+ * by colour alone. Toggle a box to see the accent follow it.
  */
 export const Selected: Story = {
   render: (args) => {

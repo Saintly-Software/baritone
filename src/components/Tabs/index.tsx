@@ -17,8 +17,7 @@ export interface TabIconState {
 export interface TabsItemProps<T> {
   /**
    * The value this tab selects. Constrained to the set the `tabs` array forms,
-   * so a typo or a value outside the union/enum is a compile error — and the
-   * same `T` flows into `value` / `onChange` / `initialValue`.
+   * so a typo or an out-of-union value is a compile error.
    */
   value: T;
   /** The visible tab label (also its accessible name). */
@@ -29,26 +28,23 @@ export interface TabsItemProps<T> {
    */
   disabled?: boolean;
   /**
-   * Icon placed before the label; inherits text colour. Pass a bare glyph
-   * (`leadIcon={<Bell />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
-   * custom size/label, or a `(props, state) => …` render function for full
-   * control.
+   * Icon before the label; inherits text colour. Pass a bare glyph
+   * (auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
+   * render function for full control.
    */
   leadIcon?: IconSlot<TabIconState>;
   /**
-   * Icon placed after the label; inherits text colour. Pass a bare glyph
-   * (`trailIcon={<Bell />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
-   * custom size/label, or a `(props, state) => …` render function for full
-   * control.
+   * Icon after the label; inherits text colour. Pass a bare glyph
+   * (auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
+   * render function for full control.
    */
   trailIcon?: IconSlot<TabIconState>;
 }
 
 interface TabsBaseProps<T> {
   /**
-   * The tabs to render, each a `TabsItemProps` (`value` + `label`, plus optional
-   * `disabled` / `leadIcon` / `trailIcon`). The union of their `value`s is the
-   * `T` that the selected-value props are type-checked against.
+   * The tabs to render, each a `TabsItemProps`. The union of their `value`s is
+   * the `T` that the selected-value props are type-checked against.
    */
   tabs: ReadonlyArray<TabsItemProps<T>>;
   /**
@@ -70,19 +66,17 @@ interface TabsBaseProps<T> {
   /** Ref to the root element. */
   ref?: React.Ref<HTMLDivElement>;
   /**
-   * Panel content, rendered below the tab strip inside the same tabs context —
+   * Panel content, rendered below the tab strip in the same tabs context —
    * typically one `<Tabs.Panel>` per tab `value`. base-ui cross-wires each
-   * panel's `aria-labelledby` to its tab and each tab's `aria-controls` to its
-   * panel by matching `value`s. Omit it entirely to render just the tab strip
-   * and place the active view yourself.
+   * pair's `aria-labelledby`/`aria-controls` by matching `value`s. Omit to
+   * render just the strip and place the active view yourself.
    */
   children?: React.ReactNode;
 }
 
 /**
- * Controlled: drive the active tab yourself with `value` + `onChange`.
- * `NoInfer` keeps `T` coming from `tabs` alone, so `value` is *checked* against
- * the tab set rather than widening it.
+ * Controlled: drive the active tab with `value` + `onChange`. `NoInfer` keeps
+ * `T` coming from `tabs` alone, so `value` is checked against it, not widened.
  */
 interface TabsControlledProps<T> {
   value: NoInfer<T>;
@@ -101,21 +95,16 @@ export type TabsProps<T> = TabsBaseProps<T> & (TabsControlledProps<T> | TabsUnco
 
 /**
  * Tabs — a horizontal tablist for switching the active view. Built on base-ui's
- * `Tabs` (roving focus, arrow-key navigation, `tablist` / `tab` ARIA wiring). It
- * renders the tab strip and, optionally, panel content: pass one `<Tabs.Panel>`
- * per tab `value` as `children` and base-ui shows the active one and wires the
- * `aria-controls` / `aria-labelledby` pair. Omit `children` to render just the
- * strip and place the content for each `value` yourself.
+ * `Tabs` (roving focus, arrow-key navigation, ARIA wiring). Pass one
+ * `<Tabs.Panel>` per tab `value` as `children` for wired-up panel content, or
+ * omit `children` to place the active view yourself.
  *
- * Like `RadioGroup`, it's **type-safe over its values**: the component is generic
- * over `T` (inferred from the `tabs` array — `const` so string/number literals
- * survive without `as const`), and `value` / `onChange` / `initialValue` are all
- * bound to that same `T`. So a tab `value`, the controlled `value`, and the
- * uncontrolled `initialValue` can only ever be members of the same union/enum.
+ * Type-safe over its values, like `RadioGroup`: generic over `T` (inferred from
+ * `tabs`), with `value`/`onChange`/`initialValue` all bound to that same `T`.
  * See https://tkdodo.eu/blog/building-type-safe-compound-components
  *
- * Controlled vs uncontrolled is a discriminated union: pass `value` + `onChange`
- * to drive it, or `initialValue` (or nothing) to let it manage its own state.
+ * Controlled vs uncontrolled is a discriminated union: `value` + `onChange` to
+ * drive it, or `initialValue` (or nothing) to manage its own state.
  *
  * @example
  * type View = "overview" | "activity" | "settings";
@@ -150,7 +139,7 @@ export function Tabs<const T>({
 }: TabsProps<T>) {
   const controlled = onChange != null;
   // base-ui's `defaultValue` falls back to `0`, which won't match string/enum
-  // values — so an uncontrolled list seeds itself with the first enabled tab.
+  // values, so we seed the first enabled tab ourselves.
   const fallback = (tabs.find((tab) => !tab.disabled) ?? tabs[0])?.value;
   const rootValueProps = controlled ? { value } : { defaultValue: initialValue ?? fallback };
 
@@ -160,9 +149,8 @@ export function Tabs<const T>({
       {...rootValueProps}
       onValueChange={(next, details) => {
         const target = tabs.find((tab) => tab.value === next);
-        // Veto selecting a disabled tab (or any tab while the group is disabled).
-        // `cancel()` stops base-ui committing it in both controlled and
-        // uncontrolled modes; the tab still takes focus, it just won't activate.
+        // Veto a disabled tab (or any tab while the group is disabled).
+        // `cancel()` blocks the commit either mode; the tab still takes focus.
         if (disabled || target?.disabled) {
           details.cancel();
           return;
@@ -181,9 +169,8 @@ export function Tabs<const T>({
             <BaseTabs.Tab
               key={String(tab.value)}
               value={tab.value}
-              // `aria-disabled` (not the native attribute) keeps the tab tabbable;
-              // the per-tab dim only applies when the group itself isn't disabled,
-              // so the group's `tabsListDisabled` never double-dims it.
+              // `aria-disabled` keeps the tab tabbable; the per-tab dim only
+              // applies when the group isn't disabled, so it never double-dims.
               aria-disabled={tabDisabled || undefined}
               className={cx(
                 componentTypographyRecipe({ size: "md" }),
@@ -209,17 +196,13 @@ export interface TabsPanelProps extends Omit<
   "color" | "children"
 > {
   /**
-   * The tab `value` this panel belongs to — base-ui shows the panel while the
-   * matching tab is active and links the two with `aria-controls` /
-   * `aria-labelledby`. Not bound to the `Tabs` generic (panels are separate
-   * children), so keep it in sync with a tab's `value`.
+   * The tab `value` this panel belongs to — shown while the matching tab is
+   * active. Not bound to the `Tabs` generic, so keep it in sync with a tab's `value`.
    */
   value: string | number;
   /**
-   * Keep the panel mounted in the DOM while hidden instead of unmounting it
-   * (base-ui's `keepMounted`). Off by default — panels are lazy, mounting on
-   * first activation — so turn it on to preserve panel state (scroll position,
-   * form input, an in-flight fetch) across tab switches.
+   * Keep the panel mounted while hidden instead of unmounting it. Off by
+   * default (lazy mount on first activation); turn on to preserve state across switches.
    */
   keepMounted?: boolean;
   /** Extra className merged onto the panel element. */
@@ -231,12 +214,10 @@ export interface TabsPanelProps extends Omit<
 }
 
 /**
- * Tabs.Panel — the content region for one tab, rendered as a `<Tabs>` child.
- * Wraps base-ui's `Tabs.Panel` (`role="tabpanel"`): it's shown only while the
- * tab whose `value` matches is active, and base-ui wires the `aria-controls` /
- * `aria-labelledby` relationship both ways. base-ui makes the active panel
- * focusable so keyboard users can page into content with no other focusable
- * child, so it carries the shared focus ring.
+ * Tabs.Panel — the content region for one tab, shown only while the tab whose
+ * `value` matches is active (base-ui wires `aria-controls`/`aria-labelledby`
+ * both ways). Carries the shared focus ring since base-ui makes the active
+ * panel focusable, for keyboard paging when it has no other focusable child.
  */
 function TabsPanel({ value, keepMounted, className, children, ref, ...rest }: TabsPanelProps) {
   return (

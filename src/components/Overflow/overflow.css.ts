@@ -4,12 +4,10 @@ import { SPACE_KEYS } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { hover } from "../../theme/oklch";
 
-// How far the gradient fade reaches in from a scrollable edge. base-ui publishes
-// the exact pixel overflow at each edge on the viewport (the
-// `--scroll-area-overflow-*` vars), so `min(FADE, …)` fades an edge in only as
-// far as it can actually scroll — a flush edge stays crisp — and never deeper
-// than this. Sized a touch wider than a nav button so the button floats *over*
-// visibly-fading content rather than a hard cut.
+// How far the gradient fade reaches in from a scrollable edge. base-ui exposes
+// the pixel overflow per edge (`--scroll-area-overflow-*`), so `min(FADE, …)`
+// fades only as far as an edge can actually scroll — a flush edge stays crisp.
+// Sized a touch wider than a nav button so it floats over the fade, not a cut.
 const FADE = "64px";
 
 // The floating nav button's diameter and its inset from the scrolling edge.
@@ -19,16 +17,15 @@ const GUTTER = vars.space[1]; // 4px
 // The thumb's resting thickness / the scrollbar rail's cross-axis size.
 const BAR = "10px";
 
-// How long the scrollbar lingers before fading back out after you stop hovering
-// / scrolling. Reveal is near-instant; the delay only applies to the fade-out.
+// How long the scrollbar lingers before fading out after hover/scroll ends.
+// Reveal is near-instant; only the fade-out is delayed.
 const REVEAL_DELAY = "400ms";
 
 /**
- * Per-edge gradient masks driven by base-ui's overflow metrics, one axis each.
- * Each `--scroll-area-overflow-<axis>-<edge>` var is the pixels of content
- * hidden past that edge (0 when flush), so the fade only appears on a side that
- * can actually scroll further, and tracks the scroll position live. Fallbacks of
- * `0px` keep content sharp before base-ui has measured (SSR / first paint).
+ * Per-edge gradient masks driven by base-ui's overflow metrics: each
+ * `--scroll-area-overflow-<axis>-<edge>` var is the pixels hidden past that
+ * edge, so a fade only shows where content can still scroll, live. `0px`
+ * fallbacks keep edges sharp before base-ui measures (SSR / first paint).
  */
 const xFade = `linear-gradient(
   to right,
@@ -48,13 +45,11 @@ const yFade = `linear-gradient(
 
 /**
  * Groups the viewport, scrollbar, and floating nav buttons (the last two are
- * `position: absolute`, so only the viewport is in flow). It's a flex column so
- * the viewport can fill it *and* be constrained by it: a definite `height` or a
- * `max-height` on the root both bound the viewport, which is what lets a vertical
- * `Overflow` grow to a cap and then scroll (a plain `height: 100%` viewport can't
- * resolve against a `max-height`-only parent). A horizontal `Overflow` needs no
- * height — it hugs its row and just wants a bounded width (its container's is
- * enough); a vertical one wants a bounded `height` / `max-height`.
+ * `position: absolute`, so only the viewport is in flow). A flex column so the
+ * viewport can both fill and be constrained by it — a `height`/`max-height` on
+ * the root bounds it, letting a vertical `Overflow` grow to a cap then scroll
+ * (plain `height: 100%` can't resolve against a `max-height`-only parent).
+ * Horizontal just needs a bounded width; vertical needs a bounded height.
  */
 export const root = style({
   position: "relative",
@@ -89,11 +84,10 @@ export const viewportFadeVertical = style({
 });
 
 /**
- * The layout track holding the controls — a single non-wrapping row (or column)
- * that grows past the viewport and scrolls. `width: max-content` (horizontal)
- * keeps every control at its intrinsic size instead of shrinking to fit, which
- * is the whole point: the controls overflow rather than squash. The `gap`
- * variant is the space between them.
+ * The layout track holding the controls — a single non-wrapping row (or
+ * column) that grows past the viewport and scrolls. `width: max-content`
+ * (horizontal) keeps every control at its intrinsic size so they overflow
+ * rather than squash. The `gap` variant is the space between them.
  */
 export const track = recipe({
   base: {
@@ -110,8 +104,7 @@ export const track = recipe({
       vertical: {
         flexDirection: "column",
         alignItems: "center",
-        // Fill the viewport's width so centered controls have a box to center
-        // in; the column's height grows with content and scrolls.
+        // Fills the viewport width (centering needs a box) and grows/scrolls with content.
         minWidth: "100%",
         width: "max-content",
       },
@@ -130,10 +123,9 @@ export const track = recipe({
 export type TrackVariants = NonNullable<RecipeVariants<typeof track>>;
 
 /**
- * A scrollbar rail. The rail is invisible — only the thumb shows — and the whole
- * thing stays hidden until you hover the area or scroll (base-ui flags those
- * with `data-hovering` / `data-scrolling`). Reveal is quick; the fade-out waits
- * out `REVEAL_DELAY` so a resting bar lingers a beat. Mirrors `ScrollArea`.
+ * A scrollbar rail — invisible itself (only the thumb shows), hidden until you
+ * hover or scroll (base-ui flags those with `data-hovering`/`data-scrolling`).
+ * Reveal is quick; fade-out waits out `REVEAL_DELAY`. Mirrors `ScrollArea`.
  */
 export const scrollbar = style({
   display: "flex",
@@ -185,20 +177,15 @@ export const thumb = style({
 });
 
 /**
- * A floating scroll button. It's a *pointer convenience* — kept out of the tab
- * order (`tabIndex={-1}` on the element), because the accessible path through a
- * row of controls is Tab, which scrolls each focused control into view on its
- * own. The button is a circular raised surface that floats over the fading edge.
+ * A floating scroll button — a pointer convenience kept out of the tab order
+ * (`tabIndex={-1}`), since Tab already scrolls each focused control into view.
  *
- * Hidden by default (no edge to scroll toward → nothing to show); the reveal
- * rules below light it up only when the matching edge actually overflows, using
- * base-ui's `data-overflow-*` attributes on the root. Show/hide is instant:
- * `visibility` (also dropping it from hit-testing and the accessibility tree
- * when inactive) and `opacity` flip together. We deliberately *don't* fade the
- * button in — the element rests at `visibility: hidden`, and Chrome stalls an
- * opacity transition that starts from a first-painted hidden element, pinning it
- * at 0. The content's edge gradient (the mask below) is the animated affordance;
- * the button just appears. Only the hover wash transitions.
+ * Hidden by default; the reveal rules below light it up when the matching edge
+ * overflows, via base-ui's `data-overflow-*` attributes. `visibility` and
+ * `opacity` flip together, instantly — never fade in from `visibility: hidden`,
+ * since Chrome stalls an opacity transition starting from a first-painted
+ * hidden element and pins it at 0. The edge gradient is the animated
+ * affordance; only the hover wash transitions.
  */
 export const navButton = style({
   position: "absolute",
@@ -251,8 +238,7 @@ export const navChevron = style({
 });
 
 // --- Placement: pin each button to its edge, centered on the cross axis. ------
-// Driven by `data-orientation` on the root + `data-side` on the button, so a
-// single `navButton` class covers all four positions.
+// Driven by `data-orientation` on the root + `data-side` on the button.
 
 globalStyle(`${root}[data-orientation="horizontal"] ${navButton}[data-side="start"]`, {
   left: GUTTER,
@@ -276,10 +262,9 @@ globalStyle(`${root}[data-orientation="vertical"] ${navButton}[data-side="end"]`
 });
 
 // --- Reveal: light a button up only when its edge actually overflows. ---------
-// A horizontal root only ever carries the x-overflow attrs, a vertical root only
-// the y-overflow attrs, so these four rules cover both orientations with the
-// start/end `data-side` pairing. Specificity (0,4,0) beats the base `navButton`
-// class, so these win while the attribute is present.
+// A horizontal root only carries x-overflow attrs, vertical only y-overflow, so
+// these four rules cover both orientations. Specificity (0,4,0) beats the base
+// `navButton` class while the attribute is present.
 const revealed = {
   opacity: 1,
   visibility: "visible",
@@ -292,8 +277,7 @@ globalStyle(`${root}[data-overflow-y-start] ${navButton}[data-side="start"]`, re
 globalStyle(`${root}[data-overflow-y-end] ${navButton}[data-side="end"]`, revealed);
 
 // --- Chevron direction: point the glyph the way the button scrolls. -----------
-// The base glyph points right (end of a horizontal row); rotate for the other
-// three directions.
+// Base glyph points right (horizontal end); rotate for the other three directions.
 globalStyle(
   `${root}[data-orientation="horizontal"] ${navButton}[data-side="start"] ${navChevron}`,
   {

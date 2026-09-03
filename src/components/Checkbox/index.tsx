@@ -18,19 +18,16 @@ import { checkboxLabelDisabled, checkboxRow, checkboxRowDisabled } from "./check
 
 interface CheckboxBaseProps {
   /**
-   * Whether the box is ticked (controlled). Ignored for the accessible state
-   * while `indeterminate` is set — a mixed box reports `aria-checked="mixed"`.
+   * Whether the box is ticked (controlled). While `indeterminate` is set, the
+   * accessible state reports `aria-checked="mixed"` instead.
    */
   value: boolean;
-  /**
-   * Called when the user toggles the box, with the next checked state first and
-   * the raw DOM event that drove it second (base-ui's native `event`).
-   */
+  /** Called when the user toggles the box: next checked state first, the raw DOM event second. */
   onChange: (value: boolean, event: Event) => void;
   /**
-   * Show the tri-state "mixed" look (a dash) and report `aria-checked="mixed"`.
-   * Typically a parent box summarising a set of children that are only partly
-   * selected. Toggling still fires `onChange` with the resolved boolean.
+   * Show the tri-state "mixed" look (a dash) and report `aria-checked="mixed"` —
+   * typically a parent box summarising partly-selected children. Toggling still
+   * fires `onChange` with the resolved boolean.
    */
   indeterminate?: boolean;
   /** Where the label sits relative to the box. Default `end`. */
@@ -41,8 +38,7 @@ interface CheckboxBaseProps {
   "aria-describedby"?: string;
   /**
    * Dim + lock the control. Modelled with `aria-disabled` + `readOnly` (not the
-   * `disabled` attribute), so the box stays keyboard-focusable — e.g. it can
-   * still be tabbed to and explain itself — while toggling is vetoed.
+   * `disabled` attribute), so the box stays keyboard-focusable while toggling is vetoed.
    */
   disabled?: boolean;
   /** Mark the field as required (sets `aria-required`). */
@@ -60,30 +56,25 @@ interface CheckboxBaseProps {
 }
 
 /**
- * The visible `label` sits beside the box (and is part of the click target).
- * Name the box with exactly one of `label` / `aria-label` / `aria-labelledby` —
- * they're mutually exclusive (see `FieldLabellingProps`).
+ * The visible `label` sits beside the box (part of the click target). Name the
+ * box with exactly one of `label`/`aria-label`/`aria-labelledby` — they're
+ * mutually exclusive (see `FieldLabellingProps`).
  */
 export type CheckboxProps = CheckboxBaseProps & FieldLabellingProps;
 
 /**
  * Checkbox — a single boolean "form control", built on base-ui's `Checkbox` for
- * behaviour (role, keyboard, form wiring) and wrapped in a `Field` for ARIA, the
- * same way `TextInput` and `RadioGroup` are.
+ * behaviour and wrapped in a `Field` for ARIA, like `TextInput` and `RadioGroup`.
  *
  * The visual is the presentational `InternalCheckbox`, slotted in via base-ui's
- * `render` prop: base-ui makes the box the focusable `role="checkbox"` element
- * and feeds it `data-checked` / `data-disabled` / `data-invalid`, while
- * `InternalCheckbox` owns the look (box, glyph, focus ring). Because base-ui's
- * hidden `<input>` is `aria-hidden`, a wrapping `<label>` would only name *it*,
- * not the box — so, exactly like `RadioGroup`, the box is named explicitly with
- * `aria-labelledby` pointing at the visible label. Without a visible `label`,
- * name the box with `aria-label` / `aria-labelledby` instead.
+ * `render` prop. Because base-ui's hidden `<input>` is `aria-hidden`, the box is
+ * named explicitly with `aria-labelledby` pointing at the visible label (as in
+ * `RadioGroup`); without a visible `label`, name it with `aria-label`/`aria-labelledby`.
  *
- * `value` stays a single `boolean` (the checked state); `indeterminate` layers a
- * "mixed" presentation on top for a parent-of-a-set summary. Validation follows
- * the shared `state` model, with an optional `helpText` line beneath the box
- * (reddened when invalid) — matching `TextInput`, `RadioGroup`, `CheckboxGroup`.
+ * `value` is a single `boolean`; `indeterminate` layers a "mixed" presentation on
+ * top for a parent-of-a-set summary. Validation follows the shared `state`
+ * model, with an optional `helpText` line beneath the box — matching
+ * `TextInput`, `RadioGroup`, `CheckboxGroup`.
  *
  * @example
  * const [agreed, setAgreed] = React.useState(false);
@@ -115,9 +106,8 @@ export function Checkbox(props: CheckboxProps) {
   const disabled = disabledProp || inheritedDisabled;
 
   // The label lives inside the clickable row rather than in the `Field`, so the
-  // exclusivity check `Field` runs for other controls has to happen here.
-  // Everything the control's focusable element needs from the field, in one
-  // object — see `fieldControlAttrs`.
+  // exclusivity check happens here. `controlProps` bundles what the control's
+  // focusable element needs from the field — see `fieldControlAttrs`.
   const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
@@ -142,20 +132,20 @@ export function Checkbox(props: CheckboxProps) {
           indeterminate={indeterminate}
           onCheckedChange={(checked, details) => onChange(checked, details.event)}
           // `readOnly` (not `disabled`) keeps the box keyboard-focusable: base-ui
-          // leaves it in the tab order but vetoes the toggle (click / Space). The
-          // `aria-disabled` carries the disabled semantics to assistive tech.
+          // vetoes the toggle but leaves it tabbable; `aria-disabled` carries the
+          // semantics to assistive tech.
           readOnly={disabled}
           aria-disabled={disabled || undefined}
           required={required}
           name={name}
           // Name the box explicitly: base-ui's hidden `<input>` is `aria-hidden`,
-          // so the wrapping `<label>` would name *that*, not the box.
+          // so the `<label>` would otherwise name that, not the box.
           {...fieldControlAttrs(controlProps, labelId)}
           render={
             <InternalCheckbox
               checked={indeterminate ? "indeterminate" : value}
-              // base-ui now reports `data-readonly`, not `data-disabled`, so the
-              // box's dim is driven explicitly from the prop.
+              // base-ui reports `data-readonly`, not `data-disabled`, so dim is
+              // driven explicitly from the prop.
               disabled={disabled}
               state={state}
               size={size}

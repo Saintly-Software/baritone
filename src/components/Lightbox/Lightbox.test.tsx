@@ -122,9 +122,8 @@ describe("Lightbox", () => {
     await user.click(screen.getByRole("button", { name: "Expand" }));
     const dialog = await screen.findByRole("dialog");
 
-    // The backdrop is the dim layer rendered just before the viewport that holds
-    // the popup. Clicking it is the "backdrop dismiss" a real pointer would do —
-    // in jsdom there's no visual layering, so target it directly.
+    // The backdrop is the dim layer just before the viewport holding the popup.
+    // jsdom has no visual layering, so target it directly to simulate a backdrop click.
     const backdrop = dialog.closest("[class*='lightboxViewport']")?.previousElementSibling;
     expect(backdrop).not.toBeNull();
     await user.click(backdrop as Element);

@@ -33,8 +33,7 @@ type Story = StoryObj<typeof Menu>;
 
 /**
  * Every row shape at once: a plain button row, one per supported `intent`, an
- * icon row, an external `href` link, and disabled variants of both a button and
- * a link row.
+ * icon row, an external `href` link, and disabled button/link variants.
  */
 export const KitchenSink: Story = {
   render: () => (

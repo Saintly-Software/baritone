@@ -86,8 +86,8 @@ interface StateRow {
   disabled?: boolean;
 }
 
-// The convenience flags — `invalid` (→ negative + glyph) and `disabled`
-// (→ dimmed) — including the combination where `disabled` wins over `invalid`.
+// The convenience flags — `invalid` (negative + glyph) and `disabled` (dimmed),
+// including the case where `disabled` wins over `invalid`.
 const stateRows: StateRow[] = [
   { label: "Default", text: "Neutral helper text." },
   { label: "Invalid", text: "This field is required.", invalid: true },

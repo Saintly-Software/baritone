@@ -22,8 +22,8 @@ const meta: Meta<typeof SegmentedBar> = {
     size: { control: "select", options: SIZES },
   },
   decorators: [
-    // The bar is full-width; capped so the legend's numerics don't drift a screen
-    // away from their labels in the docs.
+    // Capped width so the legend's numerics don't drift from their labels in
+    // the docs.
     (Story) => (
       <div style={{ maxWidth: 420 }}>
         <Story />

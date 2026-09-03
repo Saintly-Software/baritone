@@ -7,8 +7,8 @@ import { vars } from "../../theme/contract.css";
 const CONFIRMATION_INTENTS = ["secondary", "warning", "negative"] as const;
 
 /**
- * Header row: the leading `icon` (tinted by intent) sits beside the title/subtitle
- * stack. Aligns to the top so a multi-line title still lines up with the glyph.
+ * Header row: the leading `icon` sits beside the title/subtitle stack, aligned
+ * to the top so a multi-line title still lines up with the glyph.
  */
 export const confirmationModalHeader = style({
   display: "flex",
@@ -17,10 +17,9 @@ export const confirmationModalHeader = style({
 });
 
 /**
- * Tints the leading icon to the modal's intent. It republishes `--iconColor` at
- * the intent's high-saliency `component` text token, so the consumer's plain
- * `<Icon>` (which reads that variable) picks up the colour without needing to
- * know the intent. Mirrors `noticeIconRecipe`.
+ * Tints the leading icon to the modal's intent by republishing `--iconColor`,
+ * so the consumer's plain `<Icon>` picks up the colour without knowing the
+ * intent. Mirrors `noticeIconRecipe`.
  */
 export const confirmationModalIconRecipe = recipe({
   variants: {

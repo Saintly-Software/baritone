@@ -119,9 +119,8 @@ describe("DataTable", () => {
   });
 
   it("throws in dev when a visible caption is combined with an aria name", () => {
-    // The `DataTableName` union already forbids this at compile time; the runtime
-    // guard catches JS callers and type-casts that slip past it. Cast to simulate
-    // one, and silence React's error logging for the expected throw.
+    // `DataTableName` forbids this at compile time; the runtime guard catches JS
+    // callers/casts that slip past it. Silence React's expected-throw error log.
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       const withAriaLabel = {
@@ -145,8 +144,7 @@ describe("DataTable", () => {
   });
 });
 
-// A dataset whose roles repeat, so grouping actually gathers rows, plus a
-// balance column that rolls up to a per-group sum.
+// Roles repeat, so grouping gathers rows; balance rolls up to a per-group sum.
 const staff: Person[] = [
   { id: "1", name: "Ada Lovelace", role: "Engineering", balance: 42 },
   { id: "2", name: "Grace Hopper", role: "Engineering", balance: 96 },
@@ -165,8 +163,8 @@ const groupedColumns = col.columns([
   }),
 ]);
 
-// A two-dimension dataset (region → role) for nested grouping: the Americas
-// region holds three data rows spread across two role sub-groups.
+// A two-dimension dataset (region → role) for nested grouping: Americas holds
+// 3 data rows across 2 role sub-groups.
 interface Employee {
   id: string;
   region: string;
@@ -283,19 +281,17 @@ describe("DataTable grouping", () => {
         getRowId={(e) => e.id}
       />,
     );
-    // The Americas region holds 3 data rows across 2 role sub-groups (Engineering
-    // ×2, Sales ×1). Its header must count the 3 data rows, not the 2 sub-groups —
-    // so "(3)" is present, and "(2)" belongs solely to the Engineering sub-group
-    // (a lone match; the buggy direct-child count would show "(2)" twice).
+    // Americas holds 3 data rows across 2 role sub-groups (Engineering ×2, Sales
+    // ×1); its header must count the 3 rows, not the 2 sub-groups, so "(2)" is a
+    // lone match — a buggy direct-child count would show it twice.
     expect(screen.getByText("(3)")).toBeInTheDocument();
     expect(screen.getByText("(2)")).toBeInTheDocument();
     expect(screen.getByText("(1)")).toBeInTheDocument();
   });
 
   it("keeps the grouped column (default groupDisplay='columns') — a regression guard", () => {
-    // The default presentation must be unchanged: the grouped column stays its own
-    // column, so all three headers render and passing `groupDisplay="columns"`
-    // explicitly is identical to omitting it.
+    // The default presentation is unchanged: the grouped column stays its own
+    // column, so passing `groupDisplay="columns"` explicitly is identical to omitting it.
     const { container: implicit } = render(
       <DataTable
         aria-label="Staff"
@@ -329,7 +325,7 @@ describe("DataTable grouping", () => {
 });
 
 // Depth published by the merged label's inline `--groupDepth` var (via
-// assignInlineVars) — the numeric value in the element's `style` attribute.
+// `assignInlineVars`) in the element's `style` attribute.
 function labelDepth(el: HTMLElement): number {
   const match = (el.getAttribute("style") ?? "").match(/:\s*(\d+)/);
   return match ? Number(match[1]) : Number.NaN;
@@ -347,8 +343,7 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // One fewer column: the grouped "Role" header is gone; Name (the host) and
-    // Balance remain.
+    // One fewer column: the grouped "Role" header is gone; Name (host) and Balance remain.
     expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
       "Name",
       "Balance",
@@ -451,8 +446,7 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // The grouped "Role" column is dropped, so the empty cell spans the two
-    // remaining columns (Name + Balance), not three.
+    // "Role" is dropped, so the empty cell spans Name + Balance (2), not 3.
     expect(screen.getByRole("cell", { name: "No staff yet." })).toHaveAttribute("colspan", "2");
   });
 
@@ -495,8 +489,7 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // The toggle lives in the Balance column's group cell, not Name's. The group
-    // header row's first (Name) cell is empty; the group label sits in Balance.
+    // The toggle lives in Balance's group cell, not Name's; Name's cell is empty.
     const headerRow = screen.getByRole("button", { name: /Engineering/ }).closest("tr")!;
     const cells = within(headerRow).getAllByRole("cell");
     expect(within(cells[1]!).getByText("Engineering")).toBeInTheDocument();
@@ -504,9 +497,8 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
   });
 
   it("keeps the aggregate: the default host skips an aggregated column", () => {
-    // Only two columns — the grouped `category` and a summed `amount`. The label
-    // must NOT hijack the aggregated column; instead the grouped column stays on
-    // as the outline so the per-group total still renders on the header row.
+    // Two columns: grouped `category` and summed `amount`. The label must not
+    // hijack the aggregated column — `category` stays as the outline so the total still renders.
     interface Line {
       id: string;
       category: string;
@@ -551,8 +543,7 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
 
   it("still renders a usable host when every column is grouped", () => {
     // With no non-grouped column left, the innermost grouped column stays on as
-    // the host — so group rows keep their toggle + label + count instead of
-    // collapsing to zero cells.
+    // the host, so group rows keep their toggle + label + count instead of collapsing to zero.
     interface Pair {
       id: string;
       category: string;
@@ -632,18 +623,16 @@ describe("DataTable row selection", () => {
       />,
     );
     expect(screen.getByRole("checkbox", { name: "Select all rows" })).toBeInTheDocument();
-    // Each row's box carries a distinct, row-specific name (from its first cell)
-    // instead of a generic "Select row", so assistive tech can tell them apart.
-    // `getByRole` throws if a name is missing or duplicated, so this also asserts
-    // there's exactly one box per data row.
+    // Each row's box carries a distinct name (from its first cell), not a generic
+    // "Select row" — `getByRole` also throws on a missing/duplicate name, so this
+    // asserts exactly one box per row.
     for (const person of people) {
       expect(screen.getByRole("checkbox", { name: `Select ${person.name}` })).toBeInTheDocument();
     }
   });
 
   it("names a row from its first usable cell, skipping a leading empty/display cell", () => {
-    // A leading display column has no value, so the label must fall through to the
-    // next cell that carries a usable primitive (here, the name).
+    // A leading display column has no value, so the label falls to the next usable cell.
     const withLeadingDisplay = col.columns([
       col.display({ id: "spacer", header: "" }),
       col.accessor("name", { header: "Name" }),
@@ -758,8 +747,7 @@ describe("DataTable row selection", () => {
     const alan = rowCheckbox("Alan Turing");
     expect(alan).toHaveAttribute("aria-disabled", "true");
     // Focusable, not removed from the tab order (the native attribute would yank
-    // it out). Tabbing from the previous row's box lands on it — AGENTS.md's
-    // enforced convention: a disabled control stays reachable by keyboard.
+    // it out) — AGENTS.md's convention: a disabled control stays keyboard-reachable.
     expect(alan).not.toBeDisabled();
     rowCheckbox("Ada Lovelace").focus();
     await user.tab();
@@ -932,8 +920,7 @@ describe("DataTable row selection", () => {
         columns={groupedColumns}
         grouping={["role"]}
         getRowId={(p) => p.id}
-        // Only balances over 50 are selectable: Engineering has Grace ($96),
-        // but Research holds only Alan ($18) — no selectable leaf.
+        // Only balances over 50 qualify: Research has no selectable leaf (Alan is $18).
         enableRowSelection={(p) => p.balance > 50}
       />,
     );
@@ -952,8 +939,7 @@ describe("DataTable row selection", () => {
 });
 
 describe("DataTable row detail panels", () => {
-  // A panel keyed off the row's datum, so a test can assert the right row's data
-  // reached the renderer.
+  // Keyed off the row's datum so a test can assert the right data reached the renderer.
   const detail = (p: Person) => <div>Detail for {p.name}</div>;
 
   it("adds no expander column or toggle unless renderDetailPanel is provided", () => {
@@ -1218,9 +1204,8 @@ describe("DataTable row detail panels", () => {
   });
 
   it("names toggles by each row's own value in grouped mode, not the shared group value", () => {
-    // Grouped columns (region, role) carry the group's value on leaf rows, shared
-    // by every row in the group. The toggle name must fall through to the row's own
-    // distinguishing value (name) instead of labelling every Americas row alike.
+    // Grouped columns (region, role) carry the shared group value on leaf rows;
+    // the toggle name must fall through to the row's own distinguishing value (name).
     render(
       <DataTable
         aria-label="Employees"
@@ -1244,9 +1229,8 @@ describe("DataTable row detail panels", () => {
   });
 
   it("keeps panel ids valid and matched when getRowId returns values with spaces", async () => {
-    // A composite id with whitespace must not leak into the DOM id / aria-controls
-    // (an invalid id + a broken IDREF list). The panel id is keyed off render
-    // position, so the toggle's aria-controls still resolves to the panel.
+    // A composite id with whitespace must not leak into the DOM id / aria-controls.
+    // The panel id is keyed off render position, so aria-controls still resolves.
     const user = userEvent.setup();
     render(
       <DataTable

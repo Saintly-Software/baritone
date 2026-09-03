@@ -59,7 +59,7 @@ describe("BaritoneProvider", () => {
 
     await user.click(screen.getByRole("button", { name: "Add three" }));
 
-    // With a limit of 1, the older toasts are kept mounted but flagged
+    // With a limit of 1, older toasts stay mounted but flagged
     // `data-limited` — proof the limit reached base-ui's provider.
     await waitFor(() =>
       expect(document.querySelectorAll("[data-limited]").length).toBeGreaterThan(0),

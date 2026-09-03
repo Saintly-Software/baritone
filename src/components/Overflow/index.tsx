@@ -20,23 +20,20 @@ export type OverflowOrientation = "horizontal" | "vertical";
 
 /**
  * How far a nav-button click travels:
- * - `item` — reveal the next control that's clipped at that edge, aligning it
- *   fully into view. Never leaves a control half-cut.
+ * - `item` — reveal the next clipped control at that edge, fully in view.
  * - `page` — jump by one viewport (0–300 → 300–600), like Page Up/Down.
  */
 export type OverflowScrollMode = "item" | "page";
 
 export interface OverflowProps {
   /**
-   * The controls to lay out in a single non-wrapping row (`horizontal`) or
-   * column (`vertical`). They keep their intrinsic size and overflow — with a
-   * scrollbar, edge fades, and floating nav buttons — instead of wrapping.
+   * The controls, laid out in a non-wrapping row (`horizontal`) or column
+   * (`vertical`) — they overflow (scrollbar, edge fades, nav buttons) rather than wrap.
    */
   children: React.ReactNode;
   /**
-   * Flow + scroll axis. `horizontal` (default) fills the available width and
-   * hugs its row's height; `vertical` needs a bounded height (a `maxHeight` /
-   * `height` via `className` / `style`) for its column to overflow.
+   * Flow + scroll axis. `horizontal` fills the available width; `vertical`
+   * needs a bounded height (`maxHeight`/`height` via `className`/`style`) to overflow.
    * @default "horizontal"
    */
   orientation?: OverflowOrientation;
@@ -85,10 +82,8 @@ function scrollBehavior(): ScrollBehavior {
 
 /**
  * Absolute scroll offset that brings the next clipped control fully into view.
- * Positions are measured from live rects (layout-direction agnostic within an
- * axis) and converted to the viewport's scroll coordinates, so it works for a
- * mixed bag of control sizes. Returns `null` when there's nothing more to reveal
- * that way.
+ * Measured from live rects (layout-direction agnostic) and converted to the
+ * viewport's scroll coordinates. Returns `null` when there's nothing more to reveal.
  */
 function nextItemOffset(
   vp: HTMLElement,
@@ -122,14 +117,12 @@ function nextItemOffset(
 
   let target: number;
   if (dir === "end") {
-    // First control whose trailing edge is past the visible end: align that edge
-    // to the viewport's end so the control lands fully in view.
+    // First control whose trailing edge is past the visible end — align it to the viewport's end.
     const next = items.find((el) => lead(el) + extent(el) > scroll + viewSize + TOL);
     if (!next) return null;
     target = lead(next) + extent(next) - viewSize;
   } else {
-    // Last control whose leading edge is before the visible start: align that
-    // edge to the viewport's start.
+    // Last control whose leading edge is before the visible start — align it to the viewport's start.
     let prev: HTMLElement | undefined;
     for (let i = items.length - 1; i >= 0; i--) {
       const el = items[i];
@@ -145,8 +138,8 @@ function nextItemOffset(
   return Math.max(0, Math.min(target, maxScroll));
 }
 
-/** Decorative chevron; the button carries the accessible name. Points right by
- * default — {@link overflow.css} rotates it per orientation/side. */
+/** Decorative chevron; the button carries the accessible name. Rotated per
+ * orientation/side by {@link overflow.css}. */
 function Chevron() {
   return (
     <svg
@@ -167,21 +160,19 @@ function Chevron() {
 
 /**
  * Overflow — a single row (or column) of controls that scrolls instead of
- * wrapping. Built on base-ui's `ScrollArea`, it adds three affordances that all
- * appear only when there's actually more to see in that direction:
+ * wrapping. Built on base-ui's `ScrollArea`, adding three affordances, each
+ * appearing only when there's more to see in that direction:
  *
- * - **Floating nav buttons** at the start/end edges. Clicking one slides toward
- *   the next clipped control (`scrollBy="item"`) or by a whole viewport
- *   (`scrollBy="page"`). They're pointer conveniences kept out of the tab order
- *   — the keyboard path is to Tab through the controls, which scrolls each
- *   focused control into view on its own.
- * - **Gradient edge fades** that grow in as content hides past an edge (driven
- *   by base-ui's live per-edge overflow metrics) and stay crisp at a flush edge.
+ * - **Floating nav buttons** at the start/end edges — slide toward the next
+ *   clipped control (`scrollBy="item"`) or a whole viewport (`scrollBy="page"`).
+ *   Pointer-only, kept out of the tab order; Tab instead scrolls each focused
+ *   control into view.
+ * - **Gradient edge fades** that grow in as content hides past an edge, and
+ *   stay crisp at a flush edge.
  * - **A hover-reveal scrollbar** for pointer dragging.
  *
- * Supports `horizontal` (default) and `vertical` orientations. A vertical
- * `Overflow` needs a bounded height; a horizontal one just needs a bounded width
- * (its container's is enough).
+ * Supports `horizontal` (default) and `vertical`. A vertical `Overflow` needs a
+ * bounded height; a horizontal one just needs a bounded width.
  *
  * @example
  * // A toolbar of actions that scrolls when the window is narrow.
@@ -252,8 +243,7 @@ export function Overflow({
           orientation === "horizontal" ? viewportFadeHorizontal : viewportFadeVertical,
         )}
       >
-        {/* base-ui's Content sets `min-width: fit-content`, so the track overflows
-            rather than shrinking to fit. */}
+        {/* base-ui's Content sets min-width: fit-content, so the track overflows rather than shrinking to fit. */}
         <BaseScrollArea.Content>
           <div ref={trackRef} className={track({ orientation, gap })}>
             {children}
@@ -265,8 +255,7 @@ export function Overflow({
         <BaseScrollArea.Thumb className={thumb} />
       </BaseScrollArea.Scrollbar>
 
-      {/* Pointer-only scroll affordances (see the component doc): out of the tab
-          order, hidden by CSS until their edge overflows. */}
+      {/* Pointer-only scroll affordances (see the component doc): out of the tab order, hidden by CSS until their edge overflows. */}
       <button
         type="button"
         data-side="start"

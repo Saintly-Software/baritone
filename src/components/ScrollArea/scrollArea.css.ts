@@ -3,26 +3,24 @@ import { vars } from "../../theme/contract.css";
 import { hover } from "../../theme/oklch";
 
 // How far the gradient scroll fade reaches in from a scrollable edge. base-ui
-// publishes the exact pixel overflow at each edge on the viewport (see the
-// `--scroll-area-overflow-*` vars below), so the fade only grows once there's
-// content hidden past that edge — and never deeper than this.
+// publishes the pixel overflow at each edge (the `--scroll-area-overflow-*`
+// vars below), so the fade only grows once content is hidden past that edge.
 const FADE = "40px";
 
 // The thumb's resting thickness / the scrollbar rail's cross-axis size.
 const BAR = "10px";
 
-// How long the scrollbar lingers before it fades back out after you stop
-// hovering / scrolling. Reveal is near-instant (see the reveal selectors); the
-// delay only applies to the fade-out so the bar doesn't vanish mid-glance.
+// How long the scrollbar lingers before fading out after you stop
+// hovering/scrolling. Reveal is near-instant; the delay is only on fade-out,
+// so the bar doesn't vanish mid-glance.
 const REVEAL_DELAY = "400ms";
 
 /**
  * Per-edge gradient masks driven by base-ui's overflow metrics. Each
- * `--scroll-area-overflow-<axis>-<edge>` var is the number of pixels of content
- * hidden past that edge of the viewport (0 when you're flush against it), so
- * `min(FADE, …)` fades an edge in only as far as it can actually scroll and
- * leaves a fully-flush edge crisp. Fallbacks of `0px` keep the content sharp
- * before base-ui has measured (SSR / first paint).
+ * `--scroll-area-overflow-<axis>-<edge>` var is the pixels of content hidden
+ * past that edge (0 when flush), so `min(FADE, …)` fades an edge in only as
+ * far as it can scroll. `0px` fallbacks keep content sharp before base-ui has
+ * measured (SSR / first paint).
  */
 const yFade = `linear-gradient(
   to bottom,
@@ -44,9 +42,8 @@ const xFade = `linear-gradient(
 export const root = style({
   position: "relative",
   // The scroll happens in the viewport, so the box only needs a bound on the
-  // axis it scrolls — the consumer supplies that (a height / max-height, and a
-  // width for horizontal). Nothing is imposed here so the area drops into any
-  // layout.
+  // axis it scrolls — supplied by the consumer (height/max-height, or width
+  // for horizontal). Nothing imposed here, so the area drops into any layout.
   boxSizing: "border-box",
   // 0 so the area takes its parent's size and the viewport — not the page —
   // scrolls; see `Flex`.
@@ -56,7 +53,7 @@ export const root = style({
 
 /**
  * The scroll container. base-ui already sets `overflow: scroll` and hides the
- * native scrollbars, so this only fills the root and carries the gradient fade
+ * native scrollbars; this just fills the root and carries the gradient fade
  * mask (added per-orientation below).
  */
 export const viewport = style({
@@ -79,8 +76,8 @@ export const viewportFadeHorizontal = style({
 
 /**
  * Fade all four edges. Compositing the two axis masks with `intersect` keeps a
- * pixel only where *both* masks keep it, so the corners round off cleanly
- * instead of one axis's fade punching through the other's.
+ * pixel only where *both* masks keep it, so corners round off cleanly instead
+ * of one axis's fade punching through the other's.
  */
 export const viewportFadeBoth = style({
   maskImage: `${yFade}, ${xFade}`,
@@ -90,9 +87,9 @@ export const viewportFadeBoth = style({
 
 /**
  * A scrollbar rail. The rail itself is invisible — only the thumb shows — and
- * the whole thing is hidden until you hover the area or scroll (base-ui flags
- * those with `data-hovering` / `data-scrolling`). Reveal is quick; the fade-out
- * waits out `REVEAL_DELAY` so a resting bar lingers a beat before disappearing.
+ * hidden until you hover the area or scroll (base-ui flags those with
+ * `data-hovering`/`data-scrolling`). Fade-out waits out `REVEAL_DELAY` so a
+ * resting bar lingers a beat before disappearing.
  */
 export const scrollbar = style({
   display: "flex",
@@ -128,7 +125,7 @@ export const scrollbar = style({
 
 /**
  * The draggable thumb. base-ui sizes its main axis inline (via
- * `--scroll-area-thumb-height` / `-width`); we fill the cross axis and paint a
+ * `--scroll-area-thumb-height`/`-width`); we fill the cross axis with a
  * neutral pill that deepens on hover / while dragging.
  */
 export const thumb = style({

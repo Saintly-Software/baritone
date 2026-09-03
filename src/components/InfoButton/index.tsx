@@ -34,10 +34,9 @@ export interface InfoButtonIconState {
 
 export interface InfoButtonProps {
   /**
-   * Accessible name — **required**, because the button is icon-only and has no
-   * visible text to name it (e.g. "More about billing cycles"). The mirror image
-   * of `Button`, which _forbids_ `aria-label` because its visible label is
-   * already the name.
+   * Accessible name — **required**, since the button is icon-only with no
+   * visible text to name it. The mirror image of `Button`, which _forbids_
+   * `aria-label` since its visible label already is the name.
    */
   "aria-label": string;
   /** The popover body — **required**. Typically a short `Text` paragraph. */
@@ -48,10 +47,9 @@ export interface InfoButtonProps {
    */
   header?: React.ReactNode;
   /**
-   * The trigger glyph. Pass a bare glyph (`icon={<Info />}`, auto-wrapped in
-   * `Icon`), an explicit `<Icon>` for custom size/label, or a
-   * `(props, state) => …` render function for full control. Omit it for the
-   * default info "i" `<Icon>`.
+   * The trigger glyph. Pass a bare glyph (auto-wrapped in `Icon`), an explicit
+   * `<Icon>` for custom size/label, or a render function for full control.
+   * Omit for the default info "i" `<Icon>`.
    */
   icon?: IconSlot<InfoButtonIconState>;
   /** Colour scheme of the trigger. Shared with `Button` / `Chip`. Default `neutral`. */
@@ -85,16 +83,13 @@ export interface InfoButtonProps {
  * Use it for the "i" affordance next to a label or field that reveals a short
  * explanation on click.
  *
- * It composes the exported `Popover` (so focus management, `Escape` / outside
- * dismissal, and ARIA wiring come for free) with an icon-only trigger built on
- * the very same `InternalButton` that powers `Button`. Like `ToggleButton`, the
- * `aria-label` and the popover-toggle wiring ride in through `InternalButton`'s
- * `htmlAttrs` seam — base-ui's `Popover.Trigger` supplies the toggle props, and
- * the required `aria-label` names the otherwise-textless button.
+ * Composes the exported `Popover` (focus management, `Escape`/outside
+ * dismissal, ARIA wiring included) with an icon-only trigger built on the same
+ * `InternalButton` that powers `Button`; `aria-label` and the popover-toggle
+ * wiring ride in through `InternalButton`'s `htmlAttrs` seam.
  *
- * `intent` / `saliency` / `size` style the trigger (shared with `Button` /
- * `Chip`); the floating surface itself stays the default neutral, low-saliency
- * `Popover`.
+ * `intent`/`saliency`/`size` style the trigger (shared with `Button`/`Chip`);
+ * the floating surface stays the default neutral, low-saliency `Popover`.
  *
  * @example
  * <InfoButton aria-label="About billing cycles">
@@ -116,9 +111,8 @@ export function InfoButton({
   className,
   ref,
 }: InfoButtonProps) {
-  // See the htmlAttrs seam described above. `aria-label` rides alongside
-  // (rather than through `consumerProps`) because `InternalButton` strips it
-  // out of `consumerProps`.
+  // `aria-label` rides alongside htmlAttrs (not through `consumerProps`)
+  // because `InternalButton` strips it out of `consumerProps`.
   const trigger = (
     <BasePopover.Trigger
       render={(htmlAttrs) => (

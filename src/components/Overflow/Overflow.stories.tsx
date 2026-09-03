@@ -49,9 +49,8 @@ export default meta;
 type Story = StoryObj<typeof Overflow>;
 
 /**
- * A toolbar of actions in a deliberately narrow box, so the row overflows: a
- * scrollbar, edge fades, and floating nav buttons appear. Drive `orientation`,
- * `scrollBy`, and `gap` from the toolbar.
+ * A toolbar of actions in a narrow box, so the row overflows (scrollbar, edge
+ * fades, floating nav buttons). Drive `orientation`/`scrollBy`/`gap` from the panel.
  */
 export const Playground: Story = {
   render: (args) => (

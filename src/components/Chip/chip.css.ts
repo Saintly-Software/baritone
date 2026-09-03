@@ -2,18 +2,16 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
 /**
- * Chip-specific box override. The shared `componentTypographyRecipe` sizes a
- * Chip's font, inline padding, and gap for a Button-sized control; a Chip is a
- * denser thing, so this layers its own per-size box on top (applied after
- * `componentTypographyRecipe({ size })`).
+ * Chip-specific box override. `componentTypographyRecipe` sizes a Chip's font,
+ * inline padding, and gap for a Button-sized control; a Chip is denser, so this
+ * layers its own per-size box on top (applied after `componentTypographyRecipe({ size })`).
  *
- * The heights are authored here as fixed rems rather than pulled from a scale —
- * same reasoning as `badgeRecipe`'s: they're control metrics, not spacing. Each
- * one must clear the label's line box (the shared `lineHeight: 1.5` over the
- * per-size font gives 18/21/24px) plus the 1px border on each edge, or the label
- * overflows the chip it sits in. That leaves the chip a step shorter than the
- * Button sizes it shares a recipe with (24/32/40) and a step taller than a Badge
- * (16/20/24), which is the intended order: badge < chip < button.
+ * Heights are fixed rems rather than a scale — same reasoning as `badgeRecipe`'s:
+ * they're control metrics, not spacing. Each must clear the label's line box
+ * (`lineHeight: 1.5` over the per-size font gives 18/21/24px) plus the 1px border
+ * per edge, or the label overflows. That leaves the chip a step shorter than the
+ * Button sizes it shares a recipe with (24/32/40) and a step taller than Badge
+ * (16/20/24) — the intended order: badge < chip < button.
  */
 export const chipSizeRecipe = recipe({
   variants: {
@@ -31,10 +29,9 @@ export const chipSizeRecipe = recipe({
 export type ChipSizeRecipeVariants = NonNullable<RecipeVariants<typeof chipSizeRecipe>>;
 
 /**
- * Chip shape override. The shared `componentTypographyRecipe` gives every chip
- * the component radius (`square`, the default — softly rounded corners). `pill`
- * layers on top to fully round the ends into a Bootstrap-style pill/badge.
- * Applied after `componentTypographyRecipe`.
+ * Chip shape override. `componentTypographyRecipe` gives every chip the component
+ * radius (`square`, default — softly rounded); `pill` layers on top to fully round
+ * the ends into a pill/badge shape. Applied after `componentTypographyRecipe`.
  */
 export const chipShapeRecipe = recipe({
   variants: {
@@ -52,10 +49,9 @@ export type ChipShapeRecipeVariants = NonNullable<RecipeVariants<typeof chipShap
 
 /**
  * Chip width override. By default a chip is `inline-flex` and hugs its content
- * (`fit`). `fill` switches it to a block-level `flex` that stretches to its
- * container's full width — handy when chips stack in a column (e.g. a filter
- * rail) and should line up their edges. The label keeps truncating either way.
- * Applied after `componentTypographyRecipe`.
+ * (`fit`); `fill` switches it to a block-level `flex` stretching to the container's
+ * full width — handy for chips stacked in a column (e.g. a filter rail). The label
+ * keeps truncating either way. Applied after `componentTypographyRecipe`.
  */
 export const chipWidthRecipe = recipe({
   variants: {
@@ -72,19 +68,16 @@ export const chipWidthRecipe = recipe({
 export type ChipWidthRecipeVariants = NonNullable<RecipeVariants<typeof chipWidthRecipe>>;
 
 /**
- * The chip's text label — the single flex item that wraps the (string) children
- * between the lead/trail adornment lists. `min-width: 0` plus the overflow trio
- * let a long label ellipsize when the chip is width-constrained (e.g. a FileList
- * row); `white-space: nowrap` keeps it on one line (it also inherits the chip's
- * own `nowrap`, but is repeated here so the label truncates on its own terms).
+ * The chip's text label — the flex item wrapping the (string) children between the
+ * lead/trail adornment lists. `min-width: 0` plus the overflow trio let a long label
+ * ellipsize when width-constrained (e.g. a FileList row); `white-space: nowrap` is
+ * repeated here (beyond the chip's own) so the label truncates on its own terms.
  *
- * The `interactive` variant is used when the Chip is given an `onClick`: the
- * label renders as a real `<button>`, so this strips the native button chrome
- * (background, border, padding, font, alignment) back to the plain label and
- * adds the clickable affordances — a pointer cursor and a hover underline — plus
- * the inert `not-allowed` look once the chip is disabled (`aria-disabled`; the
- * button stays keyboard-focusable, see AGENTS.md). Colour is left to `inherit`
- * so the label keeps following the chip's foreground, dimmed-disabled included.
+ * `interactive` applies when the Chip has an `onClick`: the label renders as a real
+ * `<button>`, so this strips native button chrome back to the plain label and adds
+ * clickable affordances (pointer cursor, hover underline) plus the `not-allowed` look
+ * once disabled (`aria-disabled`; stays keyboard-focusable, see AGENTS.md). Colour is
+ * `inherit` so the label follows the chip's foreground, dimmed-disabled included.
  */
 export const chipLabelRecipe = recipe({
   base: {

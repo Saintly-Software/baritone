@@ -202,8 +202,7 @@ describe("Button", () => {
     });
 
     it("does not render a spinner even if `loading` is forced through", () => {
-      // `loading` is typed away on the text appearance; a forced JS caller must
-      // not get a spinner or an aria-busy control.
+      // `loading` is typed away on the text appearance; a forced JS caller must not get a spinner.
       const forced = { loading: true } as Record<string, unknown>;
       render(
         <Button appearance="text" {...forced}>
@@ -251,8 +250,7 @@ describe("Button", () => {
     });
 
     it("does not leak width to the DOM as an attribute", () => {
-      // `width` is a shorthand resolved to a class; it's invalid HTML on a
-      // <button>, so it must never be forwarded through `rest`.
+      // `width` is a shorthand resolved to a class — invalid HTML, so it must never reach `rest`.
       render(<Button width="fill">Save</Button>);
       expect(screen.getByRole("button")).not.toHaveAttribute("width");
     });

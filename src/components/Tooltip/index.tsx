@@ -14,12 +14,11 @@ type TriggerProps = React.ComponentProps<typeof BaseTooltip.Trigger>;
 type PositionerProps = React.ComponentProps<typeof BaseTooltip.Positioner>;
 
 /**
- * base-ui's tooltip intentionally leaves the description wiring to the consumer
- * (its popup carries no `role`, and the trigger gets no `aria-describedby`). We
- * add it ourselves: the surface is `role="tooltip"` with a stable id, and the
- * trigger points at that id via `aria-describedby` — but only while the tooltip
- * is open, so the reference never dangles once the (unmounted) popup is gone.
- * This context is how the compound `Tooltip.Trigger` learns that id/open state.
+ * base-ui leaves the description wiring to the consumer (no `role` on its popup, no
+ * `aria-describedby` on the trigger), so we add it: the surface is `role="tooltip"`
+ * with a stable id, and the trigger points at it via `aria-describedby` only while
+ * open, so the reference never dangles once the popup unmounts. This context is how
+ * `Tooltip.Trigger` learns that id/open state.
  */
 interface TooltipContextValue {
   /** Stable id of the tooltip surface; also the `aria-describedby` target. */
@@ -33,17 +32,14 @@ const TooltipContext = React.createContext<TooltipContextValue | null>(null);
 export interface TooltipProps {
   /**
    * The control the tooltip attaches to — typically a `<Tooltip.Trigger>`, which
-   * renders a `Button`. A tooltip is *always* anchored to a real button (never a
-   * bare element): a button is focusable and, crucially, tap-reachable, so the
-   * hint is available to keyboard and touch users — not just mouse hover. If you
-   * need to hint an arbitrary, non-focusable element, that's the deliberate
-   * tradeoff `InaccessibleTooltip` exists for.
+   * renders a `Button`. Always anchor to a real button (never a bare element): it's
+   * focusable and tap-reachable, so the hint reaches keyboard and touch users too.
+   * For an arbitrary non-focusable element, that tradeoff is what `InaccessibleTooltip` is for.
    */
   children?: React.ReactNode;
   /**
    * Tooltip text. Keep it supplemental — the button must stay fully operable for
-   * someone who never sees the tooltip; anything a user *must* read belongs in a
-   * `Popover`.
+   * someone who never sees it; anything a user *must* read belongs in a `Popover`.
    */
   content: string;
   /** Disables the tooltip so it can never open; the trigger stays mounted. */
@@ -68,20 +64,17 @@ export interface TooltipProps {
 
 /**
  * Tooltip — a small, supplemental hint shown in a floating layer, anchored to a
- * button. It opens on hover **and** focus (never on click), so it reaches
- * keyboard users; because its trigger is always a real `<button>`, it's also
- * tap-reachable on touch — the accessibility gap that keeps the system from
- * exposing a general-purpose tooltip.
+ * button. It opens on hover **and** focus (never click), so it reaches keyboard
+ * users; because its trigger is always a real `<button>`, it's tap-reachable too —
+ * the accessibility gap that keeps the system from exposing a general-purpose tooltip.
  *
- * Built on base-ui's `Tooltip`, so focus/hover handling and dismissal come for
- * free, and it shares the exact surface styling of the system's internal hints.
- * The `aria-describedby` wiring (the tooltip describes its trigger) is added on
- * top — base-ui leaves that to the consumer. It opens from a `<Tooltip.Trigger>`
- * (a `Button`) passed as its child.
+ * Built on base-ui's `Tooltip` for focus/hover handling and dismissal, sharing the
+ * system's internal hint styling. The `aria-describedby` wiring is added on top,
+ * since base-ui leaves that to the consumer. Opens from a `<Tooltip.Trigger>` (a
+ * `Button`) passed as its child.
  *
- * This is the accessible counterpart to `InaccessibleTooltip`: the same surface,
- * but the button trigger is mandatory rather than the caller's responsibility.
- * Still, keep the content supplemental — for anything a user actually needs to
+ * The accessible counterpart to `InaccessibleTooltip`: same surface, but the button
+ * trigger is mandatory. Keep the content supplemental — for anything a user must
  * read, reach for `Popover`.
  *
  * @example
@@ -103,8 +96,7 @@ function TooltipRoot({
   ref,
 }: TooltipProps) {
   const descriptionId = React.useId();
-  // Track the resolved open state (controlled or not) so the trigger only
-  // describes itself while the popup is actually mounted.
+  // Track resolved open state so the trigger only describes itself while mounted.
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen ?? false);
   const isOpen = open ?? uncontrolledOpen;
 
@@ -146,15 +138,13 @@ function TooltipRoot({
 }
 
 /**
- * The button the tooltip is anchored to. Renders a `Button` (so all of Button's
- * intents / saliencies / sizes / icons are available), wired up by base-ui so it
- * opens the hint on hover/focus, plus the `aria-describedby` linking it to the
- * tooltip surface. Must be passed to `<Tooltip>{...}</Tooltip>` so it sits inside
- * the tooltip's context.
+ * The button the tooltip is anchored to. Renders a `Button` (all its intents /
+ * saliencies / sizes / icons apply), wired by base-ui to open on hover/focus and
+ * linked to the tooltip surface via `aria-describedby`. Must sit inside
+ * `<Tooltip>{...}</Tooltip>`.
  *
  * A `disabled` trigger stays focusable (`aria-disabled`, via `Button`) but
- * *suppresses* the hint — a disabled button explains itself through its own
- * `disabledReason` instead, so the two don't fight over the same surface.
+ * suppresses the hint — a disabled button explains itself via `disabledReason` instead.
  *
  * `delay` / `closeDelay` tune the open/close timing for this trigger.
  */
@@ -167,8 +157,7 @@ export type TooltipTriggerProps = ButtonProps & {
 
 function TooltipTrigger({ delay, closeDelay, ...buttonProps }: TooltipTriggerProps) {
   const context = React.useContext(TooltipContext);
-  // A disabled button surfaces its own `disabledReason`; keep the hint out of
-  // the way by telling base-ui not to open for a disabled trigger.
+  // A disabled button surfaces its own `disabledReason`, so tell base-ui not to open the hint.
   const disabled = buttonProps.disabled;
   const describedBy = context?.describedBy;
 
@@ -180,9 +169,8 @@ function TooltipTrigger({ delay, closeDelay, ...buttonProps }: TooltipTriggerPro
       render={(htmlAttrs) => (
         <InternalButton
           consumerProps={buttonProps as ButtonProps}
-          // Only merge `aria-describedby` while the popup is mounted, so the
-          // reference never points at a removed element (base-ui `mergeProps`
-          // clobbers with `undefined`, hence the conditional spread).
+          // Merge `aria-describedby` only while mounted (base-ui `mergeProps` clobbers
+          // with `undefined`, so the conditional spread avoids a dangling reference).
           htmlAttrs={describedBy ? { ...htmlAttrs, "aria-describedby": describedBy } : htmlAttrs}
         />
       )}

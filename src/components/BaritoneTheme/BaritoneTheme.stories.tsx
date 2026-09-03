@@ -10,9 +10,8 @@ import { Text } from "../Text";
 import { TextInput } from "../TextInput";
 import { BaritoneTheme } from "./index";
 
-// Two example tenants. Each supplies only a small `BrandSeed` — a hue (and
-// maybe chroma) for `primary`, fonts, corner radius — and inherits the rest of
-// the accessible token set from `buildDefaultTokens`.
+// Two example tenants, each supplying only a small `BrandSeed` (a hue/chroma
+// for `primary`, fonts, radius) and inheriting the rest from `buildDefaultTokens`.
 const BRANDS = {
   Acme: {
     intents: { primary: { h: 292, c: 0.17 } }, // violet
@@ -24,10 +23,7 @@ const BRANDS = {
   },
 } satisfies Record<string, BrandSeed>;
 
-/**
- * A little slice of product UI. It knows nothing about the theme — every colour,
- * font, and radius comes from the nearest `BaritoneTheme` above it.
- */
+/** A little slice of product UI — knows nothing about the theme; every colour, font, and radius comes from the nearest `BaritoneTheme` above it. */
 function DemoPanel() {
   const [notify, setNotify] = React.useState(true);
   return (
@@ -63,8 +59,8 @@ function DemoPanel() {
 
 /**
  * A themed "page" frame: builds tokens from a brand seed and applies them with
- * `BaritoneTheme`. The frame reads its own background/text straight from the
- * contract vars — which now resolve to *this* scope's branded values.
+ * `BaritoneTheme`. Reads its own background/text from the contract vars, which
+ * now resolve to *this* scope's branded values.
  */
 function BrandFrame({
   name,
@@ -117,8 +113,8 @@ const meta: Meta<typeof BaritoneTheme> = {
 };
 export default meta;
 
-// The interactive Playground drives a few brand knobs live, rather than the raw
-// `tokens`/`scheme` props, so the control panel demonstrates *supplying tokens*.
+// The Playground drives a few brand knobs live, rather than the raw
+// `tokens`/`scheme` props, to demonstrate *supplying tokens*.
 interface PlaygroundArgs {
   scheme: "light" | "dark";
   primaryHue: number;

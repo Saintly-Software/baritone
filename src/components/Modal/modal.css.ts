@@ -3,9 +3,9 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
 /**
- * Full-viewport dim layer behind the modal. Always rendered (the component sets
- * `forceRender`, so nested modals/drawers still get one). Fades in on the enter
- * frame and out on the exit frame.
+ * Full-viewport dim layer behind the modal. Always rendered (`forceRender`,
+ * so nested modals/drawers still get one) and fades in/out on the
+ * enter/exit frame.
  */
 export const modalBackdrop = style({
   position: "fixed",
@@ -15,8 +15,7 @@ export const modalBackdrop = style({
   transitionDuration: vars.motion.duration.base,
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
-    // base-ui flags the enter ("starting") and exit ("ending") frames; fade the
-    // scrim on both.
+    // base-ui flags the enter/exit frames; fade the scrim on both.
     "&[data-starting-style], &[data-ending-style]": { opacity: 0 },
   },
   "@media": {
@@ -25,10 +24,10 @@ export const modalBackdrop = style({
 });
 
 /**
- * Fixed full-viewport layer that holds the popup and centres it. Sits above the
- * backdrop (later sibling in the portal). It scrolls on overflow, so a modal
- * taller than the viewport (e.g. with reduced-motion or a small window) can still
- * be reached. The padding keeps the popup off the screen edges.
+ * Fixed full-viewport layer that holds and centres the popup. Sits above the
+ * backdrop (later sibling in the portal). Scrolls on overflow, so a modal
+ * taller than the viewport can still be reached; padding keeps the popup off
+ * the screen edges.
  */
 export const modalViewport = style({
   position: "fixed",
@@ -41,13 +40,12 @@ export const modalViewport = style({
 });
 
 /**
- * The modal surface. The colour/border/radius/padding come from the shared
- * `surfaceRecipe`; this adds the panel layout (a vertical stack of header /
- * scrollable body / footer), the elevation shadow, and the scale/fade transition.
+ * The modal surface. Colour/border/radius/padding come from the shared
+ * `surfaceRecipe`; this adds the panel layout (header/body/footer stack),
+ * elevation shadow, and scale/fade transition.
  *
- * The `data-starting-style` / `data-ending-style` frames fade and scale the panel
- * down so it grows in and shrinks out from its centre. `size` only changes the
- * panel's max width.
+ * `data-starting-style` / `data-ending-style` scale the panel down so it
+ * grows in and shrinks out from its centre. `size` only changes max width.
  */
 export const modalPopup = recipe({
   base: {
@@ -104,10 +102,9 @@ export const modalHeaderText = style({
 });
 
 /**
- * The scrollable body region. Grows to fill the space between header and footer
- * (so the footer sits at the bottom on short content) and scrolls on overflow,
- * keeping header and footer fixed. Establishes the positioning context for the
- * loading overlay.
+ * The scrollable body region. Grows to fill the space between header and
+ * footer, scrolling on overflow while keeping both fixed. Also the
+ * positioning context for the loading overlay.
  */
 export const modalBody = style({
   position: "relative",
@@ -117,10 +114,9 @@ export const modalBody = style({
 });
 
 /**
- * Loading: hide the body content with `opacity` (not `display`) so it keeps its
- * size while the spinner overlays it, and turn off pointer events so the dimmed
- * content can't be interacted with. Header and footer (outside this element) stay
- * live, so the modal can still be closed.
+ * Loading: hides body content with `opacity` (not `display`, to keep its
+ * size under the spinner overlay) and disables pointer events on it. Header
+ * and footer stay live, so the modal can still be closed.
  */
 export const modalBodyContentLoading = style({
   opacity: 0,

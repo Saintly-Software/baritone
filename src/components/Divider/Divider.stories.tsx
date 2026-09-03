@@ -49,9 +49,9 @@ export const Basic: Story = {
 };
 
 /**
- * `children` breaks the rule around a label — and, when it's a string, doubles as
- * the divider's accessible name (a `separator`'s children are presentational, so
- * the visible text alone would never be announced).
+ * `children` breaks the rule around a label — and, when a string, doubles as the
+ * divider's accessible name (a `separator`'s children are presentational, so the
+ * visible text alone would never be announced).
  */
 export const Labelled: Story = {
   args: { children: "or" },
@@ -144,15 +144,15 @@ export const Thickness: Story = {
 };
 
 /**
- * The `thickness` vocabulary is defined by the *consumer*, not Baritone — exactly
- * like `Text`'s `size` / `font`. An app publishes widths as `--borderWidth-<name>`
- * custom properties (via the theme's `borderWidths` option) and, for autocompletion
- * + type-safety, declares those names by augmenting the `BorderWidthRegistry`
- * interface. The built-in `thin` / `thick` steps are always available.
+ * The `thickness` vocabulary is defined by the *consumer*, not Baritone — like
+ * `Text`'s `size`/`font`. An app publishes widths as `--borderWidth-<name>` custom
+ * properties (via the theme's `borderWidths` option) and augments the
+ * `BorderWidthRegistry` interface for autocompletion + type-safety. The built-in
+ * `thin`/`thick` steps are always available.
  *
- * This story fakes a consumer by declaring a couple of `--borderWidth-*` vars on the
- * wrapper, so `thickness="hair"` / `"heavy"` resolve — exactly what a real theme
- * would emit — while `thickness="thick"` uses the built-in.
+ * This story fakes a consumer by declaring `--borderWidth-*` vars on the wrapper, so
+ * `thickness="hair"`/`"heavy"` resolve exactly as a real theme would emit, while
+ * `thickness="thick"` uses the built-in.
  */
 export const CustomThickness: Story = {
   render: (args) => (

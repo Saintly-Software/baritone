@@ -311,8 +311,7 @@ describe("Combobox", () => {
 
       await user.click(screen.getByRole("combobox", { name: "Colour" }));
 
-      // "r" matches Red, Orange, Amber and Green — four cells re-tiled into two
-      // rows (the second partial), proving the rows re-chunk on the filtered set.
+      // "r" matches Red, Orange, Amber, Green — 4 cells re-tile into 2 rows (proving rows re-chunk on the filtered set).
       await user.keyboard("r");
       const grid = await screen.findByRole("grid");
       expect(within(grid).getAllByRole("gridcell")).toHaveLength(4);

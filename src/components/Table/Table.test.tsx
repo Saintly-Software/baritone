@@ -98,9 +98,8 @@ describe("Table", () => {
   });
 
   it("keys rows with getRowKey when provided", () => {
-    // A smoke test: rendering with a key deriver produces the expected rows and
-    // doesn't warn. (React keys aren't observable in the DOM, so we assert the
-    // rows render one-to-one.)
+    // A smoke test: rendering with a key deriver produces the expected rows.
+    // (React keys aren't observable in the DOM, so we assert rows render one-to-one.)
     render(
       <Table
         aria-label="People"
@@ -154,9 +153,8 @@ describe("Table", () => {
   });
 
   it("renders duplicate column keys without a React key warning", () => {
-    // Two columns reading the same field is valid (e.g. the same data shown two
-    // ways). Cells are keyed by column position, so React never warns about
-    // duplicate keys.
+    // Two columns reading the same field is valid (e.g. shown two ways).
+    // Cells are keyed by column position, so React never warns of duplicate keys.
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       render(
@@ -182,8 +180,8 @@ describe("Table", () => {
   });
 
   it("throws in dev when a visible caption is combined with an aria name", () => {
-    // A visible caption plus an aria-label/aria-labelledby names the table twice
-    // and the aria value wins for assistive tech — so it's rejected in dev.
+    // A visible caption plus aria-label/aria-labelledby names the table twice
+    // (the aria value wins for AT) — so it's rejected in dev.
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       expect(() =>

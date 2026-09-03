@@ -3,9 +3,8 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Button } from "./index";
 
 /**
- * Interaction coverage for `Button`. These stories drive the button with a `play`
- * function and assert the result, so they double as Storybook interaction tests
- * and Chromatic snapshot drivers.
+ * Interaction coverage for `Button`: these stories drive it with a `play` function
+ * and assert the result, doubling as interaction tests and Chromatic snapshot drivers.
  */
 const meta: Meta<typeof Button> = {
   title: "Interaction Tests/Button",
@@ -16,9 +15,9 @@ export default meta;
 type Story = StoryObj<typeof Button>;
 
 /**
- * A disabled button explains itself: `disabled` + `disabledReason` opens a
- * tooltip on hover (and keyboard focus). The `play` hovers the button and asserts
- * the reason appears in the portaled tooltip.
+ * A disabled button explains itself: `disabled` + `disabledReason` opens a tooltip
+ * on hover (and keyboard focus). `play` hovers the button and asserts the reason
+ * appears in the portaled tooltip.
  */
 export const DisabledTooltip: Story = {
   name: "Tooltip when disabled",

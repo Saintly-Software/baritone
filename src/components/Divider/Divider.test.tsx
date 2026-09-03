@@ -73,9 +73,8 @@ describe("Divider", () => {
   });
 
   it("points the rule's weight var at the named borderWidth via `thickness`", () => {
-    // `thickness` is an inline var, not a variant, because the `borderWidth`
-    // vocabulary is open (consumer-extensible) — so it resolves to a
-    // `var(--borderWidth-<name>)` the active theme publishes.
+    // `thickness` is an inline var, not a variant, because `borderWidth` is an
+    // open, consumer-extensible vocabulary resolving to a theme-published var.
     render(<Divider thickness="thick" />);
     expect(screen.getByRole("separator").getAttribute("style")).toContain(
       `var(${borderWidthVarName("thick")})`,

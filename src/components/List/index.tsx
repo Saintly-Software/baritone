@@ -10,20 +10,19 @@ import { listItem, listReset } from "./list.css";
 
 /**
  * How the list arranges its items:
- *   - `flex` (default) — a one-dimensional stack/row, tuned with `direction`,
- *     `align`, `justify`, `wrap`, and `gap` (the `Flex` layout knobs).
- *   - `grid` — a two-dimensional layout, tuned with `columns`, `rows`, `areas`,
- *     `justify`, and `gap` (the `Grid` layout knobs).
- * The prop is the discriminant of {@link ListProps}: the layout-specific props
- * only type-check for the matching `layout`.
+ *   - `flex` (default) — a one-dimensional stack/row, tuned via `direction`,
+ *     `align`, `justify`, `wrap`, `gap` (the `Flex` knobs).
+ *   - `grid` — a two-dimensional layout, tuned via `columns`, `rows`, `areas`,
+ *     `justify`, `gap` (the `Grid` knobs).
+ * Discriminant of {@link ListProps}: layout-specific props only type-check for
+ * the matching `layout`.
  */
 export type ListLayout = "flex" | "grid";
 
 export interface ListItemProps extends Omit<React.LiHTMLAttributes<HTMLLIElement>, "color"> {
   /**
-   * Place this item in a named grid area — sets `grid-area`. Only meaningful when
-   * the parent `List` uses `layout="grid"` with `areas`; ignored otherwise. A
-   * consumer `style.gridArea` wins.
+   * Places this item in a named grid area. Meaningful only with the parent
+   * `List`'s `layout="grid"` + `areas`; a consumer `style.gridArea` wins.
    */
   area?: string;
   /** Render as a different element/component (base-ui `render` pattern). Defaults to `<li>`. */
@@ -33,11 +32,10 @@ export interface ListItemProps extends Omit<React.LiHTMLAttributes<HTMLLIElement
 }
 
 /**
- * List.Item — one list cell. Pass a `<List.Item>` per entry in the `List`'s
- * `items` array. It's a semantic `<li>` (with an explicit `role="listitem"`,
- * since `list-style: none` drops the implicit role in Safari) that wraps
- * arbitrary content. For grid layouts, `area` places the item in a named
- * `grid-template-areas` region. Use `render` to change the element.
+ * List.Item — one list cell, passed per entry in the `List`'s `items` array. A
+ * semantic `<li>` (explicit `role="listitem"`; Safari drops the implicit role
+ * under `list-style: none`) wrapping arbitrary content. `area` places it in a
+ * named grid region; `render` changes the element.
  */
 function ListItem({ area, render, className, style, children, ref, ...rest }: ListItemProps) {
   return useRender({
@@ -60,17 +58,15 @@ ListItem.displayName = "List.Item";
 /** Props shared by both layouts. */
 interface ListBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "color" | "children"> {
   /**
-   * Render an ordered list (`<ol>`) rather than an unordered one (`<ul>`),
-   * communicating sequence to assistive tech. The visual marker is stripped
-   * either way (it doesn't flow through flex/grid tracks) — `ordered` only
+   * Renders an ordered list (`<ol>`) rather than `<ul>`, communicating sequence to
+   * assistive tech. The visual marker is stripped either way; `ordered` only
    * changes the semantic element. Default `false`.
    */
   ordered?: boolean;
   /**
-   * The rows to render, each a `<List.Item>` element. Keyed by each entry's
-   * `key` (falling back to its index — supply `key` for a stable identity).
-   * Falsy entries (`null` / `false` / `undefined`) are skipped, so a row can be
-   * included conditionally inline (`cond && <List.Item …/>`).
+   * The rows to render, each a `<List.Item>`. Keyed by each entry's `key` (falls
+   * back to index — supply `key` for stable identity). Falsy entries are skipped,
+   * so a row can be included conditionally (`cond && <List.Item …/>`).
    */
   items: Array<React.ReactElement<ListItemProps> | null | false | undefined>;
   ref?: React.Ref<HTMLElement>;
@@ -117,19 +113,15 @@ export interface ListGridProps extends ListBaseProps {
 export type ListProps = ListFlexProps | ListGridProps;
 
 /**
- * List — a semantic list (`<ul>`, or `<ol>` when `ordered`) whose items are laid
- * out with either flexbox or CSS grid. `layout="flex"` (default) delegates to
- * `Flex`, so `direction` / `align` / `justify` / `wrap` / `gap` behave exactly
- * as they do there; `layout="grid"` delegates to `Grid`, exposing `columns` /
- * `rows` / `areas` / `justify` / `gap` (place items in named areas with
- * `List.Item`'s `area`). The prop set is a
- * discriminated union on `layout`, so only the knobs for the active layout
- * type-check.
+ * List — a semantic list (`<ul>`, or `<ol>` when `ordered`) laid out with either
+ * flexbox or CSS grid. `layout="flex"` (default) delegates to `Flex` (`direction`
+ * / `align` / `justify` / `wrap` / `gap`); `layout="grid"` delegates to `Grid`
+ * (`columns` / `rows` / `areas` / `justify` / `gap`, placing items via
+ * `List.Item`'s `area`). Only the active layout's knobs type-check.
  *
- * Provide the rows as the `items` array, each a `<List.Item>` element. The
- * default `<ul>`/`<ol>` margin, padding, and marker are reset so the layout
- * drives all spacing; the list keeps a real `role="list"` (Safari strips it
- * under `list-style: none`).
+ * Provide the rows as the `items` array, each a `<List.Item>`. Default
+ * `<ul>`/`<ol>` margin/padding/marker are reset so the layout drives spacing; the
+ * list keeps a real `role="list"` (Safari strips it under `list-style: none`).
  *
  * @example
  * // Flex: a spaced vertical stack.
@@ -149,14 +141,12 @@ export type ListProps = ListFlexProps | ListGridProps;
  * />
  */
 /**
- * Every layout prop widened into one shape, so a single destructure can strip
- * *all* of them from `...rest` regardless of the active layout. Without this the
- * inactive layout's props (e.g. `direction` when `layout="grid"`) would fall
- * into `rest` and reach `Flex` / `Grid` — and from there the native list element
- * as invalid attributes, or (for `align`, which both accept) silently change the
- * layout. The `ListProps` union can't be passed at runtime the way the types
- * imply (Storybook retains controls across a `layout` switch), so this guards the
- * JS callers the discriminated union can't reach.
+ * Every layout prop widened into one shape, so a single destructure strips *all*
+ * of them from `...rest` regardless of the active layout — otherwise an inactive
+ * layout's prop would leak into `rest`, reaching the DOM as an invalid attribute
+ * or (for `align`, accepted by both) silently changing the layout. Guards JS
+ * callers the `ListProps` union can't reach (e.g. Storybook retaining controls
+ * across a `layout` switch).
  */
 type ResolvedListProps = ListBaseProps & {
   layout?: ListLayout;
@@ -191,9 +181,8 @@ function ListRoot(props: ListProps) {
 
   const element = ordered ? <ol /> : <ul />;
   const listClassName = cx(listReset, className);
-  // Same `items` rule as `Menu` (see `items` doc above); like `Menu`, `List`
-  // renders the `<List.Item>` element itself, rather than reading its props
-  // the way `ButtonGroup` / `ChipList` treat their carriers.
+  // Same `items` rule as `Menu`: `List` renders the `<List.Item>` element itself,
+  // rather than reading its props the way `ButtonGroup` / `ChipList` do.
   const content = keyedElements(items);
 
   if (layout === "grid") {

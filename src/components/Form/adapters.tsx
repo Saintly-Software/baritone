@@ -11,39 +11,31 @@ import { Switch, type SwitchProps } from "../Switch";
 import { TextInput, type TextInputProps } from "../TextInput";
 import { type FieldLike, type FormFieldExtras, resolveFieldDisplay } from "./fieldError";
 
-// The control props a field owns, so callers can't set them by hand — the binding
-// supplies `value`/`onChange`/`onBlur`/`name` from the TanStack field. Removed with
-// `DistributiveOmit` (never plain `Omit`) so the controls' `label` / `aria-label` /
-// `aria-labelledby` exclusivity survives — see AGENTS.md and `src/utils/types.ts`.
+// Props the binding supplies from the TanStack field, so callers can't set
+// them by hand. Uses `DistributiveOmit` (never plain `Omit`) so the controls'
+// label/aria-label/aria-labelledby exclusivity survives (AGENTS.md).
 type Bound = "value" | "onChange" | "onBlur" | "name" | "defaultValue";
 
 /*
  * Every adapter binds a TanStack field to a Baritone control the same way:
- * resolve the field's validation state into `{ state, helpText }`, then hand the
- * control its `value` / change-callback / (where relevant) `name` and `onBlur`.
- * {@link bindFieldControlProps} owns that contract in one place, so each adapter is
- * a thin, individually-typed wrapper — and a change to the wiring (say, forwarding
- * the change event too) is a one-line edit here rather than seven parallel ones.
+ * resolve validation state into `{ state, helpText }`, then hand the control
+ * its `value`, change-callback, and (where relevant) `name`/`onBlur`.
+ * {@link bindFieldControlProps} owns that contract in one place, so each
+ * adapter stays a thin, individually-typed wrapper.
  *
- * The assembled object is cast once (`as <Control>Props`) per adapter. Every
- * control's props are a union (they intersect the three-arm `FieldLabellingProps`),
- * and the value-union controls (`Select`, `Combobox`) can't be spread arm-by-arm
- * through their discriminant without a cast anyway — the components widen internally
- * for the same reason — so a single assertion per adapter keeps the wiring uniform.
+ * The assembled object is cast once (`as <Control>Props`) per adapter, since
+ * the value-union controls (`Select`, `Combobox`) can't be spread arm-by-arm
+ * through their discriminant without one anyway.
  *
  * Change marks the field touched on its own (TanStack's `setFieldValue` sets
- * `isTouched`), so no adapter has to touch it manually. The controls that expose an
- * `onBlur` — `TextInput`, `Combobox`, and `Select` — also forward `handleBlur`
- * (`forwardBlur`), which (a) covers focusing a field and leaving it *without*
- * committing a value, and (b) runs any `validators.onBlur` the consumer configured.
- * `Checkbox`, `Switch`, `RadioGroup`, and `CheckboxGroup` don't surface `onBlur`, so
- * `validators.onBlur` won't fire on those fields — validate them with `onChange` /
- * `onSubmit` (change already marks them touched, and submit validates every field).
+ * `isTouched`). `TextInput`, `Combobox`, and `Select` also forward
+ * `handleBlur` so `validators.onBlur` still runs; the rest don't surface
+ * `onBlur`, so validate them with `onChange`/`onSubmit` instead.
  *
- * `value` is coalesced per control (booleans `?? false`, array controls `?? []`,
- * the rest `?? null` / `?? ""`) so a field missing from `defaultValues` — where
- * `field.state.value` is `undefined` — stays controlled instead of flipping
- * uncontrolled→controlled (or, for `CheckboxGroup`, throwing on `undefined.includes`).
+ * `value` is coalesced per control (`?? false`, `?? []`, `?? null`/`?? ""`) so
+ * a field missing from `defaultValues` stays controlled rather than flipping
+ * uncontrolled→controlled (or, for `CheckboxGroup`, throwing on
+ * `undefined.includes`).
  */
 
 interface FieldBinding extends FormFieldExtras {
@@ -60,10 +52,9 @@ interface FieldBinding extends FormFieldExtras {
 }
 
 /**
- * Assemble the props a Baritone control receives from a bound TanStack field — the
- * one place the field ↔ control contract lives. Returns a plain `object` (a
- * supertype of every control's union props) that each adapter narrows with a single
- * `as <Control>Props`; see the block comment above for why the cast is needed.
+ * Assembles the props a Baritone control receives from a bound TanStack field.
+ * Returns a plain `object` that each adapter narrows with `as <Control>Props`
+ * (see the block comment above for why).
  */
 function bindFieldControlProps<TValue>(
   field: FieldLike<TValue>,
@@ -126,9 +117,8 @@ export function FormSelect(props: FormSelectProps) {
     changeProp: "onChange",
     value: field.state.value ?? null,
     bindName: true,
-    // `Select` exposes `onBlur` (it extends `HTMLAttributes`) and forwards it to its
-    // trigger, so forward blur exactly like `Combobox` — this also runs any
-    // `validators.onBlur` configured on the field.
+    // `Select` exposes `onBlur` (extends `HTMLAttributes`) and forwards it to
+    // its trigger, so forward blur like `Combobox` — this runs `validators.onBlur` too.
     forwardBlur: true,
   }) as SelectProps;
   return <Select {...controlProps} />;
@@ -204,8 +194,8 @@ export function FormCheckboxGroup<T>(props: FormCheckboxGroupProps<T>) {
     state,
     changeProp: "onChange",
     value: field.state.value ?? [],
-    // `CheckboxGroup` has no `name` prop — a group of checkboxes isn't a single
-    // named form control the way a radio group is.
+    // `CheckboxGroup` has no `name` — it isn't a single named control the way
+    // a radio group is.
     bindName: false,
     forwardBlur: false,
   }) as CheckboxGroupProps<T>;

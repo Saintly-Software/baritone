@@ -25,15 +25,13 @@ export interface InlineLinkProps extends Omit<
   /** The default inline-anchor look. */
   appearance?: "text";
   /**
-   * Render as a different element/component (base-ui `render` pattern). This is
-   * what makes the Link router-agnostic: pass your router's link component so it
-   * keeps the system's styling while owning navigation, e.g.
+   * Render as a different element/component (base-ui `render` pattern) — pass
+   * your router's link component to make this link router-agnostic, e.g.
    * `render={<NextLink href="/about" />}` or `render={<RouterLink to="/about" />}`.
    *
-   * Usually you don't set this per link — wrap the app in a `LinkProvider` to
-   * point *every* internal `Link` at your router once. This prop then stays the
-   * escape hatch: it overrides the provider for a single link (bespoke router
-   * props, or forcing a plain element). Renders a plain `<a>` when neither is set.
+   * Usually set once via a `LinkProvider` wrapping the app instead of per link;
+   * this prop overrides the provider for a single link. Renders a plain `<a>`
+   * when neither is set.
    */
   render?: RenderProp;
   ref?: React.Ref<HTMLAnchorElement>;
@@ -41,18 +39,16 @@ export interface InlineLinkProps extends Omit<
 }
 
 /**
- * Props shared by *every* `<Link appearance="button">` arm — the labelled look
- * and the icon-only one alike. Like `Button`'s `ButtonCommonProps`, it stays
- * deliberately silent on `children`/`aria-label`/`icon`: those differ between a
- * labelled button-link (whose visible text is the accessible name) and an
- * icon-only one (whose required `aria-label` is), so each arm redefines them.
+ * Props shared by every `<Link appearance="button">` arm, labelled and
+ * icon-only alike. Like `Button`'s `ButtonCommonProps`, it omits
+ * `children`/`aria-label`/`icon` since those differ per arm (visible label vs.
+ * required `aria-label`) — each arm redefines them.
  */
 interface ButtonLinkCommonProps extends Omit<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
   // Colour comes from intent/saliency, not the `color` attribute…
   | "color"
-  // …and the accessible name is arm-specific (the visible label vs. a required
-  // aria-label), so each arm redefines `aria-label` and `children`.
+  // …and the accessible name is arm-specific, so each arm redefines `aria-label`/`children`.
   | "aria-label"
   | "children"
 > {
@@ -63,110 +59,96 @@ interface ButtonLinkCommonProps extends Omit<
   /** Control sizing (padding / font / height). Default `md`. */
   size?: Size;
   /**
-   * Loading state: renders the spinner overlay and makes the link inert (an
-   * in-flight navigation shouldn't be re-triggered), keeping the content in
-   * place to preserve width and the accessible name.
+   * Loading state: shows the spinner overlay and makes the link inert (no
+   * re-triggering an in-flight navigation), keeping content in place to
+   * preserve width and the accessible name.
    */
   loading?: boolean;
   /**
-   * Disables the link. A disabled link has no honest HTML form, so it collapses
-   * to an inert element (no navigation, out of the a11y tree as a link) while
-   * keeping the button styling — see `InternalGenericButtonAnchor`.
+   * Disables the link. With no honest disabled HTML form, it collapses to an
+   * inert element (no navigation, out of the a11y tree) while keeping the button
+   * styling — see `InternalGenericButtonAnchor`.
    */
   disabled?: boolean;
-  /**
-   * Explanation shown in a tooltip when the link is disabled. Not shown while
-   * `loading`.
-   */
+  /** Explanation shown in a tooltip when the link is disabled (not shown while `loading`). */
   disabledReason?: React.ReactNode;
   /**
    * Router-link element for client-side navigation (base-ui `render` pattern),
    * e.g. `render={<NextLink href="/about" />}`. Omit and pass `href` for a plain
-   * external `<a>` — or wrap the app in a `LinkProvider` to route every internal
-   * button-link through your router without setting this per link (this then
-   * overrides the provider for a single link).
+   * external `<a>`, or set once via `LinkProvider` for every internal
+   * button-link — this prop overrides the provider for a single link.
    */
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;
 }
 
 /**
- * `<Link appearance="button">` — a link that *looks like* a labelled `Button`.
- * It reuses Button's colour/typography recipe wholesale (via the shared
- * `InternalButton`), so there's no style duplication: the same `intent`/
- * `saliency`/`size`/`loading`/icon knobs apply, but the rendered element is an
- * anchor (or your router link), making it a real navigation control rather than a
- * scripted button.
+ * `<Link appearance="button">` — a link that looks like a labelled `Button`.
+ * Reuses Button's colour/typography recipe wholesale (via `InternalButton`), so
+ * the same `intent`/`saliency`/`size`/`loading`/icon knobs apply, but it renders
+ * an anchor (or your router link) — a real navigation control, not a scripted
+ * button.
  *
- * The visible text is the accessible name, so `aria-label` is a type error here
- * (matching the labelled `Button` arms); pass `icon` + `aria-label` instead for
- * the icon-only arm ({@link IconButtonLinkProps}).
- *
- * Supply the destination the same way as an inline `Link`: `href` for an external
- * link, or `render` with your framework's link for client-side navigation.
+ * The visible text is the accessible name, so `aria-label` is a type error
+ * here; pass `icon` + `aria-label` instead for the icon-only arm
+ * ({@link IconButtonLinkProps}). Supply the destination as with an inline
+ * `Link`: `href` for external, `render` for client-side navigation.
  */
 export interface LabelledButtonLinkProps extends ButtonLinkCommonProps {
   /**
    * Icon before the label — a bare glyph (auto-wrapped in `Icon`), an explicit
-   * `<Icon>`, or a `(props, state)` render function. Inherits text colour.
+   * `<Icon>`, or a render function. Inherits text colour.
    */
   startIcon?: IconSlot<ButtonIconState>;
   /** Icon after the label — same forms as `startIcon`. Inherits text colour. */
   endIcon?: IconSlot<ButtonIconState>;
   /**
-   * `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit` — the
-   * same knob `Box`/`Flex` and a `solid` `Button` take. `fill` stretches the
-   * button-styled link to its container, for the full-width mobile CTA.
+   * `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit` — same
+   * knob as `Box`/`Flex`/`Button`. `fill` stretches the link to its container
+   * (e.g. a full-width mobile CTA).
    */
   width?: WidthShorthand;
   /** Required visible text label (also the accessible name). */
   children: React.ReactNode;
   /**
-   * Unsupported on a labelled button-link: the accessible name is always the
-   * visible label, so passing an `aria-label` (which would silently override it)
-   * is a type error. It's *required* on the icon-only arm
-   * ({@link IconButtonLinkProps}), which has no visible text to name it.
+   * Unsupported here: the accessible name is always the visible label, so an
+   * `aria-label` (which would silently override it) is a type error. It's
+   * required on the icon-only arm ({@link IconButtonLinkProps}) instead, which
+   * has no visible text to name it.
    */
   "aria-label"?: never;
   /**
-   * Unsupported on a labelled button-link — pass `startIcon`/`endIcon` alongside
-   * the label instead. `icon` is the discriminant of the icon-only arm
-   * ({@link IconButtonLinkProps}), which has no label.
+   * Unsupported here — pass `startIcon`/`endIcon` alongside the label instead.
+   * `icon` is the discriminant of the icon-only arm ({@link IconButtonLinkProps}).
    */
   icon?: never;
 }
 
 /**
  * `<Link appearance="button" icon={…} aria-label="…" />` — the icon-only
- * button-styled link: a square control carrying a single centred glyph and no
- * visible text, the exact mirror of `Button`'s `IconButtonProps` but rendered on
- * a real anchor (or your router link). Because there's no label to name it,
- * `aria-label` is **required** (the mirror of the labelled arm, which forbids
- * it) — the honest place for the accessible name, so you never have to smuggle it
- * in through the `render` element.
+ * button-styled link: a square control with a single centred glyph and no
+ * visible text, the mirror of `Button`'s `IconButtonProps` rendered on a real
+ * anchor (or router link). `aria-label` is **required** (the labelled arm
+ * forbids it) since there's no label to name the control.
  *
- * It shares `intent`/`saliency`/`size`/`loading`/`disabled`/`disabledReason`
- * with the labelled button-link and reuses the same square recipe (via
- * `InternalButton`/`InternalGenericButtonAnchor`), so it's pixel-identical to an
- * icon-only `Button` at the same knobs. Supply the destination the usual way:
- * `href` for an external `<a>`, or `render` (or an ambient `LinkProvider`) for
- * client-side navigation.
+ * Shares `intent`/`saliency`/`size`/`loading`/`disabled`/`disabledReason` with
+ * the labelled button-link and reuses the same square recipe, so it's
+ * pixel-identical to an icon-only `Button`. Supply the destination as usual:
+ * `href`, or `render` (or an ambient `LinkProvider`) for client-side navigation.
  */
 export interface IconButtonLinkProps extends ButtonLinkCommonProps {
   /**
    * The single centred glyph — **required**, and the discriminant of this arm.
-   * A bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`, or a
-   * `(props, state)` render function; inherits the link's text colour. Typed
-   * `NonNullable` so a nullish value (e.g. a `cond ? <Icon/> : null`) can't slip
-   * through as the icon-only arm and render an *unnamed* anchor — the required
-   * `aria-label` is only wired up when a glyph is actually present.
+   * A bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`, or a render
+   * function; inherits the link's text colour. Typed `NonNullable` so a nullish
+   * value (e.g. `cond ? <Icon/> : null`) can't slip through and render an
+   * *unnamed* anchor.
    */
   icon: NonNullable<IconSlot<ButtonIconState>>;
   /**
-   * Accessible name — **required**, because the link is icon-only and has no
-   * visible text to name it (e.g. "Back to entry details"). The mirror image of
-   * a labelled button-link, which _forbids_ `aria-label` because its visible
-   * label is already the name.
+   * Accessible name — **required**, since the link is icon-only with no visible
+   * text to name it (e.g. "Back to entry details"). The labelled arm forbids
+   * `aria-label` instead, since its visible label is already the name.
    */
   "aria-label": string;
   /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
@@ -176,46 +158,41 @@ export interface IconButtonLinkProps extends ButtonLinkCommonProps {
   /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
   endIcon?: never;
   /**
-   * Unsupported on the icon-only arm: the square treatment pins a 1:1
-   * `aspect-ratio`, so `width="fill"` wouldn't widen the link — it would inflate
-   * it into a container-sized square. Use a labelled button-link if you need a
-   * full-width control.
+   * Unsupported here: the square treatment pins a 1:1 `aspect-ratio`, so
+   * `width="fill"` would inflate it into a container-sized square rather than
+   * widen it. Use a labelled button-link for a full-width control.
    */
   width?: never;
 }
 
 /**
  * `<Link appearance="button">` props, discriminated on the presence of `icon`:
- * the labelled button-link ({@link LabelledButtonLinkProps}) or the icon-only one
- * ({@link IconButtonLinkProps}, selected by passing `icon` + `aria-label` and no
- * `children`). Mirrors `Button`'s labelled/`IconButtonProps` split exactly.
+ * labelled ({@link LabelledButtonLinkProps}) or icon-only
+ * ({@link IconButtonLinkProps}, via `icon` + `aria-label` and no `children`).
+ * Mirrors `Button`'s labelled/`IconButtonProps` split.
  */
 export type ButtonLinkProps = LabelledButtonLinkProps | IconButtonLinkProps;
 
 /**
- * `<Link appearance="chip">` — a link that *looks like* a `Chip`. It reuses
- * Chip's recipe wholesale (via the shared `InternalChip` / `chipBoxClassName`),
- * so there's no style duplication: the same `intent`/`saliency`/`size`/`shape`/
- * `width` knobs apply and it's visually identical to a `Chip`, but the rendered
- * element is a real anchor (or your router link), with the chip's pointer /
- * hover / active affordances and focus ring.
+ * `<Link appearance="chip">` — a link that looks like a `Chip`. Reuses Chip's
+ * recipe wholesale (via `InternalChip`/`chipBoxClassName`), so the same
+ * `intent`/`saliency`/`size`/`shape`/`width` knobs apply and it's visually
+ * identical to a `Chip`, but renders a real anchor (or router link) with the
+ * chip's pointer/hover/active affordances and focus ring.
  *
- * A chip-link is deliberately *one anchor* — an optional decorative `icon` /
- * `trailIcon` on each side of the label, and nothing action-bearing. Chip's
- * interactive adornments, remove button, and `onClick`/`popover` label semantics
- * intentionally stay on `Chip`: a navigable chip is a `Link`, not an `href` on
- * `Chip` (which would create invalid nested interactive elements). Supply the
- * destination the same way as any other `Link`: `href` for an external link, or
- * `render` with your framework's link (which also carries *typed* router
- * descriptors a plain `href` can't express) for client-side navigation.
+ * A chip-link is deliberately *one anchor* — an optional decorative `icon`/
+ * `trailIcon` and nothing action-bearing. Chip's interactive adornments, remove
+ * button, and `onClick`/`popover` semantics intentionally stay on `Chip`: a
+ * navigable chip is a `Link`, not an `href` on `Chip` (which would nest
+ * interactive elements invalidly). Supply the destination as with any `Link`:
+ * `href` for external, or `render` for client-side navigation.
  */
 export interface ChipLinkProps extends Omit<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
   // Colour comes from intent/saliency, not the `color` attribute…
   | "color"
-  // …and the accessible name is always the visible label, so an `aria-label`
-  // (which would silently override it) is intentionally unsupported (matches
-  // `Chip`/`Button`).
+  // …and the accessible name is always the visible label, so `aria-label` is
+  // intentionally unsupported (matches `Chip`/`Button`).
   | "aria-label"
 > {
   /** The chip look. */
@@ -237,31 +214,26 @@ export interface ChipLinkProps extends Omit<
    */
   width?: "fit" | "fill";
   /**
-   * Decorative leading icon — a single non-interactive glyph before the label
-   * (like `Chip`'s `icon`). A bare glyph (auto-wrapped in `Icon`), an explicit
-   * `<Icon>`, or a `(props, state)` render function; inherits the chip's colour.
+   * Decorative leading icon, like `Chip`'s `icon` — a bare glyph (auto-wrapped
+   * in `Icon`), explicit `<Icon>`, or render function; inherits chip colour.
    */
   icon?: IconSlot<ChipIconState>;
   /** Decorative trailing icon — mirrors `icon` (like `Chip`'s `trailIcon`). */
   trailIcon?: IconSlot<ChipIconState>;
   /**
-   * Disables the link. A disabled link has no honest HTML form, so it collapses
-   * to an inert element (no navigation, out of the a11y tree as a link) while
-   * keeping the chip styling — mirrors `appearance="button"`.
+   * Disables the link. With no honest disabled HTML form, it collapses to an
+   * inert element (no navigation, out of the a11y tree) while keeping the chip
+   * styling — mirrors `appearance="button"`.
    */
   disabled?: boolean;
-  /**
-   * Explanation shown in a tooltip when the link is disabled and the user tabs to
-   * or hovers it.
-   */
+  /** Explanation shown in a tooltip when the link is disabled, on tab or hover. */
   disabledReason?: React.ReactNode;
   /**
    * Router-link element for client-side navigation (base-ui `render` pattern),
    * e.g. `render={<NextLink href="/tags/music" />}` or a typed
    * `render={<RouterLink to="/notes" search={{ tags: ["music"] }} />}`. Omit and
-   * pass `href` for a plain external `<a>` — or wrap the app in a `LinkProvider`
-   * to route every internal chip-link through your router without setting this per
-   * link (this then overrides the provider for a single link).
+   * pass `href` for a plain external `<a>`, or set once via `LinkProvider` for
+   * every internal chip-link — this prop overrides the provider for a single link.
    */
   render?: RenderProp;
   /** Required visible text label (also the accessible name). */
@@ -275,65 +247,46 @@ export interface ChipLinkProps extends Omit<
 }
 
 /**
- * Link props, discriminated on `appearance` (and, within `appearance="button"`,
- * on the presence of `icon`): the default inline styled anchor
- * ({@link InlineLinkProps}), a button-styled link ({@link ButtonLinkProps} — a
- * labelled or icon-only arm), or a chip-styled link ({@link ChipLinkProps}).
+ * Link props, discriminated on `appearance` (and, within `"button"`, on the
+ * presence of `icon`): inline ({@link InlineLinkProps}), button-styled
+ * ({@link ButtonLinkProps} — labelled or icon-only), or chip-styled
+ * ({@link ChipLinkProps}).
  */
 export type LinkProps = InlineLinkProps | ButtonLinkProps | ChipLinkProps;
 
 /**
  * Link — a router-agnostic link. By default it renders an inline styled `<a>`
- * that blends into surrounding copy: the colour is locked to the `primary` intent
- * text token and the text is always underlined (the underline, not colour alone,
- * signals a link), with oklch-derived hover/active states and the shared focus
- * ring. Supply your framework's link via `render` to integrate with any router.
+ * that blends into copy: colour locked to the `primary` text token, always
+ * underlined, with oklch hover/active states and the shared focus ring.
  *
- * Pass `appearance="button"` for a link that looks like a `Button`: it reuses
- * Button's recipe (same `intent`/`saliency`/`size`/`loading`/icon knobs) but
- * renders an anchor, so you get button styling on a real navigation control
- * without duplicating any styles. Add `icon` + `aria-label` (and no `children`)
- * for the icon-only, square look — the anchor mirror of an icon-only `Button`
- * (see {@link IconButtonLinkProps}).
+ * `appearance="button"` looks like a `Button` (same `intent`/`saliency`/`size`/
+ * `loading`/icon knobs) but renders an anchor; add `icon` + `aria-label` (no
+ * `children`) for the icon-only square look ({@link IconButtonLinkProps}).
  *
- * Pass `appearance="chip"` for a link that looks like a `Chip`: it reuses Chip's
- * recipe (same `intent`/`saliency`/`size`/`shape`/`width` knobs, plus decorative
- * `icon`/`trailIcon`) so it's visually identical to a `Chip`, but the element is a
- * real navigable anchor — the way to make a whole chip navigate without putting an
- * `href` on `Chip`.
+ * `appearance="chip"` looks like a `Chip` (same knobs, plus decorative
+ * `icon`/`trailIcon`) but renders a real navigable anchor.
  *
- * **Router integration.** Either pass `render` per link, or wrap the app in a
- * `LinkProvider` to route every internal `Link` (all appearances) through your
- * router at once — external / new-tab / `download` links still render a plain
- * `<a>`, and a per-link `render` always overrides the provider.
+ * **Router integration.** Pass `render` per link, or wrap the app in a
+ * `LinkProvider` to route every internal `Link` at once — a per-link `render`
+ * always overrides the provider; external/new-tab/`download` links stay plain.
  */
 export function Link(props: LinkProps) {
-  // Honour an enclosing `LinkProvider`: with no per-link `render`, an internal
-  // link resolves to the provider's router link (external / new-tab / download
-  // links resolve to `undefined` → a plain `<a>`). Read once, *before* the
-  // appearance branch, so the hook order stays stable across renders. `props`
-  // exposes `render`/`href`/`target`/`download` on both union arms (all anchor
-  // props), so it's safe to read them here.
+  // Honours an enclosing `LinkProvider` (external/new-tab/download links get
+  // `undefined` → a plain `<a>`). Read before the appearance branch so hook
+  // order stays stable across renders.
   const render = useLinkRender(props.render, props);
 
   if (props.appearance === "button") {
-    // A button-styled link: hand the shared `InternalButton` the Button knobs plus
-    // the anchor seam (`href`/`render`/…). `InternalGenericButtonAnchor` sees the
-    // link seam and renders the button chrome onto an `<a>`/router link. Both arms
-    // flow through here unchanged: the labelled arm carries `children`, while the
-    // icon-only arm carries `icon` + `aria-label`, which `InternalButton` reads as
-    // its icon-only mode (square box, forwarded name) — the same path `Button`'s
-    // `IconButtonProps` takes, so the two are pixel-identical.
-    // The `appearance` discriminant is Link's own and isn't part of Button's API, so
-    // it's stripped here (InternalButton would treat it as the Button appearance).
-    // The consumer's own `render` is stripped too and replaced with the resolved
-    // one (so the provider is honoured); it's `undefined` for a plain/external
-    // link, which `InternalGenericButtonAnchor` renders as an `<a href>`.
-    // The cast bridges the ref/attribute variance across the internal boundary:
-    // Button's props type `ref` as `Ref<HTMLButtonElement>`, but a button-link's
-    // rendered element is an anchor (or an inert element when disabled), so this
-    // arm's `ref` is the wider `Ref<HTMLElement>`, and it carries anchor-only
-    // attributes (`download`, `hrefLang`, …) that flow straight through to the `<a>`.
+    // Hands the shared `InternalButton` the Button knobs plus the anchor seam
+    // (`href`/`render`/…); `InternalGenericButtonAnchor` renders the button
+    // chrome onto an `<a>`/router link. Both arms flow through unchanged — the
+    // icon-only arm hits the same `InternalButton` path as `Button`'s
+    // `IconButtonProps`, so they're pixel-identical.
+    // `appearance` is Link's own discriminant (not part of Button's API) and is
+    // stripped, and the consumer's `render` is replaced with the resolved one.
+    // The cast bridges the ref/attribute variance: Button types `ref` as
+    // `Ref<HTMLButtonElement>`, but a button-link renders an anchor, so this arm
+    // widens it to `Ref<HTMLElement>` and carries anchor-only attributes through.
     const { appearance: _appearance, render: _render, ...buttonProps } = props;
     return (
       <InternalButton
@@ -345,19 +298,16 @@ export function Link(props: LinkProps) {
   }
 
   if (props.appearance === "chip") {
-    // A chip-styled link: hand the shared `InternalChip` the Chip knobs plus the
-    // resolved anchor seam. It renders the chip chrome (via `chipBoxClassName` —
-    // the same recipe `Chip` uses) onto an `<a>`/router link. The `appearance`
-    // discriminant is Link's own, and the consumer's `render` is replaced with the
-    // provider-resolved one (`undefined` for a plain/external link), so both are
-    // stripped here.
+    // Hands the shared `InternalChip` the Chip knobs plus the resolved anchor
+    // seam, rendering the chip chrome (via `chipBoxClassName`, `Chip`'s own
+    // recipe) onto an `<a>`/router link. `appearance` (Link's own discriminant)
+    // and the consumer's `render` (replaced with the resolved one) are stripped.
     const { appearance: _appearance, render: _render, ...chipProps } = props;
     return <InternalChip {...(chipProps as InternalChipProps)} render={render} />;
   }
 
   const { appearance: _appearance, render: _render, className, children, ref, ...rest } = props;
-  // `RenderElement` (not the `useRender` hook) because this render sits behind the
-  // earlier `appearance === "button"` return.
+  // `RenderElement` (not `useRender`) since this sits behind an earlier return.
   return (
     <RenderElement
       render={render}

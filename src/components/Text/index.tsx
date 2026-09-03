@@ -20,10 +20,9 @@ interface TextOwnProps
     TypographyAtomProps {
   /**
    * Typography size, by name. The built-in scale (`xs`–`9xl`, shared with
-   * `Heading`) is always available; other names are consumer-defined — published
-   * via the theme's `sizes` option and declared on `FontSizeRegistry`. Drives
-   * `font-size` and, unless `lineHeight` is set, its paired default line-height.
-   * Default `md`. See {@link FontSizeName}.
+   * `Heading`) is always available; other names come from the theme's `sizes`
+   * option. Drives `font-size` and its paired line-height unless `lineHeight` is
+   * set. Default `md`. See {@link FontSizeName}.
    */
   size?: FontSizeName;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */
@@ -32,17 +31,16 @@ interface TextOwnProps
   saliency?: Saliency;
   /**
    * Font weight, by name. The built-in steps (`default`/`semibold`/`bold`/
-   * `superbold`) are always available; other names are consumer-defined via the
-   * theme's `weights` option + `FontWeightRegistry`. See {@link FontWeightName}.
+   * `superbold`) are always available; other names come from the theme's
+   * `weights` option. See {@link FontWeightName}.
    */
   weight?: FontWeightName;
   /** Render the text in italics. */
   italic?: TypographyDecorationVariants["italic"];
   /**
-   * Font family, by name. `sans` (default) and `mono` are always available; other
-   * names are defined by the consuming app — it publishes families through the
-   * theme's `fonts` option and declares the names on `FontRegistry`. See
-   * {@link FontName}.
+   * Font family, by name. `sans` (default) and `mono` are always available;
+   * other names are published by the consuming app via the theme's `fonts`
+   * option. See {@link FontName}.
    */
   font?: FontName;
   ref?: React.Ref<HTMLElement>;
@@ -51,8 +49,7 @@ interface TextOwnProps
 
 /**
  * `Text` props. The polymorphism knobs are mutually exclusive:
- *   - `as` — a shorthand to pick one of a few plain element tags (`div` default,
- *     `p`, `label`, `span`), or
+ *   - `as` — a shorthand for a few plain tags (`div` default, `p`, `label`, `span`), or
  *   - `render` — the full base-ui `render` escape hatch (any element/component).
  *
  * Pass one or the other, never both.
@@ -73,18 +70,15 @@ export type TextProps = TextOwnProps &
 
 /**
  * Text — body copy. Renders as a `<div>` by default (pick another tag with `as`,
- * or an arbitrary element with `render`). By default its colour is inherited from
- * the ambient `--textColor` published by a surrounding `surface`/`component`
- * (falling back to the neutral/mid token when standalone), so text in a coloured
- * surface matches automatically; pass `intent` and/or `saliency` to override. It
- * also exposes its resolved colour to descendant `Icon`s via `--iconColor`, so
- * inline icons match the text.
+ * or an arbitrary element with `render`). Colour is inherited from the ambient
+ * `--textColor` published by a surrounding `surface`/`component` (falling back
+ * to neutral/mid when standalone), so text in a coloured surface matches
+ * automatically; pass `intent`/`saliency` to override. Also exposes its
+ * resolved colour to descendant `Icon`s via `--iconColor`.
  *
- * `size` picks a font-size and, by default, its paired line-height; typography can
- * be further tuned with `weight`, `italic`, `lineHeight` (leading), `font` (the
- * family), and `letterSpacing` (tracking) — `size`, `weight`, `lineHeight`, `font`,
- * and `letterSpacing` are all open-ended, consumer-defined vocabularies (built-ins
- * plus any names the theme publishes) — plus the `textAlign`, `whiteSpace`,
+ * `size` picks a font-size and, by default, its paired line-height; further tune
+ * with `weight`, `italic`, `lineHeight`, `font`, and `letterSpacing` — all
+ * open-ended, consumer-defined vocabularies — plus the `textAlign`, `whiteSpace`,
  * `overflowWrap`, and `textTransform` layout atoms.
  */
 export function Text(props: TextProps) {

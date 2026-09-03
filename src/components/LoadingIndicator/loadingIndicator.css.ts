@@ -4,20 +4,16 @@ import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { iconColorVar } from "../../styles/vars.css";
 
-// Standalone fallback colour (component token), used only when no ancestor has
-// set --iconColor.
+// Standalone fallback colour (component token), used only when no ancestor set --iconColor.
 const fallback = createVar();
 
 /**
  * LoadingIndicator root — a centring, colour-resolving box around the shared
  * `InternalSpinner`. The ring is `em`-sized and drawn in `currentColor`, so this
- * recipe only has to set the font-size (`size`) and the resolved colour
- * (`intent`/`saliency`) for the ring to inherit.
+ * only needs to set font-size (`size`) and resolved colour (`intent`/`saliency`).
  *
- * Colour resolution mirrors `Icon`: placed inside `Text`/`Chip` (which set
- * `--iconColor`) it matches the surrounding text; standalone it falls back to
- * the `component` token for its intent/saliency. Sizes track `Icon`'s ramp so a
- * spinner and a glyph of the same `size` sit at the same footprint.
+ * Colour resolution mirrors `Icon`: matches surrounding text inside `Text`/
+ * `Chip`, falls back to the `component` token standalone. Sizes track `Icon`'s ramp for matching footprints.
  */
 export const loadingIndicatorRecipe = recipe({
   base: {

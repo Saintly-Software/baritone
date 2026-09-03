@@ -13,9 +13,8 @@ export default meta;
 type Story = StoryObj<typeof Table>;
 
 /**
- * The columns and rows you pass, rendered as a plain, semantic `<table>`. The
- * columns' `key`s are the contract: every row must have exactly those keys —
- * TypeScript rejects a row that omits one or carries a key no column maps.
+ * Columns and rows rendered as a plain, semantic `<table>`. The columns' `key`s
+ * are the contract — TypeScript rejects a row that omits or adds one.
  */
 export const Basic: Story = {
   render: () => (
@@ -38,9 +37,8 @@ export const Basic: Story = {
 };
 
 /**
- * A column's `cell` renderer receives the row's value at its `key` and the whole
- * row, so it can wrap the value in any element — here a real `Link` and a
- * currency-formatted number.
+ * A column's `cell` renderer receives the row's value and the whole row, so it
+ * can wrap the value in any element — here a `Link` and a currency-formatted number.
  */
 export const CustomCells: Story = {
   render: () => (

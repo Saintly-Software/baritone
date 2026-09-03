@@ -32,10 +32,9 @@ export default meta;
 type Story = StoryObj<typeof Popover>;
 
 /**
- * Every region at once — a `Popover.Header` (title + subtitle), a body, and a
- * `Popover.Footer` whose `.Close` buttons dismiss the surface — all driven by
- * the toolbar controls (`padding`, `side`, `align`). Opens by default so the
- * surface is visible on load.
+ * Every region at once — a `Popover.Header`, a body, and a `Popover.Footer`
+ * whose `.Close` buttons dismiss the surface — driven by the toolbar controls.
+ * Opens by default so the surface is visible on load.
  */
 export const KitchenSink: Story = {
   args: { defaultOpen: true },
@@ -68,8 +67,7 @@ export const KitchenSink: Story = {
 
 export const ImperativeClose: Story = {
   name: "Imperative close (async)",
-  // Behavioural demo of the imperative-close mechanism — kept as a test, hidden
-  // from the sidebar so the showcase stays focused on visual variants.
+  // Behavioural demo of the imperative-close mechanism; hidden from the sidebar.
   tags: ["!dev"],
   render: (args) => {
     const popover = useOverlayHandle(Popover);

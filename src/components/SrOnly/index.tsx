@@ -18,13 +18,11 @@ export interface SrOnlyProps extends Omit<React.HTMLAttributes<HTMLElement>, "co
 }
 
 /**
- * SrOnly — visually-hidden text that stays in the accessibility tree. Use it to
- * give screen-reader users context that's redundant (or purely visual) for
- * sighted users: a label for an icon-only control, extra wording on a link
- * ("read more <SrOnly>about pricing</SrOnly>"), or a status announcement.
+ * SrOnly — visually-hidden text that stays in the accessibility tree. Use it for
+ * context that's redundant or purely visual for sighted users: a label for an
+ * icon-only control, extra wording on a link, or a status announcement.
  *
- * The content is present in the DOM and announced by assistive tech, but hidden
- * from view via the clip/rect technique (`srOnly`) rather than `display: none`,
+ * Hidden from view via the clip/rect technique (`srOnly`) rather than `display: none`,
  * which would drop it from the a11y tree entirely. Renders a `<span>` by default.
  */
 export function SrOnly({ className, children, render, ref, ...rest }: SrOnlyProps) {

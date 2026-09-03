@@ -3,11 +3,9 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
 /**
- * The list container — a column (default) or a wrapping row of file chips.
- * Mirrors `checkboxGroupRoot` / `radioGroupRoot` so stacked controls lay out
- * identically across the system, and resets the default `<ul>`
- * margin / padding / marker since this renders as a real list.
- * `min-width`/`min-height: 0` per `Flex`.
+ * The list container — a column (default) or wrapping row of file chips.
+ * Mirrors `checkboxGroupRoot`/`radioGroupRoot` for consistent layout, and
+ * resets `<ul>` margin/padding/marker. `min-width`/`min-height: 0` per `Flex`.
  */
 export const fileListRoot = recipe({
   base: {
@@ -33,9 +31,8 @@ export const fileListRoot = recipe({
 });
 
 /**
- * Each list cell. `max-width: 100%` (with `min-width`/`min-height: 0` per
- * `Flex`) lets the chip shrink so a long filename can ellipsize rather than
- * forcing the row wider than the list.
+ * Each list cell. `max-width: 100%` (plus `min-width`/`min-height: 0` per
+ * `Flex`) lets the chip shrink so long filenames ellipsize instead of widening the row.
  */
 export const fileListItem = style({
   display: "flex",
@@ -45,10 +42,9 @@ export const fileListItem = style({
 });
 
 /**
- * Allow the chip itself to shrink within its cell so its label can truncate.
- * The icon and remove button are now `Chip.Adornment`s, and the chip wraps the
- * filename in its own ellipsizing label — so the only thing FileList still needs
- * is to let the chip get narrow enough for that to engage.
+ * Lets the chip shrink within its cell so its label can truncate. The icon and
+ * remove button are `Chip.Adornment`s, and the chip already ellipsizes its own
+ * label — this just lets it get narrow enough to engage.
  */
 export const fileListChip = style({
   minWidth: 0,

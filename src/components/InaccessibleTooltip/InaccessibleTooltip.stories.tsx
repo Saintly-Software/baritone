@@ -3,11 +3,10 @@ import { InaccessibleTooltip } from "./index";
 
 /**
  * `InaccessibleTooltip` is the consumer-facing escape hatch for putting a
- * tooltip on an arbitrary element. It composes the (unexported) `InternalTooltip`
- * so the surface matches the rest of the system. The blunt name is intentional:
- * attaching tooltips to non-focusable elements hides the content from keyboard
- * and touch users, so keep what you put here strictly supplemental and prefer
- * `Popover` for anything a user actually needs to read.
+ * tooltip on an arbitrary element, composing the (unexported) `InternalTooltip`
+ * for a matching surface. The blunt name is intentional: tooltips on
+ * non-focusable elements hide content from keyboard/touch users, so keep this
+ * strictly supplemental and prefer `Popover` for anything users must read.
  */
 const meta: Meta<typeof InaccessibleTooltip> = {
   title: "Components/InaccessibleTooltip",

@@ -4,8 +4,7 @@ import { FORM_STATES, type FormState, LABEL_POSITIONS, SIZES } from "../../theme
 import type { DistributiveOmit } from "../../utils/types";
 import { Switch } from "./index";
 
-// Switch is controlled, so the stories drive it from local state — the same
-// shape a consumer would use.
+// Switch is controlled, so stories drive it from local state, as a consumer would.
 function ControlledSwitch(
   props: DistributiveOmit<React.ComponentProps<typeof Switch>, "value" | "onChange">,
 ) {
@@ -67,8 +66,7 @@ interface StateRow {
   state?: FormState;
 }
 
-// Every meaningful switch state, including the invalid × checked × disabled
-// combinations that don't get their own story.
+// Every meaningful switch state, incl. combos with no story of their own.
 const stateRows: StateRow[] = [
   { label: "Off" },
   { label: "On", value: true },
@@ -124,9 +122,8 @@ export const Sizes: Story = {
 };
 
 /**
- * `labelPosition` places the label `end` (default), `start`, or `top`. It's
- * flex-direction only — `start`/`end` are inline-logical, so they flip under RTL
- * without the DOM (or the accessible name) moving.
+ * `labelPosition` places the label `end` (default), `start`, or `top` — purely
+ * flex-direction, so `start`/`end` flip under RTL without the DOM (or name) moving.
  */
 export const LabelPositions: Story = {
   render: () => (
@@ -209,10 +206,9 @@ function CrossGlyph() {
 }
 
 /**
- * A glyph can ride inside the thumb. `icon` reuses one glyph for both states;
- * `activeIcon` + `inactiveIcon` show a different glyph per state (a check when
- * on, a cross when off here). The glyph is decorative — the `label` is still the
- * accessible name.
+ * A glyph can ride inside the thumb: `icon` reuses one glyph for both states;
+ * `activeIcon` + `inactiveIcon` show a different glyph per state (check/cross
+ * here). The glyph is decorative — `label` is still the accessible name.
  */
 export const WithIcons: Story = {
   render: () => (

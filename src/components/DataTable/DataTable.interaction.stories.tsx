@@ -4,10 +4,9 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { createDataTableColumnHelper, DataTable } from "./index";
 
 /**
- * Interaction coverage for `DataTable`'s grouping and row selection. These run in
- * a real browser (unlike the jsdom unit tests), driving the toggles and checkboxes
- * the way a user would — including Shift-click range selection, which needs a real
- * pointer event carrying the modifier key.
+ * Interaction coverage for `DataTable`'s grouping and row selection, run in a
+ * real browser (unlike the jsdom unit tests) — including Shift-click range
+ * selection, which needs a real pointer event carrying the modifier key.
  */
 interface Person {
   id: string;
@@ -110,9 +109,8 @@ export const GroupsToggleIndependently: Story = {
 };
 
 /**
- * `groupDisplay="merge"`: the grouped column is dropped and its label shares the
- * host column with each leaf. Collapsing still hides exactly that group's leaves,
- * and the leaf value reads down the same column as the group value.
+ * `groupDisplay="merge"`: the grouped column is dropped and its label shares
+ * the host column with each leaf; collapsing still hides just that group's leaves.
  */
 export const MergedCollapsesAndExpands: Story = {
   render: () => (
@@ -255,10 +253,9 @@ export const ShiftClickSelectsARange: Story = {
     await userEvent.click(checkboxForRow(canvasElement, "Ada Lovelace"));
     await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe("1"));
 
-    // Shift-click Alan (row 3). A real Shift-click reaches React's `onChange` with
-    // `nativeEvent.shiftKey` set, which is what TanStack's range detector reads —
-    // so dispatch exactly that. (Holding Shift across userEvent's separate
-    // keyboard/pointer calls doesn't carry the modifier onto the click here.)
+    // Shift-click Alan (row 3): dispatch a real click with `shiftKey` set,
+    // since TanStack's range detector reads `nativeEvent.shiftKey` and
+    // userEvent's separate keyboard/pointer calls don't carry Shift onto the click.
     checkboxForRow(canvasElement, "Alan Turing").dispatchEvent(
       new MouseEvent("click", { bubbles: true, cancelable: true, shiftKey: true }),
     );

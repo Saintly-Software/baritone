@@ -7,10 +7,9 @@ import { Notice } from "../Notice";
 import { useToast, type AddToastOptions } from "./index";
 
 /**
- * Interaction coverage for `Toast`. Each story fires a toast from a button and
- * asserts the portalled result — the `dialog` base-ui renders (labelled by the
- * toast's title), the description wiring, dismissal, and stacking. Test toasts
- * use `timeout: 0` so the auto-dismiss timer can't remove them mid-assertion.
+ * Interaction coverage for `Toast`. Each story fires a toast and asserts the
+ * portalled `dialog` — its labelling, description wiring, dismissal, and
+ * stacking. Test toasts use `timeout: 0` so auto-dismiss can't fire mid-assertion.
  */
 const meta: Meta = {
   title: "Interaction Tests/Toast",

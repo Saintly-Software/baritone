@@ -25,14 +25,12 @@ export const tabsListDisabled = style({
 });
 
 /**
- * One tab button. Pairs with `componentTypographyRecipe` for the box/size (so a
- * tab matches the height/radius/font of a `Chip`/`Button`) and only owns the
- * *colour*, which toggles on base-ui's selected marker. base-ui sets
- * `aria-selected="true"` (and `data-active`) on the active tab, so the fill is
- * the selection indicator: an inactive tab is transparent with muted text, the
- * active one takes the `intent` x `saliency` colour block (high = filled, mid =
- * washed, low = transparent + border), exactly like the rest of the "component"
- * family.
+ * One tab button. Pairs with `componentTypographyRecipe` for the box/size (so
+ * it matches the height/radius/font of a `Chip`/`Button`) and only owns the
+ * *colour*, toggled on base-ui's `aria-selected`/`data-active`. An inactive tab
+ * is transparent with muted text; the active one takes the `intent` x
+ * `saliency` colour block (high = filled, mid = washed, low = transparent +
+ * border), like the rest of the "component" family.
  */
 export const tabsTab = recipe({
   base: {
@@ -62,9 +60,9 @@ export const tabsTab = recipe({
         borderColor: activeBd,
         vars: { [iconColorVar]: activeFg, [textColorVar]: activeFg },
       },
-      // Disabled is modelled with `aria-disabled` (never the native attribute),
-      // so the tab stays in the roving tab order; the dim comes from
-      // `tabsTabDisabled` / `tabsListDisabled` so it never double-applies.
+      // Disabled uses `aria-disabled` (never the native attribute) so the tab
+      // stays in the roving tab order; dim comes from
+      // `tabsTabDisabled`/`tabsListDisabled` so it never double-applies.
       '&[aria-disabled="true"]': {
         cursor: "not-allowed",
       },
@@ -105,11 +103,10 @@ export const tabsTabDisabled = style({
 });
 
 /**
- * A tab's panel — the content shown when its tab is active. base-ui makes the
- * active panel focusable (`tabIndex={0}`) so keyboard users can reach content
- * that has no other focusable child, so it carries the shared focus ring; the
- * colour comes from the neutral text token (panels are body content, not a
- * coloured surface, so they don't take `intent`/`saliency`).
+ * A tab's panel — the content shown when its tab is active. base-ui makes it
+ * focusable (`tabIndex={0}`) for content with no other focusable child, so it
+ * carries the shared focus ring. Colour is the neutral text token — panels are
+ * body content, not a coloured surface, so no `intent`/`saliency`.
  */
 export const tabsPanel = style({
   paddingBlock: vars.space[2],

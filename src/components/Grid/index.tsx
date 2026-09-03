@@ -10,11 +10,9 @@ export type GridAlign = "start" | "center" | "end" | "stretch" | "baseline";
 /** `justify-content`, in friendly terms. */
 export type GridJustify = "start" | "center" | "end" | "between" | "around" | "evenly";
 /**
- * A track template. A number is expanded to that many equal columns/rows
- * (`repeat(n, minmax(0, 1fr))` — `minmax(0, …)` rather than `1fr` so long
- * children can't blow the track out past the container). A string is passed
- * through verbatim, so any valid `grid-template-*` value works
- * (`"200px 1fr"`, `"repeat(auto-fill, minmax(8rem, 1fr))"`, …).
+ * A track template. A number expands to that many equal columns/rows via
+ * `repeat(n, minmax(0, 1fr))` (`minmax(0, …)`, not `1fr`, so long children can't
+ * blow the track out). A string passes through verbatim as any `grid-template-*` value.
  */
 export type GridTracks = number | string;
 /**
@@ -22,10 +20,8 @@ export type GridTracks = number | string;
  *   - an array of cells per row — `[["header", "header"], ["nav", "main"]]`
  *   - an array of rows — `["header header", "nav main"]`
  *   - a single (usually multi-line) string — `` `header header\n nav main` ``
- * Either way you write the cell names and Grid handles the fiddly per-row
- * quoting (and, for the cell-array form, the inter-cell spacing) that
- * `grid-template-areas` actually requires. Rows you've already quoted are left
- * alone, and blank lines are ignored so you can indent freely.
+ * Grid handles the per-row quoting `grid-template-areas` requires. Already-quoted
+ * rows are left alone, and blank lines are ignored so you can indent freely.
  */
 export type GridAreas = string | readonly string[] | readonly (readonly string[])[];
 
@@ -52,15 +48,10 @@ function toTrackList(value: GridTracks): string {
 }
 
 /**
- * Turn the friendly `areas` prop into a valid `grid-template-areas` value.
- * Normalizes to one string per row — a top-level string is split on newlines,
- * and a row that is itself an array of cells is joined with spaces — then trims
- * each row, drops blank rows, and wraps every row in quotes (unless it already
- * is). So all of
- *   `[["header", "header"], ["nav", "main"]]`
- *   `["header header", "nav main"]`
- *   `` `header header\n nav main` ``
- * become `'"header header" "nav main"'`.
+ * Turns the friendly `areas` prop into a valid `grid-template-areas` value:
+ * normalizes to one string per row, trims and drops blank rows, then wraps each
+ * in quotes (unless already quoted). All three `GridAreas` forms produce the same
+ * `'"header header" "nav main"'` result.
  */
 export function toGridTemplateAreas(areas: GridAreas): string {
   const rows = Array.isArray(areas) ? areas : (areas as string).split("\n");
@@ -78,8 +69,8 @@ export interface GridProps
   /** `grid-template-rows`. A number becomes that many equal rows. */
   rows?: GridTracks;
   /**
-   * `grid-template-areas`, minus the footguns. Pass an array of rows or a
-   * multi-line string of cell names — Grid adds the required per-row quotes.
+   * `grid-template-areas`, minus the footguns: pass an array of rows or a
+   * multi-line string of cell names, and Grid adds the required per-row quotes.
    */
   areas?: GridAreas;
 
@@ -101,13 +92,12 @@ export interface GridProps
 /**
  * Grid — a CSS-grid container primitive, the grid counterpart to `Flex`, so
  * common two-dimensional layouts don't have to reach for `atoms` directly.
- * Renders a `<div>` with `display: grid` (or `inline-grid`); `columns` / `rows`
+ * Renders a `<div>` with `display: grid` (or `inline-grid`); `columns`/`rows`
  * accept a track count or any `grid-template-*` string, and `areas` takes the
- * friendly array/multi-line form and handles the per-row quoting that
- * `grid-template-areas` normally makes so easy to get wrong. `align` / `justify`
- * take friendly values mapped to the grid keywords, and the `gap`, margin
- * (`m` / `mx` / …) and padding (`p` / `px` / …) props are wired straight to the
- * spacing scale (each responsive-capable). Use `render` to change the element.
+ * friendly array/multi-line form and handles the per-row quoting. `align`/`justify`
+ * map to the grid keywords, and `gap`, margin (`m`/`mx`/…) and padding (`p`/`px`/…)
+ * wire straight to the spacing scale (responsive-capable). Use `render` to change
+ * the element.
  */
 export function Grid({
   columns,

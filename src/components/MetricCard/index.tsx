@@ -35,10 +35,8 @@ const TREND_SENTIMENT: Record<MetricTrendDirection, Intent> = {
 };
 
 /**
- * A trend / delta shown beneath the metric — the change since some baseline
- * (e.g. `▲ 12%`). The arrow glyph is decorative; the whole badge is exposed as a
- * single image with a text alternative, so a screen reader hears "increased 12%",
- * never "up-pointing triangle, 12 percent".
+ * A trend / delta shown beneath the metric (e.g. `▲ 12%`). The arrow is
+ * decorative; the badge exposes one text alternative ("increased 12%").
  */
 export interface MetricTrend {
   /** Which way the metric moved. Picks the arrow (`▲` / `▼` / `—`). */
@@ -46,66 +44,57 @@ export interface MetricTrend {
   /** The magnitude beside the arrow (e.g. `"12%"`, `"+3"`). */
   value: React.ReactNode;
   /**
-   * Colour sentiment. Defaults from `direction` (`up` → positive, `down` →
-   * negative, `flat` → neutral); set it explicitly for *inverted* metrics where a
-   * fall is good — churn, latency, cost — so "down" can read as positive (green).
+   * Colour sentiment. Defaults from `direction`; override for inverted metrics
+   * (churn, latency, cost) where a fall is good, so "down" reads positive.
    */
   sentiment?: Intent;
   /**
-   * The text alternative announced in place of the glyph + value. Defaults to
-   * `"{increased|decreased|unchanged} {value}"` when `value` is a string; supply
-   * it when `value` isn't plain text, or to phrase it differently.
+   * Text alternative for the glyph + value. Defaults to `"increased 12%"`-style
+   * phrasing for string values; set it explicitly when `value` isn't plain text.
    */
   label?: string;
 }
 
 /**
- * The state a MetricCard `icon` render function can branch on. The leading glyph
- * is decorative and fixed (muted, `aria-hidden`), so the card resolves no
- * icon-relevant state of its own — empty today; the render-function form is
- * still supported.
+ * The state a MetricCard `icon` render function can branch on. The glyph is
+ * fixed and decorative, so there's nothing to branch on yet — kept empty so
+ * the render-function form still works.
  */
 export type MetricCardIconState = Record<string, never>;
 
 /** Props shared by every MetricCard mode (static / clickable / linkable). */
 interface MetricCardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick" | "title"> {
   /**
-   * The measured figure — the hero of the card, rendered large. It is
-   * deliberately **not** a heading: a wall of metric tiles would otherwise fill
-   * the document outline with bare numbers ("2", "1", "3"…) that mean nothing out
-   * of context and drown the real section headings. Name the group of metrics
-   * with a real heading (and a `CardList`) instead — see the component docs.
+   * The measured figure, rendered large. Deliberately **not** a heading: a grid
+   * of tiles would otherwise fill the doc outline with bare numbers ("2", "1"…).
+   * Name the group with a real heading (and a `CardList`) instead.
    */
   value: React.ReactNode;
   /**
-   * What the value measures (e.g. `"Active goals"`). Sits beneath the value and,
-   * together with it, forms the metric's accessible name when the card is
-   * interactive ("Active goals, 2").
+   * What the value measures (e.g. `"Active goals"`). Together with `value`,
+   * forms the card's accessible name when interactive ("Active goals, 2").
    */
   label: React.ReactNode;
   /**
-   * Optional supporting line beneath the label (e.g. `"tasks completed"`),
-   * rendered small and muted. It stays *outside* an interactive card's control,
-   * so it's read as ordinary content rather than folded into the link/button name.
+   * Optional supporting line beneath the label (e.g. `"tasks completed"`), small
+   * and muted. Stays *outside* an interactive card's control, so it isn't
+   * folded into the link/button name.
    */
   caption?: React.ReactNode;
   /**
-   * An optional trend / delta badge (`▲ 12%`) shown beneath the label — the
-   * change since some baseline. Like `caption`, it stays *outside* an interactive
-   * card's control, so the link/button is still named by just the value + label.
+   * Optional trend / delta badge (`▲ 12%`) shown beneath the label. Like
+   * `caption`, stays *outside* an interactive card's control.
    */
   trend?: MetricTrend;
   /**
    * Optional leading glyph, shown above the value. Pass a bare glyph
-   * (`icon={<Target />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for a
-   * custom size/label, or a `(props, state) => …` render function for full
-   * control. Treated as decorative (`aria-hidden`): the `label` already names the
-   * metric, so the icon would only add noise to a screen reader.
+   * (auto-wrapped in `Icon`), an explicit `<Icon>`, or a render function for
+   * full control. Decorative (`aria-hidden`) — `label` already names the metric.
    */
   icon?: IconSlot<MetricCardIconState>;
   /**
-   * Tints the **value** (not the surface) — e.g. `positive` / `negative` for a
-   * good / bad number. The label and caption keep the neutral text ramp.
+   * Tints the **value** only (not the surface), e.g. `positive`/`negative` for
+   * a good/bad number. Label and caption stay on the neutral ramp.
    */
   intent?: Intent;
   /** Visual size of the value figure, from the shared type scale. Default `3xl`. */
@@ -114,8 +103,7 @@ interface MetricCardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "o
   as?: CardElement;
   /**
    * Overrides the composed accessible name of an interactive card. Use it when
-   * `value` / `label` aren't plain text (so the auto-composed name would be
-   * empty or unclear), e.g. `aria-label="Active goals: 2"`.
+   * `value`/`label` aren't plain text, e.g. `aria-label="Active goals: 2"`.
    */
   "aria-label"?: string;
   ref?: React.Ref<HTMLElement>;
@@ -133,9 +121,8 @@ export interface MetricCardStaticProps extends MetricCardBaseProps {
 
 /**
  * A clickable MetricCard. The value + label become the one real `<button>`,
- * stretched across the whole surface (via an `::after` overlay) so the entire
- * card activates — the accessible pattern from
- * https://inclusive-components.design/cards/.
+ * stretched across the whole surface via an `::after` overlay so the entire
+ * card activates — the pattern from https://inclusive-components.design/cards/.
  */
 export interface MetricCardClickableProps extends MetricCardBaseProps {
   /** Activation handler. Turns the value + label into the card's `<button>`. Swallowed while disabled. */
@@ -150,8 +137,7 @@ export interface MetricCardClickableProps extends MetricCardBaseProps {
 
 /**
  * A linkable MetricCard. Like the clickable card, the value + label become the
- * one real `<a>` (or your router's link via `render`), stretched across the whole
- * surface.
+ * one real `<a>` (or a router link via `render`), stretched across the surface.
  */
 export interface MetricCardLinkableProps extends MetricCardBaseProps {
   /** Destination. Turns the value + label into the card's `<a>`. */
@@ -189,18 +175,13 @@ type InternalMetricCardProps = MetricCardBaseProps & {
 };
 
 /**
- * MetricCard — a `Card` variant for the "big number + label" stat / KPI tile
- * (dashboards, summaries). Built on `Card` for the surface, it renders a large
- * `value`, a `label` naming it, and an optional `caption` and leading `icon`.
+ * MetricCard — a `Card` variant for the "big number + label" stat/KPI tile.
+ * Renders a large `value`, a `label`, and optional `caption`/`icon`.
  *
- * **Accessibility.** The `value` is *not* a heading, so a grid of tiles doesn't
- * bury the page's real headings under bare numbers. Metrics are meant to live in
- * a **named list**: drop them into a `<CardList>` (each becomes a `listitem`
- * under a real section heading), so a screen-reader user hears "Goals, list, 3
- * items — Active 2, Paused 1, …" rather than a stream of disconnected numbers.
- * Made interactive (`onClick` / `href`), the value + label become the single
- * control naming the card ("Active goals, 2"); disabled is modelled the focusable
- * way (`aria-disabled` + swallowed activation), per AGENTS.md.
+ * **Accessibility.** `value` is *not* a heading — group metrics in a
+ * `<CardList>` instead so a screen reader hears real headings, not bare
+ * numbers. Interactive (`onClick`/`href`) cards name themselves from value +
+ * label; disabled uses `aria-disabled` + swallowed activation, per AGENTS.md.
  *
  * @example
  * <CardList aria-labelledby="goals-h">
@@ -233,8 +214,8 @@ export function MetricCard(props: MetricCardProps) {
 
   const interactive = href != null || onClick != null;
 
-  // Big, bold, high-saliency span tinted by `intent` — not a heading (see
-  // `value` doc above). Weight is explicit now that it's independent of `size`.
+  // High-saliency span tinted by `intent` — not a heading (see `value` doc).
+  // Weight is explicit since it's no longer tied to `size`.
   const valueNode = (
     <span
       className={cx(
@@ -252,11 +233,9 @@ export function MetricCard(props: MetricCardProps) {
     </Text>
   );
 
-  // The value + label are one unit. When interactive they become the single real
-  // control (stretched over the whole card); otherwise they're a plain wrapper.
-  // The activation is bundled into one `control` object (rather than a `disabled`
-  // JSX attribute) — mirroring Card's `CardPrimaryLink`, this also keeps the
-  // aria-disabled guard from mistaking the wrapper for a native control.
+  // Value + label are one unit — the single real control when interactive, else
+  // a plain wrapper. Bundled into one `control` object (mirroring Card's
+  // `CardPrimaryLink`) so aria-disabled doesn't mistake the wrapper for a native control.
   const control: MetricControlConfig | null = interactive
     ? { href, onClick, target, rel, render, disabled, ariaLabel }
     : null;
@@ -296,9 +275,8 @@ export function MetricCard(props: MetricCardProps) {
 }
 
 /**
- * The trend's text alternative: an explicit `label`, else a phrase composed from
- * the direction and magnitude ("increased 12%"). A `flat` trend announces just
- * "unchanged" — its magnitude (typically "0%") adds nothing.
+ * The trend's text alternative: explicit `label`, else direction + magnitude
+ * ("increased 12%"). `flat` announces just "unchanged" — its magnitude adds nothing.
  */
 function trendAccessibleLabel({ direction, value, label }: MetricTrend): string {
   if (label != null) return label;
@@ -307,10 +285,9 @@ function trendAccessibleLabel({ direction, value, label }: MetricTrend): string 
 }
 
 /**
- * The trend / delta badge — the arrow glyph plus the magnitude, exposed as a
- * single `role="img"` carrying a composed text alternative ("increased 12%"), so
- * the decorative arrow is never announced as a glyph name. Its colour follows the
- * trend's `sentiment` (defaulted from the direction).
+ * The trend/delta badge — the arrow glyph plus magnitude, exposed as one
+ * `role="img"` with a composed text alternative so the arrow is never
+ * announced as a glyph name. Colour follows `sentiment` (defaulted from direction).
  */
 function MetricTrendBadge({ trend }: { trend: MetricTrend }) {
   const { direction, value, sentiment } = trend;
@@ -327,8 +304,7 @@ function MetricTrendBadge({ trend }: { trend: MetricTrend }) {
       )}
     >
       <TrendGlyph direction={direction} />
-      {/* Redundant under `role="img"`, but keeps the magnitude out of the a11y
-          tree on the rare engine that doesn't prune an image's descendants. */}
+      {/* Redundant under role="img", but guards engines that don't prune an image's descendants. */}
       <span aria-hidden="true">{value}</span>
     </span>
   );
@@ -363,11 +339,10 @@ interface MetricControlConfig {
 }
 
 /**
- * The metric's single primary control — the value + label rendered as the one
- * real link/button, stretched over the whole card via `metricOverlay`'s `::after`.
- * Disabled is modelled the focusable way (per AGENTS.md): `aria-disabled` plus
- * swallowing the activation — and an `<a>`'s navigation — never the native
- * attribute. An optional `render` carries a router link.
+ * The metric's single primary control — value + label as the one real
+ * link/button, stretched over the card via `metricOverlay`'s `::after`.
+ * Disabled uses `aria-disabled` + swallowed activation (never the native
+ * attribute), per AGENTS.md. An optional `render` carries a router link.
  */
 function MetricControl({
   control,

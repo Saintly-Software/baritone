@@ -5,15 +5,14 @@ import { vars } from "../../theme/contract.css";
 /**
  * Field root — the visible label plus the control stack.
  *
- * The DOM order is always label-then-control, so the reading order and the
- * accessible name never depend on the visual arrangement; `labelPosition` places
- * the label purely with flex direction, mirroring `switchRow`. `start`/`end` are
+ * DOM order is always label-then-control, so reading order and accessible name
+ * never depend on the visual arrangement; `labelPosition` places the label
+ * purely with flex direction, mirroring `switchRow`. `start`/`end` are
  * inline-logical (`row-reverse` keeps the label on the inline-end edge in both
- * LTR and RTL) and align on the baseline, so an inline label sits on the
- * control's first line of text whatever the control's height.
+ * LTR and RTL) and align on the baseline.
  *
- * `fit` decides whether the field claims the line (`fill` — what a text input
- * wants) or shrink-wraps its content (`content` — what a checkbox row wants).
+ * `fit` decides whether the field claims the line (`fill`, for a text input) or
+ * shrink-wraps its content (`content`, for a checkbox row).
  */
 export const fieldRoot = recipe({
   base: {
@@ -32,9 +31,8 @@ export const fieldRoot = recipe({
   },
   compoundVariants: [
     {
-      // Shrink-wrapping a *column* takes an explicit cross-axis alignment;
-      // in a row (`start`/`end`) the items already size to their content, and
-      // the baseline alignment set above must survive.
+      // Shrink-wrapping a *column* needs an explicit cross-axis alignment; in a
+      // row (`start`/`end`) items already size to content and baseline survives.
       variants: { fit: "content", labelPosition: "top" },
       style: { alignItems: "flex-start" },
     },
@@ -43,9 +41,9 @@ export const fieldRoot = recipe({
 });
 
 /**
- * The control together with its help / error text. Rendered in every
- * `labelPosition` so the DOM shape stays constant, and so the help text aligns
- * under the *control* rather than under the label when the label is inline.
+ * The control together with its help/error text. Rendered in every
+ * `labelPosition` so the DOM shape stays constant and help text aligns under
+ * the control, not the label, when inline.
  */
 export const fieldStack = recipe({
   base: {
@@ -81,11 +79,10 @@ export const fieldLabelRow = style({
 });
 
 /**
- * The `required` marker beside the label text — negative-high, so it reads as the
- * conventional red asterisk. It sits in `fieldLabelRow` next to the `<label>`
- * rather than inside it (see the note in `Field`), and is decorative
- * (`aria-hidden`): the control's `aria-required` carries the semantics, so this
- * never has to be announced and can't leak "star" into the accessible name.
+ * The `required` marker beside the label — negative-high, so it reads as the
+ * conventional red asterisk. Sits in `fieldLabelRow` next to `<label>` rather
+ * than inside it (see `Field`), and is decorative (`aria-hidden`): the
+ * control's `aria-required` carries the semantics instead.
  */
 export const fieldRequiredMarker = style({
   color: vars.text.color.negative.high,

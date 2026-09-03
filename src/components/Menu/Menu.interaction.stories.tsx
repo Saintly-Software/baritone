@@ -4,10 +4,9 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Menu, type MenuProps } from "./index";
 
 /**
- * Interaction coverage for `Menu`. The `play` functions open the menu and assert
- * behaviour that only surfaces once it's mounted: the highlight follows the
- * pointer, a `keepOpen` row leaves the menu up, and each `side` places the popup
- * where it was asked to.
+ * Interaction coverage for `Menu`: the `play` functions open the menu and assert
+ * behaviour that only surfaces once mounted — the highlight follows the pointer,
+ * a `keepOpen` row leaves the menu up, and each `side` places the popup as asked.
  */
 const meta: Meta<typeof Menu> = {
   title: "Surfaces/Menu",
@@ -85,10 +84,9 @@ export const KeepOpenStaysOpen: Story = {
 
 /**
  * Builds a story that opens on the given `side` and asserts the popup landed
- * there. The trigger is centred in a roomy box so there's space on every side —
- * otherwise base-ui's collision avoidance would flip the popup and change where
- * it resolves. base-ui records the resolved placement as `data-side` on the
- * positioner (the element that wraps the `menu` popup).
+ * there. The trigger sits centred in a roomy box so there's space on every side
+ * — otherwise base-ui's collision avoidance would flip it. The resolved
+ * placement lands as `data-side` on the positioner (the popup's parent).
  */
 function sideStory(side: NonNullable<MenuProps["side"]>): Story {
   return {

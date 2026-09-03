@@ -4,9 +4,8 @@ import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
 // The indicator's fill colour, funnelled through a local var so the recipe base
-// stays flat and each intent×saliency compound variant just swaps the value.
-// Exported so the `color` escape hatch can override it inline (an inline custom
-// property declaration wins over the recipe's class-based one).
+// stays flat and each intent×saliency variant just swaps the value. Exported so
+// the `color` escape hatch can override it inline (wins over the recipe's class).
 export const meterFillVar = createVar();
 const fill = meterFillVar;
 
@@ -23,10 +22,8 @@ export const meterRoot = style({
 });
 
 /**
- * The header row above the track — the label sits at the start, the optional
- * value read-out at the end. `space-between` pushes them apart and `baseline`
- * keeps their text sitting on a shared line even when the two slots differ in
- * size.
+ * The header row above the track: label at the start, optional value read-out at
+ * the end. `space-between` pushes them apart; `baseline` keeps both on one line.
  */
 export const meterHeader = style({
   display: "flex",
@@ -36,9 +33,8 @@ export const meterHeader = style({
 });
 
 /**
- * The track — the full range rail. Backed by the washed `neutral` `mid`
- * component fill so the coloured indicator reads against it in either scheme,
- * and `overflow: hidden` clips the indicator to the pill radius.
+ * The track — the full range rail. Backed by the washed `neutral` `mid` fill so
+ * the coloured indicator reads against it in either scheme; clipped to the pill radius.
  */
 export const meterTrack = style({
   position: "relative",
@@ -50,13 +46,11 @@ export const meterTrack = style({
 });
 
 /**
- * The indicator — the filled portion. base-ui sets its `width` (the value's
- * percentage of the range) and `height: inherit` inline; we own the colour
- * (per intent × saliency, via the `fill` var) and a smooth width transition.
- *
- * The fill reads `text.color[intent][saliency]` — the one colour ramp that's a
- * solid, visible ink at every saliency (the `component` fills go transparent at
- * `low`), so `high` / `mid` / `low` give three distinct, always-visible bars.
+ * The indicator — the filled portion. base-ui sets `width` (the value's
+ * percentage) and `height: inherit` inline; we own the colour and a smooth width
+ * transition. The fill reads `text.color[intent][saliency]` — the one ramp that's
+ * solid, visible ink at every saliency (`component` fills go transparent at
+ * `low`), so `high`/`mid`/`low` stay three distinct, always-visible bars.
  */
 export const meterIndicator = recipe({
   base: {

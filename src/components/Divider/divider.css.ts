@@ -3,31 +3,27 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-// The rule's colour, funnelled through a local var so the recipe base stays flat:
-// each intent×saliency compound swaps the colour, and the pieces that actually paint
-// the line (the element itself, or its two pseudo-element rules) just read it.
+// The rule's colour, funnelled through a local var so the recipe base stays
+// flat — each intent×saliency compound swaps it; painting rules just read it.
 const line = createVar();
 
 /**
- * The rule's thickness, set per instance by the `Divider` component to a
- * `var(--borderWidth-<name>)` the active theme published — the `borderWidth`
- * vocabulary is *open* (consumer-extensible), so it's an inline var, not a variant.
- * See {@link module:../../theme/borderWidths}.
+ * The rule's thickness, set per instance by `Divider` to a
+ * `var(--borderWidth-<name>)` the active theme published. `borderWidth` is an
+ * open (consumer-extensible) vocabulary, so this is an inline var, not a variant.
  */
 export const dividerWeightVar = createVar("dividerWeight");
 
-// What the line-painting rules read for their cross-axis size. Falls back to the
-// `thin` token so a module-scope caller applying `dividerRoot(...)` as a bare class
-// (without the component's inline var) still gets a hairline rule.
+// What the line-painting rules read for their cross-axis size. Falls back to
+// `thin` so a bare `dividerRoot(...)` class (no inline var) still gets a hairline rule.
 const weight = fallbackVar(dividerWeightVar, vars.borderWidth.thin);
 
 /**
- * Divider root. A flex line: unlabelled it paints the rule on its own box;
- * labelled it grows a rule either side of the label via `::before` / `::after`.
+ * Divider root. A flex line: unlabelled paints the rule on its own box;
+ * labelled grows a rule either side of the label via `::before`/`::after`.
  *
- * The colour reads `component.color[intent][saliency].default.border` — the
- * border ramp, so the rule sits at hairline weight against a surface at every
- * saliency — and the thickness reads the `--borderWidth-<name>` the component sets.
+ * Colour reads `component.color[intent][saliency].default.border` (the border
+ * ramp); thickness reads the `--borderWidth-<name>` the component sets.
  */
 export const dividerRoot = recipe({
   base: {
@@ -35,9 +31,8 @@ export const dividerRoot = recipe({
     alignItems: "center",
     // Never let a divider get squeezed to nothing by a greedy flex sibling.
     flexShrink: 0,
-    // No `margin: 0` reset here: the root renders a `div` (no UA margin to
-    // reset), and the reset would out-order the equal-specificity `atoms` class
-    // that carries the margin props, silently swallowing `my` / `mx` / ….
+    // No `margin: 0` reset here: a `div` has no UA margin to reset, and the
+    // reset would out-order the equal-specificity `atoms` class, swallowing `my`/`mx`.
   },
   variants: {
     orientation: {
@@ -48,16 +43,14 @@ export const dividerRoot = recipe({
       vertical: {
         flexDirection: "column",
         // `alignSelf` (not `height`) so the rule spans a flex row's full height
-        // whatever the parent's `align-items` says; `min-height` keeps it
-        // visible outside a flex container, where there's nothing to stretch to.
+        // regardless of `align-items`; `min-height` keeps it visible outside a flex container.
         alignSelf: "stretch",
         minHeight: "1em",
       },
     },
     /**
-     * Whether there's a label between the rules. Drives *where* the line is
-     * painted: on the element's own box (`false`), or on the two pseudo-element
-     * rules flanking the label (`true`).
+     * Whether there's a label between the rules. Drives where the line paints:
+     * the element's own box (`false`), or the two pseudo-element rules (`true`).
      */
     labelled: {
       false: {
@@ -89,8 +82,7 @@ export const dividerRoot = recipe({
     >,
   },
   compoundVariants: [
-    // The rule's cross-axis size — on the element's own box when unlabelled, on
-    // the pseudo-element rules when labelled.
+    // Cross-axis size: the element's own box when unlabelled, the pseudo-element rules when labelled.
     {
       variants: { orientation: "horizontal", labelled: false },
       style: { height: weight },
@@ -107,9 +99,8 @@ export const dividerRoot = recipe({
       variants: { orientation: "vertical", labelled: true },
       style: { selectors: { "&::before, &::after": { width: weight } } },
     },
-    // `labelPosition` nudges the label along the divider by pinning the rule on
-    // its side to a short stub; the other rule keeps growing into the slack.
-    // `center` needs no compound — both rules grow equally by default.
+    // `labelPosition` nudges the label by pinning the rule on its side to a
+    // short stub; the other rule grows into the slack. `center` needs no compound.
     {
       variants: { labelled: true, labelPosition: "start" },
       style: { selectors: { "&::before": { flex: `0 0 ${vars.space[4]}` } } },

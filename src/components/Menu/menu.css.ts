@@ -5,16 +5,13 @@ import { vars } from "../../theme/contract.css";
 import { iconColorVar, textColorVar } from "../../styles/vars.css";
 
 /**
- * `Menu.Item`'s supported intents — the `neutral` default plus the accent
- * intents. `primary` is deliberately absent: it's the call-to-action colour, and
- * a row in a list of peers isn't a CTA — a primary-coloured row would out-shout
- * the menu's own trigger.
+ * `Menu.Item`'s supported intents — `neutral` plus the accent intents.
+ * `primary` is deliberately absent: it's the call-to-action colour, and a
+ * primary-coloured row would out-shout the menu's own trigger.
  *
- * Exported so `MenuItemIntent` can be derived from this one list rather than
- * restated: the type and the recipe's variant keys are the same set by
- * construction, so a new intent can't reach one and miss the other. `satisfies`
- * keeps every member a real `Intent`, which is what makes the token lookups
- * below total.
+ * Exported so `MenuItemIntent` derives from this one list — the type and the
+ * recipe's variant keys stay the same set by construction. `satisfies` keeps
+ * every member a real `Intent`, making the token lookups below total.
  */
 export const MENU_ITEM_INTENTS = [
   "neutral",
@@ -25,16 +22,16 @@ export const MENU_ITEM_INTENTS = [
 ] as const satisfies readonly Intent[];
 
 /** base-ui portals the menu to the end of `<body>`, so it stacks above page
- * content by DOM order — no z-index needed (see `BaritoneTheme`'s `isolation`). */
+ * content by DOM order — no z-index needed. */
 export const menuPositioner = style({
   outline: "none",
 });
 
 /**
  * The menu surface — a tight vertical stack of rows. Colour/border/radius come
- * from the shared `surfaceRecipe` (applied in the component with `padding:
- * none`, since each row owns its own padding); this adds the elevation shadow
- * and the open/close transition, mirroring `Popover`'s popup.
+ * from the shared `surfaceRecipe` (`padding: none`, since each row owns its
+ * own); this adds the elevation shadow and open/close transition, mirroring
+ * `Popover`'s popup.
  */
 export const menuPopup = style({
   display: "flex",
@@ -60,13 +57,11 @@ export const menuPopup = style({
 });
 
 /**
- * One row's colour scheme: the resolved text/icon colour for its `intent`, and
- * the background wash shown while base-ui flags it `data-highlighted`
- * (keyboard/pointer navigation) — the row's *only* focus indicator, matching
- * base-ui's own recommended pattern (no separate focus ring per item). The
- * `neutral` wash matches `Accordion`'s trigger hover; the accent intents
- * (`secondary`/`warning`/`negative`) use their own tokens so a destructive item
- * reads as such even before it's highlighted.
+ * One row's colour scheme: text/icon colour for its `intent`, and the
+ * background wash shown on `data-highlighted` — the row's *only* focus
+ * indicator, matching base-ui's recommended pattern. The `neutral` wash
+ * matches `Accordion`'s trigger hover; accent intents use their own tokens so
+ * a destructive item reads as such even before highlighted.
  */
 export const menuItemRecipe = recipe({
   base: {

@@ -2,12 +2,11 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
 /**
- * HelpText root — a single inline help / validation line: a leading icon sits
- * next to the message. Laid out as a flex row aligned to the top so a message
- * that wraps onto a second line keeps the icon pinned to the first line (mirrors
- * `Notice`). Colour and typography are owned by the composed `Text`/`Icon`
- * primitives, so this recipe only carries layout — the `variant` knob just
- * scales the gap between the glyph and the text with the type size.
+ * HelpText root — a single inline help/validation line: a leading icon next to
+ * the message. Flex row aligned to the top so a wrapped message keeps the icon
+ * pinned to the first line (mirrors `Notice`). Colour/typography are owned by
+ * the composed `Text`/`Icon`; this recipe only carries layout — `variant`
+ * scales the icon↔text gap with the type size.
  */
 export const helpTextRecipe = recipe({
   base: {
@@ -15,8 +14,8 @@ export const helpTextRecipe = recipe({
     alignItems: "flex-start",
   },
   variants: {
-    // Tracks the `Text` size the same-named prop selects; only the icon↔text gap
-    // differs, so the row stays proportional as the type scales.
+    // Tracks the `Text` size prop; only the icon↔text gap differs, keeping the
+    // row proportional as type scales.
     variant: {
       xs: { gap: vars.space[1] },
       sm: { gap: vars.space[1] },

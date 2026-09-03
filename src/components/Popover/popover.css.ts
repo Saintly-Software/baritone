@@ -2,12 +2,11 @@ import { style } from "@vanilla-extract/css";
 import { vars } from "../../theme/contract.css";
 
 /**
- * Popover surface layout — a vertical stack mirroring `Card`, so the optional
- * header, the content, and the optional footer lay out top-to-bottom. The
- * surface colour/border/padding come from the shared `surfaceRecipe`; this adds
- * the elevation shadow (it's floating) and a small open/close transition.
+ * Popover surface layout — a vertical stack mirroring `Card`. Colour/border/
+ * padding come from the shared `surfaceRecipe`; this adds the elevation shadow
+ * (it's floating) and a small open/close transition.
  *
- * `--transform-origin` is published by base-ui's positioner (it points back at
+ * `--transform-origin` is published by base-ui's positioner (points back at
  * the trigger), so the scale animation grows out of the anchor.
  */
 export const popoverPopup = style({
@@ -21,8 +20,7 @@ export const popoverPopup = style({
   transitionDuration: "120ms",
   transitionTimingFunction: "ease-out",
   selectors: {
-    // base-ui flags the enter ("starting") and exit ("ending") frames; fade and
-    // scale from the trigger on both so the popup grows in and shrinks out.
+    // base-ui flags enter/exit frames ("starting"/"ending"); fade and scale on both.
     "&[data-starting-style], &[data-ending-style]": {
       opacity: 0,
       transform: "scale(0.96)",

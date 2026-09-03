@@ -17,15 +17,14 @@ export type ScrollAreaOrientation = "vertical" | "horizontal" | "both";
 
 export interface ScrollAreaProps {
   /**
-   * The scrollable content. Give the `ScrollArea` a bounded size (a height for
-   * `vertical`, a width for `horizontal`, both for `both`) via `className` /
-   * `style` — the content scrolls whenever it overflows that box.
+   * The scrollable content. Give `ScrollArea` a bounded size (height for
+   * `vertical`, width for `horizontal`, both for `both`) via `className`/`style`.
    */
   children: React.ReactNode;
   /**
    * Which axes scroll. `vertical` (default) and `horizontal` show one scrollbar;
-   * `both` shows both plus the corner where they meet. Scrollbars only ever
-   * appear for an axis whose content actually overflows.
+   * `both` shows both plus the corner. A scrollbar only appears for an axis
+   * whose content actually overflows.
    * @default "vertical"
    */
   orientation?: ScrollAreaOrientation;
@@ -47,19 +46,18 @@ const fadeClass = {
 } as const;
 
 /**
- * ScrollArea — a scrollable region built on base-ui's `ScrollArea`, with two of
- * the docs' recipes baked in by default:
+ * ScrollArea — a scrollable region built on base-ui's `ScrollArea`, with two
+ * recipes baked in by default:
  *
- * - **Gradient scroll fade.** The content fades out at any edge it can still
- *   scroll toward and stays crisp at an edge it's flush against — driven by
- *   base-ui's per-edge overflow metrics, so it tracks the scroll position live.
- * - **Hover-reveal scrollbars.** The native scrollbars are hidden; a slim custom
- *   thumb fades in while you hover the area or scroll, then fades back out. Set
- *   `orientation="both"` for simultaneous horizontal + vertical scrollbars (with
- *   the corner between them).
+ * - **Gradient scroll fade.** The content fades at any edge it can still
+ *   scroll toward and stays crisp where it's flush — driven by base-ui's
+ *   per-edge overflow metrics, so it tracks the scroll position live.
+ * - **Hover-reveal scrollbars.** Native scrollbars are hidden; a slim custom
+ *   thumb fades in on hover/scroll. Set `orientation="both"` for simultaneous
+ *   horizontal + vertical scrollbars, with the corner between them.
  *
- * Give it a bounded size — a `height` for vertical, a `width` for horizontal —
- * through `className` or `style`; the content scrolls once it overflows.
+ * Give it a bounded size — `height` for vertical, `width` for horizontal —
+ * via `className` or `style`; content scrolls once it overflows.
  *
  * @example
  * // Vertical (default): a fixed-height panel of long content.
@@ -90,8 +88,8 @@ export function ScrollArea({
         aria-label={ariaLabel}
         className={cx(viewport, fadeClass[orientation])}
       >
-        {/* base-ui's Content sets `min-width: fit-content` inline, so wide content
-            overflows (horizontal scroll) while text still wraps (vertical). */}
+        {/* base-ui's Content sets `min-width: fit-content`, so wide content
+            overflows horizontally while text still wraps vertically. */}
         <BaseScrollArea.Content>{children}</BaseScrollArea.Content>
       </BaseScrollArea.Viewport>
       {showVertical && (

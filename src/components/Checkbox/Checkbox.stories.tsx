@@ -44,8 +44,7 @@ export default meta;
 
 type Story = StoryObj<typeof ControlledCheckbox>;
 
-// Interactive default — renamed from "Playground". Ships with `helpText` so the
-// default view shows the described-by wiring, not a bare box.
+// Ships with `helpText` so the default shows the described-by wiring, not a bare box.
 export const Basic: Story = {
   args: {
     helpText: "We send at most one email a week. Unsubscribe anytime.",

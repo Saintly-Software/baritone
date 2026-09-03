@@ -37,11 +37,10 @@ export interface BoxProps
 
 /**
  * Box — a plain element primitive, so spacing doesn't have to reach for `atoms`
- * directly. Renders a `<div>` by default (pick another tag — `span`, `section`,
- * `article` — with `as`), with the margin (`m` / `mx` / …) and padding (`p` / `px`
- * / …) props wired straight to the spacing scale (each responsive-capable). It's
- * the layout-neutral sibling of `Flex`: no `display: flex`, just a box you can
- * pad, margin, and style.
+ * directly. Renders a `<div>` by default (pick another tag with `as`), with
+ * margin (`m`/`mx`/…) and padding (`p`/`px`/…) wired to the spacing scale
+ * (responsive-capable). The layout-neutral sibling of `Flex` — no `display:
+ * flex`, just a box you can pad, margin, and style.
  */
 export function Box({
   as = "div",
@@ -75,8 +74,7 @@ export function Box({
       className: cx(
         atoms({
           // Only emit `display` when a visibility prop is set, so the element
-          // otherwise keeps its natural display (`block` for div/section/article,
-          // `inline` for span).
+          // otherwise keeps its natural display (`block`, or `inline` for span).
           display:
             hideOn || showOn
               ? resolveDisplay(as === "span" ? "inline" : "block", hideOn, showOn)

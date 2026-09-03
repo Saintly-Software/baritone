@@ -35,10 +35,9 @@ export default meta;
 type Story = StoryObj<typeof Notice>;
 
 /**
- * Kitchen sink — one notice exercising the full surface in a single composition:
- * a leading `icon`, a status `chip` on the title line, a `description`, a
- * dismiss `close`, and a row of `actions` (a primary button, a link, and an
- * icon-only control). The `intent`, `saliency`, and `shape` controls drive it.
+ * Kitchen sink — one notice exercising the full surface: a leading `icon`, a
+ * status `chip`, a `description`, a dismiss `close`, and a row of `actions`
+ * (button, link, icon-only). Driven by the `intent`/`saliency`/`shape` controls.
  */
 export const KitchenSink: Story = {
   render: (args) => (

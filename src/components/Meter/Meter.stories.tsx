@@ -20,8 +20,7 @@ const meta: Meta<typeof Meter> = {
     value: { control: { type: "range", min: 0, max: 100, step: 1 } },
   },
   decorators: [
-    // Single-meter stories read best capped at 360px; the matrix opts out via
-    // `parameters.wide` so its columns aren't squeezed into a scroll box.
+    // Single-meter stories cap at 360px; the matrix opts out via `parameters.wide`.
     (Story, ctx) => (
       <div style={{ maxWidth: ctx.parameters.wide ? undefined : 360 }}>
         <Story />
@@ -76,9 +75,8 @@ export const CustomRange: Story = {
 };
 
 /**
- * `aria-valuetext` as a function: base-ui hands it the formatted value (the
- * percentage by default) plus the raw value, and the string it returns is what
- * screen readers announce.
+ * `aria-valuetext` as a function: base-ui hands it the formatted value and the
+ * raw value; the returned string is what screen readers announce.
  */
 export const CustomValueText: Story = {
   // Kept as a test, hidden from the sidebar so the showcase stays focused.
@@ -93,8 +91,7 @@ export const CustomValueText: Story = {
 
 /**
  * `showValue` renders the value at the end of the header row. `format` (an
- * `Intl.NumberFormat` options bag) drives how it reads — here as a unit — and
- * feeds the default `aria-valuetext` too.
+ * `Intl.NumberFormat` options bag) drives how it reads, and feeds `aria-valuetext` too.
  */
 export const CustomValueFormat: Story = {
   // Kept as a test, hidden from the sidebar so the showcase stays focused.
@@ -134,9 +131,8 @@ export const CustomValueNode: Story = {
 };
 
 /**
- * `slotProps.bar.color` is the escape hatch: paint the indicator any CSS colour,
- * overriding `intent` × `saliency`. Reach for it only when you need a colour
- * outside the system palette.
+ * `slotProps.bar.color` is the escape hatch: paint the indicator any CSS
+ * colour, overriding `intent` × `saliency`. Use only outside the system palette.
  */
 export const CustomColor: Story = {
   args: {

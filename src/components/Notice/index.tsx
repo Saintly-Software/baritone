@@ -26,11 +26,7 @@ import {
   noticeTitle,
 } from "./notice.css";
 
-/**
- * What a Notice publishes to its interactive parts. A disabled Notice drags its
- * `actions` and `close` along — they go inert (`aria-disabled`, never the native
- * attribute) but stay focusable — so they read this off context.
- */
+/** Disabled state shared with a Notice's `actions`/`close` (inert via `aria-disabled`, still focusable). */
 interface NoticeContextValue {
   disabled?: boolean;
 }
@@ -58,15 +54,11 @@ function CloseGlyph() {
 
 export interface NoticeIconProps {
   /**
-   * The glyph to render — typically an `<svg>` using `currentColor`. It's wrapped
-   * in an `<Icon>`, so pass the raw glyph (not another `<Icon>`).
+   * The glyph to render — typically an `<svg>` using `currentColor`. Wrapped in an
+   * `<Icon>`, so pass the raw glyph, not another `<Icon>`.
    */
   children: React.ReactNode;
-  /**
-   * Tint just the icon a different intent, overriding the notice's foreground.
-   * Republishes `--iconColor` for this icon (and the glyph inside) so it reads the
-   * override token. Omit to inherit the notice's colour.
-   */
+  /** Tint just the icon a different intent than the notice's foreground. Omit to inherit it. */
   intent?: Intent;
   /** Saliency for the `intent` override. Default `mid`. Ignored without `intent`. */
   saliency?: Saliency;
@@ -77,11 +69,9 @@ export interface NoticeIconProps {
 }
 
 /**
- * Notice.Icon — the leading icon of a `Notice`, with control over its colour.
- * Drop it in the notice's `icon` prop instead of a bare glyph when you want the
- * icon tinted a different `intent`/`saliency` than the notice's own foreground;
- * otherwise passing a plain node to `icon` (wrapped in a colour-inheriting
- * `<Icon>`) is enough.
+ * Notice.Icon — the notice's leading icon, with its own colour. Use it in the
+ * `icon` prop when you want a different `intent`/`saliency` than the notice's
+ * foreground; otherwise a plain node passed to `icon` is enough.
  */
 function NoticeIcon({ children, intent, saliency = "mid", size, label }: NoticeIconProps) {
   return (
@@ -100,9 +90,8 @@ function NoticeIcon({ children, intent, saliency = "mid", size, label }: NoticeI
 export type NoticeChipProps = ChipProps;
 
 /**
- * Notice.Chip — a status chip for the notice's title line, passed via the
- * `chip` prop. A thin `Chip` preset that defaults to the compact `sm` size (a
- * notice title is body-sized); every other `Chip` prop passes straight through.
+ * Notice.Chip — a status chip for the notice's title line (the `chip` prop). A
+ * `Chip` preset defaulting to the compact `sm` size; every other prop passes through.
  */
 function NoticeChip({ size = "sm", ...rest }: NoticeChipProps) {
   return <Chip size={size} {...rest} />;
@@ -118,10 +107,7 @@ interface NoticeActionCommonProps extends Omit<
   saliency?: Saliency;
   /** Control size. Default `sm` — notice actions are compact. */
   size?: Size;
-  /**
-   * Inert the action (`aria-disabled`, never the native attribute — it stays
-   * focusable). Also inherited from a disabled Notice.
-   */
+  /** Inert the action (`aria-disabled`, stays focusable). Also inherited from a disabled Notice. */
   disabled?: boolean;
   /** Activation handler. With no `href`/`render` the action is a `<button>`. */
   onClick?: React.MouseEventHandler<HTMLElement>;
@@ -132,9 +118,8 @@ interface NoticeActionCommonProps extends Omit<
   /** Anchor `rel`; defaults to a safe value for `target="_blank"`. */
   rel?: string;
   /**
-   * Router-link element for internal navigation (base-ui `render` seam) — keeps
-   * the button look while your router owns navigation. Renders an `<a>` when
-   * omitted and `href` is set.
+   * Router-link element for internal navigation (base-ui `render` seam). Renders
+   * an `<a>` when omitted and `href` is set.
    */
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;
@@ -153,8 +138,8 @@ export interface NoticeActionTextProps extends NoticeActionCommonProps {
   /** The visible text label (also the accessible name). */
   children: React.ReactNode;
   /**
-   * Optional leading icon — a bare glyph (auto-wrapped in `Icon`), an explicit
-   * `<Icon>`, or a `(props, state)` render function. Inherits the action's colour.
+   * Optional leading icon — a bare glyph, an explicit `<Icon>`, or a
+   * `(props, state)` render function. Inherits the action's colour.
    */
   icon?: IconSlot<NoticeActionIconState>;
   label?: never;
@@ -163,8 +148,8 @@ export interface NoticeActionTextProps extends NoticeActionCommonProps {
 /** An icon-only `Notice.Action` — a lone glyph with a required accessible name. */
 export interface NoticeActionIconOnlyProps extends NoticeActionCommonProps {
   /**
-   * The glyph — a bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`, or a
-   * `(props, state)` render function. The action has no text.
+   * The glyph — a bare glyph, an explicit `<Icon>`, or a `(props, state)` render
+   * function. The action has no text.
    */
   icon: IconSlot<NoticeActionIconState>;
   /** Required accessible name for the icon-only action. */
@@ -173,19 +158,16 @@ export interface NoticeActionIconOnlyProps extends NoticeActionCommonProps {
 }
 
 /**
- * Notice.Action props — a text action ({@link NoticeActionTextProps}) or an
- * icon-only one ({@link NoticeActionIconOnlyProps}), each of which is a
- * `<button>` (`onClick`) or a link (`href`/`render`).
+ * Notice.Action props — a text action ({@link NoticeActionTextProps}) or
+ * icon-only ({@link NoticeActionIconOnlyProps}); each is a `<button>` or a link.
  */
 export type NoticeActionProps = NoticeActionTextProps | NoticeActionIconOnlyProps;
 
 /**
  * Notice.Action — a control for the notice's `actions` row. Looks like a small
- * `Button` (it shares the component colour/size recipes and the focus ring) but
- * can be either a `<button>` (`onClick`) or a link (`href`, or a router link via
- * `render`), and either text (`children`, with an optional leading `icon`) or
- * icon-only (`icon` + a required `label`). Inherits a disabled Notice's inert
- * state through context.
+ * `Button` but can be a `<button>` (`onClick`) or a link (`href`/`render`), and
+ * either text (`children` + optional `icon`) or icon-only (`icon` + required
+ * `label`). Inherits a disabled Notice's inert state through context.
  */
 function NoticeAction(props: NoticeActionProps) {
   const {
@@ -251,20 +233,16 @@ export interface NoticeCloseProps extends Omit<
   label?: string;
   /** Override the built-in "×" glyph. */
   children?: React.ReactNode;
-  /**
-   * Inert the button (`aria-disabled`, never the native attribute — it stays
-   * focusable). Also inherited from a disabled Notice.
-   */
+  /** Inert the button (`aria-disabled`, stays focusable). Also inherited from a disabled Notice. */
   disabled?: boolean;
   ref?: React.Ref<HTMLButtonElement>;
 }
 
 /**
- * Notice.Close — the "×" dismiss button, rendered top-right of a Notice. Pass it
- * a handler via the notice's `close` prop (a function auto-wraps into one), or
- * supply a `<Notice.Close>` directly to set its `label`/glyph. It's a real
- * focusable `<button>` with an accessible name (default "Dismiss"); a disabled
- * Notice makes it inert (`aria-disabled`) while it stays focusable.
+ * Notice.Close — the "×" dismiss button, rendered top-right of a Notice. Pass a
+ * handler via the notice's `close` prop (auto-wrapped into one), or supply a
+ * `<Notice.Close>` directly to set its `label`/glyph. A disabled Notice makes it
+ * inert (`aria-disabled`) while it stays focusable.
  */
 function NoticeClose({
   onClick,
@@ -304,14 +282,13 @@ export interface NoticeProps
   /** Colour intent — the same palette as `Chip`/`Button`. Default `neutral`. */
   intent?: Intent;
   /**
-   * How prominent the notice is. `high` (default) borrows the `component` `mid`
-   * palette — a washed fill; `low` borrows the `component` `low` palette — a
-   * subtler shade. (A Notice never uses the loud `high` component fill.)
+   * How prominent the notice is. `high` (default) uses the washed `component`
+   * `mid` palette; `low` uses the subtler `component` `low` palette.
    */
   saliency?: SurfaceSaliency;
   /**
-   * The notice's silhouette. `square` (default) keeps the shared component radius;
-   * `pill` fully rounds the ends (same as `Chip`).
+   * The notice's silhouette. `square` (default) keeps the shared component
+   * radius; `pill` fully rounds the ends (same as `Chip`).
    */
   shape?: "square" | "pill";
   /**
@@ -319,33 +296,25 @@ export interface NoticeProps
    * instead of filling its container like a full-width block banner.
    */
   inline?: boolean;
-  /**
-   * Dims the notice and makes its `actions` / `close` inert. Modelled with
-   * `aria-disabled` (never the native attribute), so the controls stay focusable.
-   */
+  /** Dims the notice and makes its `actions`/`close` inert via `aria-disabled` (stays focusable). */
   disabled?: boolean;
   /**
-   * A leading icon. Pass a bare glyph (an `<svg>`, auto-wrapped in a
-   * colour-inheriting `<Icon>`), an explicit `<Icon>`, or a `(props, state)`
-   * render function — or a `<Notice.Icon>` to tint the icon a different
-   * `intent`/`saliency`.
+   * A leading icon — a bare glyph, an explicit `<Icon>`, a `(props, state)`
+   * render function, or a `<Notice.Icon>` to tint it a different `intent`/`saliency`.
    */
   icon?: IconSlot<NoticeIconState>;
   /** Supporting text rendered beneath the title. */
   description?: React.ReactNode;
-  /**
-   * A status chip shown on the title line, after the title — a `<Notice.Chip>`
-   * (or any `<Chip>`).
-   */
+  /** A status chip shown on the title line, after the title. */
   chip?: React.ReactNode;
   /**
-   * Trailing action controls, rendered as a wrapping row beneath the text —
-   * typically `<Notice.Action>`s (or any node, e.g. a `<Button>`).
+   * Trailing action controls in a wrapping row beneath the text — typically
+   * `<Notice.Action>`s (or any node, e.g. a `<Button>`).
    */
   actions?: React.ReactNode[];
   /**
-   * Dismiss affordance, rendered at the top-right. Pass a handler for a built-in
-   * `<Notice.Close>`, or a `<Notice.Close>` element to configure its label/glyph.
+   * Dismiss affordance at the top-right. Pass a handler for a built-in
+   * `<Notice.Close>`, or an element to configure its label/glyph.
    */
   close?: (() => void) | React.ReactElement;
   /** Render as a different element/component (base-ui `render` pattern). */
@@ -356,17 +325,14 @@ export interface NoticeProps
 }
 
 /**
- * Notice — a block-level callout / inline message. It borrows the `component`
- * colour scheme (shared with `Chip`/`Button`) rather than the washed `surface`
- * palette, so `<Notice intent="warning">` matches a Button/Chip of the same
- * intent; its `saliency` (`high`/`low`) maps onto the component `mid`/`low`
- * shades (see `notice.css`). Static — a container, not a control.
+ * Notice — a block-level callout / inline message. Uses the `component` colour
+ * scheme (shared with `Chip`/`Button`), so `<Notice intent="warning">` matches a
+ * Button/Chip of the same intent. Static — a container, not a control.
  *
- * Lay it out with a leading `icon` (a plain glyph, or a `<Notice.Icon>` to recolour
- * it), the `children` as the title, an optional status `chip` on the title line,
- * a `description` beneath, an `actions` row of `<Notice.Action>`s, and a top-right
- * `close` dismiss. It announces itself as a live region (`role="alert"` for
- * negative/warning intents, `role="status"` otherwise) unless you override `role`.
+ * Lay it out with a leading `icon`, `children` as the title, an optional `chip`,
+ * a `description`, an `actions` row, and a `close` dismiss. Announces as a live
+ * region (`role="alert"` for negative/warning, `role="status"` otherwise) unless
+ * you override `role`.
  */
 function NoticeRoot({
   intent,
@@ -393,9 +359,8 @@ function NoticeRoot({
   ml,
   ...rest
 }: NoticeProps) {
-  // A `<Notice.Icon>` already is a colour-tinting icon (with its own
-  // intent/saliency), so pass it through untouched; anything else goes through
-  // the shared `renderIcon`.
+  // A `<Notice.Icon>` already carries its own colour, so pass it through
+  // untouched; anything else goes through the shared `renderIcon`.
   const iconNode =
     React.isValidElement(icon) && icon.type === NoticeIcon
       ? icon

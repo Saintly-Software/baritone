@@ -71,11 +71,9 @@ export default meta;
 type Story = StoryObj<typeof Drawer>;
 
 /**
- * Every region at once — a header carrying an overflow-actions `Menu`, a
- * scrolling body, and a footer whose primary actions render as a joined
- * `ButtonGroup` — all driven by the toolbar controls (`saliency`, `padding`,
- * `side`, `width`, `loading`, `disabled`). Opens by default so the panel is
- * visible on load.
+ * Every region at once — header (overflow-actions `Menu`), scrolling body, and
+ * footer (`ButtonGroup`) — all driven by the toolbar controls. Opens by
+ * default so the panel is visible on load.
  */
 export const KitchenSink: Story = {
   args: { defaultOpen: true },
@@ -192,9 +190,8 @@ export const Large: Story = {
 };
 
 /**
- * The `xl` (widest) width. Like every step it stays capped to the viewport, so it
- * shrinks to fit on narrow screens. Opens by default so the panel is visible on
- * load.
+ * The `xl` (widest) width. Like every step, it stays capped to the viewport
+ * and shrinks to fit narrow screens. Opens by default so it's visible on load.
  */
 export const ExtraLarge: Story = {
   args: { width: "xl", defaultOpen: true },
@@ -203,8 +200,7 @@ export const ExtraLarge: Story = {
 
 /**
  * The body sits behind a spinner while `loading` is set; the header and footer
- * stay live so the drawer can still be closed. Opens by default so the spinner
- * is visible on load.
+ * stay live so the drawer can still be closed. Opens by default.
  */
 export const Loading: Story = {
   args: { loading: true, defaultOpen: true },
@@ -271,9 +267,8 @@ export const ImperativeClose: Story = {
 };
 
 /**
- * A drawer opened from inside a modal — each surface renders its own backdrop, so
- * the stack stays legible. Both surfaces open by default so the Chromatic snapshot
- * captures the layered backdrops.
+ * A drawer opened from inside a modal — each surface renders its own backdrop,
+ * so the stack stays legible. Both open by default for the Chromatic snapshot.
  */
 export const Nested: Story = {
   render: (args) => (

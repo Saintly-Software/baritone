@@ -77,8 +77,7 @@ export const Sizes: Story = {
 
 /**
  * List-level `intent` / `saliency` apply to every chip, but any item can
- * override them — here two chips opt into their own intent while the rest inherit
- * the list's `neutral`.
+ * override them — here two chips opt into their own intent, the rest inherit `neutral`.
  */
 export const PerItemOverrides: Story = {
   args: {

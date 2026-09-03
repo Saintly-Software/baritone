@@ -5,8 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { DistributiveOmit } from "../../utils/types";
 import { Switch } from "./index";
 
-// A tiny controlled host mirroring the documented usage, so the tests exercise
-// the component exactly as a consumer would wire it.
+// A tiny controlled host mirroring documented usage, so tests exercise the
+// component the way a consumer would wire it.
 function Notifications({
   value: initial = false,
   onChange,
@@ -175,9 +175,8 @@ describe("Switch", () => {
     expect(screen.getByRole("switch", { name: "Wi-Fi" })).toBeInTheDocument();
   });
 
-  // `label` used to silently win over `aria-label`. They're mutually exclusive
-  // now — the track would show one name and announce another — so the pair is a
-  // type error, and a JS caller that gets past the types gets a thrown error.
+  // `label` used to silently win over `aria-label`; now mutually exclusive
+  // (type error) since the track would show one name and announce another.
   it("throws when label and aria-label are both passed", () => {
     expect(() =>
       render(
@@ -203,8 +202,8 @@ describe("Switch", () => {
     expect(toggle).toHaveAccessibleDescription("We'll only ping you about outages.");
   });
 
-  // One message slot: the same line stays put and changes *presentation* with
-  // `state`, rather than a separate error line appearing.
+  // One message slot: the same line changes presentation with `state`,
+  // rather than a separate error line appearing.
   it("renders the helpText as an error when invalid", () => {
     const { rerender } = render(<Notifications helpText="Required" />);
     expect(screen.getByText("Required").querySelector("svg")).toBeNull();

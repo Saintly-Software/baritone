@@ -16,9 +16,8 @@ export const accordionRootDisabled = style({
 });
 
 /**
- * One item. The colour/border/radius come from the shared `surfaceRecipe`
- * (applied in the component with `padding: none`, since the trigger and panel own
- * their padding); this just clips the collapsing panel to the rounded corners.
+ * One item. Colour/border/radius come from `surfaceRecipe` (padding: none, since
+ * the trigger/panel own their own); this just clips the panel to the rounded corners.
  */
 export const accordionItem = style({
   overflow: "hidden",
@@ -38,8 +37,7 @@ export const accordionHeader = style({
 
 /**
  * The trigger button — a full-width row of [header content | chevron]. Resets the
- * native button look (the title/subtitle come from `Text`, which carries its own
- * type + colour) and adds a subtle neutral wash on hover, matching `Tabs`.
+ * native button look and adds a subtle neutral hover wash, matching `Tabs`.
  */
 export const accordionTrigger = style({
   display: "flex",
@@ -62,9 +60,8 @@ export const accordionTrigger = style({
     '&:hover:not([aria-disabled="true"])': {
       background: vars.component.color.neutral.mid.default.bgc,
     },
-    // Disabled is modelled with `aria-disabled` (never the native attribute), so
-    // the trigger stays in the tab order; the dim comes from the item/root
-    // `*Disabled` classes so it never double-applies.
+    // Disabled uses `aria-disabled` (never the native attribute), so the trigger
+    // stays tabbable; the dim comes from the item/root `*Disabled` classes.
     '&[aria-disabled="true"]': {
       cursor: "not-allowed",
     },
@@ -75,10 +72,9 @@ export const accordionTrigger = style({
 });
 
 /**
- * The `Accordion.ItemHeader`'s own layout inside the trigger: the leading group
- * (optional `icon` + the title/subtitle stack) on the start, the optional `chip`
- * on the end. Grows to fill the trigger (the chevron is the trigger's own
- * trailing element), so the chip sits just inside it.
+ * `Accordion.ItemHeader`'s layout inside the trigger: the leading group (optional
+ * `icon` + title/subtitle) at the start, the optional `chip` at the end. Grows to
+ * fill the trigger (the chevron is its own trailing element).
  */
 export const accordionHeaderContent = style({
   display: "flex",
@@ -118,8 +114,8 @@ export const accordionHeaderChip = style({
 });
 
 /**
- * The disclosure chevron. Muted, decorative, and rotated 180° when the panel is
- * open — base-ui flags the open trigger with `data-panel-open`.
+ * The disclosure chevron: muted, decorative, and rotated 180° when open
+ * (base-ui flags the trigger with `data-panel-open`).
  */
 export const accordionChevron = style({
   flexShrink: 0,
@@ -140,9 +136,8 @@ export const accordionChevron = style({
 /**
  * The collapsible panel. base-ui publishes the measured content height as
  * `--accordion-panel-height`; animating `height` to/from `0` (the
- * `data-starting-style` / `data-ending-style` frames) gives the open/close
- * slide. `overflow: hidden` clips the content mid-transition. Padding lives on
- * the inner content wrapper so it can't perturb the animated height.
+ * `data-starting-style`/`data-ending-style` frames) gives the slide, clipped by
+ * `overflow: hidden`. Padding lives on the inner wrapper so it can't perturb the height.
  */
 export const accordionPanel = style({
   overflow: "hidden",

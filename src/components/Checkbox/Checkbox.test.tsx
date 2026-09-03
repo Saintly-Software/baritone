@@ -5,8 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { DistributiveOmit } from "../../utils/types";
 import { Checkbox } from "./index";
 
-// A tiny controlled host mirroring the documented usage, so the tests exercise
-// the component exactly as a consumer would wire it.
+// A tiny controlled host, mirroring documented usage, so tests wire the
+// component the way a consumer would.
 function Subscribe({
   value: initial = false,
   onChange,
@@ -167,9 +167,9 @@ describe("Checkbox", () => {
     expect(screen.getByRole("checkbox", { name: "External label" })).toBeInTheDocument();
   });
 
-  // `label` used to silently win over `aria-label`. They're mutually exclusive
-  // now — the box would show one name and announce another — so the pair is a
-  // type error, and a JS caller that gets past the types gets a thrown error.
+  // `label` and `aria-label` are mutually exclusive (one name shown, another
+  // announced), so the pair is a type error — or a thrown error for JS callers
+  // that bypass the types.
   it("throws when label and aria-label are both passed", () => {
     expect(() =>
       render(

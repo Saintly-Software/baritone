@@ -102,9 +102,9 @@ export default meta;
 type Story = StoryObj<typeof Environments>;
 
 /**
- * Kitchen sink — single-open (default) with the full feature set: leading icons,
- * trailing status chips, subtitles, and a disabled ("Legacy") item. Opening one
- * item collapses the others; the `disabled` control locks the whole group.
+ * Kitchen sink — single-open (default) with the full feature set: icons,
+ * status chips, subtitles, and a disabled item. Opening one collapses the
+ * others; `disabled` locks the whole group.
  */
 export const KitchenSink: Story = {};
 

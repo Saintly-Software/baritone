@@ -10,8 +10,7 @@ const StarIcon = () => (
   </svg>
 );
 
-// ToggleButton is controlled, so the stories drive it from local state — the
-// same shape a consumer would use.
+// ToggleButton is controlled, so stories drive it from local state, the same shape a consumer would use.
 function ControlledToggle(props: ToggleButtonBaseProps) {
   const [value, setValue] = React.useState(false);
   return <ToggleButton value={value} onChange={setValue} {...props} />;
@@ -44,9 +43,8 @@ type Story = StoryObj<typeof ControlledToggle>;
 export const Basic: Story = {};
 
 /**
- * Uncontrolled + state-aware slots: no `value`/`onChange` wiring, and both the
- * glyph and the accessible name flip with the pressed state. `defaultValue` seeds
- * the initial state.
+ * Uncontrolled + state-aware slots: no `value`/`onChange` wiring; both the glyph
+ * and the accessible name flip with the pressed state. `defaultValue` seeds the initial state.
  */
 export const UncontrolledWithCallbackSlots: Story = {
   tags: ["!dev"],

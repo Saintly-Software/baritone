@@ -34,9 +34,8 @@ const ICON_SIZE: Record<HelpTextVariant, Size> = {
 };
 
 /**
- * A warning triangle — the auto glyph shown for the attention intents
- * (`warning`/`negative`, e.g. via `invalid`) when no explicit `icon` is passed.
- * `currentColor` so it inherits the line's resolved colour.
+ * Auto glyph for the attention intents (`warning`/`negative`, e.g. via
+ * `invalid`) when no `icon` is passed. `currentColor` inherits the line's colour.
  */
 function WarningGlyph() {
   return (
@@ -69,10 +68,9 @@ export interface HelpTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "
   /** Type size (scales the message and the icon together). Default `sm`. */
   variant?: HelpTextVariant;
   /**
-   * A leading glyph — a bare glyph (auto-wrapped in a colour-inheriting `<Icon>`
-   * sized to the `variant`), an explicit `<Icon>`, or a `(props, state)` render
-   * function. Omit to fall back to the auto warning glyph on the attention intents
-   * (`warning`/`negative`, incl. `invalid`); other intents show none.
+   * A leading glyph — bare glyph (auto-wrapped in a colour-inheriting `<Icon>`),
+   * explicit `<Icon>`, or render function. Omits to the auto warning glyph on
+   * attention intents (`warning`/`negative`, incl. `invalid`); others show none.
    */
   icon?: IconSlot<HelpTextIconState>;
   /** Drop the icon entirely, including the auto glyph. */
@@ -87,17 +85,14 @@ export interface HelpTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "
 }
 
 /**
- * HelpText — a single inline help / validation line (icon + text), for use under
- * a form control or standalone. It composes the `Text` and `Icon` primitives:
- * `Text` owns the colour (publishing `--textColor`/`--iconColor`, so the glyph
- * matches) and typography, and the icon scales with the chosen `variant`.
+ * HelpText — a single inline help/validation line (icon + text), for use under
+ * a form control or standalone. Composes `Text` (owns colour/typography,
+ * publishing `--textColor`/`--iconColor` so the glyph matches) and `Icon`.
  *
- * Colour comes from `intent` + `saliency` (default `neutral`/`mid`), with two
- * convenience flags that stand in for the common form states: `invalid` maps to
- * `negative` and `disabled` maps to a dimmed `neutral`. On the attention intents
- * (`warning`/`negative`) a warning glyph is shown automatically when no `icon` is
- * given; pass your own `icon`, or `hideIcon` to drop it. The icon is decorative
- * (`aria-hidden`) since the message carries the meaning.
+ * Colour comes from `intent` + `saliency` (default `neutral`/`mid`); `invalid`
+ * maps to `negative`, `disabled` to a dimmed `neutral`. A warning glyph shows
+ * automatically on attention intents when no `icon` is given (`hideIcon` drops
+ * it); it's `aria-hidden` since the message carries the meaning.
  */
 export function HelpText({
   children,
@@ -113,8 +108,7 @@ export function HelpText({
   ref,
   ...rest
 }: HelpTextProps) {
-  // Resolve the convenience flags onto the colour axes. `disabled` wins over
-  // `invalid` — a disabled control's help shouldn't shout an error colour.
+  // `disabled` wins over `invalid` — a disabled control's help shouldn't shout an error colour.
   let resolvedIntent: Intent = intent;
   let resolvedSaliency: Saliency = saliency;
   if (invalid) resolvedIntent = "negative";

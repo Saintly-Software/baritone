@@ -7,11 +7,10 @@ import { RadioGroup } from "./index";
 
 type ThemeValue = "system" | "light" | "dark";
 
-// A tiny controlled host mirroring the documented usage, so the type-safe
-// render-prop pattern is exercised exactly as a consumer would write it. The
-// host owns the naming (`label="Theme"` below), so the labelling props are
-// stripped from what it forwards — they're mutually exclusive, and a `rest` that
-// could smuggle in an `aria-label` would conflict with that `label`.
+// A tiny controlled host mirroring documented usage, exercising the type-safe
+// render-prop pattern as a consumer would write it. It owns the naming
+// (`label="Theme"` below), so labelling props are stripped from `rest` —
+// they're mutually exclusive, and a smuggled `aria-label` would conflict.
 function ThemeSwitcher({
   value: initial = "system",
   onChange,

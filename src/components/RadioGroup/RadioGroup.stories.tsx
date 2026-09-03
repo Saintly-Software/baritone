@@ -6,10 +6,9 @@ import { RadioGroup } from "./index";
 
 type ThemeValue = "system" | "light" | "dark";
 
-// RadioGroup is controlled, so the stories drive it from local state — the same
-// shape a consumer would use. `DistributiveOmit` (not the built-in `Omit`) keeps
-// the mutually-exclusive labelling arms apart — a plain `Omit` over a union
-// collapses it into one object carrying every arm's keys at once.
+// RadioGroup is controlled, so the stories drive it from local state.
+// `DistributiveOmit` (not `Omit`) keeps the labelling union's arms apart — a
+// plain `Omit` would collapse it into one object with every arm's keys.
 function ThemeSwitcher(
   props: DistributiveOmit<
     React.ComponentProps<typeof RadioGroup<ThemeValue>>,
@@ -56,7 +55,7 @@ export default meta;
 
 type Story = StoryObj<typeof ThemeSwitcher>;
 
-// Interactive default — renamed from "Playground". Ships with a `description` so
+// Interactive default (renamed from "Playground"). Ships with `helpText` so
 // the default view shows the described-by wiring, folding in the old
 // "WithDescription" story.
 export const Basic: Story = {
@@ -75,8 +74,8 @@ export const Sizes: Story = {
   ),
 };
 
-// One message slot now: the copy changes with the state, rather than a help
-// line and an error line coexisting.
+// One message slot: the copy changes with state, rather than separate help
+// and error lines.
 const STATE_MESSAGE: Record<FormState, string | undefined> = {
   neutral: undefined,
   warning: "Double-check this choice.",

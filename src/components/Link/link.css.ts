@@ -4,11 +4,10 @@ import { active, hover } from "../../theme/oklch";
 import { focusRingColorVar, iconColorVar } from "../../styles/vars.css";
 
 /**
- * Link styling. Unlike the "component"/"text" element types, a Link has no
- * intent/saliency knob — its colour is locked to the `primary` text token so
- * links read as one consistent, predictable colour across the app. Hover/active
- * are derived from that token via the same oklch relative-colour math the
- * component scheme uses. Pair with `focusRingRecipe` for the ring.
+ * Link styling. Unlike "component"/"text", Link has no intent/saliency knob —
+ * its colour is locked to the `primary` text token so links read as one
+ * consistent colour app-wide. Hover/active derive from it via the same oklch
+ * math the component scheme uses; pair with `focusRingRecipe` for the ring.
  */
 
 // The link's resting colour: the primary intent text token.
@@ -22,9 +21,8 @@ export const linkBase = style({
   fontWeight: "inherit",
   lineHeight: "inherit",
   color: linkColor,
-  // Always underlined: the underline — not the colour alone — is what marks the
-  // text as a link, so it stays distinguishable for users who can't perceive
-  // the colour difference. `from-font` keeps the rule weight legible.
+  // Always underlined: the underline (not colour alone) marks this as a link
+  // for users who can't perceive colour; `from-font` keeps the weight legible.
   textDecorationLine: "underline",
   textDecorationThickness: "from-font",
   textUnderlineOffset: "0.15em",

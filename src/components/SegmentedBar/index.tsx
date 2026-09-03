@@ -21,15 +21,13 @@ import {
 } from "./segmentedBar.css";
 
 /**
- * The intents handed to segments that don't name a colour, in order. Six
- * positions, ordered so *adjacent* ones sit far apart in hue — the pairs most
- * likely to touch in the track are the ones that most need telling apart.
+ * Default intents for segments that don't name a colour, ordered so *adjacent*
+ * positions sit far apart in hue.
  *
- * Assignment is by **position**, which is only safe for a fixed set of segments.
- * If the set can change (a filter, a "top N" that reshuffles), give each segment
- * an explicit `intent` or `color` keyed off its identity — otherwise dropping one
- * segment repaints every segment after it, and the colours stop meaning anything
- * across renders.
+ * Assignment is by **position**, which is only safe for a fixed set of
+ * segments. If the set can change, give each segment an explicit `intent` or
+ * `color` keyed off its identity — otherwise dropping one segment repaints
+ * every segment after it.
  */
 const DEFAULT_SEGMENT_INTENTS = [
   "primary",
@@ -52,23 +50,17 @@ export interface SegmentedBarSegmentIntentColour {
 
 /**
  * The colour **escape hatch**, for a segment whose fill is data rather than a
- * design decision: a per-area colour a user picked, a category colour that comes
- * down with the row. These are values the palette can't enumerate, because they
- * aren't the system's to choose.
+ * design decision — a user-picked colour, a category colour from the row.
  *
- * Prefer `intent`/`saliency` — an intent segment re-themes with the rest of the
- * system, this one is frozen at whatever you pass, and nothing checks it for
- * contrast against the track or its neighbours.
- *
- * Mutually exclusive with `intent`/`saliency` rather than overriding them: it
- * replaces the token-driven scheme outright, so accepting both would leave one
- * silently doing nothing.
+ * Prefer `intent`/`saliency` when possible: this fill is frozen at whatever
+ * you pass and unchecked for contrast. Mutually exclusive with
+ * `intent`/`saliency` — it replaces the token-driven scheme outright, rather
+ * than overriding it.
  */
 export interface SegmentedBarSegmentCustomColour {
   /**
    * Paint the slice and its legend swatch any CSS colour, replacing
-   * `intent` × `saliency`. Takes anything CSS `color` does — a hex/rgb/oklch
-   * value, a custom property, `currentColor`.
+   * `intent` × `saliency`. Takes anything CSS `color` does.
    */
   color: NonNullable<React.CSSProperties["color"]>;
   /** Unsupported alongside `color` — the custom fill replaces the palette scheme. */
@@ -80,33 +72,30 @@ export interface SegmentedBarSegmentCustomColour {
 /** The content of one segment, independent of how it's coloured. */
 export interface SegmentedBarSegmentBase {
   /**
-   * Stable identity for the segment — its React key. Defaults to the index, which
-   * is fine for a fixed list; give real ids when segments can be added, removed,
-   * or reordered.
+   * Stable identity for the segment (its React key). Defaults to the index —
+   * fine for a fixed list; give real ids when segments can change.
    */
   id?: string;
   /** What the segment is, shown in the legend (e.g. `"Music"`). */
   label: React.ReactNode;
   /**
-   * The segment's magnitude, in whatever unit the bar measures. Its share of the
-   * bar is this over the `total` (which defaults to the sum of every segment).
-   * Negative values are treated as `0`.
+   * The segment's magnitude. Its share of the bar is this over `total`
+   * (default: the sum of every segment). Negative values are treated as `0`.
    */
   value: number;
 }
 
 /**
- * One segment of the bar: its content, plus a colour from either the palette
- * ({@link SegmentedBarSegmentIntentColour}, the default) or a caller-supplied CSS
- * colour ({@link SegmentedBarSegmentCustomColour}).
+ * One segment: its content, plus a colour from the palette
+ * ({@link SegmentedBarSegmentIntentColour}, the default) or custom CSS
+ * ({@link SegmentedBarSegmentCustomColour}).
  */
 export type SegmentedBarSegment = SegmentedBarSegmentBase &
   (SegmentedBarSegmentIntentColour | SegmentedBarSegmentCustomColour);
 
 /**
- * Overrides for the bar's `Text` slots. All partial: you're layering props onto
- * the slot's own defaults, so `slotProps={{ value: { weight: "bold" } }}` just
- * re-tunes that piece while the rest stays as-is.
+ * Overrides for the bar's `Text` slots. All partial — layered onto each slot's
+ * own defaults, e.g. `slotProps={{ value: { weight: "bold" } }}`.
  */
 export interface SegmentedBarSlotProps {
   /** Props for the label `Text` above the track. */
@@ -124,22 +113,18 @@ export interface SegmentedBarSlotProps {
 export interface SegmentedBarProps {
   /**
    * The parts, in display order — left to right in the track, top to bottom in
-   * the legend. Segments are rendered in the order given; sort them yourself if
-   * you want them largest-first.
+   * the legend. Sort them yourself for a largest-first order.
    */
   segments: SegmentedBarSegment[];
   /**
    * The denominator for every share. Defaults to the sum of the values (so the
-   * track always fills). Pass a larger number — a target, a capacity, a whole
-   * that the segments only partly account for — to leave the difference as
-   * unfilled track. A `total` *below* the sum is ignored: the shares have to add
-   * up to at most the whole.
+   * track always fills). Pass a larger number to leave the remainder as
+   * unfilled track. A `total` below the sum is ignored.
    */
   total?: number;
   /**
-   * Visible label rendered above the track. Also names the legend list for
-   * assistive tech. To name the bar *without* a visible label, use `aria-label` /
-   * `aria-labelledby` instead.
+   * Visible label above the track. Also names the legend list for assistive
+   * tech. Use `aria-label` / `aria-labelledby` to name it without a visible label.
    */
   label?: React.ReactNode;
   /** Show the `total` at the end of the header row. */
@@ -151,10 +136,9 @@ export interface SegmentedBarProps {
   /**
    * Show the legend beneath the track. Default `true`.
    *
-   * Setting it to `false` hides the legend **visually only** — it stays in the
-   * accessibility tree, because the track itself is a picture (`aria-hidden`) and
-   * the legend is the only thing carrying the actual numbers. A bar with neither
-   * would announce nothing at all.
+   * `false` hides it **visually only** — it stays in the accessibility tree,
+   * since the track itself is `aria-hidden` and the legend is the only thing
+   * carrying the numbers.
    */
   showLegend?: boolean;
   /** Show each segment's percentage share in its legend row. Default `true`. */
@@ -165,7 +149,7 @@ export interface SegmentedBarProps {
   size?: Size;
   /**
    * `Intl.NumberFormat` options for the displayed values (e.g.
-   * `{ style: "currency", currency: "USD" }`). Percentages are formatted
+   * `{ style: "currency", currency: "USD" }`). Percentages always format
    * separately, as whole percents.
    */
   format?: Intl.NumberFormatOptions;
@@ -178,25 +162,24 @@ export interface SegmentedBarProps {
 }
 
 /**
- * SegmentedBar — a single bar divided into the parts that make up a whole, with a
- * legend naming each part. The shape for "what is this total made of": time by
- * project, spend by category, storage by file type.
+ * SegmentedBar — a single bar divided into the parts that make up a whole,
+ * with a legend naming each part: time by project, spend by category, storage
+ * by file type.
  *
  * Each segment is coloured by `intent` × `saliency` — the same vocabulary as
- * `Chip` / `Meter` — defaulting to a fixed sequence of intents so a bar is legible
- * with nothing but labels and values. A segment whose colour is *data* (a
- * user-chosen category colour) can take a `color` escape hatch instead.
+ * `Chip` / `Meter` — defaulting to a fixed sequence of intents. A segment whose
+ * colour is *data* (a user-chosen category colour) can take a `color` escape
+ * hatch instead.
  *
- * Shares are computed from the values, so callers pass counts, not percentages;
- * pass a `total` larger than their sum to leave a remainder unfilled.
+ * Shares are computed from the values, so callers pass counts, not
+ * percentages; pass a `total` larger than their sum to leave a remainder unfilled.
  *
- * **Accessibility.** The track is a picture of the legend, so it's `aria-hidden`
- * and the legend is a real list — one item per segment, each announcing its label,
- * share, and value. Colour is therefore never the only thing carrying identity.
- * That's also why `showLegend={false}` only hides it visually.
+ * **Accessibility.** The track is a picture, so it's `aria-hidden`; the legend
+ * is a real list carrying each segment's label, share, and value, which is why
+ * `showLegend={false}` only hides it visually.
  *
- * It is *not* a `Meter`: use `Meter` for one value against a range, and this for
- * one whole split into parts.
+ * Not a `Meter`: use `Meter` for one value against a range, this for a whole
+ * split into parts.
  *
  * @example
  * <SegmentedBar
@@ -227,12 +210,10 @@ export function SegmentedBar({
   const generatedLabelId = React.useId();
   const labelId = label != null ? generatedLabelId : undefined;
 
-  // Negative values would eat into their neighbours' shares, so they're floored
-  // at zero rather than silently distorting the bar.
+  // Negative values are floored at zero, rather than distorting the other shares.
   const values = segments.map((segment) => Math.max(0, segment.value));
   const sum = values.reduce((acc, value) => acc + value, 0);
-  // A `total` under the sum can't be honoured — the parts would add up to more
-  // than the whole — so the sum is the floor.
+  // A `total` under the sum can't be honoured, so the sum is the floor.
   const denominator = Math.max(sum, total ?? 0);
   const remainder = denominator - sum;
 
@@ -242,8 +223,8 @@ export function SegmentedBar({
     maximumFractionDigits: 0,
   });
 
-  // The legend names the list, so the naming attributes land there rather than on
-  // the root (a plain `<div>` with no role, where they'd announce nothing).
+  // The legend is the list, so naming attributes land there, not on the
+  // roleless root div.
   const legendNameAttrs: Record<string, string> = {};
   if (labelId != null) legendNameAttrs["aria-labelledby"] = labelId;
   else if (ariaLabelledby != null) legendNameAttrs["aria-labelledby"] = ariaLabelledby;
@@ -271,14 +252,12 @@ export function SegmentedBar({
         </div>
       )}
 
-      {/* The track duplicates the legend exactly, so it's a picture: hidden from
-          assistive tech rather than announced as a second, wordless copy. */}
+      {/* The track is a picture of the legend, hidden from assistive tech. */}
       <div className={segmentedBarTrack({ size })} aria-hidden="true">
         {segments.map((segment, index) => {
           const value = values[index] ?? 0;
-          // A zero-value segment gets no slice at all — with `minWidth` it would
-          // otherwise show as a sliver of a share it doesn't have. It keeps its
-          // legend row, where "0%" says so in words.
+          // A zero-value segment gets no slice (minWidth would show a false
+          // sliver); its legend row still shows "0%".
           if (value <= 0) return null;
           return (
             <span
@@ -301,8 +280,7 @@ export function SegmentedBar({
         {segments.map((segment, index) => {
           const value = values[index] ?? 0;
           return (
-            // `list-style: none` can drop the implicit listitem role in Safari, so
-            // the role is set explicitly to keep the list semantics.
+            // Safari can drop the implicit listitem role when `list-style: none` is set.
             <li key={segment.id ?? index} role="listitem" className={segmentedBarLegendRow}>
               <span
                 aria-hidden="true"
@@ -345,10 +323,9 @@ export function SegmentedBar({
 }
 
 /**
- * The colour class for a segment's marks. A custom `color` still gets the recipe:
- * the class only *sets* the fill var, and the inline declaration below overrides
- * it — so both paths stay one class plus one variable, with no ordering to reason
- * about.
+ * The colour class for a segment's marks. A custom `color` still gets the
+ * recipe class — it only sets the fill var, which the inline style below
+ * overrides — so both paths stay one class plus one variable.
  */
 function fillClassName(segment: SegmentedBarSegment, index: number): string {
   return segmentedBarFill({

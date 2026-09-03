@@ -5,10 +5,9 @@ import { Link } from "../Link";
 import { isInternalHref, LinkProvider, type LinkRenderProps } from "./index";
 
 /**
- * A stand-in for a framework's link (Next.js / React Router / TanStack). It marks
- * the anchors it renders (`data-router-link`) so tests can tell a routed link from
- * a plain one, records the destinations it's asked to navigate to, and prevents
- * the default full-page navigation so a click is observable without leaving jsdom.
+ * A stand-in for a framework's link (Next.js / React Router / TanStack). Marks
+ * rendered anchors (`data-router-link`) so tests can tell a routed link from a
+ * plain one, records navigations, and prevents the default full-page navigation.
  */
 function makeRouter() {
   const navigations: string[] = [];
@@ -55,8 +54,7 @@ describe("isInternalHref", () => {
     "tel:+15551234567",
     "sms:+15551234567",
     "ftp://files.example.com",
-    // A fragment-only href is a same-document jump the browser owns, not a
-    // navigation any client router should resolve.
+    // A fragment-only href is a same-document jump, not a navigation any router should resolve.
     "#foo",
   ])("treats %s as external", (href) => {
     expect(isInternalHref(href)).toBe(false);
@@ -164,8 +162,7 @@ describe("LinkProvider", () => {
       </LinkProvider>,
     );
     const link = screen.getByRole("link", { name: "Dashboard" });
-    // The explicit render wins: the element is the one passed to `render`, not the
-    // provider's router link, and it keeps its own destination.
+    // The explicit render wins: the element passed to `render`, not the provider's router link.
     expect(link).toHaveAttribute("data-explicit-link", "");
     expect(link).not.toHaveAttribute("data-router-link");
     expect(link).toHaveAttribute("href", "/override");
@@ -253,7 +250,7 @@ describe("LinkProvider", () => {
         </LinkProvider>,
       );
       // A disabled link has no honest HTML form, so it leaves the link a11y tree
-      // even when a provider is present.
+      // even with a provider present.
       expect(screen.queryByRole("link", { name: "Off" })).not.toBeInTheDocument();
       await user.click(screen.getByText("Off"));
       expect(router.navigations).toEqual([]);

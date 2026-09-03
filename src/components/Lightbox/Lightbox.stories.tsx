@@ -36,10 +36,7 @@ export default meta;
 
 type Story = StoryObj<typeof Lightbox>;
 
-/**
- * The canonical use: an icon-only trigger opens the image full-size. Uses the
- * low-saliency small icon button from the raw example.
- */
+/** The canonical use: an icon-only trigger that opens the image full-size. */
 export const Default: Story = {
   render: () => (
     <Lightbox

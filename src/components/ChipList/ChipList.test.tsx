@@ -21,8 +21,7 @@ describe("ChipList", () => {
 
   it("keeps an explicit list role even with the list marker removed", () => {
     render(<ChipList items={TAGS} />);
-    // Set explicitly so Safari (which drops the implicit role under
-    // `list-style: none`) still exposes the list.
+    // Explicit role: Safari drops the implicit one under `list-style: none`.
     expect(screen.getByRole("list")).toHaveAttribute("role", "list");
     for (const item of screen.getAllByRole("listitem")) {
       expect(item).toHaveAttribute("role", "listitem");
@@ -57,8 +56,7 @@ describe("ChipList", () => {
         />,
       );
       const chips = container.querySelectorAll("li > *");
-      // The overriding chip carries a different intent recipe class than the
-      // inheriting one.
+      // The overriding chip carries a different intent class than the inheriting one.
       expect(chips[0]?.className).not.toBe(chips[1]?.className);
     });
 
@@ -196,8 +194,8 @@ describe("ChipList", () => {
       const onAncestor = vi.fn();
       const handleRemove = vi.fn();
       const user = userEvent.setup();
-      // A common layout: the whole list sits inside a clickable region. Removing a
-      // chip should act on that chip alone, never trip the surrounding handler.
+      // A common layout: the list sits inside a clickable region. Removing a chip
+      // should act alone, never trip the surrounding handler.
       render(
         <div onClick={onAncestor}>
           <ChipList

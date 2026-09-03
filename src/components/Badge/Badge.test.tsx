@@ -7,10 +7,9 @@ import { Badge } from "./index";
 const classesOf = (element: Element) => element.className.split(/\s+/);
 
 /**
- * The classes that mark each `interactive` variant, diffed out of the recipe
- * itself rather than hardcoded — the hashes move whenever the recipe does. The
- * `control` variant hovers/actives unconditionally; `auto` defers to the
- * rendered element.
+ * The classes marking each `interactive` variant, diffed out of the recipe itself
+ * rather than hardcoded — the hashes move whenever the recipe does. `control` hovers/
+ * actives unconditionally; `auto` defers to the rendered element.
  */
 const variantMarkers = (variant: "control" | "auto") => {
   const other = variant === "control" ? "auto" : "control";
@@ -39,10 +38,8 @@ describe("Badge", () => {
   });
 
   // A badge is an indicator, not a hit target, so it must not take the shared
-  // recipe's control affordances — a hover/active background on a static span
-  // advertises a click it can't perform. jsdom applies no stylesheet, so these
-  // assert the variant carried on the element; the hover colours themselves are
-  // verified against real computed styles in the browser.
+  // recipe's control affordances. jsdom applies no stylesheet, so these assert the
+  // variant carried on the element; hover colours are verified against real computed styles in the browser.
   describe("affordances", () => {
     it("does not take a control's hover background", () => {
       render(<Badge data-testid="badge" text="NEW" />);
@@ -159,10 +156,8 @@ describe("Badge", () => {
       render(<Badge data-testid="custom" text="NEW" color="#7c3aed" />);
       const custom = screen.getByTestId("custom").className.split(/\s+/);
 
-      // Both schemes are single classes, so if both were applied the winner
-      // would come down to stylesheet emission order rather than to intent.
-      // The custom badge must carry the escape-hatch class and *none* of the
-      // token recipe's.
+      // Both schemes are single classes, so if both were applied, the winner would
+      // come down to stylesheet emission order rather than intent — the custom badge must carry only the escape-hatch class.
       expect(custom).toContain(badgeCustomColor);
       const intentClasses = componentIntentRecipe({ intent: "primary", saliency: "high" }).split(
         /\s+/,

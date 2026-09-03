@@ -1,9 +1,9 @@
 import * as React from "react";
 
 /**
- * Coarse file categories the list shows an icon for. Deliberately small and
- * monochrome — enough to tell an image from a zip at a glance, not a full
- * mimetype atlas. Text-ish files (txt, md, json, …) fold into `document`.
+ * Coarse file categories the list shows an icon for — enough to tell an image
+ * from a zip at a glance, not a full mimetype atlas. Text-ish files (txt, md,
+ * json, …) fold into `document`.
  */
 export type FileKind =
   | "image"
@@ -74,10 +74,9 @@ const EXT_KIND: Record<string, FileKind> = {
 };
 
 /**
- * Classify a `File`. MIME type wins for the broad media buckets (it's the most
- * reliable signal when present); otherwise the filename extension decides, with
- * a generic `file` as the last resort. Many `File`s — drag-and-drop, some OSes —
- * carry an empty `type`, hence the extension fallback.
+ * Classify a `File`. MIME type wins for the broad media buckets when present;
+ * otherwise the filename extension decides, falling back to a generic `file` —
+ * many `File`s (drag-and-drop, some OSes) carry no `type` at all.
  */
 export function fileKind(file: File): FileKind {
   const type = file.type;
@@ -159,10 +158,9 @@ export interface FileTypeIconProps {
 }
 
 /**
- * A small, decorative glyph for a file's type. Sized at `1em` and drawn with
- * `currentColor`, so it scales with — and tints to — whatever chip it sits in
- * (including the dimmed `aria-disabled` foreground). `aria-hidden`: the chip's
- * filename already names the entry.
+ * A small, decorative glyph for a file's type. Sized at `1em`, drawn with
+ * `currentColor` so it scales with and tints to whatever chip it sits in.
+ * `aria-hidden`: the chip's filename already names the entry.
  */
 export function FileTypeIcon({ file, className }: FileTypeIconProps) {
   return (

@@ -64,8 +64,8 @@ describe("Card", () => {
         Body
       </Card>,
     );
-    // The header is a real <header> nested inside the <article>, so in a browser it
-    // scopes to the section rather than becoming the page `banner` landmark.
+    // A real <header> nested inside <article> scopes to the section instead of
+    // becoming the page `banner` landmark.
     const header = screen.getByRole("heading", { name: "Post" }).closest("header");
     expect(header).not.toBeNull();
     expect(header?.closest("article")).not.toBeNull();
@@ -104,8 +104,8 @@ describe("Card", () => {
     it("is a visual state on a static card — no invalid ARIA on the container", () => {
       const { rerender } = render(<Card>Pick me</Card>);
       const card = screen.getByText("Pick me");
-      // Selection is conveyed by the control inside (a checkbox); a plain
-      // container can't validly carry aria-selected/aria-pressed, so it doesn't.
+      // Selection is conveyed by the control inside (a checkbox) — a plain
+      // container can't validly carry aria-selected/aria-pressed.
       expect(card).not.toHaveAttribute("aria-selected");
       expect(card).not.toHaveAttribute("aria-pressed");
 
@@ -335,8 +335,8 @@ describe("Card", () => {
           Ship worldwide
         </Card>,
       );
-      // The header action is its own control (not part of a whole-header button):
-      // using it runs its handler and does not expand the card.
+      // The header action is its own control (not part of a whole-header
+      // button) — using it runs its handler without expanding the card.
       await user.click(screen.getByRole("button", { name: "Header action" }));
       expect(onHeaderAction).toHaveBeenCalledTimes(1);
       expect(screen.queryByText("Ship worldwide")).not.toBeInTheDocument();

@@ -8,23 +8,18 @@ import { Popover } from "../Popover";
 import { chipListItem, chipListRoot } from "./chipList.css";
 
 /**
- * One entry in a `ChipList` — the props for a single `Chip`, minus `size`
- * (the list owns sizing for every chip, so it can't be set per item). Supply a
- * stable `key` on the element when the list can reorder, otherwise the array
- * index is used.
- *
- * `intent` and `saliency` are still allowed here: they override the list-level
- * defaults for just this chip.
+ * One entry in a `ChipList` — the props for a single `Chip`, minus `size` (the
+ * list owns sizing for every chip). Supply a stable `key` when the list can
+ * reorder, otherwise the array index is used. `intent`/`saliency` are still
+ * allowed, overriding the list-level defaults for just this chip.
  */
 export type ChipListItemProps = Omit<ChipProps, "size">;
 
 /**
  * `ChipList.Item` — a **configuration element**, not a rendered one. It only
- * carries props: `ChipList` reads them off the elements you pass in `items` and
- * renders each as a `<Chip>` in its own `<li>` itself (so it can apply the
- * list's shared sizing/intent and collapse the overflow behind a "See more"
- * chip). Rendering an `Item` on its own emits nothing; it's meaningful only
- * inside a `ChipList`'s `items`.
+ * carries props: `ChipList` reads them off the `items` it's passed and renders
+ * each as a `<Chip>` itself, so it can apply shared sizing/intent and collapse
+ * overflow behind a "See more" chip. Rendering an `Item` on its own emits nothing.
  */
 export function ChipListItem(_props: ChipListItemProps): React.ReactNode {
   return null;
@@ -37,48 +32,43 @@ export type ChipListOrientation = "horizontal" | "vertical";
 export interface ChipListProps extends Omit<React.HTMLAttributes<HTMLUListElement>, "children"> {
   /**
    * The chips to render, each a `<ChipList.Item>` element (keyed by `key`,
-   * falling back to index). Falsy entries (`null` / `false` / `undefined`) are
-   * skipped, so a chip can be included conditionally inline.
+   * falling back to index). Falsy entries are skipped for conditional inclusion.
    */
   items: Array<React.ReactElement<ChipListItemProps> | null | false | undefined>;
   /**
-   * Default colour intent for every chip. A chip can override it via its own
-   * item-level `intent`. Defaults to the `Chip` default (`neutral`).
+   * Default colour intent for every chip, overridable per item. Defaults to the
+   * `Chip` default (`neutral`).
    */
   intent?: Intent;
   /**
-   * Default saliency for every chip. A chip can override it via its own
-   * item-level `saliency`. Defaults to the `Chip` default (`mid`).
+   * Default saliency for every chip, overridable per item. Defaults to the
+   * `Chip` default (`mid`).
    */
   saliency?: Saliency;
   /**
-   * Size applied to every chip — it cannot be overridden per item. Also tunes
-   * the spacing between chips (a list of `sm` chips packs tighter than `lg`).
-   * Defaults to the `Chip` default (`md`).
+   * Size applied to every chip — cannot be overridden per item. Also tunes the
+   * spacing between chips (`sm` packs tighter than `lg`). Defaults to `md`.
    */
   size?: Size;
   /** Flow the chips in a wrapping row (default) or stack them in a column. */
   orientation?: ChipListOrientation;
   /**
-   * Cap how many of the supplied chips are shown inline. When there are more
-   * items than `max`, only the first `max` render and a trailing "See more" chip
-   * is appended whose `Popover` lists the remainder. Omit to show every chip.
+   * Cap how many of the supplied chips show inline; the rest collapse behind a
+   * trailing "See more" chip whose `Popover` lists them. Omit to show every chip.
    */
   max?: number;
   /**
-   * Label for the overflow "See more" chip shown once `items` exceeds `max`.
-   * Pass a string, or a function of the hidden count for things like
-   * `(n) => `+${n}``. Defaults to `"See more"`.
+   * Label for the overflow "See more" chip. Pass a string, or a function of the
+   * hidden count (e.g. `(n) => `+${n}``). Defaults to `"See more"`.
    */
   seeMoreLabel?: string | ((remaining: number) => string);
   ref?: React.Ref<HTMLUListElement>;
 }
 
 /**
- * Render a single item as a `<Chip>` inside its `<li>`. Item-level `intent` /
- * `saliency` win over the list-level defaults; `size` always comes from the list
- * (the item type omits it, and it's applied after the spread so it can't be
- * overridden even at runtime).
+ * Render a single item as a `<Chip>` inside its `<li>`. Item-level `intent`/
+ * `saliency` win over the list defaults; `size` always comes from the list (the
+ * item type omits it, applied after the spread so it can't be overridden at runtime).
  */
 function ChipListRow({
   item,
@@ -93,7 +83,7 @@ function ChipListRow({
 }) {
   const { intent: itemIntent, saliency: itemSaliency, ...chipProps } = item.props;
   return (
-    // Same Safari role-stripping fix as the `<ul>` above.
+    // Same Safari role-stripping fix as the `<ul>` below.
     <li role="listitem" className={chipListItem}>
       <Chip
         {...chipProps}
@@ -107,16 +97,15 @@ function ChipListRow({
 
 /**
  * ChipList — renders a set of chips as a semantic list, flowed in a wrapping row
- * (default) or stacked in a column. Each chip is supplied as a `<ChipList.Item>`
- * (a `Chip`'s props); the list applies shared `intent` / `saliency` (each
- * overridable per item) and `size` (applied to every chip and not overridable,
- * which also sets the spacing between chips).
+ * (default) or stacked in a column. Each chip is supplied as a `<ChipList.Item>`;
+ * the list applies shared `intent`/`saliency` (overridable per item) and `size`
+ * (applied to every chip, not overridable, and tunes their spacing).
  *
- * Pass `max` to cap how many chips show inline: any beyond it collapse behind a
- * trailing "See more" chip whose `Popover` lists the rest.
+ * Pass `max` to cap how many chips show inline — the rest collapse behind a
+ * trailing "See more" chip whose `Popover` lists them.
  *
- * The list is a real `<ul>` (`role="list"`) of `<li>`s (`role="listitem"`), so
- * it's announced as a list with one item per chip.
+ * The list is a real `<ul>`/`<li>` structure (`role="list"`/`role="listitem"`),
+ * announced as a list with one item per chip.
  *
  * @example
  * <ChipList
@@ -154,8 +143,8 @@ export function ChipList({
     typeof seeMoreLabel === "function" ? seeMoreLabel(remaining.length) : seeMoreLabel;
 
   return (
-    // `role="list"` is set explicitly: with `list-style: none` Safari otherwise
-    // strips the implicit list role from a `<ul>`.
+    // `role="list"` is explicit — Safari strips a `<ul>`'s implicit list role
+    // once `list-style: none` is applied.
     <ul
       ref={ref}
       role="list"
@@ -166,8 +155,8 @@ export function ChipList({
         <ChipListRow key={item.key} item={item} intent={intent} saliency={saliency} size={size} />
       ))}
 
-      {/* The overflow chip: a popover trigger whose surface holds the hidden
-          chips as their own (vertical) ChipList, inheriting the same defaults. */}
+      {/* Overflow chip: a popover trigger whose surface lists the hidden chips
+          as their own (vertical) ChipList. */}
       {overflows && (
         <li role="listitem" className={chipListItem}>
           <Chip

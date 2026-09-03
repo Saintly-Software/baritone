@@ -17,10 +17,9 @@ import { useIsFieldDisabled } from "../Fieldset";
 export type TextInputSlotProps = FieldSlotProps;
 
 /**
- * Props shared by both the single-line (`<input>`) and multiline (`<textarea>`)
- * arms. The `multiline` / `size` / `rows` triad lives on the arms below so the
- * shapes can't drift: only single-line inputs take `size`, only `<textarea>`s
- * take `rows`, and the two are mutually exclusive at the type level.
+ * Props shared by the single-line (`<input>`) and multiline (`<textarea>`) arms.
+ * The `multiline`/`size`/`rows` triad lives on the arms below instead, so only
+ * single-line inputs take `size`, only `<textarea>`s take `rows`.
  */
 interface TextInputBaseProps {
   /** Validation state. `invalid` maps to negative, `valid` to positive. */
@@ -28,10 +27,9 @@ interface TextInputBaseProps {
   /** Inline help under the control, wired to its `aria-describedby`. */
   helpText?: React.ReactNode;
   /**
-   * Extra explanation surfaced in an `InfoButton` (the "i" affordance) next to the
-   * `label`. Rendered only when there's a visible `label`. Give the button an
-   * accessible name via `slotProps.info["aria-label"]` (defaults to "More
-   * information").
+   * Extra explanation shown in an `InfoButton` next to the `label`; rendered only
+   * when there's a visible `label`. Name the button via `slotProps.info["aria-label"]`
+   * (default "More information").
    */
   info?: React.ReactNode;
   /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
@@ -56,10 +54,9 @@ export interface SingleLineTextInputProps
   /** Control size. Default `md`. Mutually exclusive with `multiline` / `rows`. */
   size?: Size;
   /**
-   * Called on input, with the current string value first and the raw React
-   * change event second — the shared form-control shape. (Replaces the native
-   * event-only `onChange`; read the value from the first argument, not
-   * `event.target.value`.)
+   * Called on input with the string value first and the raw change event second
+   * — the shared form-control shape. Read the value from the first argument, not
+   * `event.target.value`.
    */
   onChange?: (value: string, event: React.ChangeEvent<HTMLInputElement>) => void;
   ref?: React.Ref<HTMLInputElement>;
@@ -77,10 +74,9 @@ export interface MultilineTextInputProps
   /** Visible rows (the textarea's starting height). Default `3`. */
   rows?: number;
   /**
-   * Called on input, with the current string value first and the raw React
-   * change event second — the shared form-control shape. (Replaces the native
-   * event-only `onChange`; read the value from the first argument, not
-   * `event.target.value`.)
+   * Called on input with the string value first and the raw change event second
+   * — the shared form-control shape. Read the value from the first argument, not
+   * `event.target.value`.
    */
   onChange?: (value: string, event: React.ChangeEvent<HTMLTextAreaElement>) => void;
   ref?: React.Ref<HTMLTextAreaElement>;
@@ -88,17 +84,15 @@ export interface MultilineTextInputProps
 
 /**
  * Discriminated on `multiline`: a single-line `<input>` (with `size`) or a
- * multiline `<textarea>` (with `rows`). TypeScript narrows off the one `multiline`
- * flag, so passing `rows` to an input — or `size` to a textarea — is a compile
- * error. Intersected with `FieldLabellingProps`, so exactly one of `label` /
- * `aria-label` / `aria-labelledby` may name the input.
+ * multiline `<textarea>` (with `rows`) — passing the wrong one is a compile error.
+ * Intersected with `FieldLabellingProps`: exactly one of `label` / `aria-label` /
+ * `aria-labelledby` may name the input.
  */
 export type TextInputProps = (SingleLineTextInputProps | MultilineTextInputProps) &
   FieldLabellingProps;
 
-// One permissive shape for internal destructuring. The *public* `TextInputProps`
-// union keeps callers honest; internally we just need every field readable in one
-// place, so we widen `multiline`/`size`/`rows`/`ref` and merge both attribute sets.
+// One permissive shape for internal destructuring, widening multiline/size/rows/ref
+// and merging both attribute sets; the public `TextInputProps` union keeps callers honest.
 type TextInputInternalProps = TextInputBaseProps &
   FieldLabellingInput &
   Omit<
@@ -121,23 +115,19 @@ type TextInputInternalProps = TextInputBaseProps &
   };
 
 /**
- * TextInput — a "form control" element type composing `Field`, which owns the
- * label / help / error layout and the ARIA wiring. Takes a `state` instead of
- * intent/saliency. Disabled uses `aria-disabled` so the field stays focusable
- * (e.g. to surface an explanatory tooltip), consistent with the rest of the
- * system.
+ * TextInput — a "form control" composing `Field`, which owns the label/help/error
+ * layout and ARIA wiring. Takes a `state` instead of intent/saliency; disabled uses
+ * `aria-disabled` so the field stays focusable (e.g. for an explanatory tooltip).
  *
- * Set `multiline` to render a `<textarea>` whose height is driven by `rows`
- * (single-line inputs take `size` instead — the two are mutually exclusive). An
- * `info` node adds an `InfoButton` next to the label, `labelPosition` inlines the
- * label, and `slotProps` re-tunes the label / helpText / info slots.
+ * Set `multiline` to render a `<textarea>` sized by `rows` (single-line inputs take
+ * `size` instead — mutually exclusive). An `info` node adds an `InfoButton` next to
+ * the label, `labelPosition` inlines the label, and `slotProps` re-tunes the label /
+ * helpText / info slots.
  *
- * Name it with exactly one of `label`, `aria-label`, or `aria-labelledby` — they
- * are mutually exclusive (see `FieldLabellingProps`).
- *
- * `onChange` follows the shared form-control shape — it's called with the string
- * value first and the raw React change event second, so read the value from the
- * first argument rather than `event.target.value`.
+ * Name it with exactly one of `label`, `aria-label`, or `aria-labelledby` (mutually
+ * exclusive). `onChange` follows the shared form-control shape: string value first,
+ * raw change event second — read the value from the first argument, not
+ * `event.target.value`.
  *
  * @example
  * <TextInput label="Email" type="email" placeholder="you@example.com" />
@@ -161,9 +151,8 @@ export function TextInput(props: TextInputProps) {
   // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
 
-  // The public API is a discriminated union; internally we read every field from
-  // one widened shape. `as unknown as` is needed because the union's `ref`
-  // (input XOR textarea) isn't directly assignable to the merged ref type.
+  // The public API is a discriminated union; internally we read from one widened
+  // shape (`as unknown as`, since the union's `ref` isn't assignable to the merged type).
   const {
     state = "neutral",
     label,
@@ -187,8 +176,7 @@ export function TextInput(props: TextInputProps) {
 
   const disabled = disabledProp || inheritedDisabled;
 
-  // Report the string value first and the raw React event second — the shared
-  // form-control shape — rather than forwarding the native event-only `onChange`.
+  // Report the string value first, raw event second — the shared form-control shape.
   const handleChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined =
     onChange && ((event) => onChange(event.target.value, event));
 
@@ -221,8 +209,7 @@ export function TextInput(props: TextInputProps) {
         required={required}
         aria-disabled={disabled || undefined}
         readOnly={disabled || readOnly}
-        // base-ui's `Field.Label` already names `Field.Control`, so this only
-        // emits an attribute for the label-less arms.
+        // `Field.Label` already names `Field.Control`; this only fills the label-less arms.
         {...fieldNameAttrs({ label, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby })}
         {...rest}
         onChange={handleChange}

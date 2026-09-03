@@ -61,10 +61,10 @@ export const IntentsAndSaliencies: Story = {
 };
 
 /**
- * Flowing inline inside `Text`, an `Icon` picks up an optical vertical alignment
- * automatically (via `--iconAlign`), so a glyph mid-sentence or at a line's end sits
- * centred against the copy instead of low on the baseline — no per-usage
- * `verticalAlign`. Shown across sizes; horizontal spacing is still the caller's.
+ * Flowing inline inside `Text`, an `Icon` picks up optical vertical alignment
+ * automatically (via `--iconAlign`), so a glyph sits centred against the copy
+ * instead of low on the baseline. Shown across sizes; horizontal spacing is
+ * still the caller's.
  */
 export const InlineInText: Story = {
   name: "Aligns inline within text",

@@ -213,8 +213,8 @@ describe("Flex.Item", () => {
       { shrink: false },
       { width: "full" as const },
       { height: "8" as const },
-      // `minWidth`/`minHeight` default to `"0"` now, so exercise the knob with a
-      // non-default value to prove it still emits a distinct class.
+      // `minWidth`/`minHeight` default to `"0"`, so use a non-default value to
+      // prove the knob still emits a distinct class.
       { minWidth: "12" as const },
       { minHeight: "fit-content" as const },
       { p: "2" as const },

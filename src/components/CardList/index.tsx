@@ -5,9 +5,9 @@ import { cx } from "../../utils/cx";
 import { cardListItem, cardListRoot } from "./cardList.css";
 
 /**
- * A CardList must be named, so screen-reader users hear what the list is. Supply
- * exactly one of `aria-label` (a literal string) or `aria-labelledby` (the id of a
- * visible heading) — the union makes providing neither a type error.
+ * A CardList must be named. Supply exactly one of `aria-label` (a literal
+ * string) or `aria-labelledby` (a heading id) — the union makes providing
+ * neither a type error.
  */
 type CardListLabel =
   | { "aria-label": string; "aria-labelledby"?: never }
@@ -25,16 +25,15 @@ export interface CardListBaseProps extends Omit<
 }
 
 /**
- * CardList props — the base props plus the required accessible name (`aria-label`
+ * CardList props — base props plus the required accessible name (`aria-label`
  * **or** `aria-labelledby`).
  */
 export type CardListProps = CardListBaseProps & CardListLabel;
 
 /**
- * CardList — renders a set of `Card`s as a semantic vertical list. Each child card
- * is wrapped in its own `<li>`, and the list is a real `<ul>` (`role="list"`) so
- * it's announced as a list with one item per card. Cards are spaced by `gap`
- * (default `4`). A name is required: pass `aria-label` or `aria-labelledby`.
+ * CardList — renders `Card`s as a semantic vertical list: each child wrapped
+ * in its own `<li>`, inside a real `<ul>` (`role="list"`). Cards are spaced by
+ * `gap` (default `4`). A name is required: `aria-label` or `aria-labelledby`.
  *
  * @example
  * <CardList aria-label="Team members" gap="3">
@@ -44,8 +43,8 @@ export type CardListProps = CardListBaseProps & CardListLabel;
  */
 export function CardList({ gap, className, children, ref, ...rest }: CardListProps) {
   return (
-    // `role="list"` is set explicitly: with `list-style: none` Safari otherwise
-    // strips the implicit list role from a `<ul>`.
+    // `role="list"` is explicit — Safari strips the implicit role when
+    // `list-style: none` is set.
     <ul ref={ref} role="list" className={cx(cardListRoot({ gap }), className)} {...rest}>
       {React.Children.map(children, (child, index) => (
         // Same Safari role-stripping fix as the `<ul>` above.

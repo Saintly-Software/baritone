@@ -4,9 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import { CardList } from "../CardList";
 import { MetricCard } from "./index";
 
-// The accessible name is composed from separate value/label elements; the space
-// between them is inserted by the accname algorithm (real browsers do, jsdom may
-// not), so allow zero-or-more whitespace.
+// The accessible name comes from separate value/label elements; the space
+// between them is inserted by the accname algorithm (jsdom may not), so allow zero-or-more whitespace.
 const namedByValueAndLabel = (value: string, label: string) => (name: string) =>
   name.includes(value) && name.includes(label);
 const valueLabelName = /^2\s*Active goals$/;

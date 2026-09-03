@@ -13,9 +13,9 @@ import { Text, type TextProps } from "../Text";
 import { dividerRoot, dividerWeightVar } from "./divider.css";
 
 /**
- * Dev-only guard: warn when `thickness` names a `--borderWidth-<name>` the active
- * theme never published, so the rule silently falls back to the `thin` width. Mirrors
- * the typographic guards in `InternalText`.
+ * Dev-only: warn when `thickness` names a `--borderWidth-<name>` the theme
+ * never published (the rule silently falls back to `thin`). Mirrors
+ * `InternalText`'s guards.
  */
 function warnIfBorderWidthUnset(el: HTMLElement | null, name: string): void {
   warnIfVarUnset(
@@ -34,17 +34,16 @@ function warnIfBorderWidthUnset(el: HTMLElement | null, name: string): void {
 export type DividerOrientation = "horizontal" | "vertical";
 
 /**
- * Where the label sits along the divider. Inline-logical (RTL-safe) for a
- * horizontal divider; `start` is the top of a vertical one.
+ * Where the label sits along the divider: inline-logical (RTL-safe) when
+ * horizontal; `start` is the top when vertical.
  */
 export type DividerLabelPosition = "start" | "center" | "end";
 
 /** Overrides for the divider's inner pieces. */
 export interface DividerSlotProps {
   /**
-   * Props for the label `Text`. Partial — you're layering onto the slot's own
-   * defaults, so `slotProps={{ label: { size: "md" } }}` re-tunes just the
-   * size and leaves the rest alone.
+   * Props for the label `Text`. Partial — layered onto the slot's own
+   * defaults, e.g. `slotProps={{ label: { size: "md" } }}`.
    */
   label?: Partial<TextProps>;
 }
@@ -58,16 +57,15 @@ export interface DividerProps
   /** Prominence of the rule within its intent. Default `low`. */
   saliency?: Saliency;
   /**
-   * Rule thickness, by name. Built-ins `thin` (default) and `thick` are always
-   * available; other names are consumer-defined via the theme's `borderWidths`
-   * option + `BorderWidthRegistry`. Resolves to `var(--borderWidth-<name>)`.
+   * Rule thickness, by name. `thin` (default) and `thick` are always
+   * available; other names come from the theme's `borderWidths` option.
+   * Resolves to `var(--borderWidth-<name>)`.
    */
   thickness?: BorderWidthName;
   /**
-   * Label sat in a gap in the rule ("OR", "Today"). A string renders as a `Text`
-   * *and* becomes the divider's accessible name; pass `aria-label` alongside any
-   * other node to name it (a `separator`'s children are presentational, so its
-   * name can only come from `aria-label` / `aria-labelledby`).
+   * Label sat in a gap in the rule ("OR", "Today"). A string renders as `Text`
+   * and becomes the divider's accessible name; for any other node, pass
+   * `aria-label` too (a `separator`'s children are presentational).
    */
   children?: React.ReactNode;
   /** Where the label sits along the divider. Default `center`. */
@@ -79,14 +77,13 @@ export interface DividerProps
 
 /**
  * Divider — a rule that separates content, built on base-ui's `Separator` for
- * the semantics (`role="separator"` plus the `aria-orientation` wiring).
+ * the semantics (`role="separator"` plus `aria-orientation`).
  *
- * The rule is coloured by `intent` × `saliency` — the same vocabulary as
- * `Chip` / `Button` — reading the `component` *border* ramp, so `neutral` / `low`
- * (the default) is the quiet hairline you want almost everywhere, and a louder
- * intent is there when the split itself is meaningful. `thickness` picks a
- * `borderWidth` — a built-in (`thin` / `thick`) or a name the active theme
- * published — and the margin props (`my`, `mx`, …) space it from its neighbours.
+ * Coloured by `intent` × `saliency` — the same vocabulary as `Chip` / `Button`
+ * — so `neutral` / `low` (the default) is the quiet hairline you want almost
+ * everywhere, with a louder intent when the split itself is meaningful.
+ * `thickness` picks a `borderWidth`; margin props (`my`, `mx`, …) space it
+ * from its neighbours.
  *
  * Pass `children` to label it: the rule breaks around the label, positioned by
  * `labelPosition`. A `vertical` divider stretches to the height of a flex row.
@@ -119,18 +116,15 @@ export function Divider({
 }: DividerProps) {
   const labelled = children != null && children !== false;
 
-  // `thickness` is an inline var, not a recipe variant, because the `borderWidth`
-  // vocabulary is open (consumer-extensible). Point the rule's weight at the
-  // `var(--borderWidth-<name>)` the active theme published; consumer `style` spreads
-  // last so it can still override.
+  // `thickness` is an inline var, not a recipe variant, since the `borderWidth`
+  // vocabulary is open. Consumer `style` spreads last so it can still override.
   const resolvedStyle = {
     ...assignInlineVars({ [dividerWeightVar]: `var(${borderWidthVarName(thickness)})` }),
     ...style,
   };
 
-  // Dev-only: warn when `thickness` names a var the theme never published. Compose an
-  // internal ref onto the node so we can read its computed style after mount; in
-  // production this is a no-op and the consumer's `ref` passes through untouched.
+  // Dev-only: compose an internal ref to read the node's computed style after
+  // mount. In production this is a no-op and the consumer's `ref` passes through.
   const nodeRef = React.useRef<HTMLDivElement | null>(null);
   const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
   React.useEffect(() => {
@@ -138,10 +132,9 @@ export function Divider({
     warnIfBorderWidthUnset(nodeRef.current, thickness);
   }, [thickness]);
 
-  // A `separator`'s children are presentational — a screen reader never reads
-  // the visible label — so a string label doubles as the accessible name. Only
-  // forward `aria-label` when we have one: base-ui's prop merge treats an
-  // explicit `undefined` as an override, and would wipe a consumer's own.
+  // A `separator`'s children are presentational, so a string label doubles as
+  // the accessible name. Only forward `aria-label` when set — base-ui's merge
+  // treats an explicit `undefined` as an override.
   const resolvedAriaLabel = ariaLabel ?? (typeof children === "string" ? children : undefined);
   const ariaProps: Record<string, string> = {};
   if (resolvedAriaLabel != null) ariaProps["aria-label"] = resolvedAriaLabel;

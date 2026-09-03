@@ -91,10 +91,7 @@ export const ItemGrow: Story = {
   ),
 };
 
-/**
- * `Flex.Item` with `shrink={false}` — the first child keeps its width while the
- * others give way in the constrained row.
- */
+/** `shrink={false}` keeps the first child's width; the others give way in the constrained row. */
 export const ItemShrink: Story = {
   render: () => (
     <Flex gap="3" p="4" style={{ maxWidth: 320, border: "1px dashed #ccc" }}>
@@ -107,10 +104,7 @@ export const ItemShrink: Story = {
   ),
 };
 
-/**
- * `width` shorthand — `fill` (100%), `fit` (fit-content), and `inherit`. Each
- * `Flex` here sits in a fixed-width parent so the difference is visible.
- */
+/** `width` shorthand — `fill`, `fit`, `inherit`, shown in a fixed-width parent for comparison. */
 export const WidthShorthand: Story = {
   render: () => (
     <Flex direction="column" gap="3" style={{ width: 320, border: "1px dashed #ccc" }} p="3">
@@ -133,9 +127,8 @@ export const WidthShorthand: Story = {
 };
 
 /**
- * `hideOn` — the banner is hidden from the `md` breakpoint (768px) upward. Each
- * listed breakpoint is its own band, so `["md", "lg", "xl"]` covers everything
- * ≥768px without leaking. Resize the preview to see it disappear on wider views.
+ * `hideOn` — hidden from the `md` breakpoint (768px) up. Each listed
+ * breakpoint is its own band, so `["md", "lg", "xl"]` covers ≥768px without leaking.
  */
 export const HideOnBreakpoint: Story = {
   render: () => (
@@ -157,10 +150,7 @@ export const HideOnBreakpoint: Story = {
   ),
 };
 
-/**
- * `showOn` — the panel is shown *only* at the `lg` breakpoint (1024px) and up.
- * Below that it is removed from layout entirely.
- */
+/** `showOn` — shown only at the `lg` breakpoint (1024px) and up; removed from layout below that. */
 export const ShowOnBreakpoint: Story = {
   render: () => (
     <Flex direction="column" gap="3">
@@ -181,10 +171,7 @@ export const ShowOnBreakpoint: Story = {
   ),
 };
 
-/**
- * Swap layouts across breakpoints — a mobile-only stack and a desktop-only row,
- * each toggled with `showOn`, so the same content re-flows at `md`.
- */
+/** Swaps a mobile-only stack for a desktop-only row via `showOn`, re-flowing at `md`. */
 export const ResponsiveSwap: Story = {
   render: () => (
     <>

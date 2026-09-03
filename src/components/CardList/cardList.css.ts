@@ -5,8 +5,7 @@ import { vars } from "../../theme/contract.css";
 
 /**
  * The list container — a vertical stack of cards. Resets the default `<ul>`
- * margin / padding / marker (this renders as a real list) and spaces the cards
- * with a `gap` from the spacing scale (default `4`).
+ * margin/padding/marker and spaces the cards with `gap` (default `4`).
  */
 export const cardListRoot = recipe({
   base: {
@@ -28,8 +27,8 @@ export const cardListRoot = recipe({
 });
 
 /**
- * Each list cell. `display: flex` so its single card stretches to the full width
- * of the row; `min-width`/`min-height: 0` per `Flex`.
+ * Each list cell. `display: flex` so its single card stretches to the row's
+ * full width; `min-width`/`min-height: 0` per `Flex`.
  */
 export const cardListItem = style({
   display: "flex",

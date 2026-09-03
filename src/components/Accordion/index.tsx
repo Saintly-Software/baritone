@@ -24,9 +24,8 @@ import {
 } from "./accordion.css";
 
 /**
- * The state an `Accordion.ItemHeader` icon render function can branch on. The
- * header resolves no presentational icon state of its own, so this is empty — the
- * render-function form is still supported for callers that need `props`.
+ * The state an `Accordion.ItemHeader` icon render function can branch on. Empty,
+ * since the header has no presentational icon state of its own.
  */
 export type AccordionItemHeaderIconState = Record<string, never>;
 
@@ -36,14 +35,13 @@ export interface AccordionItemHeaderProps {
   /** Optional supporting line beneath the title. */
   subtitle?: React.ReactNode;
   /**
-   * Leading glyph before the title. Pass a bare glyph (`icon={<ServerGlyph />}`,
-   * auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
-   * `(props, state) => …` render function for full control.
+   * Leading glyph before the title — a bare glyph (auto-wrapped in `Icon`), an
+   * explicit `<Icon>`, or a render function for full control.
    */
   icon?: IconSlot<AccordionItemHeaderIconState>;
   /**
    * Trailing element after the title, before the chevron — typically a status
-   * `<Chip>`. It sits inside the trigger button, so keep it decorative.
+   * `<Chip>`. Keep it decorative; it sits inside the trigger button.
    */
   chip?: React.ReactNode;
   /** Extra className merged onto the header content. */
@@ -54,10 +52,8 @@ export interface AccordionItemHeaderProps {
 /**
  * The header content for an `Accordion` item: a `title` with an optional
  * `subtitle`, plus an optional leading `icon` and trailing `chip`. Pass it to an
- * item's `header`. It renders only the header content — the surrounding `<h3>`,
- * the `<button>` trigger and the disclosure chevron are supplied by `Accordion`
- * itself. The whole header lives inside the trigger button, so the `icon` /
- * `chip` should be decorative (the title is the trigger's accessible name).
+ * item's `header` — the surrounding `<h3>`, trigger `<button>`, and chevron are
+ * supplied by `Accordion` itself, so keep `icon`/`chip` decorative.
  *
  * @example
  * { header: <Accordion.ItemHeader title="Shipping" subtitle="2–4 business days" />, ... }
@@ -86,8 +82,7 @@ function AccordionItemHeader({
   const iconNode = renderIcon(icon);
   return (
     <span ref={ref} className={cx(accordionHeaderContent, className)}>
-      {/* Leading group (icon + text), and the flex spacer that pushes the chip to
-          the end, so it's always rendered. */}
+      {/* Leading group (icon + text); the flex spacer pushes the chip to the end. */}
       <span className={accordionHeaderLeading}>
         {iconNode != null && <span className={accordionHeaderIcon}>{iconNode}</span>}
         <span className={accordionHeaderText}>
@@ -106,9 +101,9 @@ function AccordionItemHeader({
 
 export interface AccordionItemProps<T> {
   /**
-   * The value that identifies this item. Constrained to the set the `items` array
-   * forms, so a typo or a value outside the union/enum is a compile error — and
-   * the same `T` flows into `value` / `onChange` / `initialValue`.
+   * The value that identifies this item, constrained to the set the `items` array
+   * forms — a typo or an out-of-union value is a compile error, and the same `T`
+   * flows into `value`/`onChange`/`initialValue`.
    */
   value: T;
   /** The trigger content — typically an `<Accordion.ItemHeader />`. */
@@ -124,9 +119,8 @@ export interface AccordionItemProps<T> {
 
 interface AccordionBaseProps<T> {
   /**
-   * The items to render, each an `AccordionItemProps` (`value` + `header` +
-   * `children`, plus optional `disabled`). The union of their `value`s is the `T`
-   * that the open-value props are type-checked against.
+   * The items to render, each an `AccordionItemProps`. The union of their
+   * `value`s becomes the `T` the open-value props are type-checked against.
    */
   items: ReadonlyArray<AccordionItemProps<T>>;
   /**
@@ -187,22 +181,18 @@ export type AccordionProps<T> = AccordionBaseProps<T> &
 
 /**
  * Accordion — a vertical stack of collapsible items, built on base-ui's
- * `Accordion` (each item gets a heading + disclosure `button` + a `region` panel,
- * with the ARIA wiring and keyboard handling done for you). Each item is a
- * "surface" (like `Card`); its `header` is typically an `<Accordion.ItemHeader />`
- * and its `children` are the panel content.
+ * `Accordion` (ARIA wiring and keyboard handling included). Each item is a
+ * "surface" (like `Card`) whose `header` is typically an `<Accordion.ItemHeader />`.
  *
- * Like `Tabs`, it's **type-safe over its values**: the component is generic over
- * `T` (inferred from the `items` array — `const` so string/number literals survive
- * without `as const`), so an item `value` and the open-value props are bound to
- * the same union/enum. See https://tkdodo.eu/blog/building-type-safe-compound-components
+ * Like `Tabs`, it's type-safe over its values: generic over `T` (inferred from
+ * `items`), so an item `value` and the open-value props share one union. See
+ * https://tkdodo.eu/blog/building-type-safe-compound-components
  *
  * Two discriminated unions shape the open-state API:
- * - **`multiple`** (like `FileUpload`): omitted/`false` keeps one item open at a
- *   time, so `value` / `onChange` / `initialValue` speak a single `T | null`;
- *   `multiple` lets any number open, so they speak a `T[]`.
- * - **controlled vs uncontrolled** (like `Tabs`): pass `value` + `onChange` to
- *   drive it, or `initialValue` (or nothing) to let it manage its own state.
+ * - **`multiple`**: default keeps one item open (`T | null`); `multiple` allows
+ *   any number (`T[]`).
+ * - **controlled vs uncontrolled**: `value` + `onChange` drives it; `initialValue`
+ *   (or nothing) lets it self-manage.
  *
  * @example
  * // Single-open, uncontrolled
@@ -230,11 +220,10 @@ export type AccordionProps<T> = AccordionBaseProps<T> &
 function AccordionRoot<const T>(props: AccordionProps<T>) {
   const { items, disabled = false, "aria-label": ariaLabel, className, ref } = props;
 
-  // base-ui keeps the open set as an array regardless of `multiple`, so single
-  // mode is just "an array of at most one". Bridge both discriminated unions —
-  // `multiple` (single `T | null` ⇄ `T[]`) and controlled vs uncontrolled — onto
-  // that one array-shaped model. Controlled is detected by `onChange`, mirroring
-  // `Tabs` (so a controlled `value` of `null` / `[]` still reads as controlled).
+  // base-ui keeps the open set as an array regardless of `multiple` — single mode
+  // is just "an array of at most one". Bridge both discriminated unions onto that
+  // one array-shaped model; controlled is detected by `onChange` (mirroring
+  // `Tabs`), so a controlled `value` of `null`/`[]` still reads as controlled.
   const multiple = props.multiple === true;
   const controlled = props.onChange != null;
   const valueProps = controlled
@@ -259,14 +248,11 @@ function AccordionRoot<const T>(props: AccordionProps<T>) {
       multiple={multiple}
       {...valueProps}
       // Every toggle funnels through an item's `onOpenChange` (below), which
-      // vetoes disabled items/groups before base-ui commits — so a change that
-      // reaches here is already allowed and just needs emitting.
+      // vetoes disabled items first — a change reaching here just needs emitting.
       onValueChange={(next) => emit(next as T[])}
       aria-label={ariaLabel}
-      // Disabled is modelled with `aria-disabled` + the per-item veto, NOT
-      // base-ui's `disabled` (which natively disables each trigger, dropping it
-      // from the tab order). So a disabled accordion stays fully reachable — see
-      // AGENTS.md.
+      // Disabled uses `aria-disabled` + the per-item veto, not base-ui's `disabled`
+      // (which drops the trigger from the tab order) — see AGENTS.md.
       aria-disabled={disabled || undefined}
       className={cx(accordionRoot, disabled && accordionRootDisabled, className)}
     >
@@ -276,10 +262,8 @@ function AccordionRoot<const T>(props: AccordionProps<T>) {
           <BaseAccordion.Item
             key={String(item.value)}
             value={item.value}
-            // Veto toggling a disabled item (or any item while the group is
-            // disabled). base-ui calls this before committing and skips the
-            // commit when `cancel()` ran — so the trigger still focuses, it just
-            // won't open/close. Works the same controlled or uncontrolled.
+            // Veto toggling a disabled item/group: base-ui skips the commit when
+            // `cancel()` runs, so the trigger still focuses but won't open/close.
             onOpenChange={(_open, details) => {
               if (disabled || item.disabled) details.cancel();
             }}
@@ -291,9 +275,8 @@ function AccordionRoot<const T>(props: AccordionProps<T>) {
           >
             <BaseAccordion.Header className={accordionHeader}>
               <BaseAccordion.Trigger
-                // `aria-disabled` (not the native attribute) keeps the trigger
-                // tabbable; the per-item dim only applies when the group itself
-                // isn't disabled, so the group's dim never double-applies.
+                // `aria-disabled` keeps the trigger tabbable; the per-item dim
+                // only applies when the group itself isn't already dimmed.
                 aria-disabled={itemDisabled || undefined}
                 className={cx(accordionTrigger, focusRingRecipe({ type: "visible" }))}
               >

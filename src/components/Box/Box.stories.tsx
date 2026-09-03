@@ -73,10 +73,9 @@ export const WidthShorthand: Story = {
 
 /**
  * `hideOn` / `showOn` — responsive visibility. Each listed breakpoint is its own
- * band, so hiding is precise and never leaks upward. Here the first box is hidden
- * from `md` up and the second is shown only from `md` up. Resize the preview to
- * see the swap. (Pass a single breakpoint like `hideOn="md"` to hide just the
- * `md` band, 768–1023px.)
+ * band, so hiding is precise and never leaks upward; resize the preview to see
+ * the first box hide and the second show from `md` up. A single breakpoint like
+ * `hideOn="md"` hides just that band (768–1023px).
  */
 export const ResponsiveVisibility: Story = {
   render: () => (

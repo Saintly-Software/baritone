@@ -15,9 +15,8 @@ const CheckGlyph = () => (
 
 /**
  * Toasts aren't rendered inline — they're fired imperatively with `useToast()`
- * and shown by the viewport that `BaritoneProvider` mounts for you. Every story
- * here is wrapped in a `BaritoneProvider` (as your app root would be) and drives
- * the toasts from a button.
+ * and shown by the viewport `BaritoneProvider` mounts for you. Every story
+ * here wraps in a `BaritoneProvider` and drives the toasts from a button.
  */
 const meta: Meta = {
   title: "Components/Toast",
@@ -29,8 +28,7 @@ const meta: Meta = {
     ),
   ],
   parameters: {
-    // The toasts portal to the bottom-right of the viewport, outside the story
-    // canvas — give the panel room so they're visible in docs.
+    // Toasts portal outside the story canvas — give the panel room so they're visible in docs.
     layout: "fullscreen",
   },
 };

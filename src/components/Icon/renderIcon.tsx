@@ -5,13 +5,12 @@ import { Icon } from "./index";
 
 /**
  * The presentational props a host applies to an icon slot — spread onto the
- * wrapping `Icon` (or handed to a render function to spread). Chrome only; the
- * consumer's own props on an explicit `<Icon>` always win over these.
+ * wrapping `Icon`, or handed to a render function. Chrome only; an explicit
+ * `<Icon>`'s own props always win.
  *
- * `size` is here rather than in `state` because a few hosts intrinsically size
- * their icon (`HelpText`, `Lockup`); they pass it so the default wrap keeps that
- * size. Hosts that don't size their icon simply omit it — nothing is newly
- * applied. The render function still sees the host's size via its `state` arg.
+ * `size` lives here, not in `state`, because a few hosts (`HelpText`, `Lockup`)
+ * intrinsically size their icon and pass it to keep the default wrap at that
+ * size; others omit it. A render function still sees the size via `state`.
  */
 export interface IconRenderProps {
   className?: string;
@@ -23,8 +22,8 @@ export interface IconRenderProps {
 
 /**
  * Full-control form of an icon slot: base-ui's `(props, state)` render
- * signature. Receives the host's chrome props to spread and its resolved icon
- * state to branch on; returns the element to render.
+ * signature, receiving the host's chrome props to spread and resolved state
+ * to branch on.
  */
 export type IconRenderFn<State> = (props: IconRenderProps, state: State) => React.ReactElement;
 

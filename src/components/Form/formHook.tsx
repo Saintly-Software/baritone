@@ -20,18 +20,17 @@ import {
 } from "./adapters";
 
 /**
- * The field/form contexts every Baritone-bound form shares. Exported so advanced
- * consumers can call `createFormHook` themselves — spreading
- * {@link baritoneFieldComponents} / {@link baritoneFormComponents} in alongside
- * their own components — instead of using the ready-made {@link useAppForm}.
+ * Field/form contexts every Baritone-bound form shares. Exported for advanced
+ * consumers who call `createFormHook` themselves, spreading in
+ * {@link baritoneFieldComponents} / {@link baritoneFormComponents} instead of
+ * using {@link useAppForm}.
  */
 export const { fieldContext, formContext, useFieldContext, useFormContext } =
   createFormHookContexts();
 
-// Each pre-bound field component reads the field from context and delegates to the
-// render-prop adapter, so `<form.AppField>{(field) => <field.TextInput label=… />}`
-// needs no `value`/`onChange` wiring. The `{ ...props, field }` object is asserted
-// to the adapter's union props (built once, same reasoning as the adapters).
+// Each pre-bound field component reads the field from context and delegates to
+// the render-prop adapter, so `<form.AppField>{(field) => <field.TextInput … />}`
+// needs no `value`/`onChange` wiring.
 
 /** Props of `field.TextInput` — {@link FormTextInputProps} minus the context-supplied `field`. */
 export type TextInputFieldProps = DistributiveOmit<FormTextInputProps, "field">;
@@ -63,8 +62,8 @@ function SwitchField(props: SwitchFieldProps) {
 
 /**
  * Props of `field.CheckboxGroup` — {@link FormCheckboxGroupProps} minus `field`.
- * The composition boundary erases the item type to `unknown`; reach for the
- * generic {@link FormCheckboxGroup} render-prop adapter when you need `T` inferred.
+ * The item type erases to `unknown`; use {@link FormCheckboxGroup} directly when
+ * you need `T` inferred.
  */
 export type CheckboxGroupFieldProps = DistributiveOmit<FormCheckboxGroupProps<unknown>, "field">;
 function CheckboxGroupField(props: CheckboxGroupFieldProps) {
@@ -76,8 +75,8 @@ function CheckboxGroupField(props: CheckboxGroupFieldProps) {
 
 /**
  * Props of `field.RadioGroup` — {@link FormRadioGroupProps} minus `field`. The
- * composition boundary erases the item type to `unknown`; reach for the generic
- * {@link FormRadioGroup} render-prop adapter when you need `T` inferred.
+ * item type erases to `unknown`; use {@link FormRadioGroup} directly when you
+ * need `T` inferred.
  */
 export type RadioGroupFieldProps = DistributiveOmit<FormRadioGroupProps<unknown>, "field">;
 function RadioGroupField(props: RadioGroupFieldProps) {
@@ -100,17 +99,15 @@ function ComboboxField(props: ComboboxFieldProps) {
 export type SubmitButtonProps = DistributiveOmit<ButtonProps, "type" | "loading" | "disabled">;
 
 /**
- * A form-aware submit `Button`: `type="submit"`, spinning while the form is
- * submitting and disabled while it can't submit (invalid, or already submitting).
- * Must be rendered inside `<form.AppForm>`, which provides the form context.
+ * A form-aware submit `Button`: `type="submit"`, spinning while submitting and
+ * disabled while it can't submit. Must render inside `<form.AppForm>`.
  */
 function SubmitButton(props: SubmitButtonProps) {
   const form = useFormContext();
-  // Subscribe with a shallow comparator, not a bare object selector: react-store's
-  // default equality is referential, so `(s) => ({ canSubmit, isSubmitting })` would
-  // allocate a fresh object each emission and re-render this button on *every* form
-  // change (each keystroke). Comparing the two flags narrows it to the transitions
-  // that actually flip the button's `loading` / `disabled`.
+  // A shallow comparator, not a bare object selector: react-store's referential
+  // equality would otherwise allocate a fresh object each emission and re-render
+  // on every keystroke. Comparing the flags narrows it to transitions that
+  // actually flip `loading` / `disabled`.
   const { canSubmit, isSubmitting } = useSelector(
     form.store,
     (state) => ({ canSubmit: state.canSubmit, isSubmitting: state.isSubmitting }),
@@ -126,8 +123,8 @@ function SubmitButton(props: SubmitButtonProps) {
 }
 
 /**
- * The Baritone field components, keyed by the name they take on the `field` object
- * inside `<form.AppField>` (e.g. `field.TextInput`). Spread this into your own
+ * Baritone field components, keyed by the name they take on the `field` object
+ * inside `<form.AppField>` (e.g. `field.TextInput`). Spread into your own
  * `createFormHook({ fieldComponents: { ...baritoneFieldComponents, MyField } })`
  * to extend the set.
  */

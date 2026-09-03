@@ -12,17 +12,15 @@ const legendClass = cx(
 
 /**
  * Carries the fieldset's disabled state down to nested controls. Defaults to
- * `false` so a control outside any `Fieldset` reads "not inherited-disabled".
- * The value a `Fieldset` publishes is *cumulative* — a disabled ancestor keeps
- * its descendants disabled even inside an inner, not-explicitly-disabled
- * `Fieldset` (see `Fieldset` below).
+ * `false` outside any `Fieldset`. The published value is *cumulative* — a
+ * disabled ancestor keeps descendants disabled even inside an inner,
+ * not-explicitly-disabled `Fieldset` (see `Fieldset` below).
  */
 const FieldDisabledContext = React.createContext<boolean>(false);
 
 /**
  * Read the disabled state inherited from an enclosing `Fieldset`. Form controls
- * OR this into their own `disabled` prop so a control is disabled when *either*
- * it or a wrapping fieldset is disabled:
+ * OR this into their own `disabled` prop so either can disable the control:
  *
  * ```tsx
  * const inheritedDisabled = useIsFieldDisabled();
@@ -40,11 +38,10 @@ export interface FieldsetProps extends Omit<React.HTMLAttributes<HTMLFieldSetEle
   children?: React.ReactNode;
   /**
    * Disable the whole group. Propagates to every descendant control that reads
-   * `useIsFieldDisabled()` (they set `aria-disabled` + stay focusable) — it is
-   * *not* the native `<fieldset disabled>` attribute, which would drop the
-   * controls from the tab order. Nested fieldsets are cumulative: a disabled
-   * outer fieldset keeps its inner controls disabled regardless of the inner
-   * fieldset's own `disabled`.
+   * `useIsFieldDisabled()` (they set `aria-disabled` and stay focusable) — not
+   * the native `<fieldset disabled>` attribute, which would drop controls from
+   * the tab order. Nested fieldsets are cumulative: a disabled outer fieldset
+   * keeps inner controls disabled regardless of the inner fieldset's own value.
    */
   disabled?: boolean;
   /** Extra className merged onto the `<fieldset>`. */
@@ -53,20 +50,17 @@ export interface FieldsetProps extends Omit<React.HTMLAttributes<HTMLFieldSetEle
 
 /**
  * Fieldset — groups related controls under a shared legend and an optional
- * shared disabled context. Built on base-ui's `Fieldset` (which renders a real
- * `<fieldset>` and wires the legend as the group's accessible name), so
- * screen-reader users hear the legend prefixed to each control inside.
+ * shared disabled context. Built on base-ui's `Fieldset`, which renders a real
+ * `<fieldset>` and wires the legend as the group's accessible name.
  *
- * `disabled` fans out to every nested control through React context rather than
- * the native `<fieldset disabled>` attribute: the native attribute yanks the
- * controls out of the tab order, but our convention keeps disabled controls
- * focusable (so they can explain themselves). Controls opt in by reading
- * `useIsFieldDisabled()` and OR-ing it with their own `disabled` — every form
- * control in this package already does. Nesting composes: an inner fieldset can
- * add to, but never undo, an outer fieldset's disabled state.
+ * `disabled` fans out to nested controls through React context rather than the
+ * native `<fieldset disabled>` attribute, which would drop controls from the
+ * tab order — our convention keeps them focusable so they can explain
+ * themselves. Controls opt in via `useIsFieldDisabled()`, OR'd with their own
+ * `disabled`. Nesting composes: an inner fieldset can add to, but never undo,
+ * an outer fieldset's disabled state.
  *
- * Label the group with a `FieldsetLegend` child, or point at an existing element
- * with `aria-labelledby`.
+ * Label the group with a `FieldsetLegend` child, or `aria-labelledby`.
  *
  * @example
  * <Fieldset disabled={!editing}>
@@ -80,10 +74,9 @@ export function Fieldset({ children, disabled = false, className, ...rest }: Fie
   const groupDisabled = disabled || inheritedDisabled;
 
   return (
-    // No `disabled` on base-ui's `Fieldset.Root`: it would set the native
-    // `<fieldset disabled>` attribute, dropping every nested control out of the
-    // tab order. Disabled is published through `FieldDisabledContext` instead, and
-    // each control models it the focusable way (`aria-disabled` + `readOnly`).
+    // No `disabled` on base-ui's `Fieldset.Root` — it would set the native
+    // attribute, dropping nested controls from the tab order. Published via
+    // `FieldDisabledContext` instead; controls model it with `aria-disabled` + `readOnly`.
     <BaseFieldset.Root
       className={cx(fieldsetRoot, className)}
       data-disabled={groupDisabled || undefined}
@@ -104,9 +97,8 @@ export interface FieldsetLegendProps extends Omit<React.HTMLAttributes<HTMLDivEl
 }
 
 /**
- * FieldsetLegend — the visible heading for a `Fieldset`, automatically wired as
- * the group's accessible name by base-ui. Styled like the form-group labels
- * (neutral-high body text) and dimmed when the enclosing `Fieldset` is disabled.
+ * FieldsetLegend — the visible heading for a `Fieldset`, wired by base-ui as its
+ * accessible name. Styled like form-group labels, dimmed when disabled.
  */
 export function FieldsetLegend({ children, className, ...rest }: FieldsetLegendProps) {
   const disabled = useIsFieldDisabled();

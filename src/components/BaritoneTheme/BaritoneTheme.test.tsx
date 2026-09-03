@@ -4,8 +4,8 @@ import { vars } from "../../theme/contract.css";
 import { buildDefaultTokens } from "../../theme/defaultTokens";
 import { BaritoneTheme } from "./index";
 
-// The contract leaf is a `var(--name)` reference; strip the wrapper to get the
-// underlying custom-property name so we can read its resolved inline value.
+// Strip the `var(--name)` wrapper to get the custom-property name, to read
+// its resolved inline value.
 const operatorProp = vars.oklchOperator.slice(4, -1);
 
 const lightTokens = buildDefaultTokens("light");

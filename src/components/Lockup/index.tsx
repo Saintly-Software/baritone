@@ -17,8 +17,8 @@ export interface LockupIconState {
 /**
  * Props for the Lockup's title slot. It layers onto the title's own defaults
  * (high-saliency, `lg` size). Set `level` to render the title as a semantic
- * `Heading` (`h1`–`h6`) instead of a `Text` — a pure semantics switch, so the
- * visual size still comes from `size` and the lockup looks the same either way.
+ * `Heading` (`h1`–`h6`) instead of a `Text` — a pure semantics switch; the
+ * visual size still comes from `size`.
  */
 export interface LockupTitleSlotProps extends Omit<
   React.HTMLAttributes<HTMLElement>,
@@ -43,11 +43,10 @@ export interface LockupTitleSlotProps extends Omit<
 }
 
 /**
- * Props forwarded into each of the Lockup's three slots. Every field is partial:
- * you're layering overrides onto the slot's own defaults, so `slotProps={{ title:
- * { size: "xl" }, icon: { size: "lg" } }}` just re-sizes those pieces while
- * the rest of the lockup stays as-is. To replace a slot's content entirely, use
- * the `slots` prop instead.
+ * Props forwarded into each of the Lockup's three slots. Every field is
+ * partial — you're layering overrides onto the slot's own defaults, e.g.
+ * `slotProps={{ title: { size: "xl" } }}` just re-sizes that piece. To replace
+ * a slot's content entirely, use `slots` instead.
  */
 export interface LockupSlotProps {
   /** Props for the title `Text` (or `Heading`, when `title.level` is set). */
@@ -59,11 +58,10 @@ export interface LockupSlotProps {
 }
 
 /**
- * ReactNode overrides for the Lockup's three slots. A slot given here is rendered
- * verbatim, replacing the primitive the lockup would otherwise build from the
- * top-level `icon` / `title` / `subtitle` props (and bypassing that slot's
- * `slotProps`). Use this when you need full control over a slot's markup;
- * otherwise prefer the top-level content props with `slotProps` tweaks.
+ * ReactNode overrides for the Lockup's three slots. A slot given here renders
+ * verbatim, replacing the primitive the lockup would build from the top-level
+ * `icon` / `title` / `subtitle` props (bypassing that slot's `slotProps`). Use
+ * only when you need full control over a slot's markup.
  */
 export interface LockupSlots {
   /** Replaces the wrapped icon. */
@@ -108,9 +106,8 @@ export interface LockupProps extends Omit<React.HTMLAttributes<HTMLElement>, "ti
 /** Build the title node — a `Heading` when `level` is set, otherwise a `Text`. */
 function renderTitle(title: React.ReactNode, slot: LockupTitleSlotProps | undefined) {
   const { level, size, weight, ...rest } = slot ?? {};
-  // A pure semantics switch: both branches must render identically, so they share
-  // the same high-saliency, semibold-by-default title styling. `Heading` would
-  // otherwise apply its per-level weight, diverging from the `Text` branch.
+  // A pure semantics switch: both branches share styling, since `Heading`
+  // would otherwise apply its per-level weight and diverge from `Text`.
   const shared = { saliency: "high" as const, size: size ?? "lg", weight: weight ?? "semibold" };
   if (level != null) {
     return (
@@ -129,11 +126,10 @@ function renderTitle(title: React.ReactNode, slot: LockupTitleSlotProps | undefi
 /**
  * Lockup — an icon locked up with a title and optional subtitle, after the logo
  * design idea of a fixed "lockup" of mark and wordmark. A flexible media object:
- * the mark sits inline with the stacked text, each of the three pieces is
- * optional, and each renders as a system primitive (`Icon`, `Text`/`Heading`)
- * you can tune through `slotProps` or replace wholesale through `slots`. Colours
- * are inherited from the surrounding surface, so a lockup drops into a coloured
- * `component`/`surface` and matches automatically.
+ * each of the three pieces is optional, and each renders as a system primitive
+ * (`Icon`, `Text`/`Heading`) you can tune via `slotProps` or replace via `slots`.
+ * Colours are inherited from the surrounding surface, so a lockup dropped into a
+ * coloured `component`/`surface` matches automatically.
  */
 export function Lockup({
   title,

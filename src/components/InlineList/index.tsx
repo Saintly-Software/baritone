@@ -10,9 +10,8 @@ export interface InlineListProps
   /**
    * The delimiter drawn between items: a string (the default `·`) or any node.
    * A falsy value (`null` / `false` / `""`) separates items with the `gap`
-   * alone. It's rendered `aria-hidden` and `inert` (so also non-selectable), so
-   * the row reads — and copies — as just its items, and an interactive delimiter
-   * node can't take focus or clicks.
+   * alone. Rendered `aria-hidden` and `inert`, so the row reads — and copies —
+   * as just its items, and an interactive delimiter node can't take focus or clicks.
    */
   separator?: React.ReactNode;
   /** Gap between items (and each separator), from the spacing scale. Default `2`. */
@@ -32,25 +31,20 @@ export interface InlineListProps
  * it runs out of room. The classic "byline" / metadata line:
  * `12 lines · 340 words · Updated 2h ago`.
  *
- * It owns only the *mechanics* of a separated inline flow, so it stays reusable
- * wherever that shape appears (a card's metadata, an article header, a list
- * row): it interleaves the `separator` between items, spaces everything with
- * `gap`, and wraps. Two details make it safe to hand any content:
- *   - **Falsy children are dropped** (via `React.Children.toArray` +
- *     `filter(Boolean)`, so `0` / `""` go too), so a conditional item —
- *     `{isLyrics && <Text>…</Text>}` or `{count && <Text>…</Text>}` — never
- *     leaves a dangling separator when it's absent.
+ * It interleaves the `separator` between items, spaces everything with `gap`,
+ * and wraps. Two details make it safe to hand any content:
+ *   - **Falsy children are dropped** (`0` / `""` included), so a conditional
+ *     item like `{count && <Text>…</Text>}` never leaves a dangling separator.
  *   - **Separators are `aria-hidden`, `inert`, and non-selectable**, so
- *     assistive tech reads (and a copy-paste yields) just the items, never the
- *     dots — and an interactive delimiter node can't steal focus or clicks.
+ *     assistive tech and copy-paste see just the items, never the dots.
  *
  * It deliberately does *not* use list semantics (`ul` / `li`): a metadata line
  * is decorative separation, and announcing "list, 3 items" would be noise. For a
  * genuine list, reach for `List`.
  *
- * Typography is inherited, not imposed — the separator tracks whatever text
- * context the list sits in. For the common muted metadata line, style the items
- * (e.g. `<Text size="sm" saliency="low">`) and pass a matching `separator`.
+ * Typography is inherited, not imposed. For the common muted metadata line,
+ * style the items (e.g. `<Text size="sm" saliency="low">`) and pass a matching
+ * `separator`.
  *
  * @example
  * <InlineList>
@@ -70,12 +64,10 @@ export function InlineList({
   ref,
   ...rest
 }: InlineListProps) {
-  // Falsy children dropped, including toArray's `0`/`""`/`NaN` leaves — see
-  // doc above.
+  // Falsy children dropped, including toArray's `0`/`""`/`NaN` leaves.
   const items = React.Children.toArray(children).filter(Boolean);
-  // Nothing to lay out — render no element at all, rather than an empty box that
-  // would still apply its margins (`mx` / `my` / …) as phantom spacing. Common
-  // for a metadata line whose every item is conditional.
+  // Render nothing rather than an empty box that would still apply its margins
+  // as phantom spacing — common for a metadata line whose every item is conditional.
   if (items.length === 0) return null;
   return (
     <Flex
@@ -91,8 +83,8 @@ export function InlineList({
         const key = React.isValidElement(child) && child.key != null ? child.key : index;
         return (
           <React.Fragment key={key}>
-            {/* Ternary, not `&&`: `separator && …` would leak a falsy `separator`
-                (e.g. `0`) as text. aria-hidden/inert — see `separator` doc above. */}
+            {/* Ternary, not `&&`: a falsy `separator` (e.g. `0`) would leak
+                through `&&` as text. */}
             {index > 0 && separator ? (
               <span aria-hidden="true" inert>
                 {separator}
