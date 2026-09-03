@@ -4,13 +4,12 @@ import { InternalGenericButtonAnchor } from "./index";
 /**
  * `InternalGenericButtonAnchor` is not part of the public API — it's the shared
  * primitive behind "this thing might be a link, a button, or nothing". It renders
- * whichever element the props imply and carries **no styling of its own**, so the
- * stories add a little inline CSS purely so the elements are visible.
+ * whichever element the props imply and carries **no styling of its own**; the
+ * stories add inline CSS purely so the elements are visible.
  *
- * Which element it renders (first match wins): `render` → the router link element
- * (internal navigation); `href` → an external `<a>`; neither → a `<button>`. A
- * disabled *link* collapses to an inert `<div>`; a disabled *button* keeps
- * `aria-disabled` (so it stays focusable) and swallows its click.
+ * Which element it renders (first match wins): `render` → the router link element;
+ * `href` → an external `<a>`; neither → a `<button>`. A disabled *link* collapses to
+ * an inert `<div>`; a disabled *button* keeps `aria-disabled` (stays focusable) and swallows its click.
  */
 const meta: Meta<typeof InternalGenericButtonAnchor> = {
   title: "Internal/InternalGenericButtonAnchor",
@@ -53,8 +52,7 @@ export const AsExternalLink: Story = {
 
 /**
  * `render` → the consumer's router link drives navigation while the primitive
- * merges the shared props onto it. Here a plain `<a>` stands in for a real
- * `<RouterLink>` / `<NextLink>`.
+ * merges the shared props onto it. A plain `<a>` stands in for a real `<RouterLink>`/`<NextLink>`.
  */
 export const AsInternalLink: Story = {
   args: {

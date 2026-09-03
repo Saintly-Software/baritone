@@ -98,14 +98,11 @@ function warnIfLineHeightUnset(el: HTMLElement | null, name: string): void {
 
 /**
  * `InternalText` — the shared typography primitive behind `Text` and `Heading`.
- * It owns the whole class composition — colour (`textIntentRecipe`), the shared
- * typography base + italics (`textSizeRecipe` / `typographyDecoration`), and the
- * text-layout + spacing atoms — plus the base-ui `render` polymorphism. The
- * open-ended typographic knobs (`size`, `weight`, `lineHeight`, `font`,
- * `letterSpacing`) resolve through the `--text…` inline vars to a
- * `var(--<x>-<name>)` the active theme published. The two public components differ
- * only in the values they feed in (default element, default `size`/`weight`/
- * `saliency`, and their semantic tag), so they resolve those and delegate here.
+ * It owns the class composition (colour, typography base, spacing atoms) plus
+ * the base-ui `render` polymorphism. The open-ended typographic knobs (`size`,
+ * `weight`, `lineHeight`, `font`, `letterSpacing`) resolve through `--text…`
+ * inline vars to a `var(--<x>-<name>)` the active theme published. `Text` and
+ * `Heading` differ only in the values they feed in, then delegate here.
  */
 export interface InternalTextProps
   extends
@@ -114,10 +111,9 @@ export interface InternalTextProps
     PaddingProps,
     TypographyAtomProps {
   /**
-   * Typography size, by name — drives `font-size` and, unless a `lineHeight` is
+   * Typography size, by name. Drives `font-size` and, unless `lineHeight` is
    * given, its paired default line-height. Built-ins `xs`…`9xl` are always
-   * available; other names are consumer-defined via the theme's `sizes` option +
-   * `FontSizeRegistry`. Resolves to `var(--fontSize-<name>)`.
+   * available; other names are consumer-defined via the theme's `sizes` option.
    */
   size: FontSizeName;
   /** Override the inherited colour with this intent (resolves saliency to `mid`). */
@@ -126,17 +122,16 @@ export interface InternalTextProps
   saliency?: Saliency;
   /**
    * Font weight, by name. Built-ins `default`/`semibold`/`bold`/`superbold` are
-   * always available; other names are consumer-defined via the theme's `weights`
-   * option + `FontWeightRegistry`. Resolves to `var(--fontWeight-<name>)`.
+   * always available; other names are consumer-defined via the theme's
+   * `weights` option.
    */
   weight?: FontWeightName;
   /** Render the text in italics. */
   italic?: TypographyDecorationVariants["italic"];
   /**
    * Font family, by name. Built-ins `sans` (default) and `mono` are always
-   * available; any other name must be published by the active theme (its `fonts`
-   * option emits a `--font-<name>` custom property) and declared on `FontRegistry`
-   * for type-safety. Resolves to `var(--font-<name>)`.
+   * available; any other name must be published by the active theme's `fonts`
+   * option and declared on `FontRegistry` for type-safety.
    */
   font?: FontName;
   /** The tag rendered when `render` isn't supplied. */
@@ -182,15 +177,13 @@ export function InternalText({
   pl,
   ...rest
 }: InternalTextProps) {
-  // Point the `--text…` vars at the theme's `var(--<x>-<name>)`. These are inline
-  // vars, not variant classes, because every one of these vocabularies is
-  // open-ended and consumer-defined — see the `theme/*` modules. `size` is always
-  // present, so `--textSize` and its paired default `--textLineHeight` are always
-  // set; the leading comes from the size's own `--sizeLineHeight-<size>` namespace by
-  // default, or the `lineHeight` prop's `--lineHeight-<name>` when set (distinct
-  // namespaces, so a size and a leading may share a name). `weight`/`font`/
-  // `letterSpacing` set their vars only when passed. Consumer `style` spreads last so
-  // it can still override.
+  // Point the `--text…` vars at the theme's `var(--<x>-<name>)`. These are
+  // inline vars, not variant classes, since every vocabulary here is open-ended
+  // and consumer-defined (see `theme/*`). `size` is always set; its leading
+  // comes from the size's own `--sizeLineHeight-<size>` by default, or
+  // `lineHeight`'s `--lineHeight-<name>` when set (distinct namespaces, so they
+  // may share a name). `weight`/`font`/`letterSpacing` set their vars only when
+  // passed. Consumer `style` spreads last so it can still override.
   const resolvedStyle = {
     ...assignInlineVars({
       [textSizeVar]: `var(${fontSizeVarName(size)})`,
@@ -207,12 +200,11 @@ export function InternalText({
     ...style,
   };
 
-  // Dev-only: warn when a knob points at a var the theme never published. Compose
-  // an internal ref onto the node so we can read its computed style after mount; in
-  // production this is a no-op and the consumer's `ref` passes through untouched.
-  // `lineHeight` is only checked when the prop is set — a size-derived leading that
-  // falls back to `md` (a consumer size with no paired line-height) is intended, not
-  // a mistake.
+  // Dev-only: warn when a knob points at a var the theme never published.
+  // Composes an internal ref to read the node's computed style after mount; a
+  // no-op in production, so the consumer's `ref` passes through untouched.
+  // `lineHeight` is only checked when set — a size-derived leading falling
+  // back to `md` is intended, not a mistake.
   const nodeRef = React.useRef<HTMLElement | null>(null);
   const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
   React.useEffect(() => {

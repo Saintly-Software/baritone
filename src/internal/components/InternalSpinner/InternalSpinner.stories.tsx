@@ -2,12 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { InternalSpinner } from "./index";
 
 /**
- * `InternalSpinner` is not part of the public API — it's the shared pure-CSS ring
- * spinner the system's `loading` states compose from (`Button`, `Chip`,
- * `Drawer`, `Modal`). It's sized in `em` and drawn in `currentColor`, so it
- * inherits font-size and colour from wherever it's placed; positioning is the
- * host's job. `size` picks the ring footprint (`sm` for inline controls, `lg`
- * for overlay surfaces).
+ * `InternalSpinner` is not part of the public API — it's the shared pure-CSS
+ * ring spinner the system's `loading` states compose from (`Button`, `Chip`,
+ * `Drawer`, `Modal`). Sized in `em` and drawn in `currentColor`, so it
+ * inherits font-size and colour from wherever it's placed; positioning is
+ * the host's job. `size` picks the footprint (`sm` inline, `lg` overlay).
  */
 const meta: Meta<typeof InternalSpinner> = {
   title: "Internal/InternalSpinner",

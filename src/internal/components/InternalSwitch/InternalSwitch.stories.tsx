@@ -4,10 +4,10 @@ import { FORM_STATES, SIZES } from "../../../theme/constants";
 import { InternalSwitch } from "./index";
 
 /**
- * `InternalSwitch` is not part of the public API — it's a presentational "fake
- * switch" (no `<input>`) the system composes from. These stories document the
- * look across states and show the accessible composition pattern: slot a real,
- * visually-hidden control inside so `:focus-within` can light the ring.
+ * `InternalSwitch` is internal — a presentational "fake switch" (no `<input>`)
+ * the system composes from. Stories show the look across states and the
+ * accessible pattern: slot a real, visually-hidden control inside so
+ * `:focus-within` lights the ring.
  */
 const meta: Meta<typeof InternalSwitch> = {
   title: "Internal/InternalSwitch",
@@ -132,10 +132,9 @@ const visuallyHidden: React.CSSProperties = {
 };
 
 /**
- * The intended accessible composition: a `<label>` wraps a visually-hidden real
- * `<input role="switch">` (which owns the state, keyboard, and accessible name)
- * plus the track. Tab to it to see the `:focus-within` ring; click the label to
- * toggle.
+ * The intended accessible composition: a `<label>` wraps a visually-hidden
+ * real `<input role="switch">` (owning state, keyboard, and accessible name)
+ * plus the track. Tab to see the `:focus-within` ring; click the label to toggle.
  */
 export const AccessibleComposition: Story = {
   render: () => {

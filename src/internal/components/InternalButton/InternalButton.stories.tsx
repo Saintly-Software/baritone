@@ -3,16 +3,14 @@ import * as React from "react";
 import { InternalButton, type InternalButtonHtmlAttrs } from "./index";
 
 /**
- * `InternalButton` is not part of the public API — it's the engine behind the
- * public `Button`, which is a thin wrapper that just forwards its props as
- * `consumerProps`. The look and the full set of consumer controls are documented
- * under `Components/Button`; these stories focus on the extra `htmlAttrs` seam.
+ * `InternalButton` is not public API — it's the engine behind `Button`, a thin
+ * wrapper that forwards its props as `consumerProps`. The look and controls are
+ * documented under `Components/Button`; these stories focus on the `htmlAttrs` seam.
  *
- * `htmlAttrs` is how the overlay components (`Drawer`, `Modal`, `Popover`) reuse
- * a real button as their trigger/close: each base-ui `Trigger`/`Close` passes the
- * props it computed (`onClick`, `aria-haspopup`, `data-*`, `ref`, …) straight in
- * via its `render` callback, and they're merged onto the button — handlers
- * chained, classes/refs joined, with the consumer's own props winning.
+ * `htmlAttrs` is how overlay components (`Drawer`, `Modal`, `Popover`) reuse a
+ * real button as their trigger/close: each base-ui `Trigger`/`Close` passes its
+ * computed props (`onClick`, `aria-haspopup`, `data-*`, `ref`, …) via `render`,
+ * merged onto the button — handlers chained, classes/refs joined, consumer props winning.
  */
 const meta: Meta<typeof InternalButton> = {
   title: "Internal/InternalButton",
@@ -39,14 +37,12 @@ export const Playground: Story = {
 
 /**
  * The `htmlAttrs` seam in action. A mock "host" supplies a toggle `onClick`
- * plus the `data-state` / `aria-expanded` attributes a base-ui trigger would —
- * they merge onto the same button that carries the consumer's intent and label.
+ * plus the `data-state`/`aria-expanded` a base-ui trigger would, merged onto the same button.
  */
 export const WithHostAttributes: Story = {
   render: () => {
     const [open, setOpen] = React.useState(false);
-    // A stand-in for the attribute bag a base-ui `Trigger` would compute; the
-    // state-derived `data-state` isn't statically known, hence the cast.
+    // Stand-in for the attribute bag a base-ui `Trigger` would compute; `data-state` is state-derived, hence the cast.
     const hostAttrs = {
       onClick: () => setOpen((v) => !v),
       "aria-haspopup": "menu",

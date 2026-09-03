@@ -2,11 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { InternalChip } from "./index";
 
 /**
- * `InternalChip` is not part of the public API — it's the engine behind `Link`'s
- * `appearance="chip"`, and it shares the chip look (`chipBoxClassName`) with the
- * public `Chip` so the two never drift. The full set of consumer controls is
- * documented under `Components/Link` (the chip stories); these stories just show
- * the internal in isolation.
+ * `InternalChip` is not part of the public API — it's the engine behind
+ * `Link`'s `appearance="chip"`, sharing the chip look (`chipBoxClassName`)
+ * with the public `Chip` so the two never drift. Consumer controls are
+ * documented under `Components/Link`; these stories just show the internal
+ * in isolation.
  */
 const meta: Meta<typeof InternalChip> = {
   title: "Internal/InternalChip",

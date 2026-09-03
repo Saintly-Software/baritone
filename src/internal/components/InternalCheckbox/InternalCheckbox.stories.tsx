@@ -4,10 +4,10 @@ import { FORM_STATES, SIZES } from "../../../theme/constants";
 import { InternalCheckbox } from "./index";
 
 /**
- * `InternalCheckbox` is not part of the public API — it's a presentational "fake
- * checkbox" (no `<input>`) the system composes from. These stories document the
- * look across states and show the accessible composition pattern: slot a real,
- * visually-hidden control inside so `:focus-within` can light the ring.
+ * `InternalCheckbox` is a presentational "fake checkbox" (no `<input>`), not
+ * part of the public API. These stories show the look across states and the
+ * accessible pattern: slot a real, visually-hidden control inside so
+ * `:focus-within` lights the ring.
  */
 const meta: Meta<typeof InternalCheckbox> = {
   title: "Internal/InternalCheckbox",

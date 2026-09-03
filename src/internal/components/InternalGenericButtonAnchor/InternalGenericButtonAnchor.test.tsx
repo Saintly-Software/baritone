@@ -5,10 +5,10 @@ import { describe, expect, it, vi } from "vitest";
 import { InternalGenericButtonAnchor } from "./index";
 
 /**
- * The primitive's whole job is element-selection + disabled semantics, so the
- * tests are organised by the four things it can render (button, external link,
- * internal/router link, disabled-link div) plus the AGENTS.md focusable-disabled
- * convention.
+ * The primitive's job is element-selection + disabled semantics, so tests are
+ * organised by the four things it can render (button, external link,
+ * internal/router link, disabled-link div) plus the AGENTS.md
+ * focusable-disabled convention.
  */
 describe("InternalGenericButtonAnchor", () => {
   describe("button (no href / no render)", () => {
@@ -125,10 +125,9 @@ describe("InternalGenericButtonAnchor", () => {
       expect(screen.getByText("Settings").tagName).toBe("DIV");
     });
 
-    // An icon-only disabled link's only child is an aria-hidden glyph, so its name
-    // lives in `aria-label`. That attribute is prohibited on the role-less inert
-    // <div> (ARIA generic role; axe `aria-prohibited-attr`), so the primitive
-    // re-exposes it as visually-hidden text content instead of forwarding it.
+    // An icon-only disabled link's name lives in `aria-label`, which is
+    // prohibited on the role-less inert <div> (axe `aria-prohibited-attr`), so
+    // the primitive re-exposes it as visually-hidden text instead.
     it("re-exposes a disabled link's aria-label as text content, not a prohibited attribute", () => {
       render(
         <InternalGenericButtonAnchor href="/x" disabled aria-label="Back">
@@ -158,8 +157,8 @@ describe("InternalGenericButtonAnchor", () => {
       expect(onClick).not.toHaveBeenCalled();
     });
 
-    // The AGENTS.md convention: a disabled control stays reachable so it can
-    // explain itself. A disabled button must still be tabbable.
+    // AGENTS.md convention: a disabled control stays reachable so it can
+    // explain itself.
     it("keeps a disabled button in the tab order (aria-disabled, not native disabled)", async () => {
       const user = userEvent.setup();
       render(<InternalGenericButtonAnchor disabled>Save</InternalGenericButtonAnchor>);

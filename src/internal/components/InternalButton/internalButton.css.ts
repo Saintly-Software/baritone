@@ -6,10 +6,10 @@ import { active, hover } from "../../../theme/oklch";
 import { focusRingColorVar, iconColorVar } from "../../../styles/vars.css";
 
 /**
- * Button-specific layout that sits on top of the shared `component` recipe
- * (`componentTypographyRecipe` + `componentIntentRecipe`). The recipe owns the
- * box, colour, size, and focus ring; everything here is about the loading
- * overlay. The disabled-explanation tooltip surface lives in `InternalTooltip`.
+ * Button-specific layout on top of the shared `component` recipe
+ * (`componentTypographyRecipe` + `componentIntentRecipe`), which owns the box,
+ * colour, size, and focus ring — everything here is the loading overlay. The
+ * disabled-explanation tooltip surface lives in `InternalTooltip`.
  */
 
 /** Establishes the positioning context for the absolutely-centred spinner. */
@@ -18,13 +18,11 @@ export const buttonBase = style({
 });
 
 /**
- * Icon-only square treatment for `<Button icon aria-label>`. The shared
- * `componentTypographyRecipe` sizes a button for a text label (a fixed `height`
- * plus horizontal `paddingInline`), leaving it wider than tall. An icon-only
- * button is a single centred glyph, so zero out the inline padding and pin a 1:1
- * aspect ratio — the button becomes a square of side = the recipe's `height`, at
- * every `size`. Merged last (via `className`) so it wins the `paddingInline`.
- * Mirrors `infoButtonSquare` / `toggleButtonSquare`.
+ * Icon-only square treatment for `<Button icon aria-label>`. `componentTypographyRecipe`
+ * sizes a button for a text label (fixed `height` + horizontal `paddingInline`),
+ * leaving it wider than tall; this zeroes the inline padding and pins a 1:1 aspect
+ * ratio so the button becomes a square of side = the recipe's `height`. Merged last
+ * (via `className`) so it wins the `paddingInline`. Mirrors `infoButtonSquare` / `toggleButtonSquare`.
  */
 export const buttonSquare = style({
   paddingInline: 0,
@@ -32,9 +30,9 @@ export const buttonSquare = style({
 });
 
 /**
- * Wraps the start icon / label / end icon as a single flex row so the spinner
- * can overlay the whole group. The row carries its own `gap` (the recipe's gap
- * sits between the wrapper and the out-of-flow spinner, so it's a no-op).
+ * Wraps the start icon / label / end icon as a single flex row so the spinner can
+ * overlay the whole group. Carries its own `gap` (the recipe's gap, between the
+ * wrapper and the out-of-flow spinner, is a no-op).
  */
 export const buttonContent = style({
   display: "inline-flex",
@@ -44,9 +42,8 @@ export const buttonContent = style({
 });
 
 /**
- * Loading: hide the label/icons with `opacity` (not `visibility`/`display`) so
- * the button keeps its width *and* keeps its accessible name — the spinner is
- * purely decorative, so the text must still name the control while busy.
+ * Loading: hides the label/icons with `opacity` (not `visibility`/`display`) so the
+ * button keeps its width and its accessible name — the spinner is decorative only.
  */
 export const buttonContentLoading = style({
   opacity: 0,
@@ -71,15 +68,13 @@ const textFg = createVar();
 
 /**
  * `appearance="text"` recipe — the hyperlink look. A `<Button appearance="text">`
- * drops the component chrome (background, border, control height, padding) and
- * renders as underlined text whose colour comes from the `text.color` tokens, so
- * it reads like a `Link` but is a real `<button>` driven by `intent`/`saliency`.
- * Typography is supplied separately by `textSizeRecipe` (the `variant` knob).
+ * drops the component chrome (background, border, height, padding) and renders as
+ * underlined text coloured from `text.color` tokens — reads like a `Link` but is a
+ * real `<button>` driven by `intent`/`saliency`. Typography comes from `textSizeRecipe`.
  *
- * Colour is stored in `--textFg` so hover/active can derive from it with the same
- * oklch relative-colour math the `component`/`Link` schemes use, and it's mirrored
- * to `--iconColor` (via `currentColor`) so a `startIcon`/`endIcon` tracks the text
- * — including through the hover/active shift. Disabled dims to the shared control
+ * Colour is stored in `--textFg` so hover/active can derive from it via the same
+ * oklch math as `component`/`Link`, and mirrors to `--iconColor` so a `startIcon`/
+ * `endIcon` tracks the text through the shift. Disabled dims to the shared control
  * opacity rather than a token, since `text.color` has no disabled shade.
  */
 export const textButtonRecipe = recipe({

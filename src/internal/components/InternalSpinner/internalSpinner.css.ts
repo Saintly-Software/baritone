@@ -6,16 +6,15 @@ const spin = keyframes({
 });
 
 /**
- * Pure-CSS ring spinner. Sized in `em` so it tracks the host's font-size, and
- * `currentColor` so it matches the resolved foreground (dimmed wherever the host
- * is `aria-disabled`). The spin is an essential progress indicator, so it is
- * *not* gated behind `prefers-reduced-motion`; only the duration is eased back
- * there.
+ * Pure-CSS ring spinner. Sized in `em` to track the host's font-size, and
+ * `currentColor` to match the resolved foreground (dimmed wherever the host
+ * is `aria-disabled`). The spin is an essential progress indicator, so it's
+ * *not* gated behind `prefers-reduced-motion` — only the duration eases back.
  *
  * Shared by every loading state that needs a busy indicator; the host owns
- * positioning. The `size` picks the ring's footprint: `sm` for the inline
- * controls (`Button`, `Chip`), `lg` for the larger overlay surfaces (`Drawer`,
- * `Modal`), which also thickens the stroke to match.
+ * positioning. `size` picks the footprint: `sm` for inline controls
+ * (`Button`, `Chip`), `lg` for larger overlay surfaces (`Drawer`, `Modal`),
+ * which also thickens the stroke.
  */
 export const internalSpinnerRecipe = recipe({
   base: {

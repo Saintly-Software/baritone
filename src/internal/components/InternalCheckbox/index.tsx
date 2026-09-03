@@ -12,10 +12,7 @@ export interface InternalCheckboxProps extends Omit<
   React.HTMLAttributes<HTMLSpanElement>,
   "children"
 > {
-  /**
-   * Visual state. `true` shows a check, `"indeterminate"` shows a dash, `false`
-   * (default) shows an empty box.
-   */
+  /** Visual state: `true` shows a check, `"indeterminate"` a dash, `false` (default) an empty box. */
   checked?: InternalCheckboxState;
   /** Dim the box and suppress hover/press. Purely visual — see the note below. */
   disabled?: boolean;
@@ -25,9 +22,8 @@ export interface InternalCheckboxProps extends Omit<
   state?: FormState;
   /**
    * Optional focusable control to slot inside the box (e.g. a visually-hidden
-   * `<input type="checkbox">`). Because the ring is drawn with `:focus-within`,
-   * tabbing to a focusable child lights the ring on the box — the box itself is
-   * never a tab stop.
+   * `<input type="checkbox">`). The ring is drawn with `:focus-within`, so
+   * tabbing to a focusable child lights it — the box itself is never a tab stop.
    */
   children?: React.ReactNode;
   ref?: React.Ref<HTMLSpanElement>;
@@ -71,22 +67,19 @@ function DashGlyph() {
 }
 
 /**
- * InternalCheckbox — a "fake checkbox": a presentational box that *looks* like a
- * checkbox (checked / indeterminate / unchecked, plus disabled, hover, press,
- * and a focus ring) without being an `<input>`. It owns no state and no
- * behaviour, so it can be reused anywhere a checkbox affordance is needed — a
- * real form field, a selectable list/menu row, a "select all" header, etc.
+ * InternalCheckbox — a "fake checkbox": a presentational box that *looks* like
+ * a checkbox (checked / indeterminate / unchecked, plus disabled, hover, press,
+ * focus ring) without being an `<input>`. It owns no state or behaviour, so it
+ * can be reused anywhere a checkbox affordance is needed.
  *
- * **It is not focusable and carries no ARIA on its own.** The box is decorative;
- * whatever wraps or fills it is responsible for semantics and keyboard handling.
- * For an actual, accessible checkbox, the consumer slots a focusable control
- * inside — typically a visually-hidden `<input type="checkbox">` — and the box's
- * `:focus-within` ring lights up when that control is tabbed to. (This is why
- * the box itself is never a tab stop.)
+ * **Not focusable and carries no ARIA on its own** — whatever wraps it owns
+ * semantics and keyboard handling. For an accessible checkbox, slot a focusable
+ * control inside (typically a visually-hidden `<input type="checkbox">`); the
+ * box's `:focus-within` ring lights up when that control is tabbed to, which is
+ * why the box itself is never a tab stop.
  *
- * **Internal by design — not exported from the package.** Like `InternalTooltip`,
- * it's a building block the system composes from; a public, fully-wired
- * `Checkbox` would build on top of it.
+ * **Internal by design, not exported** — like `InternalTooltip`, it's a
+ * building block a public `Checkbox` would compose from.
  *
  * @example
  * // Accessible composition: real input owns state + focus, the box owns looks.

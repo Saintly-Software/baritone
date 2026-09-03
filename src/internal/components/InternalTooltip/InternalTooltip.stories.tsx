@@ -4,8 +4,8 @@ import { InternalTooltip } from "./index";
 
 /**
  * `InternalTooltip` is not part of the public API — it exists so internal
- * components can attach a supplemental hover/focus hint. These stories document
- * the behaviour; consumer-facing disclosure should use `Popover` instead.
+ * components can attach a supplemental hover/focus hint. Consumer-facing
+ * disclosure should use `Popover` instead.
  */
 const meta: Meta<typeof InternalTooltip> = {
   title: "Internal/InternalTooltip",

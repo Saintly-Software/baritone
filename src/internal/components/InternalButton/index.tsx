@@ -29,12 +29,10 @@ import {
 } from "./internalButton.css";
 
 /**
- * Raw HTML attributes merged onto the rendered `<button>`. This is the seam for
- * base-ui's `render` callback: an overlay `Trigger`/`Close` hands the props it
- * computed (`onClick`, `aria-haspopup`, `aria-expanded`, `data-*`, `ref`, …)
- * straight through here, so the button stays the real interactive element with
- * no extra wrapper. (`ref` rides along in this object — that's base-ui's render
- * convention, see `HTMLProps`.)
+ * Raw HTML attributes merged onto the rendered `<button>` — the seam for
+ * base-ui's `render` callback: an overlay `Trigger`/`Close` hands its computed
+ * props (`onClick`, `aria-haspopup`, `data-*`, `ref`, …) straight through, so
+ * the button stays the real interactive element with no extra wrapper.
  */
 export type InternalButtonHtmlAttrs = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   ref?: React.Ref<HTMLButtonElement>;
@@ -43,9 +41,8 @@ export type InternalButtonHtmlAttrs = React.ButtonHTMLAttributes<HTMLButtonEleme
 /**
  * The link seam: when any of these is set, `InternalGenericButtonAnchor` renders
  * the button chrome onto an `<a>`/router-link instead of a `<button>`. `Button`
- * itself never sets them (they stay `undefined`, so it's always a real button);
- * `Link`'s `appearance="button"` arm supplies them to get a button-styled link
- * that reuses this recipe wholesale rather than duplicating the styles.
+ * never sets them; `Link`'s `appearance="button"` arm supplies them to reuse
+ * this recipe rather than duplicate it.
  */
 export interface InternalButtonAnchorSeam {
   render?: RenderProp;
@@ -56,37 +53,34 @@ export interface InternalButtonAnchorSeam {
 
 export interface InternalButtonProps {
   /**
-   * The public `Button` API, exactly as a consumer set it — optionally widened
-   * with the {@link InternalButtonAnchorSeam} so a button-styled link (`Link`'s
-   * `appearance="button"`) can render the same chrome on an anchor.
+   * The public `Button` API as the consumer set it, optionally widened with
+   * {@link InternalButtonAnchorSeam} so a button-styled `Link` can reuse this
+   * chrome on an anchor.
    */
   consumerProps: ButtonProps & InternalButtonAnchorSeam;
   /**
-   * Host-supplied attributes merged onto the button — typically the props a
-   * base-ui `Trigger`/`Close` passes via its `render` callback. Merged the way
-   * base-ui itself merges: `className`/`style` are joined, refs composed, event
-   * handlers chained, and the consumer's own props win on conflict.
+   * Host-supplied attributes merged onto the button — typically what a base-ui
+   * `Trigger`/`Close` passes via `render`. Merged base-ui-style: `className`/
+   * `style` joined, refs composed, handlers chained, consumer props win.
    */
   htmlAttrs?: InternalButtonHtmlAttrs;
 }
 
 /**
  * InternalButton — the implementation behind the public `Button`. It owns the
- * button-specific chrome: the shared colour/typography recipe, the focus ring,
- * the loading-spinner overlay, and the disabled-explanation tooltip. The element
- * itself is rendered by `InternalGenericButtonAnchor`, which owns the element
- * rendering (a `<button>`), the `type` default, and the shared disabled model
- * (`aria-disabled` + swallowed activation). `Button` is a thin wrapper that just
- * forwards its props as `consumerProps`.
+ * button-specific chrome: the colour/typography recipe, focus ring, loading
+ * spinner, and disabled-explanation tooltip. `InternalGenericButtonAnchor`
+ * renders the actual element and owns the `type` default and disabled model
+ * (`aria-disabled` + swallowed activation); `Button` just forwards its props
+ * as `consumerProps`.
  *
- * The extra `htmlAttrs` seam is what lets the overlay components (`Drawer`,
- * `Modal`, `Popover`) use a real button as their trigger/close: each base-ui
- * `Trigger`/`Close` passes its computed props straight in via `render`, rather
- * than cloning a `<Button>` element and stacking a second layer of prop merging
- * on top of Button's own.
+ * The `htmlAttrs` seam lets overlay components (`Drawer`, `Modal`, `Popover`)
+ * use a real button as their trigger/close: base-ui passes computed props
+ * straight in via `render`, instead of cloning a `<Button>` and stacking a
+ * second layer of prop merging.
  *
- * **Internal by design — not exported from the package.** Like `InternalTooltip`
- * and `InternalCheckbox`, it's a building block the system composes from.
+ * **Internal by design — not exported from the package**, like
+ * `InternalTooltip` and `InternalCheckbox`.
  */
 export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps) {
   const {
@@ -95,9 +89,8 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     saliency,
     size,
     variant,
-    // Destructured out of `rest` so it never reaches the DOM: `width` is a
-    // shorthand resolved to an atoms class below, not an HTML attribute (and
-    // `width` on a `<button>`/`<a>` is invalid HTML anyway).
+    // Pulled out so it never reaches the DOM — resolved to an atoms class
+    // below, and invalid as an HTML attribute anyway.
     width,
     children,
     disabled: disabledProp = false,
@@ -110,41 +103,34 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     onClick,
     className,
     ref,
-    // Destructured out of `rest` so it's never blindly forwarded to the DOM. On a
-    // labelled button the accessible name must be the visible label, so a
-    // (type-`never`) `aria-label` is dropped here — a cast/JS caller can't sneak
-    // it on. On the icon-only arm it *is* the name, so it's forwarded explicitly
-    // below when `icon` is present.
+    // On a labelled button the accessible name must be the visible label, so
+    // `aria-label` (type-`never` here) is dropped rather than forwarded. On the
+    // icon-only arm it *is* the name, forwarded explicitly below.
     "aria-label": ariaLabel,
     ...rest
   } = consumerProps;
 
-  // Icon-only look: `<Button icon aria-label>` renders a single centred glyph in
-  // a square box, named by the required `aria-label`. `icon` is the union
-  // discriminant, so its presence is what puts the button in this mode.
+  // Icon-only look: `icon` is the union discriminant that puts the button in
+  // this mode, rendering a centred glyph in a square box named by `aria-label`.
   const isIconOnly = icon != null;
 
   // A wrapping `Fieldset` can disable the whole group; OR it into the local prop.
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
 
-  // The hyperlink look: underlined text coloured by intent/saliency, no chrome.
-  // `size`/`loading` are typed away on this appearance, so there's no spinner
-  // overlay — just the icons around the label.
+  // The hyperlink look: underlined text, no chrome. `size`/`loading` are typed
+  // away on this appearance, so there's no spinner overlay.
   const isText = appearance === "text";
 
-  // The host's click (e.g. a Trigger's open/close toggle) rides in on `htmlAttrs`.
-  // Pull it out so it's chained into `handleClick` (and thus gated by the
-  // primitive's disabled guard) — everything else from the host is merged
-  // structurally further down.
+  // The host's click (e.g. a Trigger's toggle) rides in on `htmlAttrs`. Pull it
+  // out so it chains into `handleClick`, gated by the disabled guard.
   const { onClick: hostOnClick, ...hostAttrs } = htmlAttrs ?? {};
 
-  // `loading` is a solid-only feature (no chrome to overlay a spinner on the
-  // text look). Ignore it on the text appearance even if a JS caller forces it.
+  // `loading` is solid-only — no chrome to overlay a spinner on the text look —
+  // so it's ignored there even if a JS caller forces it.
   const isLoading = loading && !isText;
 
-  // A loading button is non-interactive, so it reads as disabled to the anchor
-  // (below) and to an icon render function alike.
+  // A loading button is non-interactive, so it reads as disabled everywhere.
   const isDisabled = disabled || isLoading;
   // The button's resolved state, handed to an icon render function to branch on.
   const iconState: ButtonIconState = {
@@ -155,17 +141,15 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     disabled: isDisabled,
   };
 
-  // Chain the consumer's and the host's onClick. The disabled *guard* now lives in
-  // `InternalGenericButtonAnchor` (it swallows the activation before this runs), so
-  // a disabled trigger still can't toggle its drawer/modal/popover.
+  // Chain the consumer's and host's onClick. The disabled guard lives in
+  // `InternalGenericButtonAnchor`, which swallows activation before this runs.
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(event);
     hostOnClick?.(event);
   };
 
   // The text appearance drops the component chrome for a link-like recipe and
-  // takes its typography from `variant` (a body size) instead of `size`; the
-  // default appearance keeps the shared component recipe + `size`.
+  // takes typography from `variant` instead of `size`.
   const appearanceClassName = isText
     ? cx(textButtonRecipe({ intent, saliency }), textSizeRecipe({ size: variant }))
     : cx(
@@ -176,11 +160,9 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
         isIconOnly && buttonSquare,
       );
 
-  // The button's own props; `hostAttrs` is merged underneath these below so the
-  // consumer's intent always wins on conflict. `InternalGenericButtonAnchor` owns
-  // the element rendering (a `<button>`), the `type` default, and the disabled
-  // model (`aria-disabled` + swallowed activation); this layer adds the
-  // recipe/focus-ring classes, the loading `aria-busy`, and the icon/spinner label.
+  // The button's own props; `hostAttrs` merges underneath so the consumer wins
+  // on conflict. `InternalGenericButtonAnchor` owns the element and disabled
+  // model; this layer adds the recipe/focus-ring classes and loading state.
   const ownProps = {
     ref,
     type,
@@ -188,15 +170,14 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     className: cx(
       appearanceClassName,
       focusRingRecipe({ type: "visible" }),
-      // Layered after the recipe so it wins the `width`, and only emitted when
-      // asked for — an unset `width` leaves the button hugging its label.
+      // Layered after the recipe so it wins; unset `width` leaves the button
+      // hugging its label.
       width && atoms({ width: resolveWidth(width) }),
       className,
     ),
     "aria-busy": isLoading || undefined,
-    // The icon-only arm has no visible text, so its required `aria-label` is the
-    // accessible name and is forwarded here. Labelled buttons never reach this
-    // (their `aria-label` is type-`never` and was dropped above).
+    // The icon-only arm has no visible text, so its required `aria-label` is
+    // forwarded here as the accessible name. Labelled buttons never reach this.
     ...(isIconOnly && ariaLabel != null ? { "aria-label": ariaLabel } : {}),
     onClick: handleClick,
     children: (
@@ -222,18 +203,15 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
     ...rest,
   };
 
-  // When the button is a host's trigger/close, merge the host attributes the way
-  // base-ui would (className/style joined, refs composed, handlers chained) with
-  // the consumer's props winning. `onClick` was pulled out above and is already
-  // folded into `handleClick`, so it isn't double-applied here.
+  // Merge host attributes the way base-ui would, with the consumer's props
+  // winning. `onClick` was already pulled out above into `handleClick`.
   const finalProps = (
     htmlAttrs ? mergeProps(hostAttrs as Record<string, unknown>, ownProps) : ownProps
   ) as InternalGenericButtonAnchorProps;
 
   const button = <InternalGenericButtonAnchor {...finalProps} />;
 
-  // The tooltip only exists to explain a disabled button; skip the machinery
-  // entirely when there's nothing to explain.
+  // Skip the tooltip machinery entirely when there's nothing to explain.
   if (disabledReason == null) {
     return button;
   }
@@ -241,8 +219,8 @@ export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps
   return (
     <InternalTooltip
       content={disabledReason}
-      // Only openable while disabled-but-not-loading; keeps the tree stable as
-      // the button toggles between states.
+      // Only openable while disabled-but-not-loading, keeping the tree stable
+      // as the button toggles states.
       disabled={!(disabled && !isLoading)}
     >
       {button}

@@ -5,32 +5,30 @@ import { vars } from "../../../theme/contract.css";
 import { active, hover } from "../../../theme/oklch";
 import { focusRingColorVar } from "../../../styles/vars.css";
 
-// Per-state colour wiring, published as CSS vars so the one recipe `base` stays
-// flat and the `state` variant just swaps values. Mirrors `radioControl`.
+// Per-state colour wiring as CSS vars, so `base` stays flat and `state` just
+// swaps values. Mirrors `radioControl`.
 const bg = createVar();
 const bd = createVar();
 // `accent` is the selected colour (checked border + glyph) and the focus-ring
-// colour. A form `state` maps to a semantic intent, and we read that intent's
-// focus token — same wiring as `formControlRecipe` / `radioControl`.
+// colour, read from the state's mapped intent — same wiring as `radioControl`.
 const accent = createVar();
-// The *currently applied* border colour (neutral `bd` when unchecked, `accent`
-// when checked/indeterminate). Routing it through one var lets the shared
-// hover/active selectors shift whichever colour the current state is showing.
+// The *currently applied* border colour (`bd` unchecked, `accent` checked).
+// One var lets the shared hover/active selectors shift whichever is showing.
 const bdNow = createVar();
-// Glyph (check / dash) box size, set by the `size` variant and read by the
-// indicator child (which is nested in the control, so the var cascades down).
+// Glyph box size, set by the `size` variant and read by the indicator child
+// via cascade.
 const glyph = createVar();
 
 /**
- * The checkbox "box" — a square presentational control. Not an `<input>`: it
- * reflects `data-checked` / `data-unchecked` / `data-indeterminate` (and
- * `data-disabled`) that the component sets from props. It mirrors the visual
- * language of `radioControl` (form tokens + accent), but with a small `radius.sm`
- * square instead of a full circle, and an accent glyph instead of a dot.
+ * The checkbox "box" — a square presentational control, not an `<input>`. It
+ * reflects `data-checked` / `data-unchecked` / `data-indeterminate` /
+ * `data-disabled` set by the component. Mirrors `radioControl`'s visual
+ * language (form tokens + accent), but with a `radius.sm` square and an
+ * accent glyph instead of a circle and dot.
  *
- * It is intentionally not focusable; the focus ring is drawn by the shared
- * `focusRingRecipe({ type: "within" })`, so a focusable element the consumer
- * slots inside (e.g. a visually-hidden `<input>`) lights the ring when tabbed to.
+ * Intentionally not focusable — the focus ring is drawn by the shared
+ * `focusRingRecipe({ type: "within" })`, lit when a nested focusable element
+ * (e.g. a visually-hidden `<input>`) is tabbed to.
  */
 export const checkboxControl = recipe({
   base: {
@@ -53,12 +51,11 @@ export const checkboxControl = recipe({
     transitionTimingFunction: vars.motion.easing.standard,
     vars: { [bdNow]: bd },
     selectors: {
-      // Selected: the border picks up the accent. Background stays the form
-      // surface (outline style, like the radio) so the accent glyph keeps its
-      // contrast across themes.
+      // Selected: border picks up the accent; background stays the form
+      // surface so the glyph keeps contrast across themes.
       "&[data-checked], &[data-indeterminate]": { vars: { [bdNow]: accent } },
-      // Hover / press nudge the *shown* colours via relative-colour math, and
-      // never fire while disabled.
+      // Hover / press nudge the shown colours via relative-colour math; skip
+      // while disabled.
       "&:hover:not([data-disabled])": {
         background: hover(bg),
         borderColor: hover(bdNow),
@@ -103,8 +100,8 @@ export const checkboxControl = recipe({
 });
 
 /**
- * The check / dash glyph. Sized from the `--glyph` var the control publishes and
- * coloured by `currentColor` (the control's `accent`). Scales + fades in/out as
+ * The check / dash glyph. Sized from the `--glyph` var, coloured by
+ * `currentColor` (the control's `accent`). Scales + fades in/out as
  * `data-checked` / `data-indeterminate` toggle, matching the radio indicator.
  */
 export const checkboxIndicator = style({

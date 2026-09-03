@@ -2,18 +2,17 @@ import { style } from "@vanilla-extract/css";
 import { vars } from "../../../theme/contract.css";
 
 /**
- * Styles for the internal tooltip popup. Kept here (rather than inline in a
- * consumer like `Button`) so every internal use of `InternalTooltip` shares one
- * surface definition.
+ * Styles for the internal tooltip popup, kept here (not inline in a consumer
+ * like `Button`) so every internal use of `InternalTooltip` shares one surface.
  */
 
 /**
- * A small neutral surface. Reuses the surface tokens so it themes with
- * everything else, and fades/scales out of the trigger on open and close.
+ * A small neutral surface: reuses the surface tokens so it themes with
+ * everything else, and fades/scales out of the trigger on open/close.
  *
- * `--transform-origin` is published by base-ui's positioner (it points back at
- * the trigger), so the scale animation grows out of the anchor. `position:
- * relative` anchors the absolutely-positioned arrow to this surface.
+ * `--transform-origin` (published by base-ui's positioner) points back at the
+ * trigger, so the scale grows from the anchor; `position: relative` anchors
+ * the arrow (absolutely positioned) to this surface.
  */
 export const tooltipPopup = style({
   position: "relative",
@@ -35,8 +34,7 @@ export const tooltipPopup = style({
   transitionDuration: vars.motion.duration.fast,
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
-    // base-ui flags the enter ("starting") and exit ("ending") frames; fade and
-    // scale from the trigger on both so the popup grows in and shrinks out.
+    // base-ui flags enter ("starting") / exit ("ending") frames; fade+scale both ways.
     "&[data-starting-style], &[data-ending-style]": {
       opacity: 0,
       transform: "scale(0.96)",
@@ -54,11 +52,10 @@ const ARROW_SIZE = 8;
 const arrowBorder = `${vars.borderWidth.thin} solid ${vars.surface.color.neutral.high.default.border}`;
 
 /**
- * A rotated square that points the tooltip at its trigger. base-ui positions it
- * along the edge (`position: absolute`, plus the cross-axis offset) and tags it
- * with `data-side`; per side we push it past the edge and expose the two
- * outward-facing borders so it reads as a bordered triangle continuous with the
- * surface. The matching `background` covers the surface border where they meet.
+ * A rotated square that points the tooltip at its trigger. base-ui positions
+ * it along the edge and tags it with `data-side`; per side we push it past the
+ * edge and expose two outward borders so it reads as a triangle continuous
+ * with the surface — the matching `background` covers the surface border.
  */
 export const tooltipArrow = style({
   width: ARROW_SIZE,

@@ -10,9 +10,8 @@ type PositionerProps = React.ComponentProps<typeof Tooltip.Positioner>;
 
 export interface InternalTooltipProps {
   /**
-   * The trigger. A single React element that the tooltip attaches to (rendered
-   * via base-ui's `render`, so it stays the actual focusable/hoverable element —
-   * no extra wrapper).
+   * The trigger — a single React element the tooltip attaches to (rendered via
+   * base-ui's `render`, so it stays the actual focusable/hoverable element).
    */
   children: React.ReactElement;
   /**
@@ -43,22 +42,18 @@ export interface InternalTooltipProps {
 }
 
 /**
- * InternalTooltip — a thin wrapper over base-ui's `Tooltip` that owns the design
- * system's tooltip surface styling.
- *
- * The tooltip is fully accessible: base-ui handles the ARIA wiring, keyboard
- * focus, and dismissal, and it's composed here exactly the way `Button` uses
+ * InternalTooltip — a thin wrapper over base-ui's `Tooltip` that owns the
+ * design system's tooltip surface styling. Fully accessible: base-ui handles
+ * ARIA wiring, keyboard focus, and dismissal, composed the way `Button` uses
  * base-ui directly.
  *
- * **Internal by design — not exported from the package.** This isn't about the
- * component being inaccessible; it's that we don't want consumers *relying* on
- * the tooltip pattern. Even a correct tooltip is invisible to touch users and
- * easy to overlook, which is why tooltips so often end up carrying information
- * they shouldn't. The system keeps it internal and composes it only where it's
- * clearly supplemental (e.g. explaining a disabled `Button`); consumer-facing
+ * **Internal by design — not exported.** Not because it's inaccessible, but
+ * because consumers shouldn't *rely* on the tooltip pattern: even a correct
+ * tooltip is invisible to touch users, so it's composed only where clearly
+ * supplemental (e.g. explaining a disabled `Button`). Consumer-facing
  * disclosure should use `Popover` once it lands.
  *
- * Content here must stay supplemental — the UI has to remain fully operable for
+ * Content here must stay supplemental — the UI must remain fully operable for
  * someone who never sees the tooltip.
  */
 export function InternalTooltip({
