@@ -2,15 +2,15 @@
  * `Omit`, but it distributes over a union instead of collapsing it.
  *
  * The built-in `Omit<T, K>` is `Pick<T, Exclude<keyof T, K>>`, and `keyof` a
- * union is only the keys *common* to every arm — so `Omit` over a union flattens
- * it into a single object carrying every arm's keys at once. That quietly
- * destroys the mutually-exclusive prop unions in this package
- * (`FieldLabellingProps`, `TextInputProps`, `SelectProps`, …): the result would
- * accept `label` *and* `aria-label` together, then fail to be assignable back to
- * the component that produced it.
+ * union only keeps the keys *common* to every arm — so `Omit` flattens a
+ * union into one object carrying every arm's keys at once. That destroys the
+ * mutually-exclusive prop unions in this package (`FieldLabellingProps`,
+ * `TextInputProps`, `SelectProps`, …): the result would accept `label` *and*
+ * `aria-label` together, and fail to be assignable back to the component
+ * that produced it.
  *
- * Reach for this whenever you re-type a component's props — wrapping a control,
- * or narrowing its API:
+ * Reach for this when re-typing a component's props — wrapping a control, or
+ * narrowing its API:
  *
  * ```ts
  * // ✅ stays a union: label XOR aria-label XOR aria-labelledby
@@ -23,8 +23,7 @@
 export type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
 /**
- * `Partial`, distributed over a union — the same hazard as {@link DistributiveOmit}.
- * A plain `Partial<T>` over a union of mutually-exclusive arms produces a single
- * all-optional object in which every arm's props coexist.
+ * `Partial`, distributed over a union — same hazard as {@link DistributiveOmit}:
+ * a plain `Partial<T>` would collapse mutually-exclusive arms into one object.
  */
 export type DistributivePartial<T> = T extends unknown ? Partial<T> : never;
