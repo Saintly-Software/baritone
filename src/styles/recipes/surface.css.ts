@@ -16,17 +16,17 @@ const bdDisabled = createVar();
 
 /**
  * Shared recipe for the "surface" element type (Card, Page, Accordion, Popover,
- * Notice, ...). Two saliency levels only: `low` (default neutral background +
- * border) and `high` (a washed shade). Most surfaces use the neutral intent;
- * colourful intents exist mainly for Notice/Toast. Surfaces are static (no
- * hover); pair with the shared `focusRingRecipe` (the `intent` variant publishes
- * the ring colour) for when they're made interactive — or set the `interactive`
- * variant to add hover/active washes (computed in oklch from the `default`
- * background, like the component recipe) for a surface that *is* the control,
- * e.g. a clickable/linkable `Card`. The resolved foreground is
- * published as `--textColor` so a nested `Text` matches the surface without
- * knowing its intent, and the applied `padding` is exposed via `--surfacePadding`
- * so descendants (e.g. `Card.Bleed`) can negate it.
+ * Notice, ...). Two saliency levels: `low` (default, neutral bg + border) and
+ * `high` (washed shade). Most surfaces are neutral intent; colourful intents
+ * are mainly for Notice/Toast.
+ *
+ * Static by default — pair with `focusRingRecipe` when made interactive, or
+ * set `interactive` for oklch-computed hover/active washes on a surface that
+ * *is* the control (e.g. a clickable `Card`).
+ *
+ * Publishes resolved foreground as `--textColor` (so nested `Text` matches
+ * without knowing the intent) and `padding` as `--surfacePadding` (so
+ * `Card.Bleed` etc. can negate it).
  */
 export const surfaceRecipe = recipe({
   base: {
@@ -66,11 +66,9 @@ export const surfaceRecipe = recipe({
       md: { vars: { [surfacePaddingVar]: vars.space[4] } },
       lg: { vars: { [surfacePaddingVar]: vars.space[6] } },
     },
-    // When the surface itself is the control (a clickable/linkable Card), add the
-    // hover/active washes + pointer cursor. The hover/active backgrounds are
-    // computed in oklch from `default` (set in the compound variants below); the
-    // `:not([aria-disabled])` guards keep a disabled surface inert. Static
-    // surfaces (the default) are unaffected.
+    // When the surface itself is the control (a clickable/linkable Card), add
+    // hover/active washes + pointer cursor, computed in oklch from `default`
+    // (set in the compound variants below). `:not([aria-disabled])` guards keep a disabled surface inert.
     interactive: {
       false: {},
       true: {

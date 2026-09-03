@@ -5,8 +5,7 @@ import { vars } from "../../theme/contract.css";
 import { active, hover } from "../../theme/oklch";
 import { focusRingColorVar, iconColorVar, textColorVar } from "../vars.css";
 
-// Resolved colours are funnelled through local vars so the base style can stay
-// flat while compound variants (intent x saliency) just set the values.
+// Resolved colours funnel through local vars so the base style stays flat while compound variants (intent × saliency) just set the values.
 const bgc = createVar();
 const bgcHover = createVar();
 const bgcActive = createVar();
@@ -23,14 +22,13 @@ const sizes = {
 } as const;
 
 /**
- * "Component intent" recipe — the colour scheme shared by the "component" element
- * type (Chip, Icon, and future Button/Badge/Avatar). Sets the border, background,
- * and text colour, and publishes that foreground to descendants via `--iconColor`
- * (for `Icon`) and `--textColor` (for `Text`), so an inline icon or nested `Text`
- * matches without knowing the intent, and an `<Button intent='negative'
- * saliency='high'>` and a `<Chip>` with the same props render identically. Hover/active are computed from
- * `default` via oklch relative-colour math; low saliency hovers to the `mid`
- * shade. Also publishes the focus-ring colour for the shared `focusRingRecipe`.
+ * "Component intent" recipe — the colour scheme shared by the "component"
+ * element type (Chip, Icon, future Button/Badge/Avatar). Sets border,
+ * background, and text colour, and publishes the foreground via `--iconColor`/
+ * `--textColor` so nested icons/text match without knowing the intent — a
+ * `<Button>` and `<Chip>` with the same props render identically. Hover/active
+ * are computed from `default` via oklch math (low saliency hovers to `mid`).
+ * Also publishes the focus-ring colour for `focusRingRecipe`.
  */
 export const componentIntentRecipe = recipe({
   base: {
@@ -84,8 +82,7 @@ export const componentIntentRecipe = recipe({
     SALIENCIES.map((saliency) => {
       const block = vars.component.color[intent][saliency];
       const isLow = saliency === "low";
-      // Low saliency: transparent default -> hover uses the washed `mid` shade,
-      // active applies the active delta to that shade.
+      // Low saliency: transparent default → hover uses the washed `mid` shade; active applies the delta to that shade.
       const hoverBaseRef = isLow ? vars.component.color[intent].mid.default.bgc : block.default.bgc;
       return {
         variants: { intent, saliency },
@@ -115,10 +112,8 @@ export type ComponentIntentVariants = NonNullable<RecipeVariants<typeof componen
 
 /**
  * "Component typography" recipe — the non-colour half of the component scheme:
- * the shared box/layout (inline-flex, gap, radius), the type variables
- * (font-family/weight/line-height), interaction transitions, and the `size`
- * knob (control height / inline padding / font-size). Pair with
- * `componentIntentRecipe` for colour and `focusRingRecipe` for the ring.
+ * shared box/layout, type variables, interaction transitions, and the `size`
+ * knob. Pair with `componentIntentRecipe` for colour and `focusRingRecipe` for the ring.
  */
 export const componentTypographyRecipe = recipe({
   base: {
@@ -143,19 +138,16 @@ export const componentTypographyRecipe = recipe({
   },
   variants: {
     /**
-     * Who gets the control affordances — the pointer cursor and the unselectable
-     * label (`componentIntentRecipe`'s matching variant owns the hover/active
-     * background half).
+     * Who gets the control affordances — pointer cursor and unselectable label
+     * (`componentIntentRecipe`'s matching variant owns the hover/active background).
      *
-     *   - `control` (default) — always. For the components that *are* a control:
-     *     Button, Tabs, a Notice's action.
-     *   - `auto` — leave both to the element itself. For a polymorphic root that
-     *     is usually inert: a Chip is a static tag until `render` makes it a
-     *     link, and a tag that shows a pointer is advertising a click that does
-     *     nothing (its own text is also worth being able to select). Declaring
-     *     nothing is what makes this work in both directions — a `<span>` keeps
-     *     the default arrow, while an `<a href>` still gets its pointer from the
-     *     UA stylesheet.
+     *   - `control` (default) — for components that *are* a control: Button,
+     *     Tabs, a Notice's action.
+     *   - `auto` — leaves both to the element itself. For a polymorphic root
+     *     that's usually inert: a Chip is a static tag until `render` makes it a
+     *     link, and a pointer cursor would advertise a click that does nothing.
+     *     Declaring nothing works both ways — a `<span>` keeps the default
+     *     arrow, an `<a href>` still gets its pointer from the UA stylesheet.
      */
     interactive: {
       control: { cursor: "pointer", userSelect: "none" },

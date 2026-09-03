@@ -2,8 +2,7 @@ import type { Atoms } from "./sprinkles.css";
 
 /**
  * Friendly `width` shorthand shared by the layout primitives (`Box`, `Flex`).
- * A small, opinionated set of the most common intrinsic widths; reach for
- * `render` + `atoms` (or `style`) when you need a specific value.
+ * Reach for `render` + `atoms` (or `style`) when you need a specific value.
  *   - `fill` → `100%`
  *   - `fit` → `fit-content`
  *   - `inherit` → `inherit`
@@ -22,9 +21,8 @@ export function resolveWidth(width: WidthShorthand | undefined): Atoms["width"] 
 }
 
 /**
- * Responsive-visibility breakpoints — the sprinkles breakpoint condition names.
- * `mobile` is the mobile-first base condition; `sm`/`md`/`lg`/`xl` are the
- * `min-width` breakpoints.
+ * Responsive-visibility breakpoints. `mobile` is the mobile-first base
+ * condition; `sm`/`md`/`lg`/`xl` are `min-width` breakpoints.
  */
 export const VISIBILITY_BREAKPOINTS = ["mobile", "sm", "md", "lg", "xl"] as const;
 export type VisibilityBreakpoint = (typeof VISIBILITY_BREAKPOINTS)[number];
@@ -41,17 +39,16 @@ function toSet(value: ResponsiveVisibility | undefined): Set<VisibilityBreakpoin
 }
 
 /**
- * Build the `display` atom for a visibility-aware layout primitive.
+ * Builds the `display` atom for a visibility-aware layout primitive.
  *
  * Returns the plain `shown` value when neither `hideOn` nor `showOn` is set;
- * otherwise a responsive conditional that toggles `display: none` at each
- * requested breakpoint. `showOn` shows *only* at the listed breakpoints (hidden
- * elsewhere); `hideOn` hides at the listed breakpoints. When both are set, an
- * element is visible only where `showOn` allows it and `hideOn` does not.
+ * otherwise a responsive conditional toggling `display: none` per breakpoint.
+ * `showOn` shows *only* the listed breakpoints; `hideOn` hides them. With both
+ * set, an element is visible only where `showOn` allows and `hideOn` doesn't.
  *
- * Because the sprinkles conditions are `min-width` (a value cascades upward to
- * larger breakpoints), every condition is emitted explicitly so hiding at one
- * breakpoint never leaks into the next.
+ * Every condition is emitted explicitly (not left to cascade) since the
+ * sprinkles conditions are `min-width`, which would otherwise leak a hide into
+ * larger breakpoints.
  */
 export function resolveDisplay(
   shown: ShownDisplay,

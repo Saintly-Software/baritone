@@ -28,10 +28,9 @@ const sizes = {
 
 /**
  * Shared recipe for the "form control" element type (TextInput, and future
- * Select/NumberField/etc.). Form controls don't take intent/saliency — they
- * take a `state` (neutral | warning | invalid | valid) that drives
- * background/border/placeholder and publishes the focus-ring colour (via the
- * state's mapped intent) for the shared `focusRingRecipe`.
+ * Select/NumberField/etc.). Form controls take a `state` (neutral | warning
+ * | invalid | valid) instead of intent/saliency, driving
+ * background/border/placeholder and the focus-ring colour for `focusRingRecipe`.
  */
 export const formControlRecipe = recipe({
   base: {
@@ -95,19 +94,19 @@ export const formControlRecipe = recipe({
       },
     },
     /**
-     * Multiline (`<textarea>`) mode. Declared *after* `size` so its rules win the
-     * cascade: it trades the fixed single-line `height` for an `auto` height that
-     * the native `rows` attribute governs, and swaps horizontal-only padding for
-     * symmetric block padding. A `<textarea>` doesn't take `size` (the type union
-     * makes them mutually exclusive), so it always renders at the `md` type scale.
+     * Multiline (`<textarea>`) mode. Declared *after* `size` so its rules
+     * win the cascade: swaps the fixed `height` for `auto` (governed by the
+     * native `rows` attribute) and horizontal-only padding for symmetric
+     * block padding. A `<textarea>` can't take `size` (mutually exclusive by
+     * type), so it always renders at the `md` type scale.
      */
     multiline: {
       true: {
         height: "auto",
         paddingBlock: vars.space[2],
         lineHeight: vars.text.size.md.lineHeight,
-        // Let the user drag it taller, but never sideways (would break the field
-        // column). `rows` sets the starting height.
+        // Drag taller only — sideways would break the field column. `rows`
+        // sets the starting height.
         resize: "vertical",
       },
       false: {},

@@ -4,8 +4,7 @@ import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { iconColorVar, iconVerticalAlignVar } from "../vars.css";
 
-// Standalone fallback colour (component token), used only when no ancestor has
-// set --iconColor.
+// Standalone fallback colour, used only when no ancestor has set --iconColor.
 const fallback = createVar();
 
 /**
@@ -22,9 +21,8 @@ export const iconRecipe = recipe({
     width: "1em",
     height: "1em",
     color: fallbackVar(iconColorVar, fallback),
-    // Inside `Text`/`Heading` this resolves to the published optical offset so an
-    // inline icon sits centred against the copy; standalone or as a flex child it
-    // falls back to `baseline` (and `vertical-align` is inert in flex anyway).
+    // Inside `Text`/`Heading` this resolves to the published optical offset so
+    // an inline icon centres against the copy; otherwise falls back to `baseline`.
     verticalAlign: fallbackVar(iconVerticalAlignVar, "baseline"),
   },
   variants: {
