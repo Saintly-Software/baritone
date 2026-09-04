@@ -70,12 +70,7 @@ export function InlineList({
   ref,
   ...rest
 }: InlineListProps) {
-  // Falsy children dropped, including toArray's `0`/`""`/`NaN` leaves — see
-  // doc above.
   const items = React.Children.toArray(children).filter(Boolean);
-  // Nothing to lay out — render no element at all, rather than an empty box that
-  // would still apply its margins (`mx` / `my` / …) as phantom spacing. Common
-  // for a metadata line whose every item is conditional.
   if (items.length === 0) return null;
   return (
     <Flex
@@ -91,8 +86,6 @@ export function InlineList({
         const key = React.isValidElement(child) && child.key != null ? child.key : index;
         return (
           <React.Fragment key={key}>
-            {/* Ternary, not `&&`: `separator && …` would leak a falsy `separator`
-                (e.g. `0`) as text. aria-hidden/inert — see `separator` doc above. */}
             {index > 0 && separator ? (
               <span aria-hidden="true" inert>
                 {separator}

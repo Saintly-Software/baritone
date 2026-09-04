@@ -75,7 +75,6 @@ describe("InternalGenericButtonAnchor", () => {
     it("renders the router element and merges className, children and onClick", async () => {
       const onClick = vi.fn();
       const user = userEvent.setup();
-      // A stand-in for a router link: a custom anchor that owns its own href.
       const RouterLink = (props: ComponentProps<"a">) => <a data-router {...props} />;
       render(
         <InternalGenericButtonAnchor
@@ -104,7 +103,6 @@ describe("InternalGenericButtonAnchor", () => {
           Docs
         </InternalGenericButtonAnchor>,
       );
-      // No link is exposed at all — it's a plain div.
       expect(screen.queryByRole("link")).toBeNull();
       const div = screen.getByText("Docs");
       expect(div.tagName).toBe("DIV");
@@ -125,10 +123,6 @@ describe("InternalGenericButtonAnchor", () => {
       expect(screen.getByText("Settings").tagName).toBe("DIV");
     });
 
-    // An icon-only disabled link's only child is an aria-hidden glyph, so its name
-    // lives in `aria-label`. That attribute is prohibited on the role-less inert
-    // <div> (ARIA generic role; axe `aria-prohibited-attr`), so the primitive
-    // re-exposes it as visually-hidden text content instead of forwarding it.
     it("re-exposes a disabled link's aria-label as text content, not a prohibited attribute", () => {
       render(
         <InternalGenericButtonAnchor href="/x" disabled aria-label="Back">
@@ -137,9 +131,7 @@ describe("InternalGenericButtonAnchor", () => {
       );
       const div = screen.getByText("Back").closest("[aria-disabled]") as HTMLElement;
       expect(div.tagName).toBe("DIV");
-      // The name is perceivable as content…
       expect(div).toHaveTextContent("Back");
-      // …and the prohibited attribute is gone.
       expect(div).not.toHaveAttribute("aria-label");
     });
 
@@ -158,8 +150,6 @@ describe("InternalGenericButtonAnchor", () => {
       expect(onClick).not.toHaveBeenCalled();
     });
 
-    // The AGENTS.md convention: a disabled control stays reachable so it can
-    // explain itself. A disabled button must still be tabbable.
     it("keeps a disabled button in the tab order (aria-disabled, not native disabled)", async () => {
       const user = userEvent.setup();
       render(<InternalGenericButtonAnchor disabled>Save</InternalGenericButtonAnchor>);

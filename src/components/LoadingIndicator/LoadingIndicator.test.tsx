@@ -6,7 +6,6 @@ describe("LoadingIndicator", () => {
   it("renders a status region with the default SR-only 'Loading' label", () => {
     render(<LoadingIndicator />);
     const status = screen.getByRole("status");
-    // The accessible name comes from the SR-only label.
     expect(status).toHaveTextContent("Loading");
   });
 
@@ -19,20 +18,16 @@ describe("LoadingIndicator", () => {
 
   it("aria-hidden suppresses the label, role, and live region (decorative)", () => {
     const { container } = render(<LoadingIndicator aria-hidden data-testid="spinner" />);
-    // No status role / accessible label when decorative.
     expect(screen.queryByRole("status")).toBeNull();
     const el = screen.getByTestId("spinner");
     expect(el).toHaveAttribute("aria-hidden", "true");
     expect(el).not.toHaveAttribute("role");
-    // The SR-only "Loading" text is gone; only the decorative ring remains.
     expect(el).not.toHaveTextContent("Loading");
-    // The ring itself is still present (and itself aria-hidden).
     expect(container.querySelector("[aria-hidden] [aria-hidden]")).not.toBeNull();
   });
 
   it("renders a decorative ring alongside the label by default", () => {
     render(<LoadingIndicator />);
-    // The ring is the aria-hidden glyph nested inside the status region.
     const status = screen.getByRole("status");
     expect(status.querySelector("[aria-hidden]")).not.toBeNull();
   });

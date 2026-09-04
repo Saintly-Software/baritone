@@ -123,9 +123,6 @@ function ModalRoot({
   ...rest
 }: ModalProps) {
   const handleOpenChange: NonNullable<RootProps["onOpenChange"]> = (nextOpen, eventDetails) => {
-    // Disabled: veto every close attempt (see `disabled` doc above). `cancel()`
-    // stops base-ui from acting on the event, so the panel stays open in both
-    // controlled and uncontrolled use.
     if (disabled && !nextOpen) {
       eventDetails.cancel();
       return;
@@ -140,7 +137,6 @@ function ModalRoot({
       onOpenChange={handleOpenChange}
       handle={handle}
       modal={modal}
-      // Never closes on outside-press — see class doc above.
       disablePointerDismissal
     >
       {trigger}

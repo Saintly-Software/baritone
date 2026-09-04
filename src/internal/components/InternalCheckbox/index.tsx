@@ -115,8 +115,6 @@ export function InternalCheckbox({
   const indeterminate = checked === "indeterminate";
   const isChecked = checked === true;
 
-  // One mutually-exclusive value attribute (base-ui convention, consistent with
-  // the radio control), so CSS and consumers can target each state directly.
   const valueAttrs = {
     "data-checked": isChecked ? "" : undefined,
     "data-unchecked": !isChecked && !indeterminate ? "" : undefined,

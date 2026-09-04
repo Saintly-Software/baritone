@@ -59,7 +59,6 @@ describe("Tooltip", () => {
     await waitFor(() => expect(trigger).toHaveAttribute("aria-describedby"), { timeout: 2000 });
     const describedById = trigger.getAttribute("aria-describedby");
     expect(describedById).toBeTruthy();
-    // The referenced element is the tooltip surface carrying the content.
     const description = document.getElementById(describedById as string);
     expect(description).toHaveTextContent("Copied to clipboard");
   });

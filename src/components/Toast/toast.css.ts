@@ -27,8 +27,6 @@ export const toastViewport = style({
   right: vars.space[4],
   left: "auto",
   top: "auto",
-  // A comfortable single-column width, capped to the viewport (minus the insets)
-  // so it shrinks to fit rather than overflowing on a narrow screen.
   width: `min(24rem, calc(100vw - (${vars.space[4]} * 2)))`,
   zIndex: 1,
 });
@@ -57,10 +55,7 @@ export const toastRoot = style({
   width: "100%",
   boxSizing: "border-box",
   transformOrigin: "bottom center",
-  // Newest (index 0) paints on top of the ones behind it.
   zIndex: "calc(1000 - var(--toast-index, 0))",
-  // Resting place: lifted above the frontmost toast by the running offset plus a
-  // gap per step; the swipe vars (0 at rest) let it follow the finger 1:1.
   transform: `translateX(var(--toast-swipe-movement-x, 0px)) translateY(calc(
       (var(--toast-offset-y, 0px) + (var(--toast-index, 0) * ${GAP})) * -1
         + var(--toast-swipe-movement-y, 0px)
@@ -69,26 +64,16 @@ export const toastRoot = style({
   transitionDuration: vars.motion.duration.base,
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
-    // Enter from below the anchor; leave by fading in place while the toasts in
-    // front glide down to close the gap (their own `--toast-offset-y` shrinks).
     "&[data-starting-style]": { opacity: 0, transform: "translateY(120%)" },
     "&[data-ending-style]": { opacity: 0 },
-    // A toast dismissed by swiping slides off the way it was thrown instead of
-    // fading, continuing past the finger's last position.
     "&[data-ending-style][data-swipe-direction='right']": {
       transform: "translateX(calc(var(--toast-swipe-movement-x) + 150%))",
     },
     "&[data-ending-style][data-swipe-direction='down']": {
       transform: "translateY(calc(var(--toast-swipe-movement-y) + 150%))",
     },
-    // While actively dragging, cut the transition so the card tracks the finger.
     "&[data-swiping]": { transitionDuration: "0ms" },
-    // Over the `limit`, base-ui keeps the toast mounted (so it can animate away)
-    // but marks it `data-limited` and `inert`; hide it visually to match.
     "&[data-limited]": { opacity: 0 },
-    // Bridge the gap above each card with an invisible strip so sliding the
-    // pointer up the stack (to read or dismiss older toasts) never dips into the
-    // gap and lets the auto-dismiss timers resume mid-hover.
     "&::after": {
       content: '""',
       position: "absolute",

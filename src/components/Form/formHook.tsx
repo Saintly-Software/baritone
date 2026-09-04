@@ -28,11 +28,6 @@ import {
 export const { fieldContext, formContext, useFieldContext, useFormContext } =
   createFormHookContexts();
 
-// Each pre-bound field component reads the field from context and delegates to the
-// render-prop adapter, so `<form.AppField>{(field) => <field.TextInput label=… />}`
-// needs no `value`/`onChange` wiring. The `{ ...props, field }` object is asserted
-// to the adapter's union props (built once, same reasoning as the adapters).
-
 /** Props of `field.TextInput` — {@link FormTextInputProps} minus the context-supplied `field`. */
 export type TextInputFieldProps = DistributiveOmit<FormTextInputProps, "field">;
 function TextInputField(props: TextInputFieldProps) {
@@ -106,11 +101,6 @@ export type SubmitButtonProps = DistributiveOmit<ButtonProps, "type" | "loading"
  */
 function SubmitButton(props: SubmitButtonProps) {
   const form = useFormContext();
-  // Subscribe with a shallow comparator, not a bare object selector: react-store's
-  // default equality is referential, so `(s) => ({ canSubmit, isSubmitting })` would
-  // allocate a fresh object each emission and re-render this button on *every* form
-  // change (each keystroke). Comparing the two flags narrows it to the transitions
-  // that actually flip the button's `loading` / `disabled`.
   const { canSubmit, isSubmitting } = useSelector(
     form.store,
     (state) => ({ canSubmit: state.canSubmit, isSubmitting: state.isSubmitting }),

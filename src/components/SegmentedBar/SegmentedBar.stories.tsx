@@ -22,8 +22,6 @@ const meta: Meta<typeof SegmentedBar> = {
     size: { control: "select", options: SIZES },
   },
   decorators: [
-    // The bar is full-width; capped so the legend's numerics don't drift a screen
-    // away from their labels in the docs.
     (Story) => (
       <div style={{ maxWidth: 420 }}>
         <Story />
@@ -115,7 +113,6 @@ export const WithoutLegend: Story = {
 
 /** `showPercent` / `showValue` trim the legend down to the columns you want. */
 export const LegendColumns: Story = {
-  // Kept as a test, hidden from the sidebar so the showcase stays focused.
   tags: ["!dev"],
   args: {
     showPercent: true,
@@ -125,7 +122,6 @@ export const LegendColumns: Story = {
 
 /** No visible label — the legend list is named for assistive tech via `aria-label`. */
 export const AriaLabelOnly: Story = {
-  // Kept as a test, hidden from the sidebar so the showcase stays focused.
   tags: ["!dev"],
   args: {
     label: undefined,
@@ -135,7 +131,6 @@ export const AriaLabelOnly: Story = {
 
 /** A single segment fills the whole track, keeping both pill ends. */
 export const SingleSegment: Story = {
-  // Kept as a test, hidden from the sidebar so the showcase stays focused.
   tags: ["!dev"],
   args: {
     label: "All one thing",

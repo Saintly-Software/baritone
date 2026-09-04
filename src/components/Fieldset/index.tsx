@@ -80,10 +80,6 @@ export function Fieldset({ children, disabled = false, className, ...rest }: Fie
   const groupDisabled = disabled || inheritedDisabled;
 
   return (
-    // No `disabled` on base-ui's `Fieldset.Root`: it would set the native
-    // `<fieldset disabled>` attribute, dropping every nested control out of the
-    // tab order. Disabled is published through `FieldDisabledContext` instead, and
-    // each control models it the focusable way (`aria-disabled` + `readOnly`).
     <BaseFieldset.Root
       className={cx(fieldsetRoot, className)}
       data-disabled={groupDisabled || undefined}

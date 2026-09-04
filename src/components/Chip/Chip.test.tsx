@@ -9,8 +9,6 @@ describe("Chip", () => {
     render(<Chip data-testid="chip">Beta</Chip>);
     const chip = screen.getByTestId("chip");
     expect(chip.tagName).toBe("SPAN");
-    // The (string) label gets its own element so the chip can truncate it; it is
-    // not a raw text child of the root.
     const label = screen.getByText("Beta");
     expect(label).not.toBe(chip);
     expect(chip).toContainElement(label);
@@ -57,15 +55,12 @@ describe("Chip", () => {
   });
 
   it("omits a decorative shorthand adornment whose icon resolves to nothing", () => {
-    // A conditional shorthand glyph (`icon={cond && <Glyph/>}`) can resolve to
-    // `false`; the adornment should disappear, not render an empty spaced box.
     render(
       <Chip data-testid="chip" icon={false}>
         Label
       </Chip>,
     );
     const chip = screen.getByTestId("chip");
-    // Only the label element remains — no empty leading adornment.
     expect(chip.children).toHaveLength(1);
     expect(chip).toHaveTextContent("Label");
   });
@@ -82,7 +77,6 @@ describe("Chip", () => {
       );
       const square = screen.getByTestId("square");
       const pill = screen.getByTestId("pill");
-      // The pill variant adds a class the default square chip does not carry.
       const extra = pill.className
         .split(/\s+/)
         .filter((cls) => !square.className.split(/\s+/).includes(cls));
@@ -148,18 +142,15 @@ describe("Chip", () => {
 
       const trigger = screen.getByRole("button", { name: "Status" });
       expect(trigger.tagName).toBe("BUTTON");
-      // base-ui marks the trigger as controlling a dialog popup, collapsed to start.
       expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
       expect(trigger).toHaveAttribute("aria-expanded", "false");
 
-      // The popover is closed until the label is clicked.
       expect(screen.queryByText("Popover body")).not.toBeInTheDocument();
 
       await user.click(trigger);
 
       const popup = await screen.findByRole("dialog");
       expect(popup).toHaveTextContent("Popover body");
-      // Once open, the trigger is expanded and `aria-controls` points at the popup.
       expect(trigger).toHaveAttribute("aria-expanded", "true");
       expect(trigger).toHaveAttribute("aria-controls", popup.id);
       expect(popup.id).toBeTruthy();
@@ -250,13 +241,10 @@ describe("Chip", () => {
         </Chip>,
       );
       const chip = screen.getByTestId("chip");
-      // Label and both adornment lists are gone — replaced by the spinner.
       expect(chip).not.toHaveTextContent("Saving");
       expect(screen.queryByText("L")).not.toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
-      // The lone child is the decorative (aria-hidden) spinner.
       expect(chip.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
-      // Busy + inert, mirroring Button's loading state.
       expect(chip).toHaveAttribute("aria-busy", "true");
       expect(chip).toHaveAttribute("aria-disabled", "true");
     });
@@ -299,7 +287,6 @@ describe("Chip", () => {
           Tag
         </Chip>,
       );
-      // icon → leadAdornments → label → trailAdornments.
       expect(screen.getByTestId("chip").textContent).toBe("ILTagR");
     });
 
@@ -437,7 +424,6 @@ describe("Chip", () => {
       );
       const link = screen.getByRole("link", { name: "Open docs" });
       const remove = screen.getByRole("button", { name: "Remove" });
-      // The built-in remove "×" follows the supplied trailing link in the DOM.
       expect(link.compareDocumentPosition(remove) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
@@ -492,7 +478,6 @@ describe("Chip", () => {
           Tag
         </Chip>,
       );
-      // icon → leadAdornments → label → trailAdornments → trailIcon.
       expect(screen.getByTestId("chip").textContent).toBe("ILTagRT");
     });
 
@@ -509,7 +494,6 @@ describe("Chip", () => {
       const trail = screen.getByTestId("trail").parentElement as HTMLElement;
       const copy = screen.getByRole("button", { name: "Copy" });
       const remove = screen.getByRole("button", { name: "Remove" });
-      // DOM order: trailIcon → copy → remove.
       expect(trail.compareDocumentPosition(copy) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
       expect(copy.compareDocumentPosition(remove) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
@@ -533,7 +517,6 @@ describe("Chip", () => {
       );
       await user.click(screen.getByRole("button", { name: "Remove" }));
       expect(onAdornment).toHaveBeenCalledOnce();
-      // The adornment is its own hit target — its click must not reach the row.
       expect(onAncestor).not.toHaveBeenCalled();
     });
 
@@ -585,7 +568,6 @@ describe("Chip", () => {
         </div>,
       );
       await user.click(screen.getByRole("button", { name: "Copy" }));
-      // The copy still happens; the click just doesn't reach the row.
       expect(await navigator.clipboard.readText()).toBe("npm i baritone");
       expect(onAncestor).not.toHaveBeenCalled();
     });
@@ -596,7 +578,6 @@ describe("Chip", () => {
       render(
         <div
           onClick={(event) => {
-            // Swallow the anchor's default navigation so jsdom doesn't warn.
             event.preventDefault();
             onAncestor();
           }}
@@ -630,7 +611,6 @@ describe("Chip", () => {
       await user.click(button);
 
       expect(await navigator.clipboard.readText()).toBe("npm i baritone");
-      // Success feedback: the same button relabels to "Copied".
       expect(await screen.findByRole("button", { name: "Copied" })).toBeInTheDocument();
     });
 

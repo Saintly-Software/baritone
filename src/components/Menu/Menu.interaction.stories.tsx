@@ -75,7 +75,6 @@ export const KeepOpenStaysOpen: Story = {
     const body = within(document.body);
     await userEvent.click(await body.findByRole("menuitem", { name: "Increment" }));
 
-    // The menu stays open (items still present) and the trigger reflects the new count.
     expect(body.getByRole("menuitem", { name: "Increment" })).toBeInTheDocument();
     await waitFor(() =>
       expect(canvas.getByRole("button", { name: "Quantity: 1" })).toBeInTheDocument(),
@@ -122,7 +121,6 @@ function sideStory(side: NonNullable<MenuProps["side"]>): Story {
 
       const body = within(document.body);
       const popup = await body.findByRole("menu");
-      // The positioner is the popup's parent and carries the resolved side.
       const positioner = popup.parentElement as HTMLElement;
       await waitFor(() => expect(positioner).toHaveAttribute("data-side", side));
     },

@@ -11,8 +11,6 @@ const VIEWS = [
 ] as const;
 type View = (typeof VIEWS)[number]["value"];
 
-// A tiny controlled host mirroring the documented usage, so the type-safe
-// value/onChange pair is exercised exactly as a consumer would write it.
 function Sections({
   value: initial = "overview",
   onChange,
@@ -98,7 +96,6 @@ describe("Tabs", () => {
         ]}
       />,
     );
-    // The first tab is disabled, so the next enabled one starts selected.
     expect(screen.getByRole("tab", { name: "Activity" })).toHaveAttribute("aria-selected", "true");
   });
 
@@ -118,12 +115,9 @@ describe("Tabs", () => {
     render(<Sections value="overview" disabled />);
 
     const overview = screen.getByRole("tab", { name: "Overview" });
-    // The tabs carry the disabled semantics...
     expect(overview).toHaveAttribute("aria-disabled", "true");
-    // ...but never the native attribute that would drop them from the tab order.
     expect(overview).not.toBeDisabled();
 
-    // Tab reaches the tablist, landing on the selected (roving) tab.
     await user.tab();
     expect(overview).toHaveFocus();
   });
@@ -144,7 +138,6 @@ describe("Tabs", () => {
     );
 
     const settings = screen.getByRole("tab", { name: "Settings" });
-    // aria-disabled, so it stays focusable/reachable rather than being skipped.
     expect(settings).toHaveAttribute("aria-disabled", "true");
     expect(settings).not.toBeDisabled();
     settings.focus();
@@ -190,7 +183,6 @@ describe("Tabs", () => {
     const overviewTab = screen.getByRole("tab", { name: "Overview" });
     const panel = screen.getByRole("tabpanel");
 
-    // Only the active tab's panel is exposed; the wiring points both ways.
     expect(panel).toHaveTextContent("Overview panel");
     expect(overviewTab).toHaveAttribute("aria-controls", panel.getAttribute("id"));
     expect(panel).toHaveAttribute("aria-labelledby", overviewTab.getAttribute("id"));
@@ -225,9 +217,7 @@ describe("Tabs", () => {
       </Tabs>,
     );
 
-    // Lazy panel isn't in the DOM until its tab is first activated...
     expect(screen.queryByTestId("lazy")).not.toBeInTheDocument();
-    // ...but a keepMounted panel is present (just hidden) from the start.
     expect(screen.getByTestId("kept")).toBeInTheDocument();
 
     await user.click(screen.getByRole("tab", { name: "Activity" }));

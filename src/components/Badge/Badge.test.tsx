@@ -38,11 +38,6 @@ describe("Badge", () => {
     expect(link).toHaveTextContent("2");
   });
 
-  // A badge is an indicator, not a hit target, so it must not take the shared
-  // recipe's control affordances — a hover/active background on a static span
-  // advertises a click it can't perform. jsdom applies no stylesheet, so these
-  // assert the variant carried on the element; the hover colours themselves are
-  // verified against real computed styles in the browser.
   describe("affordances", () => {
     it("does not take a control's hover background", () => {
       render(<Badge data-testid="badge" text="NEW" />);
@@ -53,8 +48,6 @@ describe("Badge", () => {
     });
 
     it("resolves its affordances from the rendered element", () => {
-      // `auto` is what keeps a badge that `render`s as a link lighting up while
-      // the default span stays inert, so both kinds carry it.
       render(
         <>
           <Badge data-testid="span" text="NEW" />
@@ -136,7 +129,6 @@ describe("Badge", () => {
       );
       const blank = screen.getByTestId("blank");
       const count = screen.getByTestId("count");
-      // The blank variant adds a class the content-bearing badge does not carry.
       const extra = blank.className
         .split(/\s+/)
         .filter((cls) => !count.className.split(/\s+/).includes(cls));
@@ -148,10 +140,7 @@ describe("Badge", () => {
     it("sets the custom fill as an inline custom property", () => {
       render(<Badge data-testid="badge" text="NEW" color="#7c3aed" />);
       const badge = screen.getByTestId("badge");
-      // The value is arbitrary, so it can't be a recipe variant — it rides in on
-      // a custom property that the escape-hatch class reads.
       expect(badge.getAttribute("style")).toContain("#7c3aed");
-      // …and never as the native `color` attribute.
       expect(badge).not.toHaveAttribute("color");
     });
 
@@ -159,10 +148,6 @@ describe("Badge", () => {
       render(<Badge data-testid="custom" text="NEW" color="#7c3aed" />);
       const custom = screen.getByTestId("custom").className.split(/\s+/);
 
-      // Both schemes are single classes, so if both were applied the winner
-      // would come down to stylesheet emission order rather than to intent.
-      // The custom badge must carry the escape-hatch class and *none* of the
-      // token recipe's.
       expect(custom).toContain(badgeCustomColor);
       const intentClasses = componentIntentRecipe({ intent: "primary", saliency: "high" }).split(
         /\s+/,
@@ -177,7 +162,6 @@ describe("Badge", () => {
           <Badge data-testid="custom" text="NEW" size="lg" shape="square" color="#7c3aed" />
         </>,
       );
-      // Only the colour scheme differs — the size/shape classes are shared.
       const intent = new Set(screen.getByTestId("intent").className.split(/\s+/));
       const custom = new Set(screen.getByTestId("custom").className.split(/\s+/));
       const shared = [...custom].filter((cls) => intent.has(cls));
@@ -197,8 +181,6 @@ describe("Badge", () => {
     });
 
     it("rejects color alongside intent/saliency", () => {
-      // The hatch replaces the token scheme outright, so accepting both would
-      // leave one silently doing nothing.
       // @ts-expect-error `color` and `intent` are mutually exclusive.
       render(<Badge text="A" color="#7c3aed" intent="primary" />);
       // @ts-expect-error `color` and `saliency` are mutually exclusive.
@@ -222,8 +204,6 @@ describe("Badge", () => {
     });
 
     it("squares the content-less blank kind too", () => {
-      // The shape axis is orthogonal to content, so a blank badge squares just
-      // like the content-bearing kinds.
       render(
         <>
           <Badge data-testid="round-blank" shape="round" />

@@ -88,7 +88,6 @@ describe("Modal", () => {
     expect(await screen.findByText("Modal body")).toBeInTheDocument();
 
     await user.click(screen.getByTestId("outside"));
-    // Give any (unexpected) dismissal a chance to run before asserting it stayed.
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByText("Modal body")).toBeInTheDocument();
   });

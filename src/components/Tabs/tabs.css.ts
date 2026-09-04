@@ -4,9 +4,6 @@ import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { focusRingColorVar, iconColorVar, textColorVar } from "../../styles/vars.css";
 import { vars } from "../../theme/contract.css";
 
-// The active tab's colours, funnelled through local vars so the base style can
-// stay flat while the intent x saliency compound variants just swap values —
-// mirrors `componentIntentRecipe`.
 const activeBg = createVar();
 const activeFg = createVar();
 const activeBd = createVar();
@@ -46,8 +43,6 @@ export const tabsTab = recipe({
       [textColorVar]: vars.text.color.neutral.mid,
     },
     selectors: {
-      // Inactive hover: a subtle neutral wash + stronger text. Excludes the
-      // active tab (its fill stays put) and disabled tabs (inert).
       '&:hover:not([aria-selected="true"]):not([aria-disabled="true"])': {
         background: vars.component.color.neutral.mid.default.bgc,
         color: vars.text.color.neutral.high,
@@ -62,9 +57,6 @@ export const tabsTab = recipe({
         borderColor: activeBd,
         vars: { [iconColorVar]: activeFg, [textColorVar]: activeFg },
       },
-      // Disabled is modelled with `aria-disabled` (never the native attribute),
-      // so the tab stays in the roving tab order; the dim comes from
-      // `tabsTabDisabled` / `tabsListDisabled` so it never double-applies.
       '&[aria-disabled="true"]': {
         cursor: "not-allowed",
       },

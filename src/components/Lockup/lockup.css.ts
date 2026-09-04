@@ -12,8 +12,8 @@ export const lockupRoot = style({
   display: "flex",
   alignItems: "center",
   gap: vars.space[3],
-  minWidth: 0, // see `Flex`
-  minHeight: 0, // see `Flex`
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /**

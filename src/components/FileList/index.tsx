@@ -117,7 +117,6 @@ function FileListItem({ id, file, download, intent, saliency, size, disabled }: 
   const itemDisabled = disabled ?? ctx.disabled;
   const showDownload = download === true && ctx.onDownload != null;
 
-  // Trailing adornments, in order: download (if downloadable), then remove.
   const trail: Array<React.ReactElement<ChipAdornmentProps>> = [];
   if (showDownload) {
     trail.push(
@@ -146,9 +145,6 @@ function FileListItem({ id, file, download, intent, saliency, size, disabled }: 
         intent={intent ?? ctx.intent}
         saliency={saliency ?? ctx.saliency}
         size={size ?? ctx.size}
-        // `disabled` dims the chip (modelled as `aria-disabled`, never the
-        // native attribute) and, through the Chip's adornment context, makes
-        // the download / remove buttons inert while keeping them focusable.
         disabled={itemDisabled}
         className={fileListChip}
         leadAdornments={[<Chip.Adornment key="type" icon={<FileTypeIcon file={file} />} />]}

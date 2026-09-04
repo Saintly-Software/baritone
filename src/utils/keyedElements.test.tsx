@@ -16,8 +16,6 @@ describe("keyedElements", () => {
   });
 
   it("keys surviving elements by their ORIGINAL index, so a dropped middle entry doesn't renumber the rest", () => {
-    // The second slot is falsy; "c" is at original index 2. Post-filter indexing
-    // would give it key "1" and remount it whenever the conditional row toggles.
     const result = keyedElements([<span>a</span>, false, <span>c</span>]);
     expect(result.map((el) => el.key)).toEqual(["0", "2"]);
   });

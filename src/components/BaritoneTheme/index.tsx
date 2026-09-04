@@ -1,10 +1,3 @@
-// NOTE: intentionally NOT a `"use client"` module. Unlike the other components
-// (which lean on base-ui hooks), this is a pure wrapper — it computes a set of
-// inline CSS custom properties from tokens and renders one element. Keeping it
-// server-compatible means it can go straight into an SSR root layout (e.g. a
-// Next.js Server Component) where per-tenant tokens are resolved on the server
-// and inlined into the first paint — no client boundary, no flash, no hydration
-// mismatch.
 import * as React from "react";
 import {
   type BorderWidthOptions,
@@ -80,13 +73,6 @@ export function BaritoneTheme({
   ref,
   ...rest
 }: BaritoneThemeProps) {
-  // `isolation: isolate` makes this scope its own stacking context, so any
-  // z-indexed app content stays contained below the popups base-ui portals to
-  // the end of `<body>` (Tooltip/Popover/Menu/Select/Combobox/Modal/Drawer).
-  // Those surfaces therefore need no z-index of their own — they stack above the
-  // page by DOM order. Listed first so a consumer `style` can still override it.
-  // Consumer `style` spreads last so brand vars stay set while callers can still
-  // add layout styles (or deliberately override a single `--var`).
   const themeStyle = {
     isolation: "isolate" as const,
     ...createInlineTheme(tokens, {

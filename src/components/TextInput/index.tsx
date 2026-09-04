@@ -96,9 +96,6 @@ export interface MultilineTextInputProps
 export type TextInputProps = (SingleLineTextInputProps | MultilineTextInputProps) &
   FieldLabellingProps;
 
-// One permissive shape for internal destructuring. The *public* `TextInputProps`
-// union keeps callers honest; internally we just need every field readable in one
-// place, so we widen `multiline`/`size`/`rows`/`ref` and merge both attribute sets.
 type TextInputInternalProps = TextInputBaseProps &
   FieldLabellingInput &
   Omit<
@@ -158,12 +155,8 @@ type TextInputInternalProps = TextInputBaseProps &
  * />
  */
 export function TextInput(props: TextInputProps) {
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
 
-  // The public API is a discriminated union; internally we read every field from
-  // one widened shape. `as unknown as` is needed because the union's `ref`
-  // (input XOR textarea) isn't directly assignable to the merged ref type.
   const {
     state = "neutral",
     label,
@@ -187,8 +180,6 @@ export function TextInput(props: TextInputProps) {
 
   const disabled = disabledProp || inheritedDisabled;
 
-  // Report the string value first and the raw React event second — the shared
-  // form-control shape — rather than forwarding the native event-only `onChange`.
   const handleChange: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> | undefined =
     onChange && ((event) => onChange(event.target.value, event));
 
@@ -217,12 +208,9 @@ export function TextInput(props: TextInputProps) {
         ref={ref}
         render={multiline ? <textarea rows={rows} /> : undefined}
         className={controlClass}
-        // The `Field` marks the label; base-ui turns this into `aria-required`.
         required={required}
         aria-disabled={disabled || undefined}
         readOnly={disabled || readOnly}
-        // base-ui's `Field.Label` already names `Field.Control`, so this only
-        // emits an attribute for the label-less arms.
         {...fieldNameAttrs({ label, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby })}
         {...rest}
         onChange={handleChange}

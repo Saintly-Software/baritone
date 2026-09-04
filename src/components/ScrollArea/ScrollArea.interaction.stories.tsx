@@ -17,7 +17,6 @@ export default meta;
 
 type Story = StoryObj<typeof ScrollArea>;
 
-// Tall content so a vertical area overflows.
 const Tall = () => (
   <div style={{ display: "grid", gap: 12 }}>
     {Array.from({ length: 30 }, (_, i) => (
@@ -28,7 +27,6 @@ const Tall = () => (
   </div>
 );
 
-// A wide row so a horizontal area overflows.
 const Wide = () => (
   <div style={{ display: "flex", gap: 12 }}>
     {Array.from({ length: 30 }, (_, i) => (
@@ -39,7 +37,6 @@ const Wide = () => (
   </div>
 );
 
-// A wide + tall grid so a both-axis area overflows in two directions.
 const Big = () => (
   <div
     style={{
@@ -84,10 +81,8 @@ export const Vertical: Story = {
     const rootEl = getRoot(canvasElement, "Vertical");
     const bar = await waitForBar(rootEl, "vertical");
 
-    // Only the vertical scrollbar exists.
     expect(rootEl.querySelector('[data-orientation="horizontal"]')).toBeNull();
 
-    // Hidden at rest, revealed on hover, hidden again on leave.
     expect(getComputedStyle(bar).opacity).toBe("0");
     await userEvent.hover(rootEl);
     await waitFor(() => expect(getComputedStyle(bar).opacity).toBe("1"));
@@ -110,10 +105,8 @@ export const Horizontal: Story = {
     const rootEl = getRoot(canvasElement, "Horizontal");
     const bar = await waitForBar(rootEl, "horizontal");
 
-    // Only the horizontal scrollbar exists.
     expect(rootEl.querySelector('[data-orientation="vertical"]')).toBeNull();
 
-    // Hidden at rest, revealed on hover, hidden again on leave.
     expect(getComputedStyle(bar).opacity).toBe("0");
     await userEvent.hover(rootEl);
     await waitFor(() => expect(getComputedStyle(bar).opacity).toBe("1"));
@@ -137,18 +130,15 @@ export const Both: Story = {
     const verticalBar = await waitForBar(rootEl, "vertical");
     const horizontalBar = await waitForBar(rootEl, "horizontal");
 
-    // Both hidden at rest.
     expect(getComputedStyle(verticalBar).opacity).toBe("0");
     expect(getComputedStyle(horizontalBar).opacity).toBe("0");
 
-    // Hovering reveals both.
     await userEvent.hover(rootEl);
     await waitFor(() => {
       expect(getComputedStyle(verticalBar).opacity).toBe("1");
       expect(getComputedStyle(horizontalBar).opacity).toBe("1");
     });
 
-    // Leaving hides both again.
     await userEvent.unhover(rootEl);
     await waitFor(() => {
       expect(getComputedStyle(verticalBar).opacity).toBe("0");

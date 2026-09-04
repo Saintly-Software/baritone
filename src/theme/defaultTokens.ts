@@ -29,10 +29,6 @@ import {
   space,
 } from "./scales";
 
-// ---------------------------------------------------------------------------
-// Small helpers
-// ---------------------------------------------------------------------------
-
 function record<K extends string, V>(keys: readonly K[], make: (key: K) => V): Record<K, V> {
   return Object.fromEntries(keys.map((k) => [k, make(k)])) as Record<K, V>;
 }
@@ -44,8 +40,6 @@ const ok = (l: number, c: number, h: number, a?: number): string =>
 
 const round = (n: number) => Math.round(n * 1000) / 1000;
 
-// Near-black / near-white ink used for text-on-colour. The actual choice per
-// background is made by `pickInk`, so contrast is correct by construction.
 const INK = ok(0.18, 0.01, 260);
 const PAPER = ok(0.98, 0.008, 260);
 
@@ -58,13 +52,8 @@ function pickInk(bg: string): string {
 
 type ColourfulIntent = Exclude<Intent, "neutral">;
 
-// The colourful intents only (neutral is a separate near-greyscale ramp). Used
-// to build the per-intent maps a brand seed can override.
 const COLOURFUL_INTENTS = INTENTS.filter((i): i is ColourfulIntent => i !== "neutral");
 
-// Hue + base chroma per colourful intent. Neutral is handled separately as a
-// near-greyscale ramp. These are the built-in defaults; a `BrandSeed` can
-// override any of them (see `buildDefaultTokens`).
 const DEFAULT_SEED: Record<ColourfulIntent, { h: number; c: number }> = {
   primary: { h: 258, c: 0.16 },
   secondary: { h: 295, c: 0.17 },
@@ -156,10 +145,6 @@ function resolveSeed(brand: BrandSeed): ResolvedSeed {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Component colours
-// ---------------------------------------------------------------------------
-
 function disabledTriplet(isDark: boolean, transparentBg: boolean): Triplet {
   const bgc = transparentBg
     ? "transparent"
@@ -226,13 +211,7 @@ function componentColor(seed: ResolvedSeed, isDark: boolean) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Surface colours (high | low). Neutral is the common case; colourful intents
-// exist for Notice/Toast.
-// ---------------------------------------------------------------------------
-
 function neutralSurfaceBlock(saliency: "high" | "low", isDark: boolean): Block {
-  // low = the base page background; high = a washed/raised surface.
   const bgc =
     saliency === "low"
       ? isDark
@@ -294,10 +273,6 @@ function surfaceColor(seed: ResolvedSeed, isDark: boolean) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Text colours
-// ---------------------------------------------------------------------------
-
 function textColor(seed: ResolvedSeed, isDark: boolean) {
   return record(INTENTS, (intent) =>
     record(SALIENCIES, (saliency): string => {
@@ -332,10 +307,6 @@ function textColor(seed: ResolvedSeed, isDark: boolean) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Form colours
-// ---------------------------------------------------------------------------
-
 function formColor(seed: ResolvedSeed, isDark: boolean) {
   const neutral = {
     background: isDark ? ok(0.18, 0, NEUTRAL_H) : ok(0.99, 0, NEUTRAL_H),
@@ -358,14 +329,9 @@ function formColor(seed: ResolvedSeed, isDark: boolean) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Focus rings
-// ---------------------------------------------------------------------------
-
 function focusRings(seed: ResolvedSeed, isDark: boolean) {
   return record(INTENTS, (intent): string => {
     if (intent === "neutral") {
-      // Neutral focus borrows primary for visibility.
       const { h, c } = seed.intents.primary;
       return ok(isDark ? 0.7 : 0.56, c, h);
     }
@@ -374,13 +340,6 @@ function focusRings(seed: ResolvedSeed, isDark: boolean) {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Typography scale
-// ---------------------------------------------------------------------------
-
-// How many `lower`/`upper` increments each size sits from the `md` anchor:
-// fontSize(size) = md + lower·<lower step> + upper·<upper step>. The lower step
-// spans xs→xl, the upper step continues xl→9xl.
 const SIZE_STEPS: Record<TextSize, { lower: number; upper: number }> = {
   xs: { lower: -2, upper: 0 },
   sm: { lower: -1, upper: 0 },
@@ -426,10 +385,6 @@ function shadows(isDark: boolean) {
     lg: `0 12px 32px -4px ${ok(0.2, 0.02, 260, 0.16)}`,
   };
 }
-
-// ---------------------------------------------------------------------------
-// Assembled default tokens
-// ---------------------------------------------------------------------------
 
 /**
  * Produce a complete, accessible set of default token *values* for a scheme,

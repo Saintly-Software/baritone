@@ -5,8 +5,6 @@ import { Button } from "../Button";
 import { Notice } from "../Notice";
 import { useToast } from "./index";
 
-// Throwaway glyph so the icon examples have something to render (the library
-// ships no icon set — see the Notice/Drawer stories for the same pattern).
 const CheckGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
     <path d="M20 6 9 17l-5-5" />
@@ -29,8 +27,6 @@ const meta: Meta = {
     ),
   ],
   parameters: {
-    // The toasts portal to the bottom-right of the viewport, outside the story
-    // canvas — give the panel room so they're visible in docs.
     layout: "fullscreen",
   },
 };
@@ -142,7 +138,6 @@ export const WithActions: Story = {
               Undo
             </Notice.Action>,
           ],
-          // Give the reader a beat longer to react to the undo affordance.
           timeout: 8000,
         });
       };

@@ -130,7 +130,6 @@ describe("Text", () => {
   });
 
   it("renders any size from the shared scale (same scale as Heading)", () => {
-    // Text and Heading share the full scale; a large display size is valid on Text.
     render(<Text size="4xl">Display</Text>);
     expect(screen.getByText("Display").getAttribute("style")).toContain(
       `var(${fontSizeVarName("4xl")})`,

@@ -35,8 +35,6 @@ ButtonGroupItem.displayName = "ButtonGroup.Item";
 
 export interface ButtonGroupProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
-  // Colour comes from each member's intent/saliency, not `color`; the members
-  // are supplied via `items`, not `children`.
   "color" | "children"
 > {
   /**
@@ -110,13 +108,9 @@ export function ButtonGroup({
   return (
     <div ref={ref} role="group" className={cx(buttonGroupRoot, className)} {...rest}>
       {items.map((item, index) => {
-        // Position keys the corner/border collapse: the two ends stay rounded,
-        // everything between them squares off and overlaps its neighbour.
         const position =
           count === 1 ? "only" : index === 0 ? "first" : index === count - 1 ? "last" : "middle";
 
-        // Group defaults fill in, but the member's own intent/saliency win. `size`
-        // is always the group's — the member type doesn't carry one.
         const consumerProps: SolidButtonProps = {
           ...item.props,
           size,

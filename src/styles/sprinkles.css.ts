@@ -10,9 +10,6 @@ const spaceValues = Object.fromEntries(SPACE_KEYS.map((key) => [key, vars.space[
 
 const marginValues = { ...spaceValues, auto: "auto" };
 
-// Sizing values for `width` / `height` / `min*`: the spacing scale (so a flex
-// child can take a fixed size straight from the atoms scale) plus the intrinsic
-// keywords. `full` is a friendly alias for `100%`.
 const dimensionValues = {
   ...spaceValues,
   auto: "auto",
@@ -23,8 +20,6 @@ const dimensionValues = {
   "min-content": "min-content",
 };
 
-// Responsive atoms wired to the breakpoint tokens. `mobile` is the base
-// (mobile-first) condition; the rest are `min-width` media queries.
 const responsiveProperties = defineProperties({
   conditions: {
     mobile: {},
@@ -79,10 +74,6 @@ const responsiveProperties = defineProperties({
     whiteSpace: ["normal", "nowrap", "pre", "pre-wrap", "pre-line", "break-spaces"],
     overflowWrap: ["normal", "break-word", "anywhere"],
     textTransform: ["none", "uppercase", "lowercase", "capitalize"],
-    // NOTE: `letterSpacing` is deliberately *not* an atom. Its vocabulary is
-    // consumer-defined and open-ended (see `theme/letterSpacings.ts`), so it can't
-    // be enumerated into build-time classes; it's routed through the
-    // `--textLetterSpacing` var by `InternalText` instead, exactly like `font`.
   },
   shorthands: {
     p: ["padding"],

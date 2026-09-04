@@ -108,9 +108,6 @@ export interface LockupProps extends Omit<React.HTMLAttributes<HTMLElement>, "ti
 /** Build the title node — a `Heading` when `level` is set, otherwise a `Text`. */
 function renderTitle(title: React.ReactNode, slot: LockupTitleSlotProps | undefined) {
   const { level, size, weight, ...rest } = slot ?? {};
-  // A pure semantics switch: both branches must render identically, so they share
-  // the same high-saliency, semibold-by-default title styling. `Heading` would
-  // otherwise apply its per-level weight, diverging from the `Text` branch.
   const shared = { saliency: "high" as const, size: size ?? "lg", weight: weight ?? "semibold" };
   if (level != null) {
     return (

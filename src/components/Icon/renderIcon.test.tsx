@@ -46,7 +46,6 @@ describe("renderIcon", () => {
     ) as React.ReactElement<{ className?: string; size?: string }>;
 
     expect(result.type).toBe(Icon);
-    // Icon's explicit size wins; the slot className is composed ahead of the Icon's own.
     expect(result.props.size).toBe("lg");
     expect(result.props.className).toBe("slot mine");
   });

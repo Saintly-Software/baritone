@@ -47,7 +47,6 @@ describe("HelpText", () => {
       );
       const svg = screen.getByTestId("help").querySelector("svg");
       expect(svg).not.toBeNull();
-      // Wrapped in a decorative (aria-hidden) Icon since the text carries meaning.
       expect(svg?.parentElement).toHaveAttribute("aria-hidden", "true");
     });
 
@@ -90,7 +89,6 @@ describe("HelpText", () => {
       );
       const el = screen.getByTestId("help");
       expect(el.className).toContain(textIntentRecipe({ intent: "neutral", saliency: "low" }));
-      // No native `disabled` attribute — HelpText is non-interactive text.
       expect(el).not.toHaveAttribute("disabled");
     });
   });

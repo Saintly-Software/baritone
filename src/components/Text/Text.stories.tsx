@@ -16,16 +16,11 @@ const meta: Meta<typeof Text> = {
   component: Text,
   args: { children: "The quick brown fox", size: "md", saliency: "mid" },
   argTypes: {
-    // `size` and `weight` are open-ended (consumer-defined), like `font`; the
-    // built-in scales below are the ones always available without a theme that
-    // publishes more. See `CustomSizes` / `CustomWeights`.
     size: { control: "select", options: TEXT_SIZES },
     intent: { control: "select", options: INTENTS },
     saliency: { control: "select", options: SALIENCIES },
     weight: { control: "select", options: TEXT_WEIGHTS },
     italic: { control: "boolean" },
-    // `font` is open-ended (consumer-defined); the built-in `sans`/`mono` are the
-    // two always available without a theme that publishes more. See `CustomFonts`.
     font: { control: "select", options: ["sans", "mono"] },
     textAlign: { control: "inline-radio", options: ["start", "center", "end"] },
     whiteSpace: {
@@ -37,12 +32,7 @@ const meta: Meta<typeof Text> = {
       control: "select",
       options: ["none", "uppercase", "lowercase", "capitalize"],
     },
-    // `letterSpacing`, like `font`, is open-ended (consumer-defined); the built-in
-    // `tighter`…`widest` steps are the ones always available without a theme that
-    // publishes more. See `CustomLetterSpacing`.
     letterSpacing: { control: "select", options: LETTER_SPACING_KEYS },
-    // `lineHeight`, like `font`, is open-ended (consumer-defined); the built-in
-    // `none`…`loose` leadings are always available. See `CustomLineHeight`.
     lineHeight: { control: "select", options: LINE_HEIGHT_KEYS },
   },
 };
@@ -50,8 +40,6 @@ export default meta;
 
 type Story = StoryObj<typeof Text>;
 
-// Interactive default — tune every knob from the controls panel. Renamed from
-// "Playground".
 export const Basic: Story = {};
 
 const thStyle: CSSProperties = {

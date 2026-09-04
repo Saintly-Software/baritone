@@ -60,12 +60,10 @@ export const CollapsesAndExpandsAGroup: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Groups start expanded: an Engineering leaf is on screen, toggle says "Collapse".
     const collapse = canvas.getByRole("button", { name: "Collapse Engineering" });
     expect(collapse).toHaveAttribute("aria-expanded", "true");
     expect(canvas.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
 
-    // Collapse it — its rows go away and the toggle becomes "Expand" / aria-expanded=false.
     await userEvent.click(collapse);
     await waitFor(() => {
       expect(canvas.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
@@ -73,7 +71,6 @@ export const CollapsesAndExpandsAGroup: Story = {
     const expand = canvas.getByRole("button", { name: "Expand Engineering" });
     expect(expand).toHaveAttribute("aria-expanded", "false");
 
-    // Expand again — the rows return.
     await userEvent.click(expand);
     await waitFor(() => {
       expect(canvas.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
@@ -97,13 +94,11 @@ export const GroupsToggleIndependently: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Collapse Engineering only.
     await userEvent.click(canvas.getByRole("button", { name: "Collapse Engineering" }));
     await waitFor(() => {
       expect(canvas.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
     });
 
-    // Research stays open — its rows are still there and its toggle still says "Collapse".
     expect(canvas.getByRole("cell", { name: "Alan Turing" })).toBeInTheDocument();
     expect(canvas.getByRole("button", { name: "Collapse Research" })).toBeInTheDocument();
   },
@@ -130,13 +125,11 @@ export const MergedCollapsesAndExpands: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // The grouped "Role" column is gone: only Name (the host) and Balance remain.
     expect(canvas.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
       "Name",
       "Balance",
     ]);
 
-    // The group label and the leaf value share the host (Name) column.
     const collapse = canvas.getByRole("button", { name: "Collapse Engineering" });
     expect(canvas.getByText("Ada Lovelace")).toBeInTheDocument();
 
@@ -179,7 +172,6 @@ function SelectableTable({
         selectedRowIds={selected}
         onSelectionChange={setSelected}
       />
-      {/* Sorted so assertions don't depend on click order. */}
       <p data-testid="selected">{[...selected].sort().join(",")}</p>
     </div>
   );
@@ -239,7 +231,6 @@ export const HeaderGoesIndeterminateOnPartialSelection: Story = {
     await userEvent.click(checkboxForRow(canvasElement, "Ada Lovelace"));
     await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe("1"));
 
-    // Some but not all → mixed, neither fully checked nor fully unchecked.
     expect(selectAll).toBePartiallyChecked();
     expect(selectAll).not.toBeChecked();
   },
@@ -251,19 +242,13 @@ export const ShiftClickSelectsARange: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Anchor on Ada (row 1) with a normal click.
     await userEvent.click(checkboxForRow(canvasElement, "Ada Lovelace"));
     await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe("1"));
 
-    // Shift-click Alan (row 3). A real Shift-click reaches React's `onChange` with
-    // `nativeEvent.shiftKey` set, which is what TanStack's range detector reads —
-    // so dispatch exactly that. (Holding Shift across userEvent's separate
-    // keyboard/pointer calls doesn't carry the modifier onto the click here.)
     checkboxForRow(canvasElement, "Alan Turing").dispatchEvent(
       new MouseEvent("click", { bubbles: true, cancelable: true, shiftKey: true }),
     );
 
-    // The inclusive range fills in: Ada (1), Grace (2), Alan (3) — but not Katherine (4).
     await waitFor(() => expect(canvas.getByTestId("selected").textContent).toBe("1,2,3"));
     expect(checkboxForRow(canvasElement, "Katherine Johnson")).not.toBeChecked();
   },
@@ -276,17 +261,14 @@ export const GroupHeaderSelectsItsRows: Story = {
     const canvas = within(canvasElement);
     const selected = () => canvas.getByTestId("selected").textContent;
 
-    // The Engineering group's box lives in its header row (with the toggle).
     const engineeringRow = canvas
       .getByRole("button", { name: "Collapse Engineering" })
       .closest("tr");
     const engineeringBox = within(engineeringRow as HTMLElement).getByRole("checkbox");
 
     await userEvent.click(engineeringBox);
-    // Ada (1) + Grace (2) are Engineering; Research is untouched.
     await waitFor(() => expect(selected()).toBe("1,2"));
     expect(engineeringBox).toBeChecked();
-    // Overall selection is partial, so "select all" is indeterminate.
     expect(canvas.getByRole("checkbox", { name: "Select all rows" })).toBePartiallyChecked();
 
     await userEvent.click(engineeringBox);
@@ -311,12 +293,10 @@ export const ExpandsAndCollapsesADetailPanel: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Collapsed to start: the toggle says "Expand" and no panel is on screen.
     const expand = canvas.getByRole("button", { name: "Expand details for Ada Lovelace" });
     expect(expand).toHaveAttribute("aria-expanded", "false");
     expect(canvas.queryByText("Balance: $4200")).not.toBeInTheDocument();
 
-    // Open it — the panel appears and the toggle flips to "Collapse".
     await userEvent.click(expand);
     await waitFor(() => {
       expect(canvas.getByText("Balance: $4200")).toBeInTheDocument();
@@ -324,7 +304,6 @@ export const ExpandsAndCollapsesADetailPanel: Story = {
     const collapse = canvas.getByRole("button", { name: "Collapse details for Ada Lovelace" });
     expect(collapse).toHaveAttribute("aria-expanded", "true");
 
-    // Close it again — the panel goes away.
     await userEvent.click(collapse);
     await waitFor(() => {
       expect(canvas.queryByText("Balance: $4200")).not.toBeInTheDocument();
@@ -348,13 +327,11 @@ export const DetailPanelsToggleIndependently: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // Open Ada's panel only.
     await userEvent.click(canvas.getByRole("button", { name: "Expand details for Ada Lovelace" }));
     await waitFor(() => {
       expect(canvas.getByText("Details: Ada Lovelace")).toBeInTheDocument();
     });
 
-    // Grace's panel stays shut, and her toggle is still collapsed.
     expect(canvas.queryByText("Details: Grace Hopper")).not.toBeInTheDocument();
     expect(canvas.getByRole("button", { name: "Expand details for Grace Hopper" })).toHaveAttribute(
       "aria-expanded",

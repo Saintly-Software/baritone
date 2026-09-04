@@ -5,8 +5,6 @@ import { vars } from "../../theme/contract.css";
 import { active, hover } from "../../theme/oklch";
 import { focusRingColorVar, iconColorVar, textColorVar } from "../vars.css";
 
-// Resolved colours are funnelled through local vars so the base style can stay
-// flat while compound variants (intent x saliency) just set the values.
 const bgc = createVar();
 const bgcHover = createVar();
 const bgcActive = createVar();
@@ -84,8 +82,6 @@ export const componentIntentRecipe = recipe({
     SALIENCIES.map((saliency) => {
       const block = vars.component.color[intent][saliency];
       const isLow = saliency === "low";
-      // Low saliency: transparent default -> hover uses the washed `mid` shade,
-      // active applies the active delta to that shade.
       const hoverBaseRef = isLow ? vars.component.color[intent].mid.default.bgc : block.default.bgc;
       return {
         variants: { intent, saliency },

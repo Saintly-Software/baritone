@@ -13,13 +13,8 @@ import {
   textWeightVar,
 } from "../vars.css";
 
-// The colour an explicit `intent`/`saliency` resolves to. Only set when a
-// variant is active, so the base style can fall through to the inherited
-// `--textColor` (then the default token) when neither prop is passed.
 const override = createVar();
 
-// Precedence: explicit `intent`/`saliency` > inherited `--textColor` (published
-// by an ancestor surface/component) > the default neutral/mid text token.
 const resolved = fallbackVar(override, fallbackVar(textColorVar, vars.text.color.neutral.mid));
 
 /**
@@ -41,14 +36,9 @@ const resolved = fallbackVar(override, fallbackVar(textColorVar, vars.text.color
 export const textIntentRecipe = recipe({
   base: {
     color: resolved,
-    // `-0.125em` nudges the 1em icon box down so its optical centre lines up with
-    // the surrounding text; baritone owns the exact value (see `--iconAlign`).
     vars: { [iconColorVar]: resolved, [iconVerticalAlignVar]: "-0.125em" },
   },
   variants: {
-    // Single-variant styles handle "intent and/or saliency": passing only one
-    // resolves against the other's default (neutral / mid). When both are
-    // passed the compound variant below wins (emitted last in the cascade).
     intent: Object.fromEntries(
       INTENTS.map((intent) => [intent, { vars: { [override]: vars.text.color[intent].mid } }]),
     ) as Record<(typeof INTENTS)[number], { vars: Record<string, string> }>,
@@ -86,22 +76,8 @@ export type TextIntentVariants = NonNullable<RecipeVariants<typeof textIntentRec
  */
 export const textSizeRecipe = recipe({
   base: {
-    // Single indirection for the family: the `font` prop sets `--textFont` per
-    // instance (to a `var(--font-<name>)` the theme published); unset, it falls
-    // back to the `sans` token. Mirrors how colour reads `--textColor`.
     fontFamily: fallbackVar(textFontVar, vars.font.sans),
-    // Same single-indirection for tracking: the `letterSpacing` prop sets
-    // `--textLetterSpacing` per instance (to a `var(--letterSpacing-<name>)` the
-    // theme published), and a theme's `defaultLetterSpacing` can seed it at the
-    // root; unset, it falls back to the CSS `normal` keyword (no added tracking,
-    // matching bare text before this was a knob). Open-ended like `font`, so it's
-    // a var here, not an enumerated variant. See `theme/letterSpacings.ts`.
     letterSpacing: fallbackVar(textLetterSpacingVar, "normal"),
-    // Size, leading, and weight follow the same pattern. `--textSize` /
-    // `--textLineHeight` are set by the `size` prop (or the `size` variant below);
-    // `--textLineHeight` is overridden by the `lineHeight` prop; `--textWeight` by
-    // the `weight` prop (or `typographyWeight`). Unset, each falls back to the
-    // `md` / `default` token.
     fontSize: fallbackVar(textSizeVar, vars.text.size.md.fontSize),
     lineHeight: fallbackVar(textLineHeightVar, vars.text.size.md.lineHeight),
     fontWeight: fallbackVar(textWeightVar, vars.text.weight.default),
@@ -123,12 +99,6 @@ export const textSizeRecipe = recipe({
 });
 
 export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>>;
-
-// The optional typographic knobs, split by concern. The *family*, *size*,
-// *leading*, and *weight* are not enumerated recipe knobs on the open path — they're
-// the `--text…` vars the base reads (set by the `font`/`size`/`lineHeight`/`weight`
-// props). Alignment and wrapping aren't here either; they're plain CSS-property
-// passthroughs and live in the sprinkles `atoms`.
 
 /**
  * "typography weight" recipe — the built-in `weight` knob for module-scope callers
@@ -160,12 +130,3 @@ export const typographyDecoration = recipe({
 });
 
 export type TypographyDecorationVariants = NonNullable<RecipeVariants<typeof typographyDecoration>>;
-
-// Note: there's no "font" recipe — nor an open "size"/"lineHeight" recipe. Those
-// vocabularies are consumer-defined and open-ended, so they can't be enumerated into
-// build-time variant classes. Instead the base of `textSizeRecipe` reads the
-// `--textFont` / `--textSize` / `--textLineHeight` / `--textWeight` vars (see above)
-// and `Text`/`Heading` set them to a `var(--<x>-<name>)` the active theme published.
-// See `theme/fonts.ts`, `theme/fontSizes.ts`, `theme/lineHeights.ts`,
-// `theme/fontWeights.ts`. The `size` variant + `typographyWeight` above stay only as
-// a class-based convenience for the built-in values.

@@ -23,9 +23,7 @@ describe("InternalChip", () => {
   it("wraps the label in the chip label element and reuses the chip box recipe", () => {
     render(<InternalChip href="/x">Label</InternalChip>);
     const link = screen.getByRole("link", { name: "Label" });
-    // The chip look is many classes, not the bare inline-link class.
     expect(link.className.split(/\s+/).length).toBeGreaterThan(1);
-    // The label sits in its own truncating element, not directly on the anchor.
     expect(link.querySelector("span")?.textContent).toBe("Label");
   });
 
@@ -41,8 +39,6 @@ describe("InternalChip", () => {
     );
     expect(screen.getByTestId("lead")).toBeInTheDocument();
     expect(screen.getByTestId("trail")).toBeInTheDocument();
-    // Decorative glyphs are `aria-hidden`, so even textual icon content never leaks
-    // into the link's accessible name — it stays the visible label.
     expect(screen.getByRole("link", { name: "Label" })).toBeInTheDocument();
   });
 
@@ -59,7 +55,6 @@ describe("InternalChip", () => {
     );
     const chipClasses = new Set(screen.getByTestId("chip").className.split(/\s+/));
     const linkClasses = screen.getByTestId("link").className.split(/\s+/);
-    // Every class the shared `chipBoxClassName` emits is present on both.
     for (const cls of chipBoxClassName({
       intent: "primary",
       saliency: "low",
@@ -87,7 +82,6 @@ describe("InternalChip", () => {
         Off
       </InternalChip>,
     );
-    // A disabled link has no honest HTML form, so it leaves the link a11y tree.
     expect(screen.queryByRole("link", { name: "Off" })).not.toBeInTheDocument();
     const inert = screen.getByText("Off").closest("[aria-disabled]");
     expect(inert).toHaveAttribute("aria-disabled", "true");

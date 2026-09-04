@@ -36,7 +36,6 @@ describe("isInternalHref", () => {
     "../up",
     "relative",
     "?query=1",
-    // A path that *carries* a fragment is a real navigation — still internal.
     "/a#foo",
     "/a",
     "/weird:segment",
@@ -55,8 +54,6 @@ describe("isInternalHref", () => {
     "tel:+15551234567",
     "sms:+15551234567",
     "ftp://files.example.com",
-    // A fragment-only href is a same-document jump the browser owns, not a
-    // navigation any client router should resolve.
     "#foo",
   ])("treats %s as external", (href) => {
     expect(isInternalHref(href)).toBe(false);
@@ -86,9 +83,7 @@ describe("LinkProvider", () => {
       </LinkProvider>,
     );
     const link = screen.getByRole("link", { name: "Dashboard" });
-    // The design system's generated class rides along...
     expect(link.className.split(/\s+/).length).toBeGreaterThan(1);
-    // ...and the consumer's className is merged in.
     expect(link.className).toContain("extra");
   });
 
@@ -164,8 +159,6 @@ describe("LinkProvider", () => {
       </LinkProvider>,
     );
     const link = screen.getByRole("link", { name: "Dashboard" });
-    // The explicit render wins: the element is the one passed to `render`, not the
-    // provider's router link, and it keeps its own destination.
     expect(link).toHaveAttribute("data-explicit-link", "");
     expect(link).not.toHaveAttribute("data-router-link");
     expect(link).toHaveAttribute("href", "/override");
@@ -173,7 +166,6 @@ describe("LinkProvider", () => {
 
   it("honours a custom isInternal predicate (e.g. keep a subtree on full-page loads)", () => {
     const router = makeRouter();
-    // Route everything *except* the legacy /admin area.
     const isInternal = (href: string) => isInternalHref(href) && !href.startsWith("/admin");
     render(
       <LinkProvider render={router.render} isInternal={isInternal}>
@@ -226,7 +218,6 @@ describe("LinkProvider", () => {
       expect(link.tagName).toBe("A");
       expect(link).toHaveAttribute("data-router-link", "");
       expect(link).toHaveAttribute("href", "/dashboard");
-      // It still reuses the Button recipe (many classes, not the bare inline link).
       expect(link.className.split(/\s+/).length).toBeGreaterThan(1);
     });
 
@@ -252,8 +243,6 @@ describe("LinkProvider", () => {
           </Link>
         </LinkProvider>,
       );
-      // A disabled link has no honest HTML form, so it leaves the link a11y tree
-      // even when a provider is present.
       expect(screen.queryByRole("link", { name: "Off" })).not.toBeInTheDocument();
       await user.click(screen.getByText("Off"));
       expect(router.navigations).toEqual([]);
@@ -274,7 +263,6 @@ describe("LinkProvider", () => {
       expect(link.tagName).toBe("A");
       expect(link).toHaveAttribute("data-router-link", "");
       expect(link).toHaveAttribute("href", "/notes?tags=music");
-      // It still reuses the Chip recipe (many classes, not the bare inline link).
       expect(link.className.split(/\s+/).length).toBeGreaterThan(1);
     });
 

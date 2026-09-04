@@ -127,8 +127,6 @@ export interface CreateThemeOptions
 function fontVars({ fonts, defaultFont }: FontOptions): Record<string, string> {
   const family = fontFamilyVars(fonts);
   if (defaultFont === undefined) return family;
-  // `textFontVar` is a vanilla-extract var reference, so it can't be an inline
-  // object key directly — `assignInlineVars` maps it to its real property name.
   return { ...family, ...assignInlineVars({ [textFontVar]: `var(${fontVarName(defaultFont)})` }) };
 }
 
@@ -196,16 +194,6 @@ export function createDesignSystemTheme(
     warnOnContrastIssues(full, options.name ?? options.scheme);
   }
   const themeClass = createTheme(vars, full);
-  // `isolation: isolate` makes the themed root its own stacking context, so any
-  // z-indexed app content stays contained below the popups base-ui portals to the
-  // end of `<body>` (Tooltip/Popover/Menu/Select/Combobox/Modal/Drawer) — which is
-  // why those surfaces need no z-index of their own. Attached to the generated
-  // class itself (not a second class) so the return value stays a single class,
-  // safe for `classList.add`. `BaritoneTheme` sets the same via inline style. The
-  // `--font-<name>` / `--fontSize-<name>` / `--fontWeight-<name>` /
-  // `--lineHeight-<name>` / `--letterSpacing-<name>` / `--borderWidth-<name>`
-  // registries ride along on the same root so the open typographic and border props
-  // resolve against this theme's vocabulary.
   globalStyle(`.${themeClass}`, {
     isolation: "isolate",
     vars: {

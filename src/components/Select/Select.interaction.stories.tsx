@@ -99,7 +99,6 @@ export const GroupedSelection: Story = {
     const trigger = canvas.getByRole("combobox", { name: "Favourite fruit" });
 
     await userEvent.click(trigger);
-    // Each group is a labelled role="group" in the portaled listbox.
     expect(await body.findByRole("group", { name: "Citrus" })).toBeInTheDocument();
     const berries = body.getByRole("group", { name: "Berries" });
 
@@ -137,7 +136,6 @@ export const MultiSelectHoverSelectedOption: Story = {
 
     await userEvent.hover(apple);
     await waitFor(() => expect(apple).toHaveAttribute("data-highlighted"));
-    // Hover highlights but must not change selection.
     expect(apple).toHaveAttribute("aria-selected", "true");
   },
 };

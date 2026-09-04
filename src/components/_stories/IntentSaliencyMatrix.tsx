@@ -1,11 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
 
-// Shared story helper: renders an intent (rows) × saliency (columns) matrix as an
-// HTML table, with a diagonal "slash" corner cell labelling both axes. Used by the
-// `IntentsAndSaliencies` story of every intent/saliency-driven component so they
-// all read as the same matrix. Not part of the published package (excluded from
-// the dts build).
-
 const thStyle: CSSProperties = {
   fontSize: 12,
   fontWeight: 600,

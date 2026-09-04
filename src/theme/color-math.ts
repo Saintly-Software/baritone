@@ -1,7 +1,3 @@
-// Pure colour math used by the build-time contrast checker. Converts the oklch
-// strings a theme is authored in into sRGB luminance so we can compute WCAG
-// contrast ratios. Kept dependency-free and side-effect-free.
-
 export interface Oklch {
   l: number;
   c: number;

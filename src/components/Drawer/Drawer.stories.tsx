@@ -10,7 +10,6 @@ import { Modal } from "../Modal";
 import { Text } from "../Text";
 import { Drawer, type DrawerProps, type DrawerWidth } from "./index";
 
-// Throwaway glyphs so the action demos have something to render.
 const EditGlyph = () => (
   <Icon>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
@@ -229,8 +228,6 @@ export const Loading: Story = {
 
 export const ImperativeClose: Story = {
   name: "Imperative close (async)",
-  // Behavioural demo of the imperative-close mechanism — kept as a test, hidden
-  // from the sidebar so the showcase stays focused on visual variants.
   tags: ["!dev"],
   render: (args) => {
     const drawer = useOverlayHandle(Drawer);

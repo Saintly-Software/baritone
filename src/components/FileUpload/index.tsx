@@ -22,7 +22,6 @@ import {
   fileUploadInput,
 } from "./fileUpload.css";
 
-// The `Field` (label + dropzone + help) and the staged `FileList` beneath it.
 const wrapperClass = atoms({ display: "flex", flexDirection: "column", gap: "2" });
 const promptClass = cx(
   textIntentRecipe({ intent: "neutral", saliency: "high" }),
@@ -161,9 +160,6 @@ export function matchesAccept(file: File, acceptedFileTypes?: string[]): boolean
   });
 }
 
-// Monotonic id so each accepted `File` becomes a `FileInfo` with a stable, unique
-// key for `FileList` / `onRemove`. Created once at selection time and then carried
-// in `value`, so it stays stable across renders.
 let fileInfoCounter = 0;
 function createFileInfo(file: File): FileInfo {
   fileInfoCounter += 1;
@@ -256,11 +252,8 @@ export function FileUpload(props: FileUploadProps) {
     "aria-describedby": ariaDescribedby,
   } = props as FileUploadBaseProps & FieldLabellingInput;
 
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
-  // Everything the control's focusable element needs from the field, in one
-  // object — see `fieldControlAttrs`.
   const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
@@ -270,9 +263,6 @@ export function FileUpload(props: FileUploadProps) {
 
   const [dragging, setDragging] = React.useState(false);
 
-  // Bridge the `multiple` discriminated union to one array-shaped model so the
-  // rest of the component is single/multi agnostic. `emit` translates an array
-  // back to the caller's shape (a lone `FileInfo | null`, or the array).
   const multiple = props.multiple === true;
   const items = props.multiple ? props.value : props.value != null ? [props.value] : [];
   const emit = (next: FileInfo[], event?: FileUploadChangeEvent) => {
@@ -280,9 +270,6 @@ export function FileUpload(props: FileUploadProps) {
     else props.onChange(next[0] ?? null, event);
   };
 
-  // Filter by `acceptedFileTypes`, wrap as `FileInfo`s, then append (multiple) or
-  // replace with the first (single). No-op when disabled or nothing passes. The
-  // driving event (picker `change` or drop) rides through to `onChange`.
   const addFiles = (incoming: File[], event?: FileUploadChangeEvent) => {
     if (disabled) return;
     const accepted = incoming.filter((file) => matchesAccept(file, acceptedFileTypes));
@@ -294,28 +281,21 @@ export function FileUpload(props: FileUploadProps) {
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selected = event.currentTarget.files;
     if (selected != null && selected.length > 0) addFiles(Array.from(selected), event);
-    // Reset so selecting the same file again still fires `change`.
     event.currentTarget.value = "";
   };
 
-  // A focused file input opens the picker on Enter/Space and click — both arrive
-  // here as a click (keyboard activation dispatches one). Cancelling it is how a
-  // disabled dropzone blocks the picker while the input stays focusable.
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (disabled) event.preventDefault();
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     if (disabled) return;
-    // preventDefault here (and on the drop) is what marks this a valid drop target.
     event.preventDefault();
     event.dataTransfer.dropEffect = "copy";
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
     if (disabled) return;
-    // Cancels the overlaid input's native file assignment so we own the drop and
-    // can filter it (and apply single/multiple semantics) before staging.
     event.preventDefault();
     setDragging(false);
     addFiles(Array.from(event.dataTransfer.files), event);
@@ -327,8 +307,6 @@ export function FileUpload(props: FileUploadProps) {
       : undefined;
 
   return (
-    // The `FileList` sits outside the `Field` so the help text stays attached to
-    // the dropzone it describes, above the staged files rather than below them.
     <div className={wrapperClass}>
       <Field
         {...(controlProps as FieldLabellingProps)}
@@ -340,8 +318,6 @@ export function FileUpload(props: FileUploadProps) {
         disabled={disabled}
         slotProps={slotProps}
       >
-        {/* The drop target. Decorative content is inert; the overlaid input owns
-            clicks + keyboard, and drops are caught here so they can be filtered. */}
         {/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- the overlaid `Field.Control` <input type="file"> below is the accessible control (keyboard + focus); this dropzone is a pointer/drag-only enhancement. */}
         <div
           className={cx(
@@ -381,11 +357,7 @@ export function FileUpload(props: FileUploadProps) {
             multiple={multiple}
             accept={acceptAttr}
             required={required}
-            // `aria-disabled` (never the native `disabled`, per AGENTS.md) keeps the
-            // input in the tab order; the picker is vetoed in `handleClick`.
             aria-disabled={disabled || undefined}
-            // base-ui's `Field.Label` already names the input, so this only emits
-            // an attribute for the label-less arms.
             {...fieldControlAttrs(controlProps)}
             className={fileUploadInput}
             onChange={handleInputChange}

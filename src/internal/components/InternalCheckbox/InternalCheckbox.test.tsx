@@ -15,7 +15,6 @@ describe("InternalCheckbox", () => {
     expect(box).toHaveAttribute("data-unchecked");
     expect(box).not.toHaveAttribute("data-checked");
     expect(box).not.toHaveAttribute("data-indeterminate");
-    // The empty box still mounts an indicator (kept for the scale animation).
     expect(container.querySelector("svg")).toBeInTheDocument();
   });
 
@@ -57,7 +56,6 @@ describe("InternalCheckbox", () => {
     await user.tab();
     const input = screen.getByRole("checkbox", { name: "Subscribe" });
     expect(input).toHaveFocus();
-    // The focusable control lives inside the box, so :focus-within applies to it.
     expect(box).toContainElement(input);
   });
 

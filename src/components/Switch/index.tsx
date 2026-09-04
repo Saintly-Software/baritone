@@ -161,19 +161,12 @@ export function Switch(props: SwitchProps) {
   } = props as SwitchBaseProps & SwitchIconProps & FieldLabellingInput;
 
   const labelId = React.useId();
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
 
-  // `icon` is the single-glyph shorthand — reuse it for both states; otherwise
-  // fall through to the per-state pair (both present or both absent).
   const onIcon = icon ?? activeIcon;
   const offIcon = icon ?? inactiveIcon;
 
-  // The label lives inside the clickable row rather than in the `Field`, so the
-  // exclusivity check `Field` runs for other controls has to happen here.
-  // Everything the control's focusable element needs from the field, in one
-  // object — see `fieldControlAttrs`.
   const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
@@ -187,7 +180,6 @@ export function Switch(props: SwitchProps) {
       helpText={helpText}
       state={state}
       required={required}
-      // Shrink-wrap around the row instead of spanning the line.
       fit="content"
       disabled={disabled}
       slotProps={slotProps}
@@ -196,21 +188,14 @@ export function Switch(props: SwitchProps) {
         <BaseSwitch.Root
           checked={value}
           onCheckedChange={(checked, details) => onChange(checked, details.event)}
-          // `readOnly` (not `disabled`) keeps the track keyboard-focusable: base-ui
-          // leaves it in the tab order but vetoes the toggle (click / Space). The
-          // `aria-disabled` carries the disabled semantics to assistive tech.
           readOnly={disabled}
           aria-disabled={disabled || undefined}
           required={required}
           name={name}
-          // Name the track explicitly: base-ui's hidden `<input>` is `aria-hidden`,
-          // so the wrapping `<label>` would name *that*, not the track.
           {...fieldControlAttrs(controlProps, labelId)}
           render={
             <InternalSwitch
               checked={value}
-              // base-ui now reports `data-readonly`, not `data-disabled`, so the
-              // track's dim is driven explicitly from the prop.
               disabled={disabled}
               state={state}
               size={size}

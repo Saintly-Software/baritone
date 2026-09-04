@@ -31,7 +31,6 @@ export const DisabledTooltip: Story = {
     const canvas = within(canvasElement);
     const button = canvas.getByRole("button", { name: "Publish" });
     await userEvent.hover(button);
-    // The tooltip portals to the body, so query the document, not the canvas.
     await waitFor(
       () =>
         expect(

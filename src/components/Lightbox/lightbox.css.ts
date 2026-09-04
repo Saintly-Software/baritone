@@ -14,8 +14,6 @@ export const lightboxBackdrop = style({
   transitionDuration: vars.motion.duration.base,
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
-    // base-ui flags the enter ("starting") and exit ("ending") frames; fade the
-    // scrim on both.
     "&[data-starting-style], &[data-ending-style]": { opacity: 0 },
   },
   "@media": {
@@ -75,8 +73,6 @@ export const lightboxImage = style({
   display: "block",
   maxWidth: "100%",
   maxHeight: "100%",
-  // Let the image shrink in the column flow so an optional caption below stays
-  // in view rather than being pushed off-screen.
   minHeight: 0,
   width: "auto",
   height: "auto",

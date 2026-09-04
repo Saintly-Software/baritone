@@ -4,8 +4,6 @@ import { iconColorVar, textColorVar } from "../../styles/vars.css";
 import { INTENTS, SALIENCIES, SURFACE_SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-// Resolved colours are funnelled through local vars so the base style can stay
-// flat while the intent×saliency compound variants just set the values.
 const bgc = createVar();
 const fg = createVar();
 const bd = createVar();
@@ -37,8 +35,8 @@ export const noticeRecipe = recipe({
     display: "flex",
     alignItems: "flex-start",
     gap: vars.space[3],
-    minWidth: 0, // see `Flex`
-    minHeight: 0, // see `Flex`
+    minWidth: 0,
+    minHeight: 0,
     boxSizing: "border-box",
     borderStyle: "solid",
     borderWidth: vars.borderWidth.thin,
@@ -50,8 +48,6 @@ export const noticeRecipe = recipe({
     vars: { [iconColorVar]: fg, [textColorVar]: fg },
   },
   variants: {
-    // Intent/saliency are pure selectors for the compound variants below; the
-    // colour is set there so the two axes stay in lockstep.
     intent: Object.fromEntries(INTENTS.map((intent) => [intent, {}])) as Record<
       (typeof INTENTS)[number],
       Record<string, never>
@@ -65,15 +61,10 @@ export const noticeRecipe = recipe({
       pill: { borderRadius: vars.radius.full },
     },
     inline: {
-      // Block banner (default) fills its container width; `inline` shrinks the
-      // notice to its content so it can sit within a line of layout.
       false: {},
       true: { display: "inline-flex" },
     },
     disabled: {
-      // Dim the whole callout; its interactive parts (actions/close) also go inert
-      // via context. `opacity` on the container is fine — a Notice is presentational,
-      // not a form control, so there's no token'd disabled palette to reach for.
       false: {},
       true: { opacity: 0.6 },
     },
@@ -109,7 +100,6 @@ export const noticeBody = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[1],
-  // Let a long title/description ellipsize rather than push the flex row wide.
   minWidth: 0,
   flex: 1,
 });
@@ -125,7 +115,6 @@ export const noticeHeader = style({
   alignItems: "center",
   gap: vars.space[2],
   flexWrap: "wrap",
-  // Let a long title truncate rather than shove the chip off the row.
   minWidth: 0,
 });
 
@@ -207,7 +196,6 @@ export const noticeClose = style({
   padding: 0,
   border: "none",
   background: "transparent",
-  // Fallback: neutral text when used outside a Notice (no `--iconColor` to inherit).
   color: fallbackVar(iconColorVar, vars.component.color.neutral.mid.default.text),
   borderRadius: vars.radius.full,
   lineHeight: 0,

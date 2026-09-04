@@ -22,7 +22,6 @@ describe("TextInput", () => {
     render(<TextInput label="Age" state="invalid" helpText="Must be a number" />);
     const line = screen.getByText("Must be a number");
     expect(line).toBeInTheDocument();
-    // One slot: `state` drives the presentation — HelpText's warning glyph.
     expect(line.querySelector("svg")).not.toBeNull();
     expect(screen.getByLabelText("Age")).toHaveAttribute("aria-invalid", "true");
   });
@@ -66,7 +65,6 @@ describe("TextInput", () => {
         />,
       );
       const trigger = screen.getByRole("button", { name: "About API keys" });
-      // The label still names the input (info sits beside it, not inside it).
       expect(screen.getByLabelText("API key").tagName).toBe("INPUT");
 
       expect(screen.queryByText("Find it in Settings.")).not.toBeInTheDocument();
@@ -96,7 +94,6 @@ describe("TextInput", () => {
       );
       const desc = screen.getByText("Help");
       expect(desc).toHaveClass("custom-desc");
-      // The built-in help text class is still present (merged, not replaced).
       expect(desc.className).not.toBe("custom-desc");
     });
   });

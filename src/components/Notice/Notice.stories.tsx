@@ -4,7 +4,6 @@ import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Icon } from "../Icon";
 import { Notice } from "./index";
 
-// Throwaway glyph so the icon stories have something to render.
 const InfoGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
     <circle cx="12" cy="12" r="10" />

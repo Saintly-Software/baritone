@@ -68,11 +68,6 @@ export function BaritoneProvider({
     <BaseToast.Provider
       timeout={toastTimeout}
       limit={toastLimit}
-      // A `BaritoneToastManager` wraps a base-ui manager, exposing its private
-      // `' subscribe'` channel unchanged; the provider reads only that (its
-      // packing `add`/`update`/`promise` wrappers are for callers, not the
-      // provider). A raw `ToastManager` already matches. Narrowing the union to
-      // base-ui's `ToastManager` for the base-ui provider is therefore sound.
       toastManager={toastManager as ToastManager | undefined}
     >
       {children}

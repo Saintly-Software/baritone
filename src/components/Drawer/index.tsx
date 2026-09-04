@@ -156,10 +156,6 @@ function DrawerRoot({
   ...rest
 }: DrawerProps) {
   const handleOpenChange: NonNullable<RootProps["onOpenChange"]> = (nextOpen, eventDetails) => {
-    // A disabled drawer is non-dismissable: veto every close attempt (Escape, the
-    // close button, swipe). Outside-press is already disabled via
-    // `disablePointerDismissal` below. `cancel()` stops base-ui from acting on the
-    // event, so the panel stays open in both controlled and uncontrolled use.
     if (disabled && !nextOpen) {
       eventDetails.cancel();
       return;
@@ -174,15 +170,11 @@ function DrawerRoot({
       onOpenChange={handleOpenChange}
       handle={handle}
       modal={modal}
-      // `side` is purely visual (CSS); the swipe-to-dismiss gesture follows it.
       swipeDirection={side}
-      // Clicking outside never closes the drawer (a deliberate constraint of this
-      // component); dismissal is via Escape or an explicit close control.
       disablePointerDismissal
     >
       {trigger}
       <BaseDrawer.Portal>
-        {/* Always rendered, even when nested inside another drawer/modal. */}
         <BaseDrawer.Backdrop forceRender className={drawerBackdrop} />
         <BaseDrawer.Viewport className={drawerViewport({ side })}>
           <BaseDrawer.Popup

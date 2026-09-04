@@ -55,7 +55,6 @@ describe("Button", () => {
           Saving
         </Button>,
       );
-      // Label still names the control (spinner is decorative), so getByRole works.
       const button = screen.getByRole("button", { name: "Saving" });
       expect(button).toHaveAttribute("aria-disabled", "true");
       expect(button).toHaveAttribute("aria-busy", "true");
@@ -77,7 +76,6 @@ describe("Button", () => {
     const props = { "aria-label": "nope" } as Record<string, unknown>;
     // @ts-expect-error aria-label is typed as `never` on ButtonProps.
     render(<Button aria-label="nope">Text</Button>);
-    // Even when forced through a cast, it never reaches the DOM.
     render(
       <Button {...props} data-testid="forced">
         Text
@@ -93,7 +91,6 @@ describe("Button", () => {
       expect(button.tagName).toBe("BUTTON");
       expect(button).toHaveAttribute("aria-label", "Add item");
       expect(screen.getByTestId("glyph")).toBeInTheDocument();
-      // No visible text content — the glyph is the whole content.
       expect(button).toHaveTextContent("");
     });
 
@@ -202,8 +199,6 @@ describe("Button", () => {
     });
 
     it("does not render a spinner even if `loading` is forced through", () => {
-      // `loading` is typed away on the text appearance; a forced JS caller must
-      // not get a spinner or an aria-busy control.
       const forced = { loading: true } as Record<string, unknown>;
       render(
         <Button appearance="text" {...forced}>
@@ -246,13 +241,10 @@ describe("Button", () => {
         expect(className).not.toBe(base);
         seen.add(className);
       }
-      // Each shorthand resolves to its own atoms class rather than collapsing.
       expect(seen.size).toBe(3);
     });
 
     it("does not leak width to the DOM as an attribute", () => {
-      // `width` is a shorthand resolved to a class; it's invalid HTML on a
-      // <button>, so it must never be forwarded through `rest`.
       render(<Button width="fill">Save</Button>);
       expect(screen.getByRole("button")).not.toHaveAttribute("width");
     });

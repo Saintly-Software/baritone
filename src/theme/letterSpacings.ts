@@ -78,9 +78,6 @@ export function letterSpacingVars(
     out[letterSpacingVarName(key)] = vars.text.letterSpacing[key];
   }
   for (const [name, value] of Object.entries(letterSpacings)) {
-    // The built-in steps stay token-backed (`vars.text.letterSpacing.*`) so bare
-    // text and e.g. `letterSpacing="widest"` never diverge; the registry can't
-    // shadow them. Customise the built-ins through the theme tokens instead.
     if ((LETTER_SPACING_KEYS as readonly string[]).includes(name)) continue;
     out[letterSpacingVarName(name)] = value;
   }

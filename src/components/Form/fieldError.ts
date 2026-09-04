@@ -93,9 +93,6 @@ function errorToNode(error: unknown): React.ReactNode | undefined {
   if (typeof error === "object" && "message" in error) {
     const message = (error as { message?: unknown }).message;
     if (typeof message === "string") return message.length > 0 ? message : undefined;
-    // A `{ message }` issue whose message is itself a React node (a validator that
-    // formats its error as JSX) — render it rather than dropping it, which would
-    // leave the control `invalid` with a blank help line.
     if (React.isValidElement(message)) return message;
   }
   return undefined;

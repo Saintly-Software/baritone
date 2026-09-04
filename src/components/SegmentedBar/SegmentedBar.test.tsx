@@ -25,7 +25,6 @@ describe("SegmentedBar", () => {
 
   it("computes each share against the sum of the values", () => {
     render(<SegmentedBar aria-label="Areas" segments={SEGMENTS} />);
-    // 6 / 3 / 1 of 10.
     expect(legendRows()[0]).toHaveTextContent("60%");
     expect(legendRows()[1]).toHaveTextContent("30%");
     expect(legendRows()[2]).toHaveTextContent("10%");
@@ -39,7 +38,6 @@ describe("SegmentedBar", () => {
 
   it("ignores a total below the sum of the values", () => {
     render(<SegmentedBar aria-label="Quota" segments={SEGMENTS} total={5} />);
-    // Falls back to the sum (10), rather than reporting shares over 100%.
     expect(legendRows()[0]).toHaveTextContent("60%");
   });
 
@@ -77,7 +75,6 @@ describe("SegmentedBar", () => {
   it("names the legend list with aria-label when there's no visible label", () => {
     render(<SegmentedBar aria-label="This week by area" segments={SEGMENTS} />);
     expect(screen.getByRole("list", { name: "This week by area" })).toBeInTheDocument();
-    // …and renders no visible label of its own.
     expect(screen.queryByText("This week by area")).not.toBeInTheDocument();
   });
 
@@ -93,8 +90,6 @@ describe("SegmentedBar", () => {
 
   it("keeps the legend in the accessibility tree when it is visually hidden", () => {
     render(<SegmentedBar aria-label="Areas" segments={SEGMENTS} showLegend={false} />);
-    // The track is a picture; the legend is the only thing carrying the numbers,
-    // so hiding it must never mean removing it.
     expect(legendRows()).toHaveLength(3);
     expect(screen.getByRole("list")).toHaveTextContent("Sanity");
   });
@@ -130,7 +125,6 @@ describe("SegmentedBar", () => {
         ]}
       />,
     );
-    // No division by zero — an empty bar reads as all-zero, not NaN.
     expect(legendRows()[0]).toHaveTextContent("0%");
     expect(legendRows()[1]).toHaveTextContent("0%");
   });
@@ -142,9 +136,7 @@ describe("SegmentedBar", () => {
 
   it("keeps the track out of the accessibility tree", () => {
     const { container } = render(<SegmentedBar aria-label="Areas" segments={SEGMENTS} />);
-    // One aria-hidden track (the slices are its children, so they go with it).
     expect(container.querySelectorAll('[aria-hidden="true"]').length).toBeGreaterThan(0);
-    // The bar's only announced content is the legend.
     expect(screen.getAllByRole("list")).toHaveLength(1);
   });
 
@@ -158,7 +150,6 @@ describe("SegmentedBar", () => {
     const painted = [...container.querySelectorAll<HTMLElement>("[style]")].filter((element) =>
       element.getAttribute("style")?.includes("#7b61ff"),
     );
-    // Both of the segment's marks — the slice and its legend swatch.
     expect(painted).toHaveLength(2);
   });
 

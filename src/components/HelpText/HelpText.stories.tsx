@@ -6,7 +6,6 @@ import { HelpText } from "./index";
 
 const VARIANTS = ["xs", "sm", "md", "lg"] as const;
 
-// Throwaway glyph for the custom-icon story.
 const InfoGlyph = () => (
   <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" aria-hidden>
     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={2} />
@@ -86,8 +85,6 @@ interface StateRow {
   disabled?: boolean;
 }
 
-// The convenience flags — `invalid` (→ negative + glyph) and `disabled`
-// (→ dimmed) — including the combination where `disabled` wins over `invalid`.
 const stateRows: StateRow[] = [
   { label: "Default", text: "Neutral helper text." },
   { label: "Invalid", text: "This field is required.", invalid: true },

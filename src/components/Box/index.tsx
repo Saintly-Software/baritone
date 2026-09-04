@@ -74,16 +74,13 @@ export function Box({
       ref,
       className: cx(
         atoms({
-          // Only emit `display` when a visibility prop is set, so the element
-          // otherwise keeps its natural display (`block` for div/section/article,
-          // `inline` for span).
           display:
             hideOn || showOn
               ? resolveDisplay(as === "span" ? "inline" : "block", hideOn, showOn)
               : undefined,
           width: resolveWidth(width),
-          minWidth: "0", // see `Flex`
-          minHeight: "0", // see `Flex`
+          minWidth: "0",
+          minHeight: "0",
           m,
           mx,
           my,

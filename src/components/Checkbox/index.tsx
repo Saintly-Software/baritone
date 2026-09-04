@@ -110,14 +110,9 @@ export function Checkbox(props: CheckboxProps) {
   } = props as CheckboxBaseProps & FieldLabellingInput;
 
   const labelId = React.useId();
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
 
-  // The label lives inside the clickable row rather than in the `Field`, so the
-  // exclusivity check `Field` runs for other controls has to happen here.
-  // Everything the control's focusable element needs from the field, in one
-  // object — see `fieldControlAttrs`.
   const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
@@ -131,7 +126,6 @@ export function Checkbox(props: CheckboxProps) {
       helpText={helpText}
       state={state}
       required={required}
-      // Shrink-wrap around the row instead of spanning the line.
       fit="content"
       disabled={disabled}
       slotProps={slotProps}
@@ -141,21 +135,14 @@ export function Checkbox(props: CheckboxProps) {
           checked={value}
           indeterminate={indeterminate}
           onCheckedChange={(checked, details) => onChange(checked, details.event)}
-          // `readOnly` (not `disabled`) keeps the box keyboard-focusable: base-ui
-          // leaves it in the tab order but vetoes the toggle (click / Space). The
-          // `aria-disabled` carries the disabled semantics to assistive tech.
           readOnly={disabled}
           aria-disabled={disabled || undefined}
           required={required}
           name={name}
-          // Name the box explicitly: base-ui's hidden `<input>` is `aria-hidden`,
-          // so the wrapping `<label>` would name *that*, not the box.
           {...fieldControlAttrs(controlProps, labelId)}
           render={
             <InternalCheckbox
               checked={indeterminate ? "indeterminate" : value}
-              // base-ui now reports `data-readonly`, not `data-disabled`, so the
-              // box's dim is driven explicitly from the prop.
               disabled={disabled}
               state={state}
               size={size}

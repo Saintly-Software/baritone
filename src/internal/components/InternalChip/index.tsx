@@ -67,15 +67,7 @@ export function chipBoxClassName({
 
 export interface InternalChipProps
   extends
-    Omit<
-      React.AnchorHTMLAttributes<HTMLAnchorElement>,
-      // Colour comes from intent/saliency, not the `color` attribute (matches
-      // `Chip`/`Link`)…
-      | "color"
-      // …and the accessible name is always the visible label, so an `aria-label`
-      // (which would silently override it) is intentionally unsupported.
-      | "aria-label"
-    >,
+    Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "color" | "aria-label">,
     ChipBoxVariants {
   /**
    * Decorative leading icon — a single non-interactive glyph before the label,
@@ -151,24 +143,10 @@ export function InternalChip({
   className,
   children,
   ref,
-  // Destructured out of `rest` so it's never forwarded to the DOM: the accessible
-  // name is always the visible label, so a (type-`never`) `aria-label` is dropped
-  // here — a cast/JS caller can't sneak it onto the anchor (matches `Button`).
   "aria-label": _ariaLabel,
   ...rest
 }: InternalChipProps) {
-  // The root element carries the chip look; `InternalGenericButtonAnchor` renders
-  // it as the router link (`render`), a plain `<a href>`, or — when disabled — an
-  // inert element that keeps the styling but leaves the link a11y tree. The label
-  // is the single truncating flex item between the decorative icons, so a long
-  // label ellipsizes under `width="fill"` exactly as it does in `Chip`.
-  //
-  // `icon`/`trailIcon` are decorative-only (they take arbitrary content but never a
-  // label), and this chip-link is one anchor whose visible `children` *is* its
-  // accessible name — so the wrappers are `aria-hidden` to keep any textual glyph
-  // content out of that name, no matter what the caller passes.
   const iconState = { intent, saliency, size, disabled };
-  // Guard each wrapper on the resolved node, not the raw slot — a slot can resolve to nothing.
   const iconNode = renderIcon(icon, { state: iconState });
   const trailIconNode = renderIcon(trailIcon, { state: iconState });
   const chip = (
@@ -196,8 +174,6 @@ export function InternalChip({
     </InternalGenericButtonAnchor>
   );
 
-  // The tooltip only exists to explain a disabled chip-link; skip the machinery
-  // entirely when there's nothing to explain.
   if (disabledReason == null) {
     return chip;
   }

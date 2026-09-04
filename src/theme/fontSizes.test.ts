@@ -20,9 +20,6 @@ describe("fontSizeVars", () => {
     expect(out["--fontSize-xs"]).toBe(vars.text.size.xs.fontSize);
     expect(out["--fontSize-md"]).toBe(vars.text.size.md.fontSize);
     expect(out["--fontSize-9xl"]).toBe(vars.text.size["9xl"].fontSize);
-    // A size is a pair: it publishes its paired `--sizeLineHeight-<size>` too (the
-    // default `size` applies when `lineHeight` is unset) — a distinct namespace from
-    // the standalone `--lineHeight-<name>` leading vocabulary.
     expect(out["--sizeLineHeight-md"]).toBe(vars.text.size.md.lineHeight);
     expect(out["--sizeLineHeight-4xl"]).toBe(vars.text.size["4xl"].lineHeight);
   });
@@ -47,8 +44,6 @@ describe("fontSizeVars", () => {
 
   it("ignores built-in size names so they stay token-backed", () => {
     const out = fontSizeVars({ md: "IGNORED", hero: "4rem" });
-    // Reserved built-in sizes never shadow the token-backed values (otherwise bare
-    // text and e.g. `size="md"` would diverge); the custom entry is still published.
     expect(out["--fontSize-md"]).toBe(vars.text.size.md.fontSize);
     expect(out["--fontSize-hero"]).toBe("4rem");
   });

@@ -85,7 +85,6 @@ describe("Notice", () => {
     it("wraps a plain glyph node in an Icon", () => {
       render(<Notice icon={<svg data-testid="glyph" />}>Title</Notice>);
       const glyph = screen.getByTestId("glyph");
-      // The Icon wrapper marks a decorative glyph aria-hidden.
       expect(glyph.parentElement).toHaveAttribute("aria-hidden", "true");
     });
   });
@@ -114,7 +113,6 @@ describe("Notice", () => {
       </Notice>,
     );
     const icon = screen.getByRole("img", { name: "Info" });
-    // Any of the intent-override classes would tint it; none should be present.
     expect(icon.className).not.toContain(noticeIconRecipe({ intent: "warning", saliency: "mid" }));
   });
 

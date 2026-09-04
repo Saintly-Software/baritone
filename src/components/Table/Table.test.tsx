@@ -2,8 +2,6 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { Table, type TableColumn } from "./index";
 
-// A shared fixture typed to its column-key union, so the tests read like real
-// usage (inline columns infer the same union — see the "cell renderer" test).
 const columns: TableColumn<"name" | "role" | "balance">[] = [
   { key: "name", header: "Name" },
   { key: "role", header: "Role" },
@@ -21,7 +19,6 @@ describe("Table", () => {
     render(<Table aria-label="People" columns={columns} rows={people} />);
     const headers = screen.getAllByRole("columnheader");
     expect(headers.map((h) => h.textContent)).toEqual(["Name", "Role", "Balance"]);
-    // Header cells are real <th scope="col">.
     for (const header of headers) {
       expect(header.tagName).toBe("TH");
       expect(header).toHaveAttribute("scope", "col");
@@ -30,7 +27,6 @@ describe("Table", () => {
 
   it("renders one body row per datum, reading each cell from the row's value at the column key", () => {
     render(<Table aria-label="People" columns={columns} rows={people} />);
-    // Two rowgroups: thead + tbody. Body rows live in the second.
     const body = screen.getAllByRole("rowgroup")[1]!;
     expect(within(body).getAllByRole("row")).toHaveLength(3);
     expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
@@ -38,8 +34,6 @@ describe("Table", () => {
   });
 
   it("runs a column's cell renderer with the value and the whole row", () => {
-    // Inline columns infer their own key union — here just `name` and `role`, so
-    // the rows carry exactly those two keys.
     render(
       <Table
         aria-label="People"
@@ -50,9 +44,7 @@ describe("Table", () => {
         rows={[{ name: "Ada Lovelace", role: "Engineering" }]}
       />,
     );
-    // The custom renderer combined the row's `role` value with its `name`.
     expect(screen.getByRole("cell", { name: "Engineering · Ada Lovelace" })).toBeInTheDocument();
-    // The shared fixture's `balance` renderer formats its value too:
     render(<Table aria-label="P2" columns={columns} rows={people} />);
     expect(screen.getByRole("cell", { name: "$96" })).toBeInTheDocument();
   });
@@ -62,7 +54,6 @@ describe("Table", () => {
     const table = screen.getByRole("table");
     expect(table.querySelector("thead")).not.toBeNull();
     expect(table.querySelector("tbody")).not.toBeNull();
-    // Body cells are <td>, not <th>.
     const body = screen.getAllByRole("rowgroup")[1]!;
     for (const cell of within(body).getAllByRole("cell")) {
       expect(cell.tagName).toBe("TD");
@@ -72,7 +63,6 @@ describe("Table", () => {
   it("names the table from a visible caption", () => {
     render(<Table caption="Team members" columns={columns} rows={people} />);
     const table = screen.getByRole("table", { name: "Team members" });
-    // The caption is a real <caption> element.
     expect(within(table).getByText("Team members").tagName).toBe("CAPTION");
   });
 
@@ -84,7 +74,6 @@ describe("Table", () => {
 
   it("applies a distinct align class to an aligned column's cells", () => {
     render(<Table aria-label="People" columns={columns} rows={people} />);
-    // The end-aligned Balance cell should not share the default-aligned Name cell's class.
     const nameCell = screen.getByRole("cell", { name: "Ada Lovelace" });
     const balanceCell = screen.getByRole("cell", { name: "$42" });
     expect(balanceCell.className).not.toBe(nameCell.className);
@@ -98,9 +87,6 @@ describe("Table", () => {
   });
 
   it("keys rows with getRowKey when provided", () => {
-    // A smoke test: rendering with a key deriver produces the expected rows and
-    // doesn't warn. (React keys aren't observable in the DOM, so we assert the
-    // rows render one-to-one.)
     render(
       <Table
         aria-label="People"
@@ -129,8 +115,6 @@ describe("Table", () => {
   });
 
   it("renders a typed interface-backed row array (no implicit index signature)", () => {
-    // Regression: the `rows` bound is `readonly object[]`, so a plain `Person[]`
-    // — an interface type with no string index signature — is accepted.
     interface Person {
       name: string;
       role: string;
@@ -154,9 +138,6 @@ describe("Table", () => {
   });
 
   it("renders duplicate column keys without a React key warning", () => {
-    // Two columns reading the same field is valid (e.g. the same data shown two
-    // ways). Cells are keyed by column position, so React never warns about
-    // duplicate keys.
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       render(
@@ -169,7 +150,6 @@ describe("Table", () => {
           rows={[{ name: "Ada Lovelace" }]}
         />,
       );
-      // Both columns rendered the same field.
       expect(screen.getAllByRole("columnheader")).toHaveLength(2);
       expect(screen.getAllByRole("cell", { name: "Ada Lovelace" })).toHaveLength(2);
       const keyWarnings = spy.mock.calls.filter((args) =>
@@ -182,8 +162,6 @@ describe("Table", () => {
   });
 
   it("throws in dev when a visible caption is combined with an aria name", () => {
-    // A visible caption plus an aria-label/aria-labelledby names the table twice
-    // and the aria value wins for assistive tech — so it's rejected in dev.
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       expect(() =>

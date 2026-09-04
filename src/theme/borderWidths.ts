@@ -73,8 +73,6 @@ export function borderWidthVars(widths: Record<string, string> = {}): Record<str
     out[borderWidthVarName(width)] = vars.borderWidth[width];
   }
   for (const [name, value] of Object.entries(widths)) {
-    // The built-in steps stay token-backed (`vars.borderWidth.*`) so a bare rule and
-    // e.g. `thickness="thick"` never diverge; the registry can't shadow them.
     if ((BORDER_WIDTH_KEYS as readonly string[]).includes(name)) continue;
     out[borderWidthVarName(name)] = value;
   }

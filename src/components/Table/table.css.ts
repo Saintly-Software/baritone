@@ -60,7 +60,6 @@ export const cell = recipe({
         color: vars.text.color.neutral.high,
         fontWeight: vars.text.weight.semibold,
         whiteSpace: "nowrap",
-        // A heavier rule separates the header from the body.
         borderBottomWidth: vars.borderWidth.thick,
       },
       false: {

@@ -233,8 +233,6 @@ export function MetricCard(props: MetricCardProps) {
 
   const interactive = href != null || onClick != null;
 
-  // Big, bold, high-saliency span tinted by `intent` — not a heading (see
-  // `value` doc above). Weight is explicit now that it's independent of `size`.
   const valueNode = (
     <span
       className={cx(
@@ -252,11 +250,6 @@ export function MetricCard(props: MetricCardProps) {
     </Text>
   );
 
-  // The value + label are one unit. When interactive they become the single real
-  // control (stretched over the whole card); otherwise they're a plain wrapper.
-  // The activation is bundled into one `control` object (rather than a `disabled`
-  // JSX attribute) — mirroring Card's `CardPrimaryLink`, this also keeps the
-  // aria-disabled guard from mistaking the wrapper for a native control.
   const control: MetricControlConfig | null = interactive
     ? { href, onClick, target, rel, render, disabled, ariaLabel }
     : null;
@@ -273,7 +266,6 @@ export function MetricCard(props: MetricCardProps) {
     </div>
   );
 
-  // Guard on the resolved node, not the raw slot — a slot can resolve to nothing.
   const iconNode = renderIcon(icon);
   return (
     <Card as={as} ref={ref} className={cx(interactive && metricInteractive, className)} {...rest}>
@@ -327,8 +319,6 @@ function MetricTrendBadge({ trend }: { trend: MetricTrend }) {
       )}
     >
       <TrendGlyph direction={direction} />
-      {/* Redundant under `role="img"`, but keeps the magnitude out of the a11y
-          tree on the rare engine that doesn't prune an image's descendants. */}
       <span aria-hidden="true">{value}</span>
     </span>
   );
@@ -399,7 +389,6 @@ function MetricControl({
     if (target != null) elementProps.target = target;
     if (rel != null) elementProps.rel = rel;
   } else {
-    // Default `type` to `button` so a clickable card in a form doesn't submit it.
     elementProps.type = "button";
   }
 

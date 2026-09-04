@@ -22,7 +22,6 @@ function check(
   required: number,
 ): void {
   const ratio = contrastRatio(foreground, background);
-  // `null` => not statically evaluable (var()/calc()/relative-colour). Skip.
   if (ratio === null) return;
   if (ratio < required) {
     issues.push({
@@ -48,7 +47,6 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
   const issues: ContrastIssue[] = [];
   const pageBg = tokens.surface.color.neutral.low.default.bgc;
 
-  // Body/heading text over the page background.
   for (const intent of INTENTS) {
     for (const saliency of SALIENCIES) {
       const fg = tokens.text.color[intent][saliency];
@@ -57,7 +55,6 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
     }
   }
 
-  // Surface text over surface background.
   for (const intent of INTENTS) {
     for (const saliency of SURFACE_SALIENCIES) {
       const block = tokens.surface.color[intent][saliency].default;
@@ -65,8 +62,6 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
     }
   }
 
-  // Component text over component background. Transparent (low) backgrounds are
-  // checked against the page background instead.
   for (const intent of INTENTS) {
     for (const saliency of SALIENCIES) {
       const block = tokens.component.color[intent][saliency].default;
@@ -76,7 +71,6 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
     }
   }
 
-  // Form placeholder over form background.
   for (const state of FORM_STATES) {
     const block = tokens.form.color[state];
     check(issues, `form.color.${state}.placeholder`, block.placeholder, block.background, AA_BODY);

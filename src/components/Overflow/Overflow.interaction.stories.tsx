@@ -58,13 +58,10 @@ export const Horizontal: Story = {
   play: async ({ canvasElement }) => {
     const { viewport, start, end } = parts(canvasElement, "Toolbar");
 
-    // At the start: nothing hidden to the left (start hidden), more to the right
-    // (end revealed).
     await waitFor(() => expect(opacity(end)).toBe("1"));
     expect(opacity(start)).toBe("0");
     expect(viewport.scrollLeft).toBe(0);
 
-    // Jump to the end (instant): now it's the mirror image — start shows, end hides.
     viewport.scrollTo({ left: viewport.scrollWidth });
     await waitFor(() => {
       expect(opacity(start)).toBe("1");
@@ -72,7 +69,6 @@ export const Horizontal: Story = {
     });
     const atEnd = viewport.scrollLeft;
 
-    // Clicking the start button scrolls back toward the start and re-reveals end.
     await userEvent.click(start);
     await waitFor(() => {
       expect(viewport.scrollLeft).toBeLessThan(atEnd);
@@ -95,7 +91,6 @@ export const HorizontalPage: Story = {
     expect(viewport.scrollLeft).toBe(0);
     await userEvent.click(end);
 
-    // A page ≈ the viewport's client width (give or take sub-pixel rounding).
     await waitFor(() =>
       expect(viewport.scrollLeft).toBeGreaterThanOrEqual(viewport.clientWidth - 4),
     );
@@ -120,7 +115,6 @@ export const Vertical: Story = {
     expect(opacity(start)).toBe("0");
     expect(viewport.scrollTop).toBe(0);
 
-    // Jump to the bottom (instant): now the up button shows and the down hides.
     viewport.scrollTo({ top: viewport.scrollHeight });
     await waitFor(() => {
       expect(opacity(start)).toBe("1");
@@ -128,7 +122,6 @@ export const Vertical: Story = {
     });
     const atBottom = viewport.scrollTop;
 
-    // Clicking the up button scrolls back toward the top and re-reveals down.
     await userEvent.click(start);
     await waitFor(() => {
       expect(viewport.scrollTop).toBeLessThan(atBottom);

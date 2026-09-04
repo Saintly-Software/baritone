@@ -23,9 +23,6 @@ describe("letterSpacingVars", () => {
 
   it("ignores built-in step names so they stay token-backed", () => {
     const out = letterSpacingVars({ widest: "IGNORED", eyebrow: "0.2em" });
-    // Reserved built-in steps never shadow the token-backed values (otherwise bare
-    // text and e.g. `letterSpacing="widest"` would diverge); the custom entry is
-    // still published.
     expect(out["--letterSpacing-widest"]).toBe(vars.text.letterSpacing.widest);
     expect(out["--letterSpacing-eyebrow"]).toBe("0.2em");
   });

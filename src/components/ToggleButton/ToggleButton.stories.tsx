@@ -3,15 +3,12 @@ import * as React from "react";
 import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { ToggleButton, type ToggleButtonBaseProps } from "./index";
 
-// A throwaway glyph so the stories have something to render.
 const StarIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
   </svg>
 );
 
-// ToggleButton is controlled, so the stories drive it from local state — the
-// same shape a consumer would use.
 function ControlledToggle(props: ToggleButtonBaseProps) {
   const [value, setValue] = React.useState(false);
   return <ToggleButton value={value} onChange={setValue} {...props} />;

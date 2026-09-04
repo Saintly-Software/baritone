@@ -65,8 +65,6 @@ export const buttonSpinner = style({
   pointerEvents: "none",
 });
 
-// The resting foreground for the text appearance, funnelled through a local var
-// so hover/active can shift *this* colour (not the inherited one) via oklch.
 const textFg = createVar();
 
 /**
@@ -84,7 +82,6 @@ const textFg = createVar();
  */
 export const textButtonRecipe = recipe({
   base: {
-    // Strip the native button chrome so only the text (and its underline) shows.
     appearance: "none",
     background: "none",
     border: "none",
@@ -97,8 +94,6 @@ export const textButtonRecipe = recipe({
     color: textFg,
     cursor: "pointer",
     borderRadius: vars.radius.sm,
-    // Always underlined: like `Link`, the underline (not colour alone) is what
-    // marks it as an actionable link-style control. `from-font` keeps it legible.
     textDecorationLine: "underline",
     textDecorationThickness: "from-font",
     textUnderlineOffset: "0.15em",
@@ -125,8 +120,6 @@ export const textButtonRecipe = recipe({
         { vars: { [focusRingColorVar]: vars.component.focus[intent] } },
       ]),
     ) as Record<(typeof INTENTS)[number], { vars: Record<string, string> }>,
-    // Saliency alone resolves against the default intent (neutral); the compound
-    // variants below carry the actual intent x saliency colour.
     saliency: Object.fromEntries(SALIENCIES.map((saliency) => [saliency, {}])) as Record<
       (typeof SALIENCIES)[number],
       Record<string, never>

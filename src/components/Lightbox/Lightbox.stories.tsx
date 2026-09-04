@@ -3,7 +3,6 @@ import { Icon } from "../Icon";
 import { Text } from "../Text";
 import { Lightbox } from "./index";
 
-// The library ships no icon set, so the stories inline the glyphs they need.
 const ExpandGlyph = () => (
   <Icon>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -16,7 +15,6 @@ const ExpandGlyph = () => (
   </Icon>
 );
 
-// A stable sample image so snapshots don't drift.
 const SRC = "https://picsum.photos/id/1025/1200/800";
 const ALT = "A dog resting on a wooden floor";
 

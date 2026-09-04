@@ -4,8 +4,6 @@ import { focusRingColorVar, iconColorVar } from "../../styles/vars.css";
 import { FORM_STATES, FORM_STATE_INTENT } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-// Border + background are published as CSS vars so the one `base` reads them and
-// the `state` variant just swaps values (mirrors `formControlRecipe`).
 const bd = createVar();
 const bg = createVar();
 
@@ -46,8 +44,6 @@ export const fileUploadDropzone = recipe({
     transitionTimingFunction: vars.motion.easing.standard,
     selectors: {
       '&[data-dragging="true"]': { borderColor: focusRingColorVar },
-      // Disabled is modelled with `aria-disabled` (never the native attribute) so
-      // the input stays focusable; this just dims the look.
       '&[aria-disabled="true"]': { opacity: 0.55, cursor: "not-allowed" },
     },
     "@media": {
@@ -55,9 +51,6 @@ export const fileUploadDropzone = recipe({
     },
   },
   variants: {
-    // Generated from `FORM_STATES` rather than hand-listed, exactly like
-    // `formControlRecipe` — so the dropzone can never support a narrower set of
-    // states than the rest of the form controls.
     state: Object.fromEntries(
       FORM_STATES.map((state) => {
         const c = vars.form.color[state];

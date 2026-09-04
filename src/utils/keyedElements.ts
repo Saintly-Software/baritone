@@ -22,8 +22,6 @@ export function keyedElements<P>(
   const resolved: React.ReactElement<P>[] = [];
   (items ?? []).forEach((item, index) => {
     if (!item) return;
-    // Cast around `cloneElement`'s overloads, which don't resolve for a generic
-    // `P`; we only ever inject a `key`, so the element type is preserved.
     const keyed = React.cloneElement(item as React.ReactElement, {
       key: item.key ?? index,
     }) as React.ReactElement<P>;

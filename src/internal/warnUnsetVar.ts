@@ -1,16 +1,5 @@
-// Prod-safe by construction: a browser production bundle replaces
-// `process.env.NODE_ENV` with `"production"`, so this folds to `false` and any
-// dev-only path (ref composition + effect) built on it dead-code-eliminates. React
-// is a peer dep that already requires `process.env.NODE_ENV` to be defined, so
-// reading it unguarded is safe wherever this runs. (Deliberately not the
-// `typeof process === "undefined" || …` form — that returns `true` in a browser
-// where `process` is undefined, which would leak the dev path into production.)
 export const isDev = (): boolean => process.env.NODE_ENV !== "production";
 
-// `--…-<name>` custom properties already warned about, so a page full of elements
-// naming the same unset var warns once, not once per element. Shared across the
-// open-vocabulary consumers (`InternalText`, `Divider`, …) and keyed by the resolved
-// CSS var, which is unique per (prop, name) pair.
 const warnedUnsetVars = new Set<string>();
 
 /**

@@ -137,7 +137,6 @@ export const Clickable: Story = {
           onClick={() => setCount((c) => c + 1)}
           header={<Card.Header title="Activate this card" />}
         >
-          {/* The card is a container now, so block content is fine. */}
           <Text render={<p />} size="sm" saliency="low">
             Pressed {count} {count === 1 ? "time" : "times"}.
           </Text>

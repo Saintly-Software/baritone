@@ -200,9 +200,6 @@ function packPromiseOptions<Value>(
 export function useToast(): UseToastReturn {
   const { toasts, add, update, close, promise } = BaseToast.useToastManager<ToastData>();
 
-  // base-ui's manager methods are stable (they come off the store); only `toasts`
-  // is reactive. Memoise the wrappers on those stable refs so `add` et al. keep a
-  // steady identity across renders.
   const addToast = React.useCallback(
     (options: AddToastOptions) => add({ ...pack(options), id: options.id }),
     [add],
@@ -210,8 +207,6 @@ export function useToast(): UseToastReturn {
   const updateToast = React.useCallback(
     (id: string, options: Partial<AddToastOptions>) => {
       const packed = pack(options);
-      // base-ui replaces `data` wholesale on update; merge over the live toast's
-      // current data so a partial update (e.g. just `intent`) keeps icon/actions.
       if (packed.data !== undefined) {
         const existing = toasts.find((toast) => toast.id === id)?.data;
         packed.data = { ...existing, ...packed.data };
@@ -281,12 +276,10 @@ function ToastItem({ toast, close }: { toast: BaritoneToast; close: (id?: string
   return (
     <BaseToast.Root
       toast={toast}
-      // Bottom-right stack: throw a card right or down to dismiss it.
       swipeDirection={["right", "down"]}
       className={cx(toastRoot, focusRingRecipe({ type: "visible", offset: "sm" }))}
     >
       <Notice
-        // The Root dialog carries the semantics; the Notice is just its skin.
         role="presentation"
         className={toastNotice}
         intent={intent}

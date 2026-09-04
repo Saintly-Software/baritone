@@ -3,13 +3,6 @@ import * as React from "react";
 import { describe, expect, it } from "vitest";
 import { Overflow } from "./index";
 
-// These run in jsdom, which has no layout — so base-ui never measures overflow,
-// the scrollbars stay unmounted, and the nav buttons stay in their hidden
-// resting state. The scroll/reveal behaviour (which needs a real viewport) is
-// covered by Overflow.interaction.stories.tsx. Here we assert the parts jsdom
-// can see: content, the labelled region, root plumbing, and the nav buttons'
-// wiring (labels, out-of-tab-order, non-submitting).
-
 const NAV = (container: HTMLElement, side: "start" | "end") =>
   container.querySelector<HTMLButtonElement>(`button[data-side="${side}"]`)!;
 
@@ -65,7 +58,6 @@ describe("Overflow", () => {
     for (const side of ["start", "end"] as const) {
       const btn = NAV(container, side);
       expect(btn).not.toBeNull();
-      // Pointer conveniences: never a Tab stop, never a form submit.
       expect(btn).toHaveAttribute("tabindex", "-1");
       expect(btn).toHaveAttribute("type", "button");
     }

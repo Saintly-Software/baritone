@@ -5,8 +5,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { DistributiveOmit } from "../../utils/types";
 import { Checkbox } from "./index";
 
-// A tiny controlled host mirroring the documented usage, so the tests exercise
-// the component exactly as a consumer would wire it.
 function Subscribe({
   value: initial = false,
   onChange,
@@ -97,7 +95,6 @@ describe("Checkbox", () => {
     const box = screen.getByRole("checkbox", { name: "Subscribe" });
 
     expect(box).toHaveAttribute("aria-disabled", "true");
-    // The native attribute would yank it out of the tab order.
     expect(box).not.toBeDisabled();
 
     await user.tab();
@@ -167,9 +164,6 @@ describe("Checkbox", () => {
     expect(screen.getByRole("checkbox", { name: "External label" })).toBeInTheDocument();
   });
 
-  // `label` used to silently win over `aria-label`. They're mutually exclusive
-  // now — the box would show one name and announce another — so the pair is a
-  // type error, and a JS caller that gets past the types gets a thrown error.
   it("throws when label and aria-label are both passed", () => {
     expect(() =>
       render(
@@ -186,15 +180,11 @@ describe("Checkbox", () => {
     );
   });
 
-  // One message slot: the same line stays put and changes *presentation* with
-  // `state`, rather than a separate error line appearing.
   it("renders the helpText as an error when invalid", () => {
     const { rerender } = render(<Subscribe helpText="Required" />);
-    // Neutral: the line is there, with no warning glyph.
     expect(screen.getByText("Required").querySelector("svg")).toBeNull();
 
     rerender(<Subscribe state="invalid" helpText="Required" />);
-    // Invalid: the same line, now carrying HelpText's warning glyph.
     expect(screen.getByText("Required").querySelector("svg")).not.toBeNull();
   });
 });

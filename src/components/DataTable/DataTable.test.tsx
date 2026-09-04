@@ -35,7 +35,6 @@ describe("DataTable", () => {
     );
     const headers = screen.getAllByRole("columnheader");
     expect(headers.map((h) => h.textContent)).toEqual(["Name", "Role", "Balance"]);
-    // Header cells are real <th scope="col">.
     for (const header of headers) {
       expect(header.tagName).toBe("TH");
       expect(header).toHaveAttribute("scope", "col");
@@ -46,12 +45,10 @@ describe("DataTable", () => {
     render(
       <DataTable aria-label="People" data={people} columns={columns} getRowId={(p) => p.id} />,
     );
-    // Two rowgroups: thead + tbody. Body rows live in the second.
     const body = screen.getAllByRole("rowgroup")[1]!;
     expect(within(body).getAllByRole("row")).toHaveLength(3);
     expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "Compilers" })).toBeInTheDocument();
-    // Custom cell renderer ran.
     expect(screen.getByRole("cell", { name: "$96" })).toBeInTheDocument();
   });
 
@@ -60,7 +57,6 @@ describe("DataTable", () => {
       <DataTable caption="Team members" data={people} columns={columns} getRowId={(p) => p.id} />,
     );
     const table = screen.getByRole("table", { name: "Team members" });
-    // The caption is a real <caption> element.
     expect(within(table).getByText("Team members").tagName).toBe("CAPTION");
   });
 
@@ -81,7 +77,6 @@ describe("DataTable", () => {
     render(
       <DataTable aria-label="People" data={people} columns={columns} getRowId={(p) => p.id} />,
     );
-    // The end-aligned Balance cell should not share the default-aligned Name cell's class.
     const nameCell = screen.getByRole("cell", { name: "Ada Lovelace" });
     const balanceCell = screen.getByRole("cell", { name: "$42" });
     expect(balanceCell.className).not.toBe(nameCell.className);
@@ -119,9 +114,6 @@ describe("DataTable", () => {
   });
 
   it("throws in dev when a visible caption is combined with an aria name", () => {
-    // The `DataTableName` union already forbids this at compile time; the runtime
-    // guard catches JS callers and type-casts that slip past it. Cast to simulate
-    // one, and silence React's error logging for the expected throw.
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
       const withAriaLabel = {
@@ -145,8 +137,6 @@ describe("DataTable", () => {
   });
 });
 
-// A dataset whose roles repeat, so grouping actually gathers rows, plus a
-// balance column that rolls up to a per-group sum.
 const staff: Person[] = [
   { id: "1", name: "Ada Lovelace", role: "Engineering", balance: 42 },
   { id: "2", name: "Grace Hopper", role: "Engineering", balance: 96 },
@@ -165,8 +155,6 @@ const groupedColumns = col.columns([
   }),
 ]);
 
-// A two-dimension dataset (region → role) for nested grouping: the Americas
-// region holds three data rows spread across two role sub-groups.
 interface Employee {
   id: string;
   region: string;
@@ -207,12 +195,9 @@ describe("DataTable grouping", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // One toggle per distinct group value.
     expect(screen.getByRole("button", { name: /Engineering/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Research/ })).toBeInTheDocument();
-    // The Engineering group holds two rows...
     expect(screen.getByText("(2)")).toBeInTheDocument();
-    // ...and its balances sum on the group row (42 + 96 = 138).
     expect(screen.getByRole("cell", { name: "$138" })).toBeInTheDocument();
   });
 
@@ -241,12 +226,10 @@ describe("DataTable grouping", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // Expanded by default — a toggle labelled "Collapse …".
     const collapse = screen.getByRole("button", { name: /Collapse Engineering/ });
     expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
 
     await user.click(collapse);
-    // The Engineering leaves are gone; the header (now "Expand …") stays.
     expect(screen.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
     expect(screen.queryByRole("cell", { name: "Grace Hopper" })).not.toBeInTheDocument();
     const expand = screen.getByRole("button", { name: /Expand Engineering/ });
@@ -267,9 +250,7 @@ describe("DataTable grouping", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // Group headers are present but collapsed...
     expect(screen.getByRole("button", { name: /Expand Engineering/ })).toBeInTheDocument();
-    // ...and no leaf rows show.
     expect(screen.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
   });
 
@@ -283,19 +264,12 @@ describe("DataTable grouping", () => {
         getRowId={(e) => e.id}
       />,
     );
-    // The Americas region holds 3 data rows across 2 role sub-groups (Engineering
-    // ×2, Sales ×1). Its header must count the 3 data rows, not the 2 sub-groups —
-    // so "(3)" is present, and "(2)" belongs solely to the Engineering sub-group
-    // (a lone match; the buggy direct-child count would show "(2)" twice).
     expect(screen.getByText("(3)")).toBeInTheDocument();
     expect(screen.getByText("(2)")).toBeInTheDocument();
     expect(screen.getByText("(1)")).toBeInTheDocument();
   });
 
   it("keeps the grouped column (default groupDisplay='columns') — a regression guard", () => {
-    // The default presentation must be unchanged: the grouped column stays its own
-    // column, so all three headers render and passing `groupDisplay="columns"`
-    // explicitly is identical to omitting it.
     const { container: implicit } = render(
       <DataTable
         aria-label="Staff"
@@ -321,15 +295,12 @@ describe("DataTable grouping", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // Byte-for-byte: the explicit default renders the same table markup as omitting it.
     expect(explicit.querySelector("table")!.outerHTML).toBe(
       implicit.querySelector("table")!.outerHTML,
     );
   });
 });
 
-// Depth published by the merged label's inline `--groupDepth` var (via
-// assignInlineVars) — the numeric value in the element's `style` attribute.
 function labelDepth(el: HTMLElement): number {
   const match = (el.getAttribute("style") ?? "").match(/:\s*(\d+)/);
   return match ? Number(match[1]) : Number.NaN;
@@ -347,8 +318,6 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // One fewer column: the grouped "Role" header is gone; Name (the host) and
-    // Balance remain.
     expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
       "Name",
       "Balance",
@@ -366,12 +335,10 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // The group label (toggle + value + count) is hosted in the Name column...
     const toggle = screen.getByRole("button", { name: /Engineering/ });
     const headerRow = toggle.closest("tr")!;
     expect(within(headerRow).getByText("Engineering")).toBeInTheDocument();
     expect(within(headerRow).getByText("(2)")).toBeInTheDocument();
-    // ...and the aggregated Balance total still renders on that same header row.
     expect(within(headerRow).getByRole("cell", { name: "$138" })).toBeInTheDocument();
   });
 
@@ -386,7 +353,6 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // The leaf's Name value lives in the host column, deeper than its group header.
     const leaf = screen.getByText("Ada Lovelace");
     expect(leaf.closest("td")).toBeInTheDocument();
     const groupLabel = screen.getByRole("button", { name: /Engineering/ }).parentElement!;
@@ -428,13 +394,11 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(e) => e.id}
       />,
     );
-    // Only Name survives as a column (region + role are both grouped away).
     expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Name"]);
 
     const region = screen.getByRole("button", { name: /Americas/ }).parentElement!;
     const role = screen.getByRole("button", { name: /Engineering/ }).parentElement!;
     const leaf = screen.getByText("Ada Lovelace");
-    // Region (depth 0) < role sub-group (depth 1) < leaf (depth 2).
     expect(labelDepth(region)).toBeLessThan(labelDepth(role));
     expect(labelDepth(role)).toBeLessThan(labelDepth(leaf));
   });
@@ -451,8 +415,6 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // The grouped "Role" column is dropped, so the empty cell spans the two
-    // remaining columns (Name + Balance), not three.
     expect(screen.getByRole("cell", { name: "No staff yet." })).toHaveAttribute("colspan", "2");
   });
 
@@ -469,12 +431,10 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
     const { container: plain } = render(
       <DataTable aria-label="Staff" data={staff} columns={groupedColumns} getRowId={(p) => p.id} />,
     );
-    // With no `grouping`, merge changes nothing — same markup as the default.
     expect(merged.querySelector("table")!.outerHTML).toBe(plain.querySelector("table")!.outerHTML);
   });
 
   it("honours meta.groupLabel to pick the host column", () => {
-    // Put the label on Balance instead of the first column (Name).
     const hostBalance = col.columns([
       col.accessor("name", { header: "Name" }),
       col.accessor("role", { header: "Role" }),
@@ -495,8 +455,6 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // The toggle lives in the Balance column's group cell, not Name's. The group
-    // header row's first (Name) cell is empty; the group label sits in Balance.
     const headerRow = screen.getByRole("button", { name: /Engineering/ }).closest("tr")!;
     const cells = within(headerRow).getAllByRole("cell");
     expect(within(cells[1]!).getByText("Engineering")).toBeInTheDocument();
@@ -504,9 +462,6 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
   });
 
   it("keeps the aggregate: the default host skips an aggregated column", () => {
-    // Only two columns — the grouped `category` and a summed `amount`. The label
-    // must NOT hijack the aggregated column; instead the grouped column stays on
-    // as the outline so the per-group total still renders on the header row.
     interface Line {
       id: string;
       category: string;
@@ -538,21 +493,16 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(l) => l.id}
       />,
     );
-    // Both columns stay (the grouped Category hosts the outline)...
     expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual([
       "Category",
       "Amount",
     ]);
-    // ...and the Housing header row shows both its label and the summed total.
     const headerRow = screen.getByRole("button", { name: /Housing/ }).closest("tr")!;
     expect(within(headerRow).getByText("Housing")).toBeInTheDocument();
     expect(within(headerRow).getByRole("cell", { name: "$140" })).toBeInTheDocument();
   });
 
   it("still renders a usable host when every column is grouped", () => {
-    // With no non-grouped column left, the innermost grouped column stays on as
-    // the host — so group rows keep their toggle + label + count instead of
-    // collapsing to zero cells.
     interface Pair {
       id: string;
       category: string;
@@ -578,7 +528,6 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
         getRowId={(p) => p.id}
       />,
     );
-    // One outline column survives, and its group rows have a working toggle + count.
     expect(screen.getAllByRole("columnheader").map((h) => h.textContent)).toEqual(["Subcategory"]);
     const housing = screen.getByRole("button", { name: /Housing/ });
     const housingRow = housing.closest("tr")!;
@@ -632,18 +581,12 @@ describe("DataTable row selection", () => {
       />,
     );
     expect(screen.getByRole("checkbox", { name: "Select all rows" })).toBeInTheDocument();
-    // Each row's box carries a distinct, row-specific name (from its first cell)
-    // instead of a generic "Select row", so assistive tech can tell them apart.
-    // `getByRole` throws if a name is missing or duplicated, so this also asserts
-    // there's exactly one box per data row.
     for (const person of people) {
       expect(screen.getByRole("checkbox", { name: `Select ${person.name}` })).toBeInTheDocument();
     }
   });
 
   it("names a row from its first usable cell, skipping a leading empty/display cell", () => {
-    // A leading display column has no value, so the label must fall through to the
-    // next cell that carries a usable primitive (here, the name).
     const withLeadingDisplay = col.columns([
       col.display({ id: "spacer", header: "" }),
       col.accessor("name", { header: "Name" }),
@@ -674,7 +617,6 @@ describe("DataTable row selection", () => {
       />,
     );
     await user.click(rowCheckbox("Ada Lovelace"));
-    // ids first, then the matching rows from `data` (Ada is id "1").
     expect(onSelectionChange).toHaveBeenLastCalledWith(["1"], [people[0]]);
     expect(rowCheckbox("Ada Lovelace")).toBeChecked();
   });
@@ -725,7 +667,6 @@ describe("DataTable row selection", () => {
         defaultSelectedRowIds={["2"]}
       />,
     );
-    // Id "2" is Alan Turing.
     expect(rowCheckbox("Alan Turing")).toBeChecked();
     expect(rowCheckbox("Ada Lovelace")).not.toBeChecked();
   });
@@ -736,7 +677,6 @@ describe("DataTable row selection", () => {
     expect(rowCheckbox("Ada Lovelace")).toBeChecked();
 
     await user.click(rowCheckbox("Grace Hopper"));
-    // The parent applied the change: Grace (id "3") joined the selection.
     expect(screen.getByTestId("selection")).toHaveTextContent("1,3");
     expect(rowCheckbox("Grace Hopper")).toBeChecked();
   });
@@ -750,26 +690,20 @@ describe("DataTable row selection", () => {
         data={people}
         columns={columns}
         getRowId={(p) => p.id}
-        // Only rows with a balance over 20 are selectable — Alan (18) is not.
         enableRowSelection={(p) => p.balance > 20}
         onSelectionChange={onSelectionChange}
       />,
     );
     const alan = rowCheckbox("Alan Turing");
     expect(alan).toHaveAttribute("aria-disabled", "true");
-    // Focusable, not removed from the tab order (the native attribute would yank
-    // it out). Tabbing from the previous row's box lands on it — AGENTS.md's
-    // enforced convention: a disabled control stays reachable by keyboard.
     expect(alan).not.toBeDisabled();
     rowCheckbox("Ada Lovelace").focus();
     await user.tab();
     expect(alan).toHaveFocus();
 
-    // Clicking the locked box does nothing.
     await user.click(alan);
     expect(onSelectionChange).not.toHaveBeenCalled();
 
-    // Select-all covers only the selectable rows (Ada "1", Grace "3").
     await user.click(screen.getByRole("checkbox", { name: "Select all rows" }));
     const [ids] = onSelectionChange.mock.calls.at(-1)!;
     expect([...ids].sort()).toEqual(["1", "3"]);
@@ -782,15 +716,12 @@ describe("DataTable row selection", () => {
         data={people}
         columns={columns}
         getRowId={(p) => p.id}
-        // Alan ("2", balance 18) is not selectable...
         enableRowSelection={(p) => p.balance > 20}
-        // ...but a stale/seeded id still lists him as selected.
         defaultSelectedRowIds={["2"]}
       />,
     );
     const alan = rowCheckbox("Alan Turing");
     expect(alan).toHaveAttribute("aria-disabled", "true");
-    // The locked box can't be cleared, so it must not read as checked.
     expect(alan).not.toBeChecked();
   });
 
@@ -803,7 +734,6 @@ describe("DataTable row selection", () => {
         data={people}
         columns={columns}
         getRowId={(p) => p.id}
-        // No `selectedRowIds` → the table owns selection in its own state.
         enableRowSelection
         onSelectionChange={onSelectionChange}
       />,
@@ -812,7 +742,6 @@ describe("DataTable row selection", () => {
     expect(rowCheckbox("Ada Lovelace")).toBeChecked();
     expect(onSelectionChange).toHaveBeenLastCalledWith(["1"], [people[0]]);
 
-    // Clicking again clears it — the internally-owned state updates both ways.
     await user.click(rowCheckbox("Ada Lovelace"));
     expect(rowCheckbox("Ada Lovelace")).not.toBeChecked();
     expect(onSelectionChange).toHaveBeenLastCalledWith([], []);
@@ -829,7 +758,6 @@ describe("DataTable row selection", () => {
         enableRowSelection
       />,
     );
-    // 3 data columns + the selection column.
     expect(screen.getByRole("cell", { name: "No people yet." })).toHaveAttribute("colspan", "4");
   });
 
@@ -842,18 +770,14 @@ describe("DataTable row selection", () => {
         data={people}
         columns={columns}
         getRowId={(p) => p.id}
-        // A predicate that excludes every row leaves nothing for select-all to do.
         enableRowSelection={() => false}
         onSelectionChange={onSelectionChange}
       />,
     );
     const selectAll = screen.getByRole("checkbox", { name: "Select all rows" });
-    // Locked via aria-disabled (never the native attribute), so it stays focusable.
     expect(selectAll).toHaveAttribute("aria-disabled", "true");
     expect(selectAll).not.toBeDisabled();
-    // The box reads as unchecked (its visual state follows the `checked` prop).
     expect(selectAll).not.toBePartiallyChecked();
-    // Clicking the locked box is a no-op: no selection, no callback.
     await user.click(selectAll);
     expect(onSelectionChange).not.toHaveBeenCalled();
   });
@@ -872,12 +796,10 @@ describe("DataTable row selection", () => {
         onSelectionChange={onSelectionChange}
       />,
     );
-    // The Engineering group's box lives in its header row (alongside the toggle).
     const groupRow = screen.getByRole("button", { name: /Collapse Engineering/ }).closest("tr");
     const groupBox = within(groupRow!).getByRole("checkbox");
 
     await user.click(groupBox);
-    // Engineering holds Ada ("1") and Grace ("2"); Research is untouched.
     const [ids] = onSelectionChange.mock.calls.at(-1)!;
     expect([...ids].sort()).toEqual(["1", "2"]);
     expect(groupBox).toBeChecked();
@@ -893,16 +815,13 @@ describe("DataTable row selection", () => {
         columns={columns}
         getRowId={(p) => p.id}
         enableRowSelection
-        // "stale" matches no current row (e.g. paged/filtered out).
         defaultSelectedRowIds={["stale"]}
         onSelectionChange={onSelectionChange}
       />,
     );
     await user.click(rowCheckbox("Ada Lovelace"));
     const [ids, rows] = onSelectionChange.mock.calls.at(-1)!;
-    // The stale id survives in the ids (the source of truth)...
     expect([...ids].sort()).toEqual(["1", "stale"]);
-    // ...but only rows present in `data` come back (Ada is id "1").
     expect(rows).toEqual([people[0]]);
   });
 
@@ -918,7 +837,6 @@ describe("DataTable row selection", () => {
       />,
     );
     const selectAll = screen.getByRole("checkbox", { name: "Select all rows" });
-    // No real row is selected, so the header is neither checked nor mixed.
     expect(selectAll).not.toBeChecked();
     expect(selectAll).not.toBePartiallyChecked();
     expect(rowCheckbox("Ada Lovelace")).not.toBeChecked();
@@ -932,18 +850,14 @@ describe("DataTable row selection", () => {
         columns={groupedColumns}
         grouping={["role"]}
         getRowId={(p) => p.id}
-        // Only balances over 50 are selectable: Engineering has Grace ($96),
-        // but Research holds only Alan ($18) — no selectable leaf.
         enableRowSelection={(p) => p.balance > 50}
       />,
     );
     const researchRow = screen.getByRole("button", { name: /Collapse Research/ }).closest("tr");
     const researchBox = within(researchRow!).getByRole("checkbox");
-    // Its box is locked (not a checked no-op) and stays focusable via aria-disabled.
     expect(researchBox).toHaveAttribute("aria-disabled", "true");
     expect(researchBox).not.toBeChecked();
 
-    // Engineering has a selectable leaf, so its box stays active.
     const engineeringRow = screen
       .getByRole("button", { name: /Collapse Engineering/ })
       .closest("tr");
@@ -952,8 +866,6 @@ describe("DataTable row selection", () => {
 });
 
 describe("DataTable row detail panels", () => {
-  // A panel keyed off the row's datum, so a test can assert the right row's data
-  // reached the renderer.
   const detail = (p: Person) => <div>Detail for {p.name}</div>;
 
   it("adds no expander column or toggle unless renderDetailPanel is provided", () => {
@@ -961,7 +873,6 @@ describe("DataTable row detail panels", () => {
       <DataTable aria-label="People" data={people} columns={columns} getRowId={(p) => p.id} />,
     );
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
-    // No leading expander column: only the three data columns.
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
   });
 
@@ -975,14 +886,11 @@ describe("DataTable row detail panels", () => {
         renderDetailPanel={detail}
       />,
     );
-    // The extra (empty) expander header sits ahead of the three data columns.
     expect(screen.getAllByRole("columnheader")).toHaveLength(4);
-    // Each data row has a toggle named from its own value, starting collapsed.
     for (const person of people) {
       const toggle = screen.getByRole("button", { name: `Expand details for ${person.name}` });
       expect(toggle).toHaveAttribute("aria-expanded", "false");
     }
-    // Nothing is rendered until a row is opened.
     expect(screen.queryByText(/^Detail for/)).not.toBeInTheDocument();
   });
 
@@ -1000,7 +908,6 @@ describe("DataTable row detail panels", () => {
     await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
     expect(screen.getByText("Detail for Ada Lovelace")).toBeInTheDocument();
 
-    // The toggle flips to "Collapse" / aria-expanded=true and points at the panel.
     const open = screen.getByRole("button", { name: "Collapse details for Ada Lovelace" });
     expect(open).toHaveAttribute("aria-expanded", "true");
     const panelId = open.getAttribute("aria-controls");
@@ -1009,7 +916,6 @@ describe("DataTable row detail panels", () => {
 
     await user.click(open);
     expect(screen.queryByText("Detail for Ada Lovelace")).not.toBeInTheDocument();
-    // Collapsed again: no dangling aria-controls to an absent panel.
     const collapsed = screen.getByRole("button", { name: "Expand details for Ada Lovelace" });
     expect(collapsed).not.toHaveAttribute("aria-controls");
   });
@@ -1026,11 +932,9 @@ describe("DataTable row detail panels", () => {
         renderDetailPanel={render_}
       />,
     );
-    // Never invoked while every panel is collapsed.
     expect(render_).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
-    // Ada is people[0]; only her datum is passed.
     expect(render_).toHaveBeenCalledWith(people[0]);
     const openedFor = render_.mock.calls.map(([p]) => p);
     expect(openedFor).toContain(people[0]);
@@ -1053,7 +957,6 @@ describe("DataTable row detail panels", () => {
     expect(screen.getByText("Detail for Ada Lovelace")).toBeInTheDocument();
     expect(screen.getByText("Detail for Alan Turing")).toBeInTheDocument();
 
-    // Closing one leaves the other open.
     await user.click(screen.getByRole("button", { name: "Collapse details for Ada Lovelace" }));
     expect(screen.queryByText("Detail for Ada Lovelace")).not.toBeInTheDocument();
     expect(screen.getByText("Detail for Alan Turing")).toBeInTheDocument();
@@ -1071,7 +974,6 @@ describe("DataTable row detail panels", () => {
       />,
     );
     await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
-    // 1 expander + 3 data columns.
     const panelCell = screen.getByText("Detail for Ada Lovelace").closest("td");
     expect(panelCell).toHaveAttribute("colspan", "4");
   });
@@ -1088,13 +990,11 @@ describe("DataTable row detail panels", () => {
         renderDetailPanel={detail}
       />,
     );
-    // Ada's row carries both a checkbox and an expander toggle.
     const adaRow = screen.getByText("Ada Lovelace").closest("tr")!;
     expect(within(adaRow).getByRole("checkbox")).toBeInTheDocument();
     const toggle = within(adaRow).getByRole("button", { name: "Expand details for Ada Lovelace" });
 
     await user.click(toggle);
-    // expander + selection + 3 data columns.
     const panelCell = screen.getByText("Detail for Ada Lovelace").closest("td");
     expect(panelCell).toHaveAttribute("colspan", "5");
   });
@@ -1110,12 +1010,10 @@ describe("DataTable row detail panels", () => {
         renderDetailPanel={detail}
       />,
     );
-    // The group header carries its group toggle but no detail toggle.
     const groupHeaderRow = screen
       .getByRole("button", { name: /Collapse Engineering/ })
       .closest("tr");
     expect(within(groupHeaderRow!).queryByRole("button", { name: /details for/ })).toBeNull();
-    // A data row under it does get one.
     expect(
       screen.getByRole("button", { name: "Expand details for Ada Lovelace" }),
     ).toBeInTheDocument();
@@ -1132,7 +1030,6 @@ describe("DataTable row detail panels", () => {
         renderDetailPanel={detail}
       />,
     );
-    // 3 data columns + the expander column.
     expect(screen.getByRole("cell", { name: "No people yet." })).toHaveAttribute("colspan", "4");
   });
 
@@ -1144,20 +1041,16 @@ describe("DataTable row detail panels", () => {
         columns={columns}
         getRowId={(p) => p.id}
         renderDetailPanel={detail}
-        // Only balances over 20 are expandable — Alan (18) is not.
         enableRowExpansion={(p) => p.balance > 20}
       />,
     );
-    // The expander column still renders (its header is present)...
     expect(screen.getAllByRole("columnheader")).toHaveLength(4);
-    // ...with a toggle on the eligible rows...
     expect(
       screen.getByRole("button", { name: "Expand details for Ada Lovelace" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Expand details for Grace Hopper" }),
     ).toBeInTheDocument();
-    // ...but none on the excluded row (its expander cell is simply empty).
     expect(screen.queryByRole("button", { name: "Expand details for Alan Turing" })).toBeNull();
     const alanRow = screen.getByText("Alan Turing").closest("tr")!;
     expect(within(alanRow).getAllByRole("cell")[0]).toBeEmptyDOMElement();
@@ -1176,10 +1069,8 @@ describe("DataTable row detail panels", () => {
         enableRowExpansion={(p) => p.balance > 20}
       />,
     );
-    // The eligible row still opens...
     await user.click(screen.getByRole("button", { name: "Expand details for Ada Lovelace" }));
     expect(screen.getByText("Detail for Ada Lovelace")).toBeInTheDocument();
-    // ...and the excluded row is never rendered (no toggle exists to open it).
     expect(render_.mock.calls.map(([p]) => p)).not.toContain(people[1]);
   });
 
@@ -1212,15 +1103,11 @@ describe("DataTable row detail panels", () => {
         enableRowExpansion={false}
       />,
     );
-    // No expander column and no toggles — the renderer is inert.
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("names toggles by each row's own value in grouped mode, not the shared group value", () => {
-    // Grouped columns (region, role) carry the group's value on leaf rows, shared
-    // by every row in the group. The toggle name must fall through to the row's own
-    // distinguishing value (name) instead of labelling every Americas row alike.
     render(
       <DataTable
         aria-label="Employees"
@@ -1231,7 +1118,6 @@ describe("DataTable row detail panels", () => {
         renderDetailPanel={(e) => <div>Detail for {e.name}</div>}
       />,
     );
-    // getByRole throws on a duplicated name, so this also asserts the labels are distinct.
     expect(
       screen.getByRole("button", { name: "Expand details for Ada Lovelace" }),
     ).toBeInTheDocument();
@@ -1244,9 +1130,6 @@ describe("DataTable row detail panels", () => {
   });
 
   it("keeps panel ids valid and matched when getRowId returns values with spaces", async () => {
-    // A composite id with whitespace must not leak into the DOM id / aria-controls
-    // (an invalid id + a broken IDREF list). The panel id is keyed off render
-    // position, so the toggle's aria-controls still resolves to the panel.
     const user = userEvent.setup();
     render(
       <DataTable
@@ -1262,7 +1145,6 @@ describe("DataTable row detail panels", () => {
 
     const panelId = toggle.getAttribute("aria-controls");
     expect(panelId).toBeTruthy();
-    // A valid HTML id has no whitespace, and the reference resolves to the panel.
     expect(panelId).not.toMatch(/\s/);
     expect(document.getElementById(panelId!)).toHaveTextContent("Detail for Ada Lovelace");
   });

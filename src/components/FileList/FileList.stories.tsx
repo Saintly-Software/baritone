@@ -181,8 +181,6 @@ export const Downloadable: Story = {
         items={items}
         onRemove={(id) => setItems((cur) => cur.filter((f) => f.id !== id))}
         onDownload={(id) => {
-          // A real consumer would stream / save the File here; the story just
-          // proves the affordance is wired and keyed by `id`.
           const hit = items.find((f) => f.id === id);
           if (hit != null) window.alert(`Download ${hit.file.name}`);
         }}

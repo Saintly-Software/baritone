@@ -20,7 +20,6 @@ describe("ButtonGroup", () => {
     expect(buttons).toHaveLength(3);
     expect(buttons.every((b) => b.tagName === "BUTTON")).toBe(true);
     expect(buttons.map((b) => b.textContent)).toEqual(["Left", "Center", "Right"]);
-    // DOM order (and thus tab order) matches the `items` order.
     expect(group).toContainElement(screen.getByRole("button", { name: "Left" }));
   });
 
@@ -59,7 +58,6 @@ describe("ButtonGroup", () => {
         ]}
       />,
     );
-    // Both members are ordinary tab stops in order (no roving tab stop).
     await user.tab();
     expect(screen.getByRole("button", { name: "Keep" })).toHaveFocus();
     await user.tab();

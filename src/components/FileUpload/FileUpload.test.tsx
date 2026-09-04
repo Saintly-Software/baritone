@@ -182,7 +182,6 @@ describe("FileUpload", () => {
         dragData([new File([], "pic.png", { type: "image/png" })]),
       );
 
-      // The raw React drop event rides along as the second argument.
       const event = onChange.mock.calls.at(-1)?.[1];
       expect(event).toBeDefined();
       expect(event).toHaveProperty("nativeEvent");
@@ -203,7 +202,6 @@ describe("FileUpload", () => {
       expect(screen.getByText("b.png")).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: "Remove a.pdf" }));
-      // Removal carries no DOM event, so `onChange`'s second arg is `undefined`.
       expect(onChange).toHaveBeenCalledExactlyOnceWith([value.at(1)], undefined);
     });
 
@@ -214,7 +212,6 @@ describe("FileUpload", () => {
       render(<FileUpload label="Avatar" value={value} onChange={onChange} />);
 
       await user.click(screen.getByRole("button", { name: "Remove a.pdf" }));
-      // Removal carries no DOM event, so `onChange`'s second arg is `undefined`.
       expect(onChange).toHaveBeenCalledExactlyOnceWith(null, undefined);
     });
 
@@ -241,7 +238,6 @@ describe("FileUpload", () => {
       const { container } = render(
         <FileUpload label="Files" disabled value={null} onChange={() => {}} />,
       );
-      // fireEvent returns false when a handler called preventDefault.
       expect(fireEvent.click(getInput(container))).toBe(false);
     });
 
@@ -376,7 +372,6 @@ describe("FileUpload", () => {
       );
       const label = screen.getByText("Files");
       expect(label).toHaveClass("custom-label");
-      // The built-in text classes are still applied (not clobbered).
       expect(label.className.split(" ").length).toBeGreaterThan(1);
     });
 

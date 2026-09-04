@@ -4,8 +4,6 @@ import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { iconColorVar } from "../../styles/vars.css";
 
-// Standalone fallback colour (component token), used only when no ancestor has
-// set --iconColor.
 const fallback = createVar();
 
 /**

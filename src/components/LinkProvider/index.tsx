@@ -66,12 +66,8 @@ export type LinkRenderFn = (props: LinkRenderProps) => React.ReactNode;
  * subtree on full-page loads while routing everything else.
  */
 export function isInternalHref(href: string): boolean {
-  // Protocol-relative — see doc above.
   if (href.startsWith("//")) return false;
-  // Fragment-only — see doc above.
   if (href.startsWith("#")) return false;
-  // A leading URL scheme, per RFC 3986: ALPHA then any of ALPHA / DIGIT / `+` /
-  // `-` / `.` — see doc above.
   if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(href)) return false;
   return true;
 }
@@ -147,9 +143,6 @@ export interface LinkProviderProps {
  * </LinkProvider>;
  */
 export function LinkProvider({ render, isInternal = isInternalHref, children }: LinkProviderProps) {
-  // Publish a stable object so the tree below only re-renders when the router
-  // link or the predicate actually changes (wrap `render` in `useCallback` for
-  // maximum stability, though an inline function is fine — `Link` isn't memoised).
   const value = React.useMemo<LinkRenderContextValue>(
     () => ({ render, isInternal }),
     [render, isInternal],
@@ -185,19 +178,11 @@ export function useLinkRender(
 ): RenderProp | undefined {
   const ctx = React.useContext(LinkRenderContext);
 
-  // The per-link escape hatch: an explicit `render` always wins over the provider.
   if (explicitRender != null) return explicitRender;
-  // Nothing to route without a provider or a destination.
   if (ctx == null || link.href == null) return undefined;
-  // New-tab and download links stay real anchors: a client router can't open a
-  // new browsing context or save a file — the browser must.
   if (link.download != null && link.download !== false) return undefined;
   if (link.target != null && link.target !== "_self") return undefined;
-  // Leave external URLs (and anything the app marks external) as plain anchors.
   if (!ctx.isInternal(link.href)) return undefined;
 
-  // Hand the resolved props to the router link. `LinkRenderFn`'s strict
-  // `LinkRenderProps` is the same shape `useRender` passes (a props record with a
-  // resolved `href`), so this is a safe widening for the render-callback seam.
   return ctx.render as RenderProp;
 }

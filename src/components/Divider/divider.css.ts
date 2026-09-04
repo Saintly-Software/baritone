@@ -3,9 +3,6 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-// The rule's colour, funnelled through a local var so the recipe base stays flat:
-// each intent×saliency compound swaps the colour, and the pieces that actually paint
-// the line (the element itself, or its two pseudo-element rules) just read it.
 const line = createVar();
 
 /**
@@ -16,9 +13,6 @@ const line = createVar();
  */
 export const dividerWeightVar = createVar("dividerWeight");
 
-// What the line-painting rules read for their cross-axis size. Falls back to the
-// `thin` token so a module-scope caller applying `dividerRoot(...)` as a bare class
-// (without the component's inline var) still gets a hairline rule.
 const weight = fallbackVar(dividerWeightVar, vars.borderWidth.thin);
 
 /**
@@ -33,11 +27,7 @@ export const dividerRoot = recipe({
   base: {
     display: "flex",
     alignItems: "center",
-    // Never let a divider get squeezed to nothing by a greedy flex sibling.
     flexShrink: 0,
-    // No `margin: 0` reset here: the root renders a `div` (no UA margin to
-    // reset), and the reset would out-order the equal-specificity `atoms` class
-    // that carries the margin props, silently swallowing `my` / `mx` / ….
   },
   variants: {
     orientation: {
@@ -47,9 +37,6 @@ export const dividerRoot = recipe({
       },
       vertical: {
         flexDirection: "column",
-        // `alignSelf` (not `height`) so the rule spans a flex row's full height
-        // whatever the parent's `align-items` says; `min-height` keeps it
-        // visible outside a flex container, where there's nothing to stretch to.
         alignSelf: "stretch",
         minHeight: "1em",
       },
@@ -89,8 +76,6 @@ export const dividerRoot = recipe({
     >,
   },
   compoundVariants: [
-    // The rule's cross-axis size — on the element's own box when unlabelled, on
-    // the pseudo-element rules when labelled.
     {
       variants: { orientation: "horizontal", labelled: false },
       style: { height: weight },
@@ -107,9 +92,6 @@ export const dividerRoot = recipe({
       variants: { orientation: "vertical", labelled: true },
       style: { selectors: { "&::before, &::after": { width: weight } } },
     },
-    // `labelPosition` nudges the label along the divider by pinning the rule on
-    // its side to a short stub; the other rule keeps growing into the slack.
-    // `center` needs no compound — both rules grow equally by default.
     {
       variants: { labelled: true, labelPosition: "start" },
       style: { selectors: { "&::before": { flex: `0 0 ${vars.space[4]}` } } },

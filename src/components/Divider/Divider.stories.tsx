@@ -24,8 +24,6 @@ const meta: Meta<typeof Divider> = {
     children: { control: "text" },
   },
   decorators: [
-    // Horizontal dividers are full-width; cap them so the rule doesn't run the
-    // whole viewport. The matrix opts out via `parameters.wide`.
     (Story, ctx) => (
       <div style={{ maxWidth: ctx.parameters.wide ? undefined : 360 }}>
         <Story />
@@ -100,7 +98,6 @@ export const Vertical: Story = {
 
 /** A labelled `vertical` divider stacks the label between two rules. */
 export const VerticalLabelled: Story = {
-  // Kept as a test, hidden from the sidebar so the showcase stays focused.
   tags: ["!dev"],
   args: { orientation: "vertical", children: "or" },
   render: (args) => (
@@ -182,7 +179,6 @@ export const CustomThickness: Story = {
  * `slotProps.label` re-tunes the label `Text`.
  */
 export const SpacingAndLabelSlot: Story = {
-  // Kept as a test, hidden from the sidebar so the showcase stays focused.
   tags: ["!dev"],
   args: {
     children: "Today",

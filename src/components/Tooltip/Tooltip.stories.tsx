@@ -62,7 +62,6 @@ export const Basic: Story = {
     const canvas = within(canvasElement);
     const trigger = canvas.getByRole("button", { name: "Copy" });
     await userEvent.hover(trigger);
-    // The tooltip portals to the body, so query the document, not the canvas.
     await waitFor(() =>
       expect(within(document.body).getByText("Copied to your clipboard")).toBeInTheDocument(),
     );

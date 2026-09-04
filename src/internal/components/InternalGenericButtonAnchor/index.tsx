@@ -5,9 +5,6 @@ import { RenderElement, type RenderProp } from "../../../utils/render";
 
 export interface InternalGenericButtonAnchorProps extends Omit<
   React.HTMLAttributes<HTMLElement>,
-  // Colour comes from the design system's intent/saliency model, never the
-  // deprecated `color` attribute (matches `Link`). This primitive is style-free
-  // regardless — the consumer supplies the look via `className`.
   "color"
 > {
   /**
@@ -110,8 +107,6 @@ export function InternalGenericButtonAnchor({
 }: InternalGenericButtonAnchorProps) {
   const isLink = render != null || href != null;
 
-  // A disabled control swallows its activation (no native `disabled`, so the DOM
-  // click still fires) before the consumer's handler runs. Mirrors InternalButton.
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     if (disabled) {
       event.preventDefault();
@@ -121,17 +116,7 @@ export function InternalGenericButtonAnchor({
     onClick?.(event);
   };
 
-  // A disabled link has no honest HTML form, so it becomes an inert `<div>`: no
-  // navigation and no click wired, just the passthrough props and an
-  // `aria-disabled` hook for styling/AT. Covers both internal and external links.
   if (isLink && disabled) {
-    // A role-less `<div>` prohibits `aria-label` (ARIA `generic` role; axe flags
-    // `aria-prohibited-attr`, and some AT ignore it), so an *icon-only* link —
-    // whose only child is an `aria-hidden` glyph — would collapse to a nameless
-    // control. Re-expose the name as visually-hidden text *content* (which a
-    // generic element does surface) and drop the prohibited attribute. A labelled
-    // link passes no `aria-label`, so this only affects the icon-only arm; its
-    // visible children already carry the name.
     const { "aria-label": ariaLabel, ...inertRest } = rest;
     return (
       <div
@@ -147,16 +132,11 @@ export function InternalGenericButtonAnchor({
   }
 
   if (isLink) {
-    // Shared across both live-link renders (the router element and the `<a>`):
-    // default a safe `rel` for new-tab links so they can't reach `window.opener`.
     const resolvedRel = rel ?? (target === "_blank" ? "noopener noreferrer" : undefined);
     const linkProps = {
       ref,
       className,
       onClick: handleClick,
-      // `href` rides along even for a router link (matching Card's overlay link):
-      // most router links read their own destination, but forwarding it is
-      // harmless and lets `href`-based links keep working through `render`.
       ...(href != null && { href }),
       ...(target != null && { target }),
       ...(resolvedRel != null && { rel: resolvedRel }),
@@ -164,19 +144,12 @@ export function InternalGenericButtonAnchor({
       ...rest,
     };
 
-    // Internal, client-side navigation: hand our props to the consumer's router
-    // link via the base-ui render seam. Falls back to a plain `<a>` when `render`
-    // is a plain `href` link with no element. `RenderElement` (not the `useRender`
-    // hook) because this render sits behind the earlier disabled/button returns.
     return <RenderElement render={render} defaultElement="a" props={linkProps} />;
   }
 
-  // Not a link → a button. Disabled uses `aria-disabled` (never the native
-  // attribute) so it stays focusable, with activation swallowed by `handleClick`.
   return (
     <button
       ref={ref as React.Ref<HTMLButtonElement>}
-      // Default to a non-submitting button so one in a form doesn't submit it.
       type={type ?? "button"}
       aria-disabled={disabled || undefined}
       className={className}

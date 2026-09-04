@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { INTENTS } from "../../theme/constants";
 import { MetricCard } from "./index";
 
-// Throwaway bare glyph — passed as `icon={<TargetGlyph />}` and auto-wrapped in `Icon`.
 const TargetGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
     <circle cx="12" cy="12" r="9" />
@@ -85,7 +84,6 @@ export const Trend: Story = {
         trend={{ direction: "up", value: "12%" }}
         icon={<TargetGlyph />}
       />
-      {/* Inverted metric: churn going down is good, so force a positive sentiment. */}
       <MetricCard
         value="3.1%"
         label="Churn"

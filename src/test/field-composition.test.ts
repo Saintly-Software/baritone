@@ -20,8 +20,6 @@ const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 /** The only module allowed to import base-ui's `Field` — it *is* the wrapper. */
 const ALLOWED = ["components/Field/index.tsx"];
 
-// `@base-ui/react/fieldset` is a different module (and legitimately used by
-// `Fieldset`), so match the field import exactly rather than by substring.
 const BASE_UI_FIELD_IMPORT = /from\s+["']@base-ui\/react\/field["']/;
 
 function sourceFiles(dir: string): string[] {

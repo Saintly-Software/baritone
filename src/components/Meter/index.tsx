@@ -134,18 +134,12 @@ export function Meter({
   "aria-valuetext": ariaValueText,
   slotProps,
 }: MeterProps) {
-  // base-ui's `aria-valuetext` takes a *string*; a *function* is its
-  // `getAriaValueText`. Split the one prop across the two.
   const valueText = typeof ariaValueText === "string" ? ariaValueText : undefined;
   const getValueText = typeof ariaValueText === "function" ? ariaValueText : undefined;
 
   const generatedDescriptionId = React.useId();
   const descriptionId = description != null ? generatedDescriptionId : undefined;
 
-  // base-ui computes sensible defaults for `aria-labelledby` (the rendered
-  // `<Meter.Label>`) and `aria-valuetext` (the formatted value), and its prop
-  // merge treats an explicit `undefined` as an override — so only forward these
-  // when we actually have one, or we'd wipe the default association.
   const ariaProps: Record<string, string> = {};
   if (ariaLabel != null) ariaProps["aria-label"] = ariaLabel;
   if (ariaLabelledby != null) ariaProps["aria-labelledby"] = ariaLabelledby;

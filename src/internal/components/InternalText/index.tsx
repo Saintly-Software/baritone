@@ -182,15 +182,6 @@ export function InternalText({
   pl,
   ...rest
 }: InternalTextProps) {
-  // Point the `--text…` vars at the theme's `var(--<x>-<name>)`. These are inline
-  // vars, not variant classes, because every one of these vocabularies is
-  // open-ended and consumer-defined — see the `theme/*` modules. `size` is always
-  // present, so `--textSize` and its paired default `--textLineHeight` are always
-  // set; the leading comes from the size's own `--sizeLineHeight-<size>` namespace by
-  // default, or the `lineHeight` prop's `--lineHeight-<name>` when set (distinct
-  // namespaces, so a size and a leading may share a name). `weight`/`font`/
-  // `letterSpacing` set their vars only when passed. Consumer `style` spreads last so
-  // it can still override.
   const resolvedStyle = {
     ...assignInlineVars({
       [textSizeVar]: `var(${fontSizeVarName(size)})`,
@@ -207,12 +198,6 @@ export function InternalText({
     ...style,
   };
 
-  // Dev-only: warn when a knob points at a var the theme never published. Compose
-  // an internal ref onto the node so we can read its computed style after mount; in
-  // production this is a no-op and the consumer's `ref` passes through untouched.
-  // `lineHeight` is only checked when the prop is set — a size-derived leading that
-  // falls back to `md` (a consumer size with no paired line-height) is intended, not
-  // a mistake.
   const nodeRef = React.useRef<HTMLElement | null>(null);
   const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
   React.useEffect(() => {

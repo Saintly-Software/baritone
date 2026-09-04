@@ -26,7 +26,6 @@ function RoutingHarness() {
         {...props}
         href={href}
         onClick={(event) => {
-          // Prevent the frame from actually navigating so the click is observable.
           event.preventDefault();
           setPath(href);
         }}
@@ -50,12 +49,9 @@ export const RoutesInternalLinks: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    // The external link is never routed — it stays a plain anchor with its href.
     const external = canvas.getByRole("link", { name: "External" });
     expect(external).toHaveAttribute("href", "https://example.com");
 
-    // Clicking the internal link routes through the provider (mock router updates
-    // the path); the browser never leaves the story frame.
     expect(canvas.getByTestId("route")).toHaveTextContent("/");
     await userEvent.click(canvas.getByRole("link", { name: "Dashboard" }));
     await waitFor(() => expect(canvas.getByTestId("route")).toHaveTextContent("/dashboard"));

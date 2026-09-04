@@ -66,11 +66,6 @@ export const surfaceRecipe = recipe({
       md: { vars: { [surfacePaddingVar]: vars.space[4] } },
       lg: { vars: { [surfacePaddingVar]: vars.space[6] } },
     },
-    // When the surface itself is the control (a clickable/linkable Card), add the
-    // hover/active washes + pointer cursor. The hover/active backgrounds are
-    // computed in oklch from `default` (set in the compound variants below); the
-    // `:not([aria-disabled])` guards keep a disabled surface inert. Static
-    // surfaces (the default) are unaffected.
     interactive: {
       false: {},
       true: {

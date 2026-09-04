@@ -23,8 +23,6 @@ function Glyph({ d, solid }: { d: string; solid?: boolean }) {
   );
 }
 
-// A handful of recognisable glyphs for the icon-grid story. `label` stays a real
-// word so typeahead still filters by name.
 const ICON_OPTIONS: ComboboxOption[] = [
   {
     value: "star",
@@ -119,7 +117,6 @@ const FRUITS: ComboboxOption[] = [
   { value: "mango", label: "Mango" },
 ];
 
-// Short, tile-like labels that suit the grid view.
 const COLORS: ComboboxOption[] = [
   { value: "red", label: "Red" },
   { value: "orange", label: "Orange" },
@@ -251,8 +248,6 @@ interface StateRow {
   helpText?: string;
 }
 
-// Every validation state plus disabled — the combinations that used to be their
-// own stories, folded into one table.
 const stateRows: StateRow[] = [
   { label: "neutral" },
   { label: "warning", state: "warning", helpText: "Double-check this choice." },
@@ -411,8 +406,6 @@ export const Virtualized: Story = {
   },
 };
 
-// ---------------------------------------------------------------------------
-
 const CITIES = [
   "Amsterdam",
   "Berlin",
@@ -459,7 +452,6 @@ function AsyncExample() {
     setLoading(true);
     setError(undefined);
     timer.current = setTimeout(() => {
-      // Pretend "xyz" always errors, to exercise the error state.
       if (q.toLowerCase() === "xyz") {
         setError("Something went wrong. Try again.");
         setResults([]);

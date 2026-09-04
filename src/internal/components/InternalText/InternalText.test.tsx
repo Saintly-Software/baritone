@@ -34,7 +34,6 @@ describe("InternalText", () => {
         Big
       </InternalText>,
     );
-    // With no `lineHeight`, the leading is the size's own `--sizeLineHeight-<size>`.
     expect(screen.getByText("Big").getAttribute("style")).toContain(
       `var(${sizeLineHeightVarName("2xl")})`,
     );

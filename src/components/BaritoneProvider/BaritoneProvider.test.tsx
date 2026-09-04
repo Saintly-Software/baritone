@@ -28,7 +28,6 @@ describe("BaritoneProvider", () => {
       </BaritoneProvider>,
     );
 
-    // No viewport placed by hand — the provider mounts it.
     await user.click(screen.getByRole("button", { name: "Show" }));
     expect(await screen.findByRole("dialog", { name: "Hello" })).toBeInTheDocument();
   });
@@ -59,8 +58,6 @@ describe("BaritoneProvider", () => {
 
     await user.click(screen.getByRole("button", { name: "Add three" }));
 
-    // With a limit of 1, the older toasts are kept mounted but flagged
-    // `data-limited` — proof the limit reached base-ui's provider.
     await waitFor(() =>
       expect(document.querySelectorAll("[data-limited]").length).toBeGreaterThan(0),
     );

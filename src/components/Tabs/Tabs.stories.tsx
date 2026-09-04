@@ -6,7 +6,6 @@ import type { Intent, Saliency } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Tabs } from "./index";
 
-// A throwaway bare glyph — passed as `leadIcon`/`trailIcon` and auto-wrapped in `Icon`.
 const Dot = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <circle cx="12" cy="12" r="6" />
@@ -20,15 +19,12 @@ const VIEWS = [
 ] as const;
 type View = (typeof VIEWS)[number]["value"];
 
-// Panel body copy, one blurb per view, so the panel story has real content.
 const PANELS: Record<View, string> = {
   overview: "A birds-eye summary of the project — health, owners, recent activity.",
   activity: "A running feed of what changed and who changed it.",
   settings: "Configuration for the project: visibility, integrations, danger zone.",
 };
 
-// Tabs are controlled, so the stories drive them from local state — the same
-// shape a consumer would use — and show the active view's content underneath.
 function Sections({
   intent,
   saliency,
@@ -155,7 +151,6 @@ export const KitchenSink: Story = {
   },
 };
 
-// A bare tab bar (no panel/paragraph) so the matrix cells stay compact.
 function TabBar({ intent, saliency }: { intent: Intent; saliency: Saliency }) {
   const [value, setValue] = React.useState<View>("overview");
   return (

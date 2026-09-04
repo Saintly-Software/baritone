@@ -7,11 +7,6 @@ import { RadioGroup } from "./index";
 
 type ThemeValue = "system" | "light" | "dark";
 
-// A tiny controlled host mirroring the documented usage, so the type-safe
-// render-prop pattern is exercised exactly as a consumer would write it. The
-// host owns the naming (`label="Theme"` below), so the labelling props are
-// stripped from what it forwards — they're mutually exclusive, and a `rest` that
-// could smuggle in an `aria-label` would conflict with that `label`.
 function ThemeSwitcher({
   value: initial = "system",
   onChange,
@@ -109,16 +104,13 @@ describe("RadioGroup", () => {
     const user = userEvent.setup();
     render(<ThemeSwitcher value="system" disabled />);
 
-    // The group carries the disabled semantics...
     expect(screen.getByRole("radiogroup", { name: "Theme" })).toHaveAttribute(
       "aria-disabled",
       "true",
     );
-    // ...but no radio gets the native attribute that would remove it from focus.
     const selected = screen.getByRole("radio", { name: "system" });
     expect(selected).not.toBeDisabled();
 
-    // Tab reaches the group, landing on the selected (roving) option.
     await user.tab();
     expect(selected).toHaveFocus();
   });
@@ -138,8 +130,6 @@ describe("RadioGroup", () => {
     );
 
     const dark = screen.getByRole("radio", { name: "dark" });
-    // The disabled option uses aria-disabled, so it stays focusable/reachable
-    // (e.g. by arrow keys) rather than being skipped entirely like a native one.
     expect(dark).toHaveAttribute("aria-disabled", "true");
     expect(dark).not.toBeDisabled();
     dark.focus();

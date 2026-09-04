@@ -15,8 +15,8 @@ export const cardListRoot = recipe({
     margin: 0,
     padding: 0,
     listStyle: "none",
-    minWidth: 0, // see `Flex`
-    minHeight: 0, // see `Flex`
+    minWidth: 0,
+    minHeight: 0,
   },
   variants: {
     gap: Object.fromEntries(SPACE_KEYS.map((key) => [key, { gap: vars.space[key] }])) as Record<

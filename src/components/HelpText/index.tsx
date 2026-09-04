@@ -113,8 +113,6 @@ export function HelpText({
   ref,
   ...rest
 }: HelpTextProps) {
-  // Resolve the convenience flags onto the colour axes. `disabled` wins over
-  // `invalid` — a disabled control's help shouldn't shout an error colour.
   let resolvedIntent: Intent = intent;
   let resolvedSaliency: Saliency = saliency;
   if (invalid) resolvedIntent = "negative";

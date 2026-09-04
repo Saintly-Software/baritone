@@ -17,7 +17,6 @@ export type FileKind =
 
 /** Extension → kind, the fallback when the `File` has no (or a vague) MIME type. */
 const EXT_KIND: Record<string, FileKind> = {
-  // images
   png: "image",
   jpg: "image",
   jpeg: "image",
@@ -28,29 +27,24 @@ const EXT_KIND: Record<string, FileKind> = {
   ico: "image",
   svg: "image",
   heic: "image",
-  // audio
   mp3: "audio",
   wav: "audio",
   ogg: "audio",
   flac: "audio",
   m4a: "audio",
   aac: "audio",
-  // video
   mp4: "video",
   mov: "video",
   webm: "video",
   avi: "video",
   mkv: "video",
   m4v: "video",
-  // documents
   pdf: "pdf",
-  // spreadsheets
   csv: "spreadsheet",
   tsv: "spreadsheet",
   xls: "spreadsheet",
   xlsx: "spreadsheet",
   ods: "spreadsheet",
-  // archives
   zip: "archive",
   rar: "archive",
   "7z": "archive",
@@ -58,7 +52,6 @@ const EXT_KIND: Record<string, FileKind> = {
   gz: "archive",
   bz2: "archive",
   xz: "archive",
-  // word-processing + plain text
   doc: "document",
   docx: "document",
   odt: "document",

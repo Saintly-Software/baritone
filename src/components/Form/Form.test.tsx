@@ -20,8 +20,6 @@ import {
 import { Form } from "./Form";
 import { useAppForm } from "./formHook";
 
-// A minimal, deterministic stub of the slice `resolveFieldDisplay` reads — enough
-// to unit-test the gating without spinning up a whole form.
 const source = (errors: readonly unknown[], isTouched: boolean) => ({
   state: { meta: { errors, isTouched } },
 });
@@ -49,7 +47,6 @@ describe("hasFieldError", () => {
     expect(hasFieldError([])).toBe(false);
     expect(hasFieldError([null, undefined, false, ""])).toBe(false);
     expect(hasFieldError(["Required"])).toBe(true);
-    // A real error that carries no display string (a non-standard object).
     expect(hasFieldError([{ code: "too_short", minimum: 2 }])).toBe(true);
   });
 });
@@ -81,8 +78,6 @@ describe("resolveFieldDisplay", () => {
   });
 
   it("marks invalid (no help text) for a real error carrying no display string", () => {
-    // The field is invalid — `form.canSubmit` is false — so it must not render
-    // neutral just because no message could be extracted.
     expect(
       resolveFieldDisplay(source([{ code: "too_short", minimum: 2 }], true), { helpText: "Hint" }),
     ).toEqual({ state: "invalid", helpText: undefined });
@@ -145,10 +140,9 @@ describe("useAppForm + pre-bound field components", () => {
     render(<SignupForm />);
     const email = screen.getByLabelText("Email");
 
-    // Pristine: the validator hasn't run, so nothing is shown yet.
     expect(screen.queryByText("Enter a valid email")).not.toBeInTheDocument();
 
-    await user.type(email, "nope"); // change marks the field touched
+    await user.type(email, "nope");
     expect(screen.getByText("Enter a valid email")).toBeInTheDocument();
     expect(email).toHaveAttribute("aria-invalid", "true");
 
@@ -162,8 +156,6 @@ describe("useAppForm + pre-bound field components", () => {
     render(<SignupForm />);
     const terms = screen.getByRole("checkbox", { name: "I agree" });
 
-    // Check then uncheck: the second toggle leaves it invalid, and because the
-    // adapter marks touched on change, the error surfaces without any blur.
     await user.click(terms);
     await user.click(terms);
     expect(screen.getByText("You must agree")).toBeInTheDocument();
@@ -177,9 +169,6 @@ describe("useAppForm + pre-bound field components", () => {
 
     await user.type(email, "bad");
     expect(submit).toHaveAttribute("aria-disabled", "true");
-    // Focusable-disabled contract (AGENTS.md): the button models "disabled" with
-    // `aria-disabled`, never the native attribute, so it stays in the tab order and
-    // can still be focused while the form can't submit.
     expect(submit).not.toHaveAttribute("disabled");
     submit.focus();
     expect(submit).toHaveFocus();
@@ -195,7 +184,6 @@ describe("Form", () => {
     const user = userEvent.setup();
     const handleSubmit = vi.fn();
     const onSubmit = vi.fn();
-    // A plain form-like value (no `AppForm`) — mirrors a bare `useForm()`.
     const { container } = render(
       <Form form={{ handleSubmit }} onSubmit={onSubmit}>
         <button type="submit">Go</button>
@@ -205,7 +193,6 @@ describe("Form", () => {
 
     await user.click(screen.getByRole("button", { name: "Go" }));
     expect(handleSubmit).toHaveBeenCalledTimes(1);
-    // The side-effect hook still fires, and the browser default is prevented.
     expect(onSubmit).toHaveBeenCalledTimes(1);
     expect(onSubmit.mock.calls[0]?.[0]?.defaultPrevented).toBe(true);
   });
@@ -222,14 +209,11 @@ describe("Form", () => {
     );
     const provider = screen.getByTestId("app-form");
     expect(provider).toHaveTextContent("inside");
-    // The <form> lives inside the provider, so form components resolve context.
     expect(provider.querySelector("form")).toBeInTheDocument();
   });
 });
 
 describe("Form adapters (render-prop, across controls)", () => {
-  // A field whose path was omitted from `defaultValues`, so `field.state.value` is
-  // `undefined` — the case each adapter must coalesce to stay controlled.
   const missing = <T,>(handleChange?: (value: T) => void): FieldLike<T> => ({
     name: "field",
     handleChange: handleChange ?? (() => {}),
@@ -299,8 +283,6 @@ describe("Form adapters (render-prop, across controls)", () => {
     );
     const trigger = screen.getByRole("combobox", { name: "Fruit" });
     trigger.focus();
-    // Moving focus away blurs the trigger → the adapter forwards it to handleBlur,
-    // which is also what would run a `validators.onBlur` on the field.
     await user.click(screen.getByRole("button", { name: "outside" }));
     expect(handleBlur).toHaveBeenCalledTimes(1);
   });

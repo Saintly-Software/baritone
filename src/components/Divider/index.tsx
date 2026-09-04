@@ -119,18 +119,11 @@ export function Divider({
 }: DividerProps) {
   const labelled = children != null && children !== false;
 
-  // `thickness` is an inline var, not a recipe variant, because the `borderWidth`
-  // vocabulary is open (consumer-extensible). Point the rule's weight at the
-  // `var(--borderWidth-<name>)` the active theme published; consumer `style` spreads
-  // last so it can still override.
   const resolvedStyle = {
     ...assignInlineVars({ [dividerWeightVar]: `var(${borderWidthVarName(thickness)})` }),
     ...style,
   };
 
-  // Dev-only: warn when `thickness` names a var the theme never published. Compose an
-  // internal ref onto the node so we can read its computed style after mount; in
-  // production this is a no-op and the consumer's `ref` passes through untouched.
   const nodeRef = React.useRef<HTMLDivElement | null>(null);
   const mergedRef = React.useMemo(() => (isDev() ? composeRefs(nodeRef, ref) : ref), [ref]);
   React.useEffect(() => {
@@ -138,10 +131,6 @@ export function Divider({
     warnIfBorderWidthUnset(nodeRef.current, thickness);
   }, [thickness]);
 
-  // A `separator`'s children are presentational — a screen reader never reads
-  // the visible label — so a string label doubles as the accessible name. Only
-  // forward `aria-label` when we have one: base-ui's prop merge treats an
-  // explicit `undefined` as an override, and would wipe a consumer's own.
   const resolvedAriaLabel = ariaLabel ?? (typeof children === "string" ? children : undefined);
   const ariaProps: Record<string, string> = {};
   if (resolvedAriaLabel != null) ariaProps["aria-label"] = resolvedAriaLabel;

@@ -24,7 +24,6 @@ const ITEMS = [
   },
 ] as const;
 
-// Controlled single-open host mirroring the documented usage.
 function SingleFAQ({
   onChange,
   disabled,
@@ -49,7 +48,6 @@ function SingleFAQ({
   );
 }
 
-// Controlled multi-open host.
 function MultiFAQ({
   onChange,
   initialOpen = [],
@@ -77,7 +75,6 @@ describe("Accordion", () => {
     render(<SingleFAQ />);
     expect(screen.getAllByRole("button")).toHaveLength(3);
     expect(screen.getByRole("button", { name: /Shipping/ })).toBeInTheDocument();
-    // The subtitle renders alongside the title in the trigger.
     expect(screen.getByText("2–4 business days")).toBeInTheDocument();
   });
 
@@ -103,10 +100,8 @@ describe("Accordion", () => {
     );
 
     const trigger = screen.getByRole("button", { name: /Production/ });
-    // Both adornments live inside the trigger button alongside the title.
     expect(trigger).toContainElement(screen.getByTestId("icon"));
     expect(trigger).toContainElement(screen.getByTestId("chip"));
-    // The chip text folds into the trigger's accessible name.
     expect(trigger).toHaveAccessibleName(/Production.*Healthy/s);
   });
 
@@ -164,7 +159,6 @@ describe("Accordion", () => {
     await user.click(screen.getByRole("button", { name: /Returns/ }));
     expect(onChange).toHaveBeenLastCalledWith(["shipping", "returns"]);
 
-    // Both stay open.
     expect(screen.getByRole("button", { name: /Shipping/ })).toHaveAttribute(
       "aria-expanded",
       "true",
@@ -185,7 +179,6 @@ describe("Accordion", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /Returns/ }));
-    // Single-open: opening Returns closes Shipping, with no external state.
     expect(screen.getByRole("button", { name: /Returns/ })).toHaveAttribute(
       "aria-expanded",
       "true",
@@ -215,9 +208,7 @@ describe("Accordion", () => {
     render(<SingleFAQ disabled />);
 
     const shipping = screen.getByRole("button", { name: /Shipping/ });
-    // The triggers carry the disabled semantics...
     expect(shipping).toHaveAttribute("aria-disabled", "true");
-    // ...but never the native attribute that would drop them from the tab order.
     expect(shipping).not.toBeDisabled();
 
     await user.tab();
@@ -249,7 +240,6 @@ describe("Accordion", () => {
     );
 
     const warranty = screen.getByRole("button", { name: /Warranty/ });
-    // aria-disabled, so it stays focusable/reachable rather than being skipped.
     expect(warranty).toHaveAttribute("aria-disabled", "true");
     expect(warranty).not.toBeDisabled();
     warranty.focus();
@@ -259,7 +249,6 @@ describe("Accordion", () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(warranty).toHaveAttribute("aria-expanded", "false");
 
-    // A sibling still toggles normally.
     await user.click(screen.getByRole("button", { name: /Shipping/ }));
     expect(onChange).toHaveBeenCalledWith("shipping");
   });

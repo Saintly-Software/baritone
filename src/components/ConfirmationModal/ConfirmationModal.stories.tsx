@@ -42,8 +42,6 @@ export default meta;
 
 type Story = StoryObj<typeof ConfirmationModal>;
 
-// Negative / Warning / Secondary open by default (`defaultOpen`) so the dialog
-// itself is what a snapshot (e.g. Chromatic) captures, not just the trigger.
 export const Negative: Story = {
   args: { defaultOpen: true },
   render: (args) => (
@@ -96,8 +94,6 @@ export const Secondary: Story = {
   ),
 };
 
-// Hidden from the sidebar (`!dev`) — a controlled-usage reference that still runs
-// as a story test, but doesn't clutter the curated nav.
 export const Controlled: Story = {
   tags: ["!dev"],
   render: (args) => {
@@ -115,11 +111,6 @@ export const Controlled: Story = {
         >
           <Text render={<p />}>Your account and all associated data will be removed.</Text>
         </ConfirmationModal>
-        {/*
-          When you drive `open` yourself, the opener lives outside the dialog, so
-          it's a plain `Button` — not `ConfirmationModal.Trigger` (a base-ui
-          `Dialog.Trigger`, which must sit inside the dialog via the `trigger` prop).
-        */}
         <Button intent="negative" saliency="high" onClick={() => setOpen(true)}>
           Delete account
         </Button>
@@ -128,8 +119,6 @@ export const Controlled: Story = {
   },
 };
 
-// Hidden from the sidebar (`!dev`) — the async-confirm behaviour belongs with the
-// tests, not the curated nav.
 export const Loading: Story = {
   name: "Loading (async confirm)",
   tags: ["!dev"],
@@ -138,7 +127,6 @@ export const Loading: Story = {
     const [submitting, setSubmitting] = React.useState(false);
 
     const handleConfirm = (event: React.MouseEvent) => {
-      // Keep the dialog open, show the spinner, then close when the work resolves.
       event.preventDefault();
       setSubmitting(true);
       setTimeout(() => {

@@ -3,11 +3,6 @@ import * as React from "react";
 import { describe, expect, it } from "vitest";
 import { ScrollArea } from "./index";
 
-// These run in jsdom, which has no layout — so base-ui never measures overflow
-// and the scrollbars stay unmounted. The scrollbar / hover-reveal behaviour is
-// covered by ScrollArea.interaction.stories.tsx (a real browser). Here we assert
-// the parts jsdom can see: content, the labelled region, and root plumbing.
-
 describe("ScrollArea", () => {
   it("renders its children", () => {
     render(

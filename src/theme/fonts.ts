@@ -69,9 +69,6 @@ export function fontFamilyVars(fonts: Record<string, string> = {}): Record<strin
     [fontVarName("mono")]: vars.font.mono,
   };
   for (const [name, family] of Object.entries(fonts)) {
-    // `sans`/`mono` are always token-backed (`vars.font.*`) so bare text and
-    // `font="sans"` never diverge; the registry can't shadow them. Customise the
-    // built-in families through the theme tokens (`brand.fonts`) instead.
     if (name === "sans" || name === "mono") continue;
     out[fontVarName(name)] = family;
   }

@@ -103,8 +103,6 @@ function TooltipRoot({
   ref,
 }: TooltipProps) {
   const descriptionId = React.useId();
-  // Track the resolved open state (controlled or not) so the trigger only
-  // describes itself while the popup is actually mounted.
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen ?? false);
   const isOpen = open ?? uncontrolledOpen;
 
@@ -167,8 +165,6 @@ export type TooltipTriggerProps = ButtonProps & {
 
 function TooltipTrigger({ delay, closeDelay, ...buttonProps }: TooltipTriggerProps) {
   const context = React.useContext(TooltipContext);
-  // A disabled button surfaces its own `disabledReason`; keep the hint out of
-  // the way by telling base-ui not to open for a disabled trigger.
   const disabled = buttonProps.disabled;
   const describedBy = context?.describedBy;
 
@@ -180,9 +176,6 @@ function TooltipTrigger({ delay, closeDelay, ...buttonProps }: TooltipTriggerPro
       render={(htmlAttrs) => (
         <InternalButton
           consumerProps={buttonProps as ButtonProps}
-          // Only merge `aria-describedby` while the popup is mounted, so the
-          // reference never points at a removed element (base-ui `mergeProps`
-          // clobbers with `undefined`, hence the conditional spread).
           htmlAttrs={describedBy ? { ...htmlAttrs, "aria-describedby": describedBy } : htmlAttrs}
         />
       )}

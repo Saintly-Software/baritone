@@ -42,19 +42,15 @@ export const buttonGroupItemRecipe = recipe({
   },
   variants: {
     position: {
-      // Lone button: a plain `Button`, no joins to collapse.
       only: {},
-      // Leftmost: keep the start corners, square the end (neighbour) corners.
       first: {
         borderStartEndRadius: 0,
         borderEndEndRadius: 0,
       },
-      // Interior: square every corner and overlap the previous member's border.
       middle: {
         borderRadius: 0,
         marginInlineStart: `calc(-1 * ${vars.borderWidth.thin})`,
       },
-      // Rightmost: keep the end corners, square the start (neighbour) corners.
       last: {
         borderStartStartRadius: 0,
         borderEndStartRadius: 0,

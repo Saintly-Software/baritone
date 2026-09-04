@@ -48,8 +48,6 @@ describe("List", () => {
   });
 
   it("falls back to the index for an item without its own key", () => {
-    // No `key` on the elements — the list supplies the positional fallback, so
-    // both rows still render rather than colliding.
     render(<List items={[<List.Item>First</List.Item>, <List.Item>Second</List.Item>]} />);
     expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(2);
   });
@@ -71,7 +69,6 @@ describe("List", () => {
 
   it("applies grid-template-columns for a numeric grid columns count", () => {
     render(<List layout="grid" columns={3} items={[<List.Item key="a">A</List.Item>]} />);
-    // Grid sets the template inline, so it's readable in jsdom.
     expect(screen.getByRole("list").style.gridTemplateColumns).toBe("repeat(3, minmax(0, 1fr))");
   });
 
@@ -81,8 +78,6 @@ describe("List", () => {
   });
 
   it("drops inactive flex props when layout=grid (retained Storybook controls)", () => {
-    // A JS/Storybook caller can keep flex controls after switching to grid — the
-    // discriminated union can't stop that. They must not reach the DOM element.
     const props = {
       layout: "grid",
       columns: 2,
@@ -93,7 +88,6 @@ describe("List", () => {
     } as React.ComponentProps<typeof List>;
     render(<List {...props} />);
     const list = screen.getByRole("list");
-    // Grid layout is intact; the stray flex props never leak onto the <ul>.
     expect(list.style.gridTemplateColumns).toBe("repeat(2, minmax(0, 1fr))");
     expect(list.hasAttribute("direction")).toBe(false);
     expect(list.hasAttribute("wrap")).toBe(false);
@@ -112,7 +106,6 @@ describe("List", () => {
     expect(list.hasAttribute("columns")).toBe(false);
     expect(list.hasAttribute("rows")).toBe(false);
     expect(list.hasAttribute("areas")).toBe(false);
-    // No grid template leaked into the flex list.
     expect(list.style.gridTemplateColumns).toBe("");
   });
 

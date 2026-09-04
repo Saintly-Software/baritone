@@ -3,8 +3,6 @@ import { SALIENCIES, SIZES } from "../../theme/constants";
 import { Text } from "../Text";
 import { InfoButton, type InfoButtonIntent } from "./index";
 
-// `positive` is excluded from InfoButton — a success colour reads wrong on an
-// informational affordance.
 const INFO_INTENTS: InfoButtonIntent[] = ["primary", "secondary", "neutral", "warning", "negative"];
 
 const meta: Meta<typeof InfoButton> = {

@@ -46,7 +46,6 @@ describe("InternalSwitch", () => {
     await user.tab();
     const input = screen.getByRole("switch", { name: "Wi-Fi" });
     expect(input).toHaveFocus();
-    // The focusable control lives inside the track, so :focus-within applies to it.
     expect(track).toContainElement(input);
   });
 
