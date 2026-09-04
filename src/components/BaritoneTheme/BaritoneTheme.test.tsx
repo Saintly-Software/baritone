@@ -4,8 +4,6 @@ import { vars } from "../../theme/contract.css";
 import { buildDefaultTokens } from "../../theme/defaultTokens";
 import { BaritoneTheme } from "./index";
 
-// The contract leaf is a `var(--name)` reference; strip the wrapper to get the
-// underlying custom-property name so we can read its resolved inline value.
 const operatorProp = vars.oklchOperator.slice(4, -1);
 
 const lightTokens = buildDefaultTokens("light");
@@ -27,7 +25,6 @@ describe("BaritoneTheme", () => {
       </BaritoneTheme>,
     );
     const root = screen.getByTestId("root");
-    // At least one contract variable should be set inline.
     const inline = root.getAttribute("style") ?? "";
     expect(inline).toMatch(/--[\w-]+:/);
   });
@@ -70,7 +67,6 @@ describe("BaritoneTheme", () => {
     );
     const root = screen.getByTestId("root");
     expect(root.style.margin).toBe("8px");
-    // Consumer layout style did not wipe out the inline theme variables.
     expect(root.getAttribute("style") ?? "").toMatch(/--[\w-]+:/);
   });
 });

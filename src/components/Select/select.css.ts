@@ -2,8 +2,6 @@ import { style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
-// The trigger's trailing zone holds the chevron (and, when busy, a spinner in its
-// place). The clear button is the same footprint, floated just inside it.
 const chevronZone = "1.25rem";
 const clearZone = "1.5rem";
 
@@ -39,7 +37,6 @@ export const selectValue = style({
   textOverflow: "ellipsis",
   textAlign: "start",
   selectors: {
-    // base-ui flags the placeholder state; dim it like an input's placeholder.
     "&[data-placeholder]": { color: vars.text.color.neutral.low },
   },
 });
@@ -121,8 +118,6 @@ export const selectClearButton = recipe({
     },
   },
   variants: {
-    // `right` = the trigger's inline padding + the chevron zone + the gap, so the
-    // clear button sits exactly over its reserved slot for each control size.
     size: {
       sm: { right: `calc(${vars.space[2]} + ${chevronZone} + ${vars.space[1]})` },
       md: { right: `calc(${vars.space[3]} + ${chevronZone} + ${vars.space[1]})` },

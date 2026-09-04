@@ -3,15 +3,12 @@ import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { IntentSaliencyMatrix } from "../_stories/IntentSaliencyMatrix";
 import { Button } from "./index";
 
-// A throwaway bare glyph so the start/end icon stories have something to render;
-// the Button auto-wraps it in `<Icon>`.
 const Sparkle = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
   </svg>
 );
 
-// A bare plus glyph for the icon-only stories; the Button auto-wraps it in `<Icon>`.
 const Plus = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" />
@@ -115,9 +112,6 @@ export const IconOnly: Story = {
  */
 export const Width: Story = {
   render: () => (
-    // `align-items: flex-start` so the *container* never stretches its children —
-    // otherwise (a default grid/stretch parent) an unset button fills the column
-    // on its own and `width` looks like it does nothing.
     <div
       style={{
         display: "flex",
@@ -190,7 +184,6 @@ export const TextIntentsAndSaliencies: Story = {
   ),
 };
 
-// The small end of the shared type scale — the sizes that suit inline text buttons.
 const TEXT_BUTTON_SIZES = ["xs", "sm", "md", "lg", "xl"] as const;
 
 export const TextVariants: Story = {

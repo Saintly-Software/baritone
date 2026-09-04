@@ -6,8 +6,8 @@ export const accordionRoot = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[2],
-  minWidth: 0, // see `Flex`
-  minHeight: 0, // see `Flex`
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /** Dim the whole stack when the group is disabled. */
@@ -22,8 +22,8 @@ export const accordionRootDisabled = style({
  */
 export const accordionItem = style({
   overflow: "hidden",
-  minWidth: 0, // see `Flex`
-  minHeight: 0, // see `Flex`
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /** Dim a single disabled item (only when the group as a whole isn't disabled). */
@@ -62,9 +62,6 @@ export const accordionTrigger = style({
     '&:hover:not([aria-disabled="true"])': {
       background: vars.component.color.neutral.mid.default.bgc,
     },
-    // Disabled is modelled with `aria-disabled` (never the native attribute), so
-    // the trigger stays in the tab order; the dim comes from the item/root
-    // `*Disabled` classes so it never double-applies.
     '&[aria-disabled="true"]': {
       cursor: "not-allowed",
     },

@@ -7,8 +7,6 @@ import { CheckboxGroup } from "./index";
 
 type Topic = "product" | "billing" | "security";
 
-// A tiny controlled host mirroring the documented usage, so the type-safe
-// render-prop pattern is exercised exactly as a consumer would write it.
 function Subscriptions({
   value: initial = [],
   onChange,
@@ -135,7 +133,6 @@ describe("CheckboxGroup", () => {
     expect(product).toHaveAttribute("aria-disabled", "true");
     expect(product).not.toBeDisabled();
 
-    // No roving focus here — each box is its own tab stop, even disabled.
     await user.tab();
     expect(product).toHaveFocus();
   });
@@ -155,7 +152,6 @@ describe("CheckboxGroup", () => {
     );
 
     const product = screen.getByRole("checkbox", { name: "product" });
-    // The disabled item stays focusable so it can be tabbed to and inspected.
     expect(product).toHaveAttribute("aria-disabled", "true");
     expect(product).not.toBeDisabled();
     await user.tab();
@@ -175,8 +171,6 @@ describe("CheckboxGroup", () => {
     expect(line.querySelector("svg")).not.toBeNull();
   });
 
-  // The group is a bare `<div role="group">`, so base-ui's field context can't
-  // reach it — its help / error text used to render but point at nothing.
   describe("aria-describedby", () => {
     /** Resolve the group's `aria-describedby` to the text it announces. */
     const describedByText = (el: HTMLElement) =>
@@ -192,8 +186,6 @@ describe("CheckboxGroup", () => {
 
     it("keeps helpText wired when the state turns invalid", () => {
       render(<Subscriptions helpText="Pick any that apply" state="invalid" />);
-      // The one line stays in `aria-describedby` across states — it changes
-      // colour, it doesn't leave and re-enter the description.
       expect(describedByText(screen.getByRole("group"))).toEqual(["Pick any that apply"]);
     });
 
@@ -210,13 +202,10 @@ describe("CheckboxGroup", () => {
       ]);
     });
 
-    // `role="group"` can't take `aria-required`, so a required group announces it
-    // through the description instead (the visible asterisk is `aria-hidden`).
     it("announces required through the group's description", () => {
       render(<Subscriptions required helpText="Pick any that apply" />);
       const group = screen.getByRole("group");
       expect(describedByText(group)).toEqual(["Required", "Pick any that apply"]);
-      // The hidden hint must not have an unsupported attribute or pollute the name.
       expect(group).not.toHaveAttribute("aria-required");
       expect(group).toHaveAccessibleName("Email me about");
     });

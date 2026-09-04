@@ -1,7 +1,5 @@
 import { vars } from "./contract.css";
 
-// Interaction-state deltas applied in oklch space. Hover is a small nudge,
-// active is double. The sign comes from `--oklch-operator` (per theme/scheme).
 export const HOVER_DELTA = { l: 0.02, c: 0.01 } as const;
 export const ACTIVE_DELTA = { l: 0.04, c: 0.02 } as const;
 

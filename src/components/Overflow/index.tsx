@@ -107,10 +107,8 @@ function nextItemOffset(
   const maxScroll = horizontal
     ? vp.scrollWidth - vp.clientWidth
     : vp.scrollHeight - vp.clientHeight;
-  // Sub-pixel slack so a control that's *just* flush doesn't count as clipped.
   const TOL = 1;
 
-  // Leading edge / extent of a control in the viewport's scroll coordinates.
   const lead = (el: HTMLElement) => {
     const r = el.getBoundingClientRect();
     return horizontal ? r.left - vpRect.left + scroll : r.top - vpRect.top + scroll;
@@ -122,14 +120,10 @@ function nextItemOffset(
 
   let target: number;
   if (dir === "end") {
-    // First control whose trailing edge is past the visible end: align that edge
-    // to the viewport's end so the control lands fully in view.
     const next = items.find((el) => lead(el) + extent(el) > scroll + viewSize + TOL);
     if (!next) return null;
     target = lead(next) + extent(next) - viewSize;
   } else {
-    // Last control whose leading edge is before the visible start: align that
-    // edge to the viewport's start.
     let prev: HTMLElement | undefined;
     for (let i = items.length - 1; i >= 0; i--) {
       const el = items[i];
@@ -226,7 +220,6 @@ export function Overflow({
       target = nextItemOffset(vp, trackRef.current, horizontal, dir);
     }
     if (target === null) {
-      // `page` mode, or `item` with nothing measurable: move one viewport.
       const amount = horizontal ? vp.clientWidth : vp.clientHeight;
       const delta = dir === "end" ? amount : -amount;
       vp.scrollBy(horizontal ? { left: delta, behavior } : { top: delta, behavior });
@@ -252,8 +245,6 @@ export function Overflow({
           orientation === "horizontal" ? viewportFadeHorizontal : viewportFadeVertical,
         )}
       >
-        {/* base-ui's Content sets `min-width: fit-content`, so the track overflows
-            rather than shrinking to fit. */}
         <BaseScrollArea.Content>
           <div ref={trackRef} className={track({ orientation, gap })}>
             {children}
@@ -265,8 +256,6 @@ export function Overflow({
         <BaseScrollArea.Thumb className={thumb} />
       </BaseScrollArea.Scrollbar>
 
-      {/* Pointer-only scroll affordances (see the component doc): out of the tab
-          order, hidden by CSS until their edge overflows. */}
       <button
         type="button"
         data-side="start"

@@ -102,9 +102,6 @@ function CheckboxGroupItem<T>({
     toggle,
   } = React.useContext(CheckboxGroupItemContext);
   const itemDisabled = groupDisabled || disabled;
-  // Membership decides checked state. Identity is `===` (via `includes`), which
-  // is exactly right for the strings / numbers / enums these options are meant
-  // to be; object values would compare by reference.
   const checked = selected.includes(value);
   const labelId = React.useId();
   const content = children ?? defaultLabel(value);
@@ -114,13 +111,9 @@ function CheckboxGroupItem<T>({
       <BaseCheckbox.Root
         checked={checked}
         onCheckedChange={(next, details) => toggle(value, next, details.event)}
-        // `readOnly` + `aria-disabled` (not `disabled`) so a disabled box stays in
-        // the tab order and reachable, while base-ui vetoes the toggle.
         readOnly={itemDisabled}
         aria-disabled={itemDisabled || undefined}
         aria-labelledby={content != null ? labelId : undefined}
-        // base-ui now reports `data-readonly`, not `data-disabled`, so the box's
-        // dim is driven explicitly from the prop.
         render={
           <InternalCheckbox checked={checked} disabled={itemDisabled} state={state} size={size} />
         }
@@ -232,7 +225,6 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     className,
   } = props as CheckboxGroupBaseProps<T> & FieldLabellingInput;
 
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
   const nameProps: FieldLabellingInput = {
@@ -241,8 +233,6 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     "aria-labelledby": ariaLabelledby,
   };
 
-  // `onChange` is referenced from `toggle` below; keep the latest in a ref so the
-  // memoised context value doesn't have to change identity on every `onChange`.
   const onChangeRef = React.useRef(onChange);
   onChangeRef.current = onChange;
 
@@ -260,7 +250,6 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
     [size, state, disabled, value, toggle],
   );
 
-  // Announced-required id (see the group's `aria-describedby` below).
   const requiredHintId = React.useId();
 
   return (
@@ -273,22 +262,11 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
       disabled={disabled}
       slotProps={slotProps}
     >
-      {/*
-        The group is a bare `<div role="group">`, which base-ui's field context
-        can't see — so, unlike `RadioGroup`, it takes its naming and description
-        wiring from the render prop by hand.
-      */}
       {({ nameAttrs, describedBy }) => (
         <CheckboxGroupItemContext.Provider value={itemContext}>
           <div
             role="group"
             {...nameAttrs}
-            // `role="group"` can't carry the announced-required half: ARIA doesn't
-            // support `aria-required` on it, and putting it per-item would wrongly
-            // mean *every* box is required. So `required` rides the group's
-            // description — a visually-hidden "Required" node wired into
-            // `aria-describedby`, alongside the visual asterisk the `Field` renders
-            // (AGENTS.md: "required goes on both").
             aria-describedby={joinIds(
               required ? requiredHintId : undefined,
               ariaDescribedby,
@@ -302,8 +280,6 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
               </span>
             )}
             {children({
-              // The stable generic item, narrowed to this group's `T`. The cast is
-              // purely a type-level instantiation — the runtime function is the same.
               CheckboxGroupItem: CheckboxGroupItem as (
                 props: CheckboxGroupItemProps<T>,
               ) => React.ReactNode,

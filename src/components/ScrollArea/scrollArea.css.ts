@@ -2,18 +2,10 @@ import { style } from "@vanilla-extract/css";
 import { vars } from "../../theme/contract.css";
 import { hover } from "../../theme/oklch";
 
-// How far the gradient scroll fade reaches in from a scrollable edge. base-ui
-// publishes the exact pixel overflow at each edge on the viewport (see the
-// `--scroll-area-overflow-*` vars below), so the fade only grows once there's
-// content hidden past that edge — and never deeper than this.
 const FADE = "40px";
 
-// The thumb's resting thickness / the scrollbar rail's cross-axis size.
 const BAR = "10px";
 
-// How long the scrollbar lingers before it fades back out after you stop
-// hovering / scrolling. Reveal is near-instant (see the reveal selectors); the
-// delay only applies to the fade-out so the bar doesn't vanish mid-glance.
 const REVEAL_DELAY = "400ms";
 
 /**
@@ -43,13 +35,7 @@ const xFade = `linear-gradient(
 /** Groups every part; sizes to whatever the consumer gives it. */
 export const root = style({
   position: "relative",
-  // The scroll happens in the viewport, so the box only needs a bound on the
-  // axis it scrolls — the consumer supplies that (a height / max-height, and a
-  // width for horizontal). Nothing is imposed here so the area drops into any
-  // layout.
   boxSizing: "border-box",
-  // 0 so the area takes its parent's size and the viewport — not the page —
-  // scrolls; see `Flex`.
   minWidth: 0,
   minHeight: 0,
 });
@@ -96,7 +82,6 @@ export const viewportFadeBoth = style({
  */
 export const scrollbar = style({
   display: "flex",
-  // Don't let a drag on the thumb also scroll the page / select text.
   touchAction: "none",
   userSelect: "none",
   opacity: 0,
@@ -107,7 +92,6 @@ export const scrollbar = style({
   selectors: {
     '&[data-orientation="vertical"]': {
       width: BAR,
-      // A little breathing room from the edge; the padding insets the thumb.
       padding: "2px",
     },
     '&[data-orientation="horizontal"]': {

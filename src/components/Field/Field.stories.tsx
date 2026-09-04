@@ -7,11 +7,6 @@ import { cx } from "../../utils/cx";
 import { Text } from "../Text";
 import { Field } from "./index";
 
-// Field is a layout + ARIA primitive, not a styled control — the stories slot a
-// plainly-styled input into it (the same recipes `TextInput` uses) so the label /
-// help / error arrangement is what you're actually looking at. The field's `state`
-// drives its label / error text; colouring the *control* to match is the composing
-// component's job (here, the recipe `TextInput` would apply).
 const controlClassFor = (state: FormState = "neutral") =>
   cx(formControlRecipe({ state, size: "md" }), focusRingRecipe({ type: "visible", offset: "sm" }));
 
@@ -113,8 +108,6 @@ export const Required: Story = {
   },
 };
 
-// One message slot now: the copy changes with the state, rather than a help
-// line and an error line coexisting.
 const STATE_MESSAGE: Record<FormState, string | undefined> = {
   neutral: undefined,
   warning: "This address looks unusual.",

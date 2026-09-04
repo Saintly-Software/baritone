@@ -179,9 +179,6 @@ function ConfirmationModalRoot({
   className,
   ref,
 }: ConfirmationModalProps) {
-  // While busy (confirming or hard-disabled) the dialog is non-dismissable: Modal
-  // already vetoes Escape / close / backdrop when `disabled`, so route both states
-  // through it.
   const busy = loading || disabled;
 
   const {
@@ -199,10 +196,6 @@ function ConfirmationModalRoot({
     ...cancelRest
   } = cancel ?? {};
 
-  // The confirm button closes the dialog after its handler runs — unless the
-  // handler calls `preventDefault()` (async-confirm escape hatch). We render it as
-  // a base-ui `Dialog.Close` purely to obtain the close callback, then gate it
-  // ourselves rather than letting the Close fire unconditionally.
   const confirmButton = (
     <BaseDialog.Close
       render={(htmlAttrs) => {

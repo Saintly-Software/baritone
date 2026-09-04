@@ -8,7 +8,6 @@ describe("InfoButton", () => {
     render(<InfoButton aria-label="More info">Body</InfoButton>);
     const button = screen.getByRole("button", { name: "More info" });
     expect(button.tagName).toBe("BUTTON");
-    // No visible text label — the accessible name comes from aria-label.
     expect(button).toHaveTextContent("");
   });
 
@@ -103,7 +102,6 @@ describe("InfoButton", () => {
 
       await user.click(screen.getByRole("button", { name: "More info" }));
 
-      // Give the popover a chance to (not) open.
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(screen.queryByText("Popover body")).not.toBeInTheDocument();
     });

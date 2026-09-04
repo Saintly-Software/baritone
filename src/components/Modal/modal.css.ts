@@ -15,8 +15,6 @@ export const modalBackdrop = style({
   transitionDuration: vars.motion.duration.base,
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
-    // base-ui flags the enter ("starting") and exit ("ending") frames; fade the
-    // scrim on both.
     "&[data-starting-style], &[data-ending-style]": { opacity: 0 },
   },
   "@media": {
@@ -57,7 +55,6 @@ export const modalPopup = recipe({
     flexDirection: "column",
     gap: vars.space[4],
     width: "100%",
-    // Cap height to the padded viewport so the body (not the page) scrolls.
     maxHeight: "100%",
     overflow: "hidden",
     boxShadow: vars.shadow.lg,

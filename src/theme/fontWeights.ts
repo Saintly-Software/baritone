@@ -74,8 +74,6 @@ export function fontWeightVars(weights: Record<string, string> = {}): Record<str
     out[fontWeightVarName(weight)] = vars.text.weight[weight];
   }
   for (const [name, value] of Object.entries(weights)) {
-    // The built-in steps stay token-backed (`vars.text.weight.*`) so bare text and
-    // e.g. `weight="bold"` never diverge; the registry can't shadow them.
     if ((TEXT_WEIGHTS as readonly string[]).includes(name)) continue;
     out[fontWeightVarName(name)] = value;
   }

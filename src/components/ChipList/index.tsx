@@ -93,7 +93,6 @@ function ChipListRow({
 }) {
   const { intent: itemIntent, saliency: itemSaliency, ...chipProps } = item.props;
   return (
-    // Same Safari role-stripping fix as the `<ul>` above.
     <li role="listitem" className={chipListItem}>
       <Chip
         {...chipProps}
@@ -143,8 +142,6 @@ export function ChipList({
   ref,
   ...rest
 }: ChipListProps) {
-  // Resolve to keyed elements first (dropping falsy entries) so `max` counts and
-  // slices real chips, and the shared keying rule applies.
   const resolved = keyedElements(items);
   const overflows = max != null && resolved.length > max;
   const visible = overflows ? resolved.slice(0, max) : resolved;
@@ -154,8 +151,6 @@ export function ChipList({
     typeof seeMoreLabel === "function" ? seeMoreLabel(remaining.length) : seeMoreLabel;
 
   return (
-    // `role="list"` is set explicitly: with `list-style: none` Safari otherwise
-    // strips the implicit list role from a `<ul>`.
     <ul
       ref={ref}
       role="list"
@@ -166,8 +161,6 @@ export function ChipList({
         <ChipListRow key={item.key} item={item} intent={intent} saliency={saliency} size={size} />
       ))}
 
-      {/* The overflow chip: a popover trigger whose surface holds the hidden
-          chips as their own (vertical) ChipList, inheriting the same defaults. */}
       {overflows && (
         <li role="listitem" className={chipListItem}>
           <Chip

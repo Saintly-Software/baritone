@@ -88,7 +88,6 @@ function NoticeIcon({ children, intent, saliency = "mid", size, label }: NoticeI
     <Icon
       size={size}
       label={label}
-      // See `intent` doc above.
       className={intent != null ? noticeIconRecipe({ intent, saliency }) : undefined}
     >
       {children}
@@ -206,7 +205,6 @@ function NoticeAction(props: NoticeActionProps) {
   } = props;
   const { disabled: noticeDisabled } = React.useContext(NoticeContext);
   const inert = disabled === true || noticeDisabled === true;
-  // No children → the icon is the whole control, so it needs the `label` name.
   const iconOnly = children == null;
 
   const iconState = { intent, saliency, size, disabled: inert };
@@ -393,19 +391,14 @@ function NoticeRoot({
   ml,
   ...rest
 }: NoticeProps) {
-  // A `<Notice.Icon>` already is a colour-tinting icon (with its own
-  // intent/saliency), so pass it through untouched; anything else goes through
-  // the shared `renderIcon`.
   const iconNode =
     React.isValidElement(icon) && icon.type === NoticeIcon
       ? icon
       : renderIcon(icon, { state: { intent, saliency, disabled: disabled ?? false } });
 
-  // See `close` doc above.
   const closeNode =
     close == null ? null : typeof close === "function" ? <NoticeClose onClick={close} /> : close;
 
-  // Live-region role — see class doc above; also overridable via `aria-live`.
   const resolvedRole = role ?? (intent === "negative" || intent === "warning" ? "alert" : "status");
 
   const contextValue = React.useMemo<NoticeContextValue>(() => ({ disabled }), [disabled]);
@@ -433,11 +426,9 @@ function NoticeRoot({
               {chip}
             </div>
             {description != null && <Text size="sm">{description}</Text>}
-            {actions != null &&
-              actions.length > 0 && (
-                // `Children.toArray` assigns stable keys to the positional list.
-                <div className={noticeActions}>{React.Children.toArray(actions)}</div>
-              )}
+            {actions != null && actions.length > 0 && (
+              <div className={noticeActions}>{React.Children.toArray(actions)}</div>
+            )}
           </div>
           {closeNode}
         </NoticeContext.Provider>

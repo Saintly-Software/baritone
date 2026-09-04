@@ -11,27 +11,19 @@ import { focusRingColorVar, iconColorVar } from "../../styles/vars.css";
  * component scheme uses. Pair with `focusRingRecipe` for the ring.
  */
 
-// The link's resting colour: the primary intent text token.
 const linkColor = vars.text.color.primary.mid;
 
 export const linkBase = style({
-  // Blend into surrounding copy when used inline (the default, router-agnostic
-  // use case is an anchor inside body text).
   fontFamily: "inherit",
   fontSize: "inherit",
   fontWeight: "inherit",
   lineHeight: "inherit",
   color: linkColor,
-  // Always underlined: the underline — not the colour alone — is what marks the
-  // text as a link, so it stays distinguishable for users who can't perceive
-  // the colour difference. `from-font` keeps the rule weight legible.
   textDecorationLine: "underline",
   textDecorationThickness: "from-font",
   textUnderlineOffset: "0.15em",
   cursor: "pointer",
   borderRadius: vars.radius.sm,
-  // The underline colour follows `currentColor`, so the hover/active colour
-  // shift below carries it along; nested `Icon`s track the link colour too.
   vars: {
     [iconColorVar]: "currentColor",
     [focusRingColorVar]: vars.component.focus.primary,

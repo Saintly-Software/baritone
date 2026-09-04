@@ -34,7 +34,6 @@ function mergeProps(ours: AnyProps, theirs: AnyProps): AnyProps {
   for (const key of Object.keys(theirs)) {
     const ourValue = ours[key];
     const theirValue = theirs[key];
-    // Chain event handlers so both ours and the consumer's run.
     if (
       /^on[A-Z]/.test(key) &&
       typeof ourValue === "function" &&

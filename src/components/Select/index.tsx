@@ -266,7 +266,6 @@ export function Select(props: SelectProps) {
       onChange: (value: never, event: Event) => void;
     };
 
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
   const nameProps: FieldLabellingInput = {
@@ -275,10 +274,6 @@ export function Select(props: SelectProps) {
     "aria-labelledby": ariaLabelledby,
   };
 
-  // The union is collapsed to a single runtime handler; the casts are safe
-  // because `multiple` decides which arm the caller wired. Both commit paths
-  // carry a raw DOM event: base-ui hands one through `details.event`, and the
-  // clear button forwards its click's `nativeEvent`.
   const emit = onChange as (value: string | string[] | null, event: Event) => void;
   const handleValueChange = (next: string | string[] | null, details: { event: Event }) =>
     emit(next, details.event);
@@ -287,13 +282,8 @@ export function Select(props: SelectProps) {
 
   const hasValue = multiple ? (value as string[]).length > 0 : value != null;
   const showClear = !hideClearButton && hasValue && !disabled && !loading;
-  // Disabled and loading both lock the value the focusable way: base-ui's
-  // `readOnly` vetoes commits while `aria-disabled` carries the semantics.
   const locked = disabled || loading;
 
-  // `options` may be flat or grouped. base-ui's `items` prop only needs the flat
-  // set (it maps a value back to its label for the trigger), so flatten for that;
-  // the grouped structure drives the rendered `Group`/`GroupLabel` sections.
   const flatOptions = isGrouped(options) ? options.flatMap((group) => group.options) : options;
 
   const renderItem = (option: SelectOption) => (
@@ -330,7 +320,6 @@ export function Select(props: SelectProps) {
       slotProps={slotProps}
     >
       <BaseSelect.Root
-        // base-ui's generic value; our discriminated public API is the source of truth.
         multiple={multiple as never}
         value={value as never}
         onValueChange={handleValueChange as never}
@@ -350,8 +339,6 @@ export function Select(props: SelectProps) {
             )}
             aria-disabled={disabled || undefined}
             aria-busy={loading || undefined}
-            // base-ui's `Field.Label` already names the trigger, so this only
-            // emits an attribute for the label-less arms.
             {...fieldNameAttrs(nameProps)}
             {...rest}
           >

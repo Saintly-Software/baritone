@@ -18,8 +18,6 @@ function record<K extends string, V>(keys: readonly K[], make: (key: K) => V): R
   return Object.fromEntries(keys.map((key) => [key, make(key)])) as Record<K, V>;
 }
 
-// Leaf placeholder. createThemeContract only cares about the *shape*; it
-// generates a unique CSS variable for every leaf regardless of value.
 const s = (): string => "";
 
 const colorTriplet = () => ({ bgc: s(), text: s(), border: s() });
@@ -52,22 +50,10 @@ export const tokenShape = {
   },
   text: {
     color: record(INTENTS, () => record(SALIENCIES, () => s())),
-    // Per-size typography tokens. `fontSize` is calc-derived from `fontStep`
-    // (see `defaultTokens`) but overridable per size; `lineHeight` is a concrete
-    // per-size token. Both are applied together whenever a `size` is selected.
     size: record(TEXT_SIZES, () => ({ fontSize: s(), lineHeight: s() })),
-    // The two increment tokens that drive the font-size ramp: `lower` is the
-    // step across `xs`→`xl`, `upper` the step across `xl`→`9xl`.
     fontStep: { lower: s(), upper: s() },
-    // Named `font-weight` steps selectable via the `weight` prop.
     weight: record(TEXT_WEIGHTS, () => s()),
-    // Named letter-spacing (tracking) steps selectable via the `letterSpacing`
-    // prop. `em`-based so a step scales with font-size across the whole ramp.
     letterSpacing: record(LETTER_SPACING_KEYS, () => s()),
-    // Named line-height (leading) steps selectable via the `lineHeight` prop.
-    // Unitless so a step scales with font-size. The per-size `size.lineHeight`
-    // above is a *separate* thing — the default `size` pairs with; this is the
-    // standalone override vocabulary.
     lineHeight: record(LINE_HEIGHT_KEYS, () => s()),
   },
   font: {
@@ -82,8 +68,6 @@ export const tokenShape = {
     duration: { fast: s(), base: s(), slow: s() },
     easing: { standard: s() },
   },
-  // Per-scheme interaction direction for the relative-colour math:
-  // -1 = darken on hover/active (light themes), +1 = lighten (dark themes).
   oklchOperator: s(),
 };
 

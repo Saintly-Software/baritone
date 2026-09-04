@@ -35,8 +35,6 @@ export const tooltipPopup = style({
   transitionDuration: vars.motion.duration.fast,
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
-    // base-ui flags the enter ("starting") and exit ("ending") frames; fade and
-    // scale from the trigger on both so the popup grows in and shrinks out.
     "&[data-starting-style], &[data-ending-style]": {
       opacity: 0,
       transform: "scale(0.96)",

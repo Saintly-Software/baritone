@@ -23,14 +23,7 @@ export interface ButtonIconState {
  */
 interface ButtonCommonProps extends Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
-  // Colour comes from intent/saliency, not `color`.
-  | "color"
-  // The accessible name is arm-specific (visible label vs. required aria-label),
-  // so each arm redefines `aria-label` and `children`.
-  | "aria-label"
-  | "children"
-  // Disabled is modelled with `aria-disabled` (see below), so it's redefined.
-  | "disabled"
+  "color" | "aria-label" | "children" | "disabled"
 > {
   intent?: Intent;
   saliency?: Saliency;

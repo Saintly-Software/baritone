@@ -83,7 +83,6 @@ describe("ConfirmationModal", () => {
     await user.click(await screen.findByRole("button", { name: "Confirm" }));
 
     expect(handleConfirm).toHaveBeenCalledTimes(1);
-    // Give any (unexpected) dismissal a chance to run before asserting it stayed.
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByText("This permanently removes the project.")).toBeInTheDocument();
   });
@@ -133,7 +132,6 @@ describe("ConfirmationModal", () => {
     const confirm = screen.getByRole("button", { name: "Confirm" });
     expect(confirm).toHaveAttribute("aria-busy", "true");
 
-    // Neither button acts, and Escape can't dismiss the locked dialog.
     await user.click(confirm);
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     await user.keyboard("{Escape}");

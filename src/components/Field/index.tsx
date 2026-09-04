@@ -343,8 +343,6 @@ export type FieldProps = FieldBaseProps & FieldLabellingProps;
  * </Field>
  */
 export function Field(props: FieldProps) {
-  // The public type is a union over the labelling arms; internally we read every
-  // field from one widened shape.
   const nameProps = props as FieldLabellingInput;
   const {
     children,
@@ -362,21 +360,12 @@ export function Field(props: FieldProps) {
 
   assertExclusiveNames(nameProps, "Field");
 
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
 
-  // Split the label slot's own `className` out so it merges *onto* the built-in
-  // class instead of clobbering it. base-ui's Field parts accept `string` or
-  // `(state) => string`; `mergeSlotClass` folds either form onto our base class.
   const { className: labelSlotClass, ...labelSlotProps } = slotProps?.label ?? {};
   const helpTextSlotProps = slotProps?.helpText;
 
-  // Own the part ids rather than letting base-ui generate them: base-ui only
-  // hands its generated ids to its *own* components, so a control it can't reach
-  // would have nothing to point `aria-describedby` at. Setting them explicitly
-  // keeps base-ui's auto-wiring working *and* lets the render-prop form wire a
-  // custom control by hand.
   const generatedLabelId = React.useId();
   const helpTextId = React.useId();
   const labelId = label != null ? generatedLabelId : undefined;
@@ -392,18 +381,9 @@ export function Field(props: FieldProps) {
     </BaseField.Label>
   );
 
-  // The required marker and the InfoButton both ride *beside* the label, never
-  // inside it, for two reasons. A button inside the `<label>` would join the
-  // control's accessible name and activate the control when clicked. And while an
-  // `aria-hidden` asterisk inside the label would keep the *real* accessible name
-  // right (the accname spec skips hidden subtrees), testing-library's
-  // `getByLabelText` matches the label's raw `textContent` — so it would quietly
-  // break every `getByLabelText("Email")` the moment someone added `required`.
-  // Outside, the label's text and its accessible name stay the same string.
   const hasLabelAdornment = required || info != null;
 
   return (
-    // No `disabled` on `Field.Root` — see the note in the component doc above.
     <BaseField.Root
       invalid={state === "invalid"}
       className={cx(fieldRoot({ labelPosition, fit }), className)}
@@ -431,10 +411,6 @@ export function Field(props: FieldProps) {
           ? children({ nameAttrs: fieldNameAttrs(nameProps, labelId), describedBy, labelId })
           : children}
         {helpText != null && (
-          // Always a `Description`, never base-ui's `Error`: one line whose
-          // *presentation* tracks `state`, so it stays wired to
-          // `aria-describedby` in every state instead of appearing and
-          // disappearing from it.
           <BaseField.Description
             id={helpTextId}
             render={

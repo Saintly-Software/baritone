@@ -18,8 +18,6 @@ describe("InternalButton", () => {
   });
 
   it("merges htmlAttrs (className, data-*, aria-*) onto the button", () => {
-    // base-ui hands its `render` callback a pre-built bag of attributes; the
-    // `data-*` it derives from state aren't statically known, hence the cast.
     const hostAttrs = {
       className: "host",
       "aria-haspopup": "dialog",
@@ -32,7 +30,6 @@ describe("InternalButton", () => {
       />,
     );
     const button = screen.getByRole("button", { name: "Trigger" });
-    // Both the host's and the consumer's classes survive the merge.
     expect(button.className).toContain("host");
     expect(button.className).toContain("consumer");
     expect(button).toHaveAttribute("aria-haspopup", "dialog");

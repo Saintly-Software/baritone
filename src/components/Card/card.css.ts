@@ -7,9 +7,6 @@ import { vars } from "../../theme/contract.css";
 /** Bumps the card's internal padding a step up from the `md` breakpoint. */
 const cardPaddingBreakpoint = `screen and (min-width: ${breakpoints.md})`;
 
-// Negative inset equal to the card's own padding (published by the surface
-// recipe as `--surfacePadding`). Used to pull full-bleed content / dividers out
-// to the card's edges.
 const bleedInline = `calc(${surfacePaddingVar} * -1)`;
 
 /**
@@ -22,8 +19,8 @@ export const cardRoot = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[4],
-  minWidth: 0, // see `Flex`
-  minHeight: 0, // see `Flex`
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /**
@@ -102,19 +99,11 @@ export const cardSelectedRecipe = recipe({
     selected: {
       false: {},
       true: {
-        // The inset ring never fights the surface (it sets no box-shadow), so it
-        // can live at the top level.
         boxShadow: `inset 0 0 0 ${vars.borderWidth.thin} ${vars.surface.focus.primary}`,
         selectors: {
-          // `&&` doubles specificity so the accent wins over the surface recipe's
-          // base `border-color` (equal single-class specificity) regardless of
-          // stylesheet insertion order.
           "&&": { borderColor: vars.surface.focus.primary },
         },
         "@media": {
-          // Authored colours are dropped in forced-colors mode (and box-shadows
-          // stripped), so map the accent to the system `Highlight` on the border,
-          // which forced-colors preserves.
           "(forced-colors: active)": {
             selectors: { "&&": { borderColor: "Highlight" } },
           },

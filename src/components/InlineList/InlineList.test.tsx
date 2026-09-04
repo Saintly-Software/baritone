@@ -57,7 +57,6 @@ describe("InlineList", () => {
       </InlineList>,
     );
     expect(screen.queryByText("hidden")).toBeNull();
-    // Two visible items → exactly one separator.
     expect(screen.getAllByText("·")).toHaveLength(1);
   });
 
@@ -72,7 +71,6 @@ describe("InlineList", () => {
       </InlineList>,
     );
     expect(screen.queryByText("never")).toBeNull();
-    // Only the two real items survive → exactly one separator, and no bare "0".
     expect(screen.getAllByText("·")).toHaveLength(1);
     expect(screen.queryByText("0")).toBeNull();
   });
@@ -119,7 +117,6 @@ describe("InlineList", () => {
         <span>b</span>
       </InlineList>,
     );
-    // No stray empty spacer spans: the two items are the only element children.
     expect(container.querySelectorAll("span")).toHaveLength(2);
     expect(screen.getByText("a")).toBeInTheDocument();
     expect(screen.getByText("b")).toBeInTheDocument();

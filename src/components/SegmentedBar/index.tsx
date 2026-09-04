@@ -227,12 +227,8 @@ export function SegmentedBar({
   const generatedLabelId = React.useId();
   const labelId = label != null ? generatedLabelId : undefined;
 
-  // Negative values would eat into their neighbours' shares, so they're floored
-  // at zero rather than silently distorting the bar.
   const values = segments.map((segment) => Math.max(0, segment.value));
   const sum = values.reduce((acc, value) => acc + value, 0);
-  // A `total` under the sum can't be honoured — the parts would add up to more
-  // than the whole — so the sum is the floor.
   const denominator = Math.max(sum, total ?? 0);
   const remainder = denominator - sum;
 
@@ -242,8 +238,6 @@ export function SegmentedBar({
     maximumFractionDigits: 0,
   });
 
-  // The legend names the list, so the naming attributes land there rather than on
-  // the root (a plain `<div>` with no role, where they'd announce nothing).
   const legendNameAttrs: Record<string, string> = {};
   if (labelId != null) legendNameAttrs["aria-labelledby"] = labelId;
   else if (ariaLabelledby != null) legendNameAttrs["aria-labelledby"] = ariaLabelledby;
@@ -271,14 +265,9 @@ export function SegmentedBar({
         </div>
       )}
 
-      {/* The track duplicates the legend exactly, so it's a picture: hidden from
-          assistive tech rather than announced as a second, wordless copy. */}
       <div className={segmentedBarTrack({ size })} aria-hidden="true">
         {segments.map((segment, index) => {
           const value = values[index] ?? 0;
-          // A zero-value segment gets no slice at all — with `minWidth` it would
-          // otherwise show as a sliver of a share it doesn't have. It keeps its
-          // legend row, where "0%" says so in words.
           if (value <= 0) return null;
           return (
             <span
@@ -301,8 +290,6 @@ export function SegmentedBar({
         {segments.map((segment, index) => {
           const value = values[index] ?? 0;
           return (
-            // `list-style: none` can drop the implicit listitem role in Safari, so
-            // the role is set explicitly to keep the list semantics.
             <li key={segment.id ?? index} role="listitem" className={segmentedBarLegendRow}>
               <span
                 aria-hidden="true"

@@ -149,8 +149,6 @@ export function Tabs<const T>({
   children,
 }: TabsProps<T>) {
   const controlled = onChange != null;
-  // base-ui's `defaultValue` falls back to `0`, which won't match string/enum
-  // values — so an uncontrolled list seeds itself with the first enabled tab.
   const fallback = (tabs.find((tab) => !tab.disabled) ?? tabs[0])?.value;
   const rootValueProps = controlled ? { value } : { defaultValue: initialValue ?? fallback };
 
@@ -160,9 +158,6 @@ export function Tabs<const T>({
       {...rootValueProps}
       onValueChange={(next, details) => {
         const target = tabs.find((tab) => tab.value === next);
-        // Veto selecting a disabled tab (or any tab while the group is disabled).
-        // `cancel()` stops base-ui committing it in both controlled and
-        // uncontrolled modes; the tab still takes focus, it just won't activate.
         if (disabled || target?.disabled) {
           details.cancel();
           return;
@@ -181,9 +176,6 @@ export function Tabs<const T>({
             <BaseTabs.Tab
               key={String(tab.value)}
               value={tab.value}
-              // `aria-disabled` (not the native attribute) keeps the tab tabbable;
-              // the per-tab dim only applies when the group itself isn't disabled,
-              // so the group's `tabsListDisabled` never double-dims it.
               aria-disabled={tabDisabled || undefined}
               className={cx(
                 componentTypographyRecipe({ size: "md" }),

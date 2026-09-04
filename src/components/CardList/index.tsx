@@ -44,11 +44,8 @@ export type CardListProps = CardListBaseProps & CardListLabel;
  */
 export function CardList({ gap, className, children, ref, ...rest }: CardListProps) {
   return (
-    // `role="list"` is set explicitly: with `list-style: none` Safari otherwise
-    // strips the implicit list role from a `<ul>`.
     <ul ref={ref} role="list" className={cx(cardListRoot({ gap }), className)} {...rest}>
       {React.Children.map(children, (child, index) => (
-        // Same Safari role-stripping fix as the `<ul>` above.
         <li
           key={React.isValidElement(child) && child.key != null ? child.key : index}
           role="listitem"

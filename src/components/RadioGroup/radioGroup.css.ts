@@ -4,16 +4,9 @@ import { FORM_STATES, FORM_STATE_INTENT } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { focusRingColorVar } from "../../styles/vars.css";
 
-// Per-state colour wiring for the control, published as CSS vars so the one
-// recipe `base` can read them and the `state` variant just swaps values.
 const bg = createVar();
 const bd = createVar();
-// `accent` is the selected colour (border + inner dot) and the focus-ring
-// colour. It mirrors `formControlRecipe`: a form `state` maps to a semantic
-// intent, and we read that intent's focus token.
 const accent = createVar();
-// Inner-dot diameter, set by the `size` variant and read by the indicator
-// (which is a child of the control, so the var cascades down).
 const dot = createVar();
 
 /** The group container — a stack of items, vertical or horizontal. */

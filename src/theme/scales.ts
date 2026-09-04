@@ -1,17 +1,7 @@
-// Raw, scheme-independent scale values. These are the numbers a default theme
-// is authored from; the contract turns them into CSS variables. Typography,
-// spacing, radius etc. do not change between light/dark, so they live here and
-// are reused by both schemes in the default theme.
-
-// The font-size scale is defined by an anchor (the `md` step) plus two linear
-// increments — `lower` spans `xs`→`xl`, `upper` spans `xl`→`9xl`. The per-size
-// values are derived from these at token-build time (see `defaultTokens`). These
-// defaults reproduce Tailwind's font-sizes exactly for `xs`–`2xl`, then grow
-// linearly.
-export const fontSizeAnchor = "1rem"; // md
+export const fontSizeAnchor = "1rem";
 export const fontStep = {
-  lower: "0.125rem", // xs → xl step
-  upper: "0.25rem", // xl → 9xl step
+  lower: "0.125rem",
+  upper: "0.25rem",
 } as const;
 
 export const fontWeight = {
@@ -22,10 +12,6 @@ export const fontWeight = {
   superbold: "800",
 } as const;
 
-// Letter-spacing (tracking) scale. `em`-based on purpose, so a step tracks the
-// font-size proportionally across the whole type ramp (0.05em reads the same at
-// `xs` and `9xl`). Values reproduce Tailwind's tracking scale; `normal` is the
-// zero step. `widest` (0.1em) is the go-to for small uppercase labels/eyebrows.
 export const letterSpacing = {
   tighter: "-0.05em",
   tight: "-0.025em",
@@ -35,10 +21,6 @@ export const letterSpacing = {
   widest: "0.1em",
 } as const;
 
-// Named line-height (leading) scale — unitless multipliers reproducing Tailwind's
-// `leading-*` steps, so a step scales with the font-size. This is the standalone
-// `lineHeight` prop's built-in vocabulary; it's distinct from the per-size
-// `lineHeight` below, which `size` applies as its paired default.
 export const leading = {
   none: "1",
   tight: "1.25",
@@ -48,8 +30,6 @@ export const leading = {
   loose: "2",
 } as const;
 
-// Per-size line-heights, defaulting to Tailwind's values. Small–display sizes
-// use an absolute length; the largest sizes use a unitless `1`.
 export const lineHeight = {
   xs: "1rem",
   sm: "1.25rem",

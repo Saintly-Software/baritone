@@ -10,8 +10,8 @@ export const listReset = style({
   margin: 0,
   padding: 0,
   listStyle: "none",
-  minWidth: 0, // see `Flex`
-  minHeight: 0, // see `Flex`
+  minWidth: 0,
+  minHeight: 0,
 });
 
 /** Each item cell; `min-width`/`min-height: 0` per `Flex`. */

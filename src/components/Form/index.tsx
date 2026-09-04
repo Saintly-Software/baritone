@@ -1,15 +1,3 @@
-// The TanStack Form integration. Two layers, both public:
-//
-//   • Composition (the blessed surface) — `useAppForm` with pre-bound field
-//     components (`field.TextInput`, `field.Select`, …) and a form-aware
-//     `SubmitButton`, so a form is `<form.AppField>{(field) => <field.X … />}`
-//     with no `value`/`onChange`/error wiring by hand.
-//   • Adapters (the primitive underneath) — one `Form*` per control, each binding
-//     a TanStack field to the Baritone control. Use these directly with the plain
-//     `form.Field` render-prop API, or to build your own `createFormHook`.
-//
-// Everything re-exports through the `@saintly-software/baritone/form` subpath.
-
 export {
   FormCheckbox,
   type FormCheckboxProps,

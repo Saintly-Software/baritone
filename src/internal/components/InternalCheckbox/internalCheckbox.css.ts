@@ -5,20 +5,10 @@ import { vars } from "../../../theme/contract.css";
 import { active, hover } from "../../../theme/oklch";
 import { focusRingColorVar } from "../../../styles/vars.css";
 
-// Per-state colour wiring, published as CSS vars so the one recipe `base` stays
-// flat and the `state` variant just swaps values. Mirrors `radioControl`.
 const bg = createVar();
 const bd = createVar();
-// `accent` is the selected colour (checked border + glyph) and the focus-ring
-// colour. A form `state` maps to a semantic intent, and we read that intent's
-// focus token — same wiring as `formControlRecipe` / `radioControl`.
 const accent = createVar();
-// The *currently applied* border colour (neutral `bd` when unchecked, `accent`
-// when checked/indeterminate). Routing it through one var lets the shared
-// hover/active selectors shift whichever colour the current state is showing.
 const bdNow = createVar();
-// Glyph (check / dash) box size, set by the `size` variant and read by the
-// indicator child (which is nested in the control, so the var cascades down).
 const glyph = createVar();
 
 /**
@@ -41,7 +31,6 @@ export const checkboxControl = recipe({
     justifyContent: "center",
     flexShrink: 0,
     background: bg,
-    // Drives the glyph's `currentColor`.
     color: accent,
     borderRadius: vars.radius.sm,
     borderStyle: "solid",
@@ -53,12 +42,7 @@ export const checkboxControl = recipe({
     transitionTimingFunction: vars.motion.easing.standard,
     vars: { [bdNow]: bd },
     selectors: {
-      // Selected: the border picks up the accent. Background stays the form
-      // surface (outline style, like the radio) so the accent glyph keeps its
-      // contrast across themes.
       "&[data-checked], &[data-indeterminate]": { vars: { [bdNow]: accent } },
-      // Hover / press nudge the *shown* colours via relative-colour math, and
-      // never fire while disabled.
       "&:hover:not([data-disabled])": {
         background: hover(bg),
         borderColor: hover(bdNow),

@@ -314,11 +314,6 @@ function CardRoot(props: CardProps) {
     ...rest
   }: InternalCardProps = props;
 
-  // A string `header` is the shorthand: render it as a styled `Card.Header` (title
-  // + optional `subheader` subtitle, with `action` in the trailing slot). A card
-  // that supplies only `subheader` / `action` (no `header`) still gets a header row
-  // for them. A `Card.Header` element passed as `header` is used verbatim — the
-  // shorthand-only props don't apply to it.
   const headerIsString = typeof header === "string";
   const headerNode =
     headerIsString || (header == null && (subheader != null || action != null)) ? (
@@ -329,23 +324,14 @@ function CardRoot(props: CardProps) {
       header
     );
 
-  // Body-level supporting copy, distinct from the header's `subheader`. Rendered
-  // as its own paragraph beneath the header.
   const descriptionNode = description != null ? <Text size="md">{description}</Text> : null;
 
-  // A collapsible card is a self-contained disclosure (header + collapsing
-  // panel), structurally unlike the flat surface, so it gets its own branch. The
-  // disclosure trigger lives *inside* the header (added by Card.Header from
-  // context), so only that button toggles — the rest of the header is free.
   if (collapsible) {
     return (
       <Collapsible.Root
         ref={ref as React.Ref<HTMLDivElement>}
         open={open}
         defaultOpen={defaultOpen}
-        // Always intercept so a disabled card can veto the toggle (base-ui skips
-        // the commit when `cancel()` ran) — the trigger stays focusable, it just
-        // won't open/close. Mirrors Accordion's per-item veto.
         onOpenChange={(nextOpen, details) => {
           if (disabled) {
             details.cancel();
@@ -382,18 +368,10 @@ function CardRoot(props: CardProps) {
 
   const interactive = href != null || onClick != null;
 
-  // The card is never itself the control: an interactive card is a container, and
-  // its header title becomes the one real link/button (stretched over the whole
-  // surface). Hand the activation down to that control via context. `render` (a
-  // router link) belongs to the link too, so it's forwarded — never applied to
-  // the container.
   const linkControl: CardHeaderControl | null = interactive
     ? { kind: "link", href, target, rel, download, onClick, render, disabled, selected }
     : null;
 
-  // `Card.Header` becomes a real `<header>` when this root scopes it (a sectioning
-  // `article` / `section`, or `main`); a plain `div` card keeps a `<div>` header so
-  // it can't be mistaken for the page `banner`. See SECTIONING_CARD_ELEMENTS.
   const headerElement: "header" | "div" = SECTIONING_CARD_ELEMENTS.has(as) ? "header" : "div";
 
   const body = (
@@ -405,8 +383,6 @@ function CardRoot(props: CardProps) {
     </CardHeaderContext.Provider>
   );
 
-  // `RenderElement` (not the `useRender` hook) because this render sits behind the
-  // earlier `if (collapsible)` return.
   return (
     <RenderElement
       render={interactive ? undefined : render}
@@ -417,8 +393,6 @@ function CardRoot(props: CardProps) {
           surfaceRecipe({ intent, saliency, interactive }),
           cardResponsivePadding,
           cardRoot,
-          // Interactive cards position their overlay link; static cards keep the
-          // focus ring in case a consumer makes the surface itself focusable.
           interactive ? cardInteractive : focusRingRecipe({ type: "visible" }),
           cardSelectedRecipe({ selected }),
           className,
@@ -466,19 +440,10 @@ function CardPrimaryLink({
     elementProps.href = href;
     if (target != null) elementProps.target = target;
     if (rel != null) elementProps.rel = rel;
-    // Plain anchor `download` (boolean flag or a suggested filename). React omits
-    // the attribute for `false`/`undefined`, so only a truthy value takes effect.
     if (download != null) elementProps.download = download;
-    // A selected link is the current choice among the cards. Only emit the
-    // attribute when selected — `aria-current="false"` is still announced by some
-    // screen readers, so an unselected link should carry nothing.
     if (selected != null) elementProps["aria-current"] = selected || undefined;
   } else {
-    // Default `type` to `button` so a clickable card in a form doesn't submit it.
     elementProps.type = "button";
-    // A selected clickable card is a toggle button; announce its pressed state.
-    // Left `undefined` when the card isn't selectable so plain click cards stay
-    // ordinary buttons (no toggle semantics).
     if (selected != null) elementProps["aria-pressed"] = selected;
   }
 
@@ -524,38 +489,25 @@ function CardHeader({
   ref,
   ...rest
 }: CardHeaderProps) {
-  // A Card supplies one of these when it needs the header to host a card-level
-  // control: a `link` (the title becomes the stretched overlay link/button) or a
-  // `collapsible` disclosure trigger. Outside an interactive/collapsible card the
-  // context is null and the header is plain text.
   const ctx = React.useContext(CardHeaderContext);
   const control = ctx?.control ?? null;
   const link = control?.kind === "link" ? control : null;
   const collapsibleControl = control?.kind === "collapsible" ? control : null;
 
-  // The disclosure trigger is labelled by the title (so it announces e.g.
-  // "Shipping details, button, collapsed"); fall back to a generic label.
   const titleId = React.useId();
   const labelledByTitle = collapsibleControl != null && title != null;
 
   const hasText = title != null || subtitle != null;
-  // The collapsible trigger always needs a home in the trailing group, so render
-  // it even without a chip / children.
   const hasTrailing = chip != null || children != null || collapsibleControl != null;
-  // Guard on the resolved node, not the raw slot — a slot can resolve to nothing.
   const iconNode = renderIcon(icon);
   const content = (
     <>
-      {/* Leading group (icon + text) also acts as the flex spacer that pushes the
-          trailing group to the end, so it's always rendered. */}
       <div className={cardHeaderLeading}>
         {iconNode != null && <span className={cardHeaderIcon}>{iconNode}</span>}
         {hasText && (
           <div className={cardHeaderText}>
             {title != null && (
               <Heading level={level} size="lg" id={labelledByTitle ? titleId : undefined}>
-                {/* An interactive card turns the title into its one real control,
-                    stretched over the whole surface (see the article). */}
                 {link != null ? <CardPrimaryLink link={link}>{title}</CardPrimaryLink> : title}
               </Heading>
             )}
@@ -573,8 +525,6 @@ function CardHeader({
           {children}
           {collapsibleControl != null && (
             <Collapsible.Trigger
-              // `aria-disabled` (never the native attribute) keeps the trigger
-              // tabbable; the root's veto stops it toggling. See AGENTS.md.
               aria-disabled={collapsibleControl.disabled || undefined}
               aria-label={labelledByTitle ? undefined : "Toggle"}
               aria-labelledby={labelledByTitle ? titleId : undefined}
@@ -588,9 +538,6 @@ function CardHeader({
     </>
   );
 
-  // A sectioning card (`article` / `section` / `main`) scopes this header, so it's
-  // a real `<header>`; a plain `div` card keeps a `<div>` (see
-  // CardHeaderContextValue.element). Default to `div` when used outside a Card.
   return useRender({
     render: undefined,
     defaultElement: ctx?.element ?? "div",
@@ -631,7 +578,6 @@ export interface CardActionsProps {
 function CardActions({ side, actions, className, ref }: CardActionsProps) {
   return (
     <div ref={ref} className={cx(cardActionsRecipe({ side }), className)}>
-      {/* `Children.toArray` assigns stable keys to the positional list. */}
       {React.Children.toArray(actions)}
     </div>
   );
@@ -691,8 +637,6 @@ interface CardRowRichProps {
  * list stays a proper description list either way.
  */
 function CardRow(props: CardRowProps) {
-  // The `never` fields make the public union mutually exclusive; internally we
-  // read both shapes off a loose view and branch on which was supplied.
   const { term, description, title, subtitle, actions } = props as {
     term?: React.ReactNode;
     description?: React.ReactNode;
@@ -702,8 +646,6 @@ function CardRow(props: CardRowProps) {
   };
 
   if (title !== undefined || actions !== undefined) {
-    // A rich row carries its own action, so it doesn't get the row hover wash —
-    // the action's own hover is the affordance that matters.
     return (
       <div className={cardRowRecipe({ hoverable: false })}>
         <dt className={cardRowText}>
@@ -719,7 +661,6 @@ function CardRow(props: CardRowProps) {
     );
   }
 
-  // A plain term/value row has no action of its own, so it highlights on hover.
   return (
     <div className={cardRowRecipe({ hoverable: true })}>
       <Text render={<dt className={cardRowTerm} />} size="sm" saliency="low">

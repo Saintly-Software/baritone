@@ -72,11 +72,8 @@ export function LoadingIndicator({
   ref,
   ...rest
 }: LoadingIndicatorProps) {
-  // A `void` here keeps the reserved `variant` prop from tripping lint while it
-  // has a single value; it becomes a real switch once other variants land.
   void variant;
 
-  // Decorative → drop status role + SR label (see doc above).
   const decorative = rest["aria-hidden"] === true || rest["aria-hidden"] === "true";
 
   return useRender({

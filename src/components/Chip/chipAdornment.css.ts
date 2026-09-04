@@ -4,8 +4,6 @@ import { iconColorVar } from "../../styles/vars.css";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-// Colour for an adornment used *outside* a Chip (no ancestor `--iconColor` to
-// inherit) that also isn't overriding its intent — falls back to neutral text.
 const fallback = createVar();
 
 /**
@@ -26,13 +24,6 @@ const glyphSize = {
  */
 const glyphBox = style({});
 
-// A built-in glyph is a bare `<svg>` drawn at `1em`, so it already resolves
-// against the adornment's font-size. An `<Icon>` doesn't: it renders a span whose
-// `size` variant pins that `1em` to an absolute rem, ignoring the chip entirely
-// (a fixed 20px in every chip — taller than an `sm` chip is tall). `inherit`
-// re-points it at the adornment, putting both kinds on the same footing.
-// `${glyphBox} > span` (0,1,1) outweighs `iconRecipe`'s single class (0,1,0), so
-// this holds regardless of stylesheet order.
 globalStyle(`${glyphBox} > span`, { fontSize: "inherit" });
 
 /**
@@ -62,8 +53,6 @@ export const chipAdornmentRecipe = recipe({
       justifyContent: "center",
       flexShrink: 0,
       lineHeight: 0,
-      // Read the chip's published foreground; the override compound below re-sets
-      // `--iconColor` on this same element, which this declaration then resolves.
       color: fallbackVar(iconColorVar, fallback),
       vars: { [fallback]: vars.component.color.neutral.mid.default.text },
     },
@@ -82,8 +71,6 @@ export const chipAdornmentRecipe = recipe({
         border: "none",
         background: "transparent",
         borderRadius: vars.radius.full,
-        // Family only. The `font` shorthand would reset `font-size` too, and
-        // (being a sibling variant class) could clobber the glyph box above.
         fontFamily: "inherit",
         cursor: "pointer",
         textDecoration: "none",
@@ -101,9 +88,6 @@ export const chipAdornmentRecipe = recipe({
       },
       false: {},
     },
-    // Intent/saliency are intentionally default-less: omit them (the inherit
-    // case) and no `--iconColor` is set, so the adornment matches the Chip. Pass
-    // *both* (the override case) and the compound variant republishes it.
     intent: Object.fromEntries(INTENTS.map((intent) => [intent, {}])) as Record<
       (typeof INTENTS)[number],
       Record<string, never>

@@ -4,7 +4,6 @@ import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { Icon } from "../Icon";
 import { ButtonGroup } from "./index";
 
-// Throwaway glyphs so the icon stories have something to render.
 const ChevronLeft = () => (
   <Icon>
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>

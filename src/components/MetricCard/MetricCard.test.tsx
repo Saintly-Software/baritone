@@ -4,9 +4,6 @@ import { describe, expect, it, vi } from "vitest";
 import { CardList } from "../CardList";
 import { MetricCard } from "./index";
 
-// The accessible name is composed from separate value/label elements; the space
-// between them is inserted by the accname algorithm (real browsers do, jsdom may
-// not), so allow zero-or-more whitespace.
 const namedByValueAndLabel = (value: string, label: string) => (name: string) =>
   name.includes(value) && name.includes(label);
 const valueLabelName = /^2\s*Active goals$/;
@@ -40,7 +37,6 @@ describe("MetricCard", () => {
       />,
     );
     const link = screen.getByRole("link");
-    // The glyph is present but hidden, so it can't leak into the link's name.
     expect(within(link.parentElement as HTMLElement).queryByTestId("glyph")).not.toBeNull();
     expect(link.getAttribute("aria-label")).toBeNull();
     expect(link).toHaveAccessibleName(valueLabelName);
@@ -67,7 +63,6 @@ describe("MetricCard", () => {
       expect(button).toHaveAttribute("aria-disabled", "true");
       expect(button).not.toHaveAttribute("disabled");
 
-      // Disabled but reachable: it can be tabbed to.
       await user.tab();
       expect(button).toHaveFocus();
 
@@ -129,10 +124,8 @@ describe("MetricCard", () => {
       render(
         <MetricCard value="$1.2M" label="Revenue" trend={{ direction: "up", value: "12%" }} />,
       );
-      // Exposed as one image named by the composed phrase.
       const badge = screen.getByRole("img", { name: "increased 12%" });
       expect(badge).toBeInTheDocument();
-      // The decorative arrow carries no text of its own.
       expect(badge.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
     });
 
@@ -168,7 +161,6 @@ describe("MetricCard", () => {
       const link = screen.getByRole("link");
       expect(link).toHaveAccessibleName(valueLabelName);
       expect(link).not.toHaveTextContent("12%");
-      // The trend is a sibling of the control, still announced separately.
       expect(screen.getByRole("img", { name: "increased 12%" })).toBeInTheDocument();
     });
   });
@@ -196,7 +188,6 @@ describe("MetricCard", () => {
     );
     const list = screen.getByRole("list", { name: "Goals" });
     expect(within(list).getAllByRole("listitem")).toHaveLength(2);
-    // Each metric is one navigable link within the named list.
     expect(within(list).getAllByRole("link")).toHaveLength(2);
   });
 });

@@ -153,8 +153,6 @@ function FlexRoot({
       className: cx(
         atoms({
           display: resolveDisplay(inline ? "inline-flex" : "flex", hideOn, showOn),
-          // `direction` is already a valid `flex-direction` keyword (`row` /
-          // `column`); undefined leaves it at the flexbox default (row).
           flexDirection: direction,
           flexWrap: wrap ? "wrap" : undefined,
           flexGrow: grow === undefined ? undefined : grow ? 1 : 0,
@@ -164,11 +162,6 @@ function FlexRoot({
           width: resolveWidth(width),
           height,
           maxWidth,
-          // Default both min sizes to `0` so a nested Flex can shrink below its
-          // content instead of blowing its parent out — the classic flexbox
-          // min-size footgun (`min-width`/`min-height` default to `auto`, i.e.
-          // the content size, on flex/grid items). Pass an explicit value —
-          // `minWidth="auto"` — to opt back into content-based minimums.
           minWidth: minWidth ?? "0",
           minHeight: minHeight ?? "0",
           m,
@@ -275,8 +268,8 @@ export function FlexItem({
           flexShrink: shrink === undefined ? undefined : shrink ? 1 : 0,
           width,
           height,
-          minWidth: minWidth ?? "0", // see `FlexRoot`
-          minHeight: minHeight ?? "0", // see `FlexRoot`
+          minWidth: minWidth ?? "0",
+          minHeight: minHeight ?? "0",
           m,
           mx,
           my,

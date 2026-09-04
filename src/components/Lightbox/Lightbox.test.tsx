@@ -122,9 +122,6 @@ describe("Lightbox", () => {
     await user.click(screen.getByRole("button", { name: "Expand" }));
     const dialog = await screen.findByRole("dialog");
 
-    // The backdrop is the dim layer rendered just before the viewport that holds
-    // the popup. Clicking it is the "backdrop dismiss" a real pointer would do —
-    // in jsdom there's no visual layering, so target it directly.
     const backdrop = dialog.closest("[class*='lightboxViewport']")?.previousElementSibling;
     expect(backdrop).not.toBeNull();
     await user.click(backdrop as Element);
@@ -147,7 +144,6 @@ describe("Lightbox", () => {
     const image = await screen.findByRole("img", { name: "A cat" });
 
     await user.click(image);
-    // Give any (unexpected) dismissal a chance to run before asserting it stayed.
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByRole("img", { name: "A cat" })).toBeInTheDocument();
   });

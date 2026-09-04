@@ -21,7 +21,6 @@ function Article() {
   );
 }
 
-// A wide + tall numbered grid, so it overflows on both axes.
 function Grid() {
   return (
     <ul

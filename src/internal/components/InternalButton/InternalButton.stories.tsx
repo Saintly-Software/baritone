@@ -45,8 +45,6 @@ export const Playground: Story = {
 export const WithHostAttributes: Story = {
   render: () => {
     const [open, setOpen] = React.useState(false);
-    // A stand-in for the attribute bag a base-ui `Trigger` would compute; the
-    // state-derived `data-state` isn't statically known, hence the cast.
     const hostAttrs = {
       onClick: () => setOpen((v) => !v),
       "aria-haspopup": "menu",

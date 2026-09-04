@@ -90,7 +90,6 @@ describe("Drawer", () => {
     expect(await screen.findByText("Drawer body")).toBeInTheDocument();
 
     await user.click(screen.getByTestId("outside"));
-    // Give any (unexpected) dismissal a chance to run before asserting it stayed.
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.getByText("Drawer body")).toBeInTheDocument();
   });
@@ -253,7 +252,6 @@ describe("Drawer.Header actions", () => {
       </Drawer>,
     );
 
-    // The actions collapse into an icon-only trigger; the items are hidden until it opens.
     const trigger = screen.getByRole("button", { name: "Actions" });
     expect(screen.queryByRole("menuitem", { name: "Rename" })).not.toBeInTheDocument();
 

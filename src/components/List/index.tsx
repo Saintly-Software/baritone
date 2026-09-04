@@ -45,7 +45,6 @@ function ListItem({ area, render, className, style, children, ref, ...rest }: Li
     defaultElement: "li",
     props: {
       ref,
-      // Explicit role — see doc above (Safari drops the implicit one).
       role: "listitem",
       className: cx(listItem, className),
       style: area != null ? { gridArea: area, ...style } : style,
@@ -161,7 +160,6 @@ export type ListProps = ListFlexProps | ListGridProps;
 type ResolvedListProps = ListBaseProps & {
   layout?: ListLayout;
   gap?: Atoms["gap"];
-  // `FlexJustify` and `GridJustify` are the same union; one field covers both.
   justify?: FlexJustify;
   direction?: FlexDirection;
   align?: FlexAlign;
@@ -191,9 +189,6 @@ function ListRoot(props: ListProps) {
 
   const element = ordered ? <ol /> : <ul />;
   const listClassName = cx(listReset, className);
-  // Same `items` rule as `Menu` (see `items` doc above); like `Menu`, `List`
-  // renders the `<List.Item>` element itself, rather than reading its props
-  // the way `ButtonGroup` / `ChipList` treat their carriers.
   const content = keyedElements(items);
 
   if (layout === "grid") {

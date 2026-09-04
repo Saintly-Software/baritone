@@ -30,8 +30,6 @@ describe("Field", () => {
       expect(screen.getByLabelText("Search").tagName).toBe("INPUT");
     });
 
-    // A control that shows one name and announces another is an a11y bug, not a
-    // condition to degrade through — so this throws rather than warning.
     it("throws when label and aria-label are both passed", () => {
       expect(() =>
         render(
@@ -107,7 +105,6 @@ describe("Field", () => {
           <Field.Control />
         </Field>,
       );
-      // HelpText composes Text, which renders a <p> by default.
       expect(screen.getByText("Help me").tagName).toBe("P");
     });
 
@@ -119,14 +116,10 @@ describe("Field", () => {
       );
       const help = screen.getByText("Help me");
       expect(help).toHaveClass("custom");
-      // Merged onto the built-in class, not replacing it.
       expect(help.className).not.toBe("custom");
     });
   });
 
-  // There is one message slot, not two: `helpText` *is* the error line when
-  // `state="invalid"`. It stays in `aria-describedby` across every state —
-  // it changes colour rather than leaving and re-entering the description.
   describe("validation", () => {
     it("renders the helpText as an error when invalid", () => {
       render(
@@ -137,7 +130,6 @@ describe("Field", () => {
       const input = screen.getByLabelText("Age");
       expect(input).toHaveAttribute("aria-invalid", "true");
       expect(describedByText(input)).toEqual(["Must be a number"]);
-      // HelpText's automatic warning glyph marks it as the error.
       expect(screen.getByText("Must be a number").querySelector("svg")).not.toBeNull();
     });
 
@@ -148,7 +140,6 @@ describe("Field", () => {
         </Field>,
       );
       expect(describedByText(screen.getByLabelText("Age"))).toEqual(["Your age"]);
-      // Neutral: no glyph.
       expect(screen.getByText("Your age").querySelector("svg")).toBeNull();
 
       rerender(
@@ -156,7 +147,6 @@ describe("Field", () => {
           <Field.Control />
         </Field>,
       );
-      // Still one description, same id — only the presentation moved.
       expect(describedByText(screen.getByLabelText("Age"))).toEqual(["Your age"]);
       expect(screen.getByText("Your age").querySelector("svg")).not.toBeNull();
     });
@@ -193,16 +183,9 @@ describe("Field", () => {
       );
       const marker = screen.getByText("*");
       expect(marker).toBeInTheDocument();
-      // Decorative — the semantics live on the control, not the asterisk. (A real
-      // `<input>` gets the native `required`, which already implies them; base-ui
-      // uses `aria-required` for the controls that aren't native inputs.)
       expect(marker).toHaveAttribute("aria-hidden", "true");
       expect(screen.getByRole("textbox", { name: "Email" })).toBeRequired();
 
-      // The marker sits *beside* the `<label>`, not inside it, so the label's raw
-      // text is still exactly "Email". That's what keeps `getByLabelText("Email")`
-      // — which matches on textContent, not the accessible name — working for
-      // consumers who add `required`.
       expect(container.querySelector("label")).toHaveTextContent(/^Email$/);
       expect(screen.getByLabelText("Email").tagName).toBe("INPUT");
     });
@@ -251,7 +234,6 @@ describe("Field", () => {
           </Field>
         </Fieldset>,
       );
-      // The disabled class is merged on top of the base label class.
       expect(screen.getByText("Email").className.split(" ").length).toBeGreaterThan(1);
     });
   });
@@ -266,7 +248,6 @@ describe("Field", () => {
       const input = screen.getByLabelText("Email");
       expect(input).toHaveAttribute("id", "email");
       expect(container.querySelector("label")).toHaveAttribute("for", "email");
-      // The help wiring still resolves alongside the caller-chosen id.
       expect(describedByText(input)).toEqual(["Help"]);
     });
   });
@@ -283,7 +264,6 @@ describe("Field", () => {
           <Field.Control />
         </Field>,
       );
-      // The label still names the input on its own — the button sits beside it.
       expect(screen.getByLabelText("API key").tagName).toBe("INPUT");
 
       const trigger = screen.getByRole("button", { name: "About API keys" });

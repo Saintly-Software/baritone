@@ -114,8 +114,6 @@ export const RenderPropAdapter: Story = {
       onSubmit: () => {},
     });
     return (
-      // A plain `useForm()` has no `AppForm`, so `<Form>` renders the styled
-      // `<form>` + submit wiring without a context provider.
       <Form form={form} style={{ maxWidth: 360 }}>
         <form.Field
           name="name"

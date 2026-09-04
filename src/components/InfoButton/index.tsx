@@ -116,9 +116,6 @@ export function InfoButton({
   className,
   ref,
 }: InfoButtonProps) {
-  // See the htmlAttrs seam described above. `aria-label` rides alongside
-  // (rather than through `consumerProps`) because `InternalButton` strips it
-  // out of `consumerProps`.
   const trigger = (
     <BasePopover.Trigger
       render={(htmlAttrs) => (

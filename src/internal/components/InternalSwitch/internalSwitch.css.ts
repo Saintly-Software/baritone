@@ -5,24 +5,12 @@ import { vars } from "../../../theme/contract.css";
 import { active, hover } from "../../../theme/oklch";
 import { focusRingColorVar, iconColorVar } from "../../../styles/vars.css";
 
-// Per-state colour wiring, published as CSS vars so the one recipe `base` stays
-// flat and the `state` variant just swaps values. Mirrors `checkboxControl`.
 const bg = createVar();
 const bd = createVar();
-// `accent` is the selected colour (checked border + thumb) and the focus-ring
-// colour. A form `state` maps to a semantic intent, and we read that intent's
-// focus token — same wiring as `checkboxControl` / `radioControl`.
 const accent = createVar();
-// The *currently applied* border + thumb colour (neutral `bd` when unchecked,
-// `accent` when checked). Routing it through one var lets the shared hover/active
-// selectors shift whichever colour the current state is showing, and lets the
-// thumb child read the same colour the track is showing.
 const bdNow = createVar();
-// Track geometry, set by the `size` variant and read by the thumb child (which
-// is nested in the track, so the vars cascade down).
 const trackW = createVar();
 const thumb = createVar();
-// Inner padding between the thumb and the track edge. Constant across sizes.
 const pad = createVar();
 
 /**
@@ -45,7 +33,6 @@ export const switchTrack = recipe({
     alignItems: "center",
     flexShrink: 0,
     background: bg,
-    // Drives the thumb's `currentColor`.
     color: bdNow,
     borderRadius: vars.radius.full,
     borderStyle: "solid",
@@ -57,12 +44,7 @@ export const switchTrack = recipe({
     transitionTimingFunction: vars.motion.easing.standard,
     vars: { [bdNow]: bd, [pad]: "0.125rem" },
     selectors: {
-      // Selected: border + thumb pick up the accent. Background stays the form
-      // surface (outline style, like the checkbox) so the accent keeps its
-      // contrast across themes.
       "&[data-checked]": { vars: { [bdNow]: accent } },
-      // Hover / press nudge the *shown* colours via relative-colour math, and
-      // never fire while disabled.
       "&:hover:not([data-disabled])": {
         background: hover(bg),
         borderColor: hover(bdNow),
@@ -134,7 +116,6 @@ export const switchThumb = style({
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
     "&[data-unchecked]": { transform: "translateX(0)" },
-    // Travel = track width − thumb − padding on both sides − both borders.
     "&[data-checked]": {
       transform: `translateX(calc(${trackW} - ${thumb} - 2 * ${pad} - 2 * ${vars.borderWidth.thin}))`,
     },
@@ -163,8 +144,6 @@ export const switchThumbIcon = style({
   pointerEvents: "none",
 });
 
-// Fill the wrapper with whatever glyph is slotted in — a bare `<svg>` or the
-// `<svg>` an `<Icon>` renders — so its intrinsic size doesn't matter.
 globalStyle(`${switchThumbIcon} svg`, {
   display: "block",
   width: "100%",

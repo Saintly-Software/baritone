@@ -4,8 +4,6 @@ import { FORM_STATES, type FormState, LABEL_POSITIONS, SIZES } from "../../theme
 import type { DistributiveOmit } from "../../utils/types";
 import { Switch } from "./index";
 
-// Switch is controlled, so the stories drive it from local state — the same
-// shape a consumer would use.
 function ControlledSwitch(
   props: DistributiveOmit<React.ComponentProps<typeof Switch>, "value" | "onChange">,
 ) {
@@ -43,7 +41,6 @@ export default meta;
 
 type Story = StoryObj<typeof ControlledSwitch>;
 
-// Interactive default — renamed from "Playground".
 export const Basic: Story = {};
 
 const thStyle: React.CSSProperties = {
@@ -67,8 +64,6 @@ interface StateRow {
   state?: FormState;
 }
 
-// Every meaningful switch state, including the invalid × checked × disabled
-// combinations that don't get their own story.
 const stateRows: StateRow[] = [
   { label: "Off" },
   { label: "On", value: true },
@@ -190,8 +185,6 @@ export const IconOnly: Story = {
   ),
 };
 
-// Bare `currentColor` glyphs — the switch sizes and recolours them inside the
-// thumb, so they only need a `viewBox` and paths.
 function CheckGlyph() {
   return (
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2.25} aria-hidden>

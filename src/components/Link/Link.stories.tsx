@@ -4,14 +4,12 @@ import { LinkProvider } from "../LinkProvider";
 import { Text } from "../Text";
 import { Link } from "./index";
 
-// A throwaway glyph so the icon stories have something to render.
 const Sparkle = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
   </svg>
 );
 
-// A left-arrow glyph for the icon-only "back" navigation stories.
 const ArrowLeft = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M11 5l1.4 1.4L7.8 11H20v2H7.8l4.6 4.6L11 19l-7-7z" />
@@ -39,9 +37,6 @@ export const Inline: Story = {
   ),
 };
 
-// Router-agnostic: any component can be supplied via `render`. Here a plain
-// element stands in for a framework's link (Next.js `<Link>`, React Router
-// `<Link>`, TanStack Router, …) — it keeps the styling while owning navigation.
 export const AsRouterLink: Story = {
   args: {
     children: "Go to the dashboard",
@@ -139,7 +134,6 @@ export const ButtonDisabled: Story = {
   },
 };
 
-// As a button-styled router link: `render` owns navigation, the recipe owns the look.
 export const ButtonAsRouterLink: Story = {
   args: {
     appearance: "button",
@@ -168,8 +162,6 @@ export const ButtonIconOnly: Story = {
   },
 };
 
-// The icon-only button-link stays a 1:1 square at every `size`, exactly like an
-// icon-only `Button`.
 export const ButtonIconOnlySizes: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -188,8 +180,6 @@ export const ButtonIconOnlySizes: Story = {
   ),
 };
 
-// As an icon-only button-styled router link: `render` owns navigation, the square
-// recipe owns the look, and the required `aria-label` names it.
 export const ButtonIconOnlyAsRouterLink: Story = {
   args: {
     appearance: "button",
@@ -304,7 +294,6 @@ export const ChipWithIcons: Story = {
   },
 };
 
-// External destination — a plain `<a>`, never routed by a `LinkProvider`.
 export const ChipExternalLink: Story = {
   args: {
     appearance: "chip",
@@ -315,8 +304,6 @@ export const ChipExternalLink: Story = {
   },
 };
 
-// As a chip-styled router link: a per-link `render` owns navigation (and carries
-// typed router descriptors a string `href` can't express); the recipe owns the look.
 export const ChipAsRouterLink: Story = {
   args: {
     appearance: "chip",

@@ -106,8 +106,6 @@ export const formControlRecipe = recipe({
         height: "auto",
         paddingBlock: vars.space[2],
         lineHeight: vars.text.size.md.lineHeight,
-        // Let the user drag it taller, but never sideways (would break the field
-        // column). `rows` sets the starting height.
         resize: "vertical",
       },
       false: {},

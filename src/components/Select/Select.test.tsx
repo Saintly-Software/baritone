@@ -28,7 +28,6 @@ const GROUPED: SelectOptionGroup[] = [
   },
 ];
 
-// Controlled single-select host, mirroring documented usage.
 function SingleHost({
   value: initial = null,
   onChange,
@@ -53,7 +52,6 @@ function SingleHost({
   );
 }
 
-// Controlled multi-select host.
 function MultiHost({
   value: initial = [],
   onChange,
@@ -159,14 +157,11 @@ describe("Select", () => {
       "aria-selected",
       "true",
     );
-    // Selecting a second option keeps the popup open and appends to the array.
     await user.click(screen.getByRole("option", { name: "Banana" }));
     expect(onChange).toHaveBeenCalledWith(["apple", "banana"], expect.any(Event));
     expect(screen.getByRole("listbox")).toBeInTheDocument();
   });
 
-  // One message slot: the same line stays put and changes *presentation* with
-  // `state`, rather than a separate error line appearing.
   it("renders the helpText as an error when invalid", () => {
     const { rerender } = render(<SingleHost state="neutral" helpText="Required" />);
     expect(screen.getByText("Required").querySelector("svg")).toBeNull();

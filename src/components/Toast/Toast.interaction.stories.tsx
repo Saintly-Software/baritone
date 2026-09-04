@@ -51,9 +51,7 @@ export const ShowAndDismiss: Story = {
     await userEvent.click(canvas.getByRole("button", { name: "Show toast" }));
 
     const body = within(document.body);
-    // base-ui renders each low-priority toast as a `dialog` named by its title.
     const toast = await body.findByRole("dialog", { name: "Changes saved" });
-    // The description is wired to the dialog (aria-describedby → the text).
     expect(within(toast).getByText("Your profile is up to date.")).toBeInTheDocument();
 
     await userEvent.click(within(toast).getByRole("button", { name: "Dismiss" }));

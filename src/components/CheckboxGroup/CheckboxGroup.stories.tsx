@@ -7,11 +7,6 @@ import { CheckboxGroup } from "./index";
 
 type Topic = "product" | "billing" | "security";
 
-// CheckboxGroup is controlled, so the stories drive it from local state — the
-// same shape a consumer would use.
-// `DistributiveOmit` (not the built-in `Omit`) keeps the mutually-exclusive
-// labelling arms apart — a plain `Omit` over a union collapses it into one
-// object carrying every arm's keys at once.
 function Subscriptions(
   props: DistributiveOmit<
     React.ComponentProps<typeof CheckboxGroup<Topic>>,
@@ -58,9 +53,6 @@ export default meta;
 
 type Story = StoryObj<typeof Subscriptions>;
 
-// Interactive default — renamed from "Playground". Ships with a `description` so
-// the default view shows the described-by wiring, folding in the old
-// "WithDescription" story.
 export const Basic: Story = {
   args: {
     helpText: "Pick any topics you'd like to hear about.",
@@ -77,8 +69,6 @@ export const Sizes: Story = {
   ),
 };
 
-// One message slot now: the copy changes with the state, rather than a help
-// line and an error line coexisting.
 const STATE_MESSAGE: Record<FormState, string | undefined> = {
   neutral: undefined,
   warning: "Double-check these choices.",

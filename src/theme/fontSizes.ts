@@ -107,16 +107,11 @@ export function fontSizeVars(
     out[sizeLineHeightVarName(size)] = vars.text.size[size].lineHeight;
   }
   for (const [name, value] of Object.entries(sizes)) {
-    // The built-in sizes stay token-backed (`vars.text.size.*`) so bare text and
-    // e.g. `size="lg"` never diverge; the registry can't shadow them. Customise the
-    // built-ins through the theme tokens instead.
     if ((TEXT_SIZES as readonly string[]).includes(name)) continue;
     if (typeof value === "string") {
       out[fontSizeVarName(name)] = value;
     } else {
       out[fontSizeVarName(name)] = value.fontSize;
-      // A bundled `lineHeight` becomes the size's paired default; without one, the
-      // size's leading falls back to `md` (the size recipe's fallback).
       if (value.lineHeight !== undefined) out[sizeLineHeightVarName(name)] = value.lineHeight;
     }
   }

@@ -26,7 +26,6 @@ const GROUPED: ComboboxOptionGroup[] = [
   },
 ];
 
-// Six short labels — a clean 3-column × 2-row grid.
 const COLORS: ComboboxOption[] = [
   { value: "red", label: "Red" },
   { value: "orange", label: "Orange" },
@@ -247,7 +246,6 @@ describe("Combobox", () => {
 
       expect(await screen.findByRole("group", { name: "Citrus" })).toBeInTheDocument();
       expect(screen.getByRole("group", { name: "Berries" })).toBeInTheDocument();
-      // Every option across every group is listed.
       expect(screen.getAllByRole("option")).toHaveLength(4);
     });
 
@@ -296,10 +294,8 @@ describe("Combobox", () => {
       await user.click(screen.getByRole("combobox", { name: "Colour" }));
 
       const grid = await screen.findByRole("grid");
-      // A grid, not a listbox of options.
       expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
       expect(within(grid).queryAllByRole("option")).toHaveLength(0);
-      // Six colours tile into two rows of three gridcells.
       expect(within(grid).getAllByRole("row")).toHaveLength(2);
       expect(within(grid).getAllByRole("gridcell")).toHaveLength(6);
       expect(within(grid).getByRole("gridcell", { name: "Red" })).toBeInTheDocument();
@@ -311,14 +307,11 @@ describe("Combobox", () => {
 
       await user.click(screen.getByRole("combobox", { name: "Colour" }));
 
-      // "r" matches Red, Orange, Amber and Green — four cells re-tiled into two
-      // rows (the second partial), proving the rows re-chunk on the filtered set.
       await user.keyboard("r");
       const grid = await screen.findByRole("grid");
       expect(within(grid).getAllByRole("gridcell")).toHaveLength(4);
       expect(within(grid).getAllByRole("row")).toHaveLength(2);
 
-      // Narrowing to "red" collapses to a single cell on a single row.
       await user.keyboard("ed");
       const cells = within(grid).getAllByRole("gridcell");
       expect(cells).toHaveLength(1);
@@ -385,7 +378,6 @@ describe("Combobox", () => {
       await user.click(screen.getByRole("combobox", { name: "Colour" }));
 
       const grid = await screen.findByRole("grid");
-      // Grid wins over windowing: every colour is mounted.
       expect(within(grid).getAllByRole("gridcell")).toHaveLength(6);
     });
 
@@ -399,7 +391,6 @@ describe("Combobox", () => {
 
       await user.click(screen.getByRole("combobox", { name: "Icon" }));
 
-      // The cell is still named by its label (the icon is decorative / aria-hidden).
       const cell = await screen.findByRole("gridcell", { name: "Star" });
       expect(within(cell).getByTestId("star-glyph")).toBeInTheDocument();
     });

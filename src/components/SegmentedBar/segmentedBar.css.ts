@@ -3,11 +3,6 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { INTENTS, SALIENCIES } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-// A segment's fill colour, funnelled through a local var so one recipe can paint
-// both of a segment's marks — the slice in the track and its legend swatch —
-// without either needing to know which intent won. Exported so the per-segment
-// `color` escape hatch can override it inline (an inline custom property
-// declaration wins over the recipe's class-based one).
 export const segmentFillVar = createVar();
 const fill = segmentFillVar;
 
@@ -162,10 +157,6 @@ export const segmentedBarLegendRow = style({
 export const segmentedBarLegendLabel = style({
   flex: "1 1 auto",
   minWidth: 0,
-  // The truncation trio: a single-line box (`nowrap`) whose overflow is clipped
-  // (`hidden`) and marked with an ellipsis. Without `nowrap` a long label wraps
-  // onto more lines instead of truncating, and the ellipsis never engages — the
-  // legend `Text` sets no `white-space` of its own, so this is the only source.
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",

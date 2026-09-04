@@ -5,7 +5,6 @@ import { LinkProvider } from "../LinkProvider";
 import { Text } from "../Text";
 import { Link } from "./index";
 
-// A left-arrow glyph for the icon-only "back" navigation stories.
 const ArrowLeft = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M11 5l1.4 1.4L7.8 11H20v2H7.8l4.6 4.6L11 19l-7-7z" />
@@ -100,7 +99,6 @@ export const IconOnlyButtonAccessibleName: Story = {
     const link = canvas.getByRole("link", { name: "Back to entry details" });
     expect(link.tagName).toBe("A");
     expect(link).toHaveAttribute("href", "/entries/42");
-    // Icon-only: the glyph is the whole content, so there's no visible text.
     expect(link).toHaveTextContent("");
   },
 };
@@ -127,8 +125,6 @@ export const DisabledIconOnlyButtonTooltip: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // Inert: out of the link a11y tree (a role-less element), with its name
-    // re-exposed as visually-hidden content rather than a prohibited aria-label.
     expect(canvas.queryByRole("link")).toBeNull();
     const inert = canvas.getByText("Back to entry details").closest("[aria-disabled]");
     expect(inert).not.toBeNull();
@@ -187,8 +183,6 @@ export const ChipRoutesThroughProvider: Story = {
             href={href}
             data-router-link=""
             onClick={(event) => {
-              // Route through the "router" (record + prevent the full-page load)
-              // so a click is observable without leaving the story.
               event.preventDefault();
               setNavigations((prev) => [...prev, href]);
             }}
@@ -200,7 +194,6 @@ export const ChipRoutesThroughProvider: Story = {
         <Link appearance="chip" intent="primary" saliency="low" href="/notes?tags=music">
           Music
         </Link>
-        {/* Surface the recorded navigations for the assertion below. */}
         <output data-testid="navlog">{navigations.join(",")}</output>
       </LinkProvider>
     );

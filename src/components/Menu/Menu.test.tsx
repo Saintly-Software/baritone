@@ -147,7 +147,6 @@ describe("Menu", () => {
 
     await user.click(item);
     expect(onClick).toHaveBeenCalledTimes(1);
-    // Still open — the row didn't dismiss the menu.
     expect(screen.getByRole("menuitem", { name: "Increment" })).toBeInTheDocument();
   });
 
@@ -213,8 +212,6 @@ describe("Menu", () => {
     await user.click(screen.getByRole("button", { name: "Open" }));
     await screen.findByRole("menuitem", { name: MENU_ITEM_INTENTS[0] });
 
-    // A missing recipe variant silently falls back to the base class, so the
-    // intents would collide rather than throw — distinctness is what catches it.
     const classNames = MENU_ITEM_INTENTS.map(
       (intent) => screen.getByRole("menuitem", { name: intent }).className,
     );
@@ -306,7 +303,6 @@ describe("Menu", () => {
     await user.click(screen.getByRole("button", { name: "Open" }));
     await screen.findByRole("menuitem", { name: "Edit" });
 
-    // Typing "Du" should land on "Duplicate".
     await user.keyboard("Du");
     await waitFor(() => expect(screen.getByRole("menuitem", { name: "Duplicate" })).toHaveFocus());
   });

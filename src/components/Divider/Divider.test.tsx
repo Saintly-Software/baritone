@@ -25,8 +25,6 @@ describe("Divider", () => {
 
   it("renders a string label and names the separator with it", () => {
     render(<Divider>or</Divider>);
-    // A separator's children are presentational, so the visible text alone would
-    // never be announced — the string label doubles as the accessible name.
     const divider = screen.getByRole("separator", { name: "or" });
     expect(divider).toHaveTextContent("or");
   });
@@ -73,9 +71,6 @@ describe("Divider", () => {
   });
 
   it("points the rule's weight var at the named borderWidth via `thickness`", () => {
-    // `thickness` is an inline var, not a variant, because the `borderWidth`
-    // vocabulary is open (consumer-extensible) — so it resolves to a
-    // `var(--borderWidth-<name>)` the active theme publishes.
     render(<Divider thickness="thick" />);
     expect(screen.getByRole("separator").getAttribute("style")).toContain(
       `var(${borderWidthVarName("thick")})`,
@@ -89,8 +84,6 @@ describe("Divider", () => {
 
   it("wires the margin props to the spacing scale", () => {
     render(<Divider my="4" />);
-    // The recipe must not carry a `margin` reset of its own: it would out-order
-    // this equal-specificity atoms class and swallow the margin props.
     expect(screen.getByRole("separator")).toHaveClass(atoms({ my: "4" }));
   });
 

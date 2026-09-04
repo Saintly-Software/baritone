@@ -147,11 +147,6 @@ function MenuItem(props: MenuItemProps) {
     return (
       <BaseMenu.LinkItem
         label={children}
-        // A menu item navigating away should close the menu, same as any other
-        // activation — base-ui defaults link items to `false` (kept open) since
-        // they're often used to open a nested surface; override to match `Item`.
-        // (`keepOpen` can force it back open, though it's rarely meaningful on a
-        // link that's navigating away.)
         closeOnClick={!keepOpen}
         render={(htmlAttrs) => <MenuItemAnchor {...props} htmlAttrs={htmlAttrs} />}
       />
@@ -161,18 +156,7 @@ function MenuItem(props: MenuItemProps) {
   return (
     <BaseMenu.Item
       label={children}
-      // Dismiss on activation by default (base-ui's default too); `keepOpen`
-      // holds the menu open for a repeatable, non-navigating action.
       closeOnClick={!keepOpen}
-      // `disabled` is intentionally not passed to base-ui here: per this
-      // library's convention (see Accordion), disabling always stays modelled
-      // as `aria-disabled` + a swallowed activation on our own rendered
-      // element (below, via `InternalGenericButtonAnchor`), never base-ui's own
-      // `disabled` prop — so the row stays keyboard-reachable regardless of
-      // that primitive's particular disabled implementation.
-      // The row renders a real `<button>` below, so tell base-ui it's already a
-      // native button (it otherwise assumes its `<div>` default and adds its own
-      // keyboard-activation shim).
       nativeButton
       render={(htmlAttrs) => <MenuItemAnchor {...props} htmlAttrs={htmlAttrs} />}
     />
@@ -309,8 +293,6 @@ export type MenuTriggerProps =
 function MenuTrigger(props: MenuTriggerProps) {
   const { openOnHover, delay, closeDelay } = props;
 
-  // Custom trigger: hand base-ui's render straight through — the consumer owns
-  // the element and just needs the popup wiring merged onto it.
   if (props.render != null) {
     return (
       <BaseMenu.Trigger
@@ -322,9 +304,6 @@ function MenuTrigger(props: MenuTriggerProps) {
     );
   }
 
-  // Default trigger: a real `Button` fed base-ui's computed props through
-  // InternalButton's `htmlAttrs` seam. Strip the trigger-only knobs so they
-  // don't leak onto the Button/DOM.
   const { openOnHover: _oh, delay: _d, closeDelay: _cd, render: _r, ...buttonProps } = props;
   return (
     <BaseMenu.Trigger

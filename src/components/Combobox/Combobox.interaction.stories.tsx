@@ -28,7 +28,6 @@ const GROUPED: ComboboxOptionGroup[] = [
   },
 ];
 
-// Nine short labels — a clean 3×3 grid, so vertical arrow moves are unambiguous.
 const COLORS: ComboboxOption[] = [
   { value: "red", label: "Red" },
   { value: "orange", label: "Orange" },
@@ -81,7 +80,6 @@ export const MultiSelectHighlight: Story = {
     const banana = within(listbox).getByRole("option", { name: "Banana" });
     await userEvent.hover(banana);
     await waitFor(() => expect(banana).toHaveAttribute("data-highlighted"));
-    // Highlighting a different row must not disturb the existing selection.
     expect(apple).toHaveAttribute("aria-selected", "true");
   },
 };
@@ -101,23 +99,19 @@ export const GridNavigation: Story = {
     const input = canvas.getByRole("combobox", { name: "Colour" });
     await userEvent.click(input);
 
-    // Nine colours tile into a 3×3 grid of gridcells (not a listbox of options).
     const grid = await body.findByRole("grid");
     expect(within(grid).getAllByRole("row")).toHaveLength(3);
     expect(within(grid).getAllByRole("gridcell")).toHaveLength(9);
 
-    // First ArrowDown highlights the first cell…
     await userEvent.keyboard("{ArrowDown}");
     const red = within(grid).getByRole("gridcell", { name: "Red" });
     await waitFor(() => expect(red).toHaveAttribute("data-highlighted"));
 
-    // …and a second ArrowDown drops a whole row (to Green), not to the next item.
     await userEvent.keyboard("{ArrowDown}");
     const green = within(grid).getByRole("gridcell", { name: "Green" });
     await waitFor(() => expect(green).toHaveAttribute("data-highlighted"));
     expect(red).not.toHaveAttribute("data-highlighted");
 
-    // Enter commits the highlighted cell, which surfaces in the input.
     await userEvent.keyboard("{Enter}");
     await waitFor(() => expect(input).toHaveValue("Green"));
   },
@@ -135,11 +129,9 @@ export const GroupedFiltering: Story = {
     const body = within(document.body);
     await userEvent.click(canvas.getByRole("combobox", { name: "Fruit" }));
 
-    // Both groups show initially, each a labelled role="group".
     expect(await body.findByRole("group", { name: "Citrus" })).toBeInTheDocument();
     expect(body.getByRole("group", { name: "Berries" })).toBeInTheDocument();
 
-    // Filtering to a berry drops the empty Citrus group.
     await userEvent.keyboard("straw");
     await waitFor(() =>
       expect(body.queryByRole("group", { name: "Citrus" })).not.toBeInTheDocument(),
@@ -205,7 +197,6 @@ export const AsyncSearchLoading: Story = {
     await userEvent.click(input);
     await userEvent.keyboard("london");
 
-    // The spinner and its "Searching…" copy live in the portaled popup.
     await waitFor(() => expect(within(document.body).getByText("Searching…")).toBeInTheDocument());
   },
 };
@@ -230,8 +221,6 @@ export const AsyncSearchError: Story = {
   },
 };
 
-// A mock remote search that never resolves: any query leaves the popup in the
-// loading state, so the story captures the in-menu spinner.
 function PendingSearchExample() {
   const [loading, setLoading] = React.useState(false);
 
@@ -248,7 +237,6 @@ function PendingSearchExample() {
   );
 }
 
-// A debounced, abortable mock remote search: "xyz" always errors.
 function AsyncExample() {
   const [results, setResults] = React.useState<ComboboxOption[]>([]);
   const [loading, setLoading] = React.useState(false);

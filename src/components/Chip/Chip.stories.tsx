@@ -5,7 +5,6 @@ import { Popover } from "../Popover";
 import { Text } from "../Text";
 import { Chip } from "./index";
 
-// Throwaway glyphs so the adornment stories have something to render.
 const TagGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
     <path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13.2V4h9.2l8.4 8.4a1 1 0 0 1 0 1z" />
@@ -159,7 +158,6 @@ export const ClickableLabel: Story = {
         Clickable
       </Chip>
 
-      {/* Clickable label + independent remove button. */}
       <Chip
         intent="neutral"
         saliency="mid"
@@ -171,7 +169,6 @@ export const ClickableLabel: Story = {
         Filter
       </Chip>
 
-      {/* Disabled: label inert but still focusable. */}
       <Chip intent="primary" saliency="high" disabled onClick={() => alert("nope")}>
         Disabled
       </Chip>
@@ -201,7 +198,6 @@ export const WithPopover: Story = {
         Passing
       </Chip>
 
-      {/* Popover-triggering label alongside an independent remove button. */}
       <Chip
         intent="neutral"
         saliency="mid"
@@ -217,7 +213,6 @@ export const WithPopover: Story = {
         Details
       </Chip>
 
-      {/* Disabled: the label trigger is inert but still focusable. */}
       <Chip
         intent="primary"
         saliency="high"
@@ -242,7 +237,6 @@ export const WithPopover: Story = {
 export const Adornments: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-      {/* Regular leading icon. */}
       <Chip
         intent="primary"
         saliency="mid"
@@ -251,7 +245,6 @@ export const Adornments: Story = {
         Label
       </Chip>
 
-      {/* Clickable trailing "remove" button. */}
       <Chip
         intent="neutral"
         saliency="mid"
@@ -262,7 +255,6 @@ export const Adornments: Story = {
         Removable
       </Chip>
 
-      {/* Link trailing adornment. */}
       <Chip
         intent="secondary"
         saliency="low"
@@ -273,7 +265,6 @@ export const Adornments: Story = {
         Docs
       </Chip>
 
-      {/* Both ends. */}
       <Chip
         intent="positive"
         saliency="mid"
@@ -295,12 +286,10 @@ export const Adornments: Story = {
 export const IconShorthand: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-      {/* Just the shorthand icon. */}
       <Chip intent="primary" saliency="mid" icon={<TagGlyph />}>
         Tagged
       </Chip>
 
-      {/* The shorthand icon sits ahead of an explicit leading adornment. */}
       <Chip
         intent="neutral"
         saliency="mid"
@@ -323,12 +312,10 @@ export const IconShorthand: Story = {
 export const Removable: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-      {/* Just a removable chip. */}
       <Chip intent="neutral" saliency="mid" handleRemove={() => alert("removed")}>
         Removable
       </Chip>
 
-      {/* The built-in "×" sits after a supplied leading + trailing adornment. */}
       <Chip
         intent="primary"
         saliency="mid"
@@ -341,7 +328,6 @@ export const Removable: Story = {
         Tag
       </Chip>
 
-      {/* Disabled: the remove "×" goes inert but stays focusable. */}
       <Chip intent="primary" saliency="high" disabled handleRemove={() => alert("nope")}>
         Disabled
       </Chip>
@@ -389,12 +375,10 @@ export const AdornmentIntentOverride: Story = {
 export const TrailingIcon: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-      {/* Lead + trail shorthand icons together. */}
       <Chip intent="primary" saliency="mid" icon={<TagGlyph />} trailIcon={<ExternalGlyph />}>
         Tagged
       </Chip>
 
-      {/* The trailing shorthand sits after an explicit trailing adornment. */}
       <Chip
         intent="neutral"
         saliency="mid"
@@ -419,7 +403,6 @@ export const CopyToClipboard: Story = {
         npm i @saintly-software/baritone
       </Chip>
 
-      {/* Alongside a leading icon. */}
       <Chip intent="primary" saliency="mid" icon={<TagGlyph />} contentToCopy="DES-35">
         DES-35
       </Chip>

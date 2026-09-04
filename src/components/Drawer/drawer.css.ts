@@ -17,9 +17,6 @@ export const drawerBackdrop = style({
   transitionDuration: vars.motion.duration.base,
   transitionTimingFunction: vars.motion.easing.standard,
   selectors: {
-    // base-ui flags the enter ("starting") and exit ("ending") frames; fade the
-    // scrim on both. While actively swiping, cut the transition so the scrim
-    // tracks the finger 1:1.
     "&[data-starting-style], &[data-ending-style]": { opacity: 0 },
     "&[data-swiping]": { transitionDuration: "0ms" },
   },

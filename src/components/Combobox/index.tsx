@@ -224,8 +224,6 @@ export type ComboboxProps = ComboboxBaseProps &
   (ComboboxSingleProps | ComboboxMultipleProps) &
   FieldLabellingProps;
 
-// Rough per-row height (px) for the virtualized window — matches the item's
-// vertical padding + line box. Rows are given this exact height when virtualized.
 const VIRTUAL_ITEM_HEIGHT = 40;
 const VIRTUAL_VIEWPORT_HEIGHT = 280;
 const VIRTUAL_OVERSCAN = 6;
@@ -258,9 +256,6 @@ function XIcon() {
   );
 }
 
-// Forwards props so the `className` base-ui's `ItemIndicator` passes through its
-// `render` prop actually lands on the svg (that's how the list check gets its
-// styling and the grid check its corner positioning).
 function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" width="1.1em" height="1.1em" fill="none" aria-hidden {...props}>
@@ -326,7 +321,6 @@ export function Combobox(props: ComboboxProps) {
       ref?: React.Ref<HTMLInputElement>;
     };
 
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
   const nameProps: FieldLabellingInput = {
@@ -335,10 +329,6 @@ export function Combobox(props: ComboboxProps) {
     "aria-labelledby": ariaLabelledby,
   };
 
-  // Value <-> option registry. Public values are strings; base-ui items are the
-  // option objects. We remember every option we've seen (props + async results +
-  // selections) so a selected value's label still resolves after the async list
-  // has moved on. Populating during render is idempotent and safe.
   const cacheRef = React.useRef<Map<string, ComboboxOption>>(new Map());
   for (const o of flattenOptions(options)) cacheRef.current.set(o.value, o);
   for (const o of flattenOptions(search?.results)) cacheRef.current.set(o.value, o);
@@ -350,24 +340,15 @@ export function Combobox(props: ComboboxProps) {
   const [query, setQuery] = React.useState("");
 
   const isAsync = search != null;
-  // The active source — flat or grouped, sync `options` or async `search.results`.
   const source: readonly ComboboxOption[] | readonly ComboboxOptionGroup[] = isAsync
     ? (search.results ?? [])
     : (options ?? []);
-  // Grid view: a whole number of columns ≥ 2 lays the options out as a 2-D grid.
-  // It wins over `virtualized` (whose flat-row windowing can't tile), so windowing
-  // is off whenever the grid is on.
   const gridColumns = columns != null ? Math.max(1, Math.floor(columns)) : undefined;
   const isGrid = gridColumns != null && gridColumns >= 2;
   const isVirtual = !!virtualized && !isGrid;
-  // Groups are supported everywhere except the virtualized window, whose row math
-  // assumes a flat list — there, a grouped source is flattened and headings drop.
-  // The grid tiles each group under its own heading, so grouping survives there.
   const useGroups = !isVirtual && isGrouped(source);
   const flatOptions = flattenOptions(source);
 
-  // Free-text "Add …" affordance: a synthetic option for the current query when
-  // it doesn't already match a known option (by label or value).
   const trimmed = query.trim();
   const hasExactMatch = flatOptions.some(
     (o) => o.label.toLowerCase() === trimmed.toLowerCase() || o.value === trimmed,
@@ -375,9 +356,6 @@ export function Combobox(props: ComboboxProps) {
   const showCreate = freeText && trimmed !== "" && !hasExactMatch;
   const createOption: InternalOption = { value: trimmed, label: trimmed, create: true };
 
-  // What base-ui receives as `items`: a flat option list, or (when grouping)
-  // its `{ label, items }` group shape. The free-text row is appended either as a
-  // trailing flat option or as its own headerless group.
   const rootItems: readonly InternalOption[] | readonly InternalGroup[] = useGroups
     ? [
         ...(source as readonly ComboboxOptionGroup[]).map(
@@ -459,10 +437,6 @@ export function Combobox(props: ComboboxProps) {
     <BaseCombobox.Item
       key={option.value}
       value={option}
-      // Options are listbox rows, never tab stops (the input keeps focus and they
-      // are navigated by roving highlight), so base-ui's `disabled` correctly sets
-      // `aria-disabled` here without harming focusability — see the allowlist note
-      // in aria-disabled-convention.test.ts.
       disabled={option.disabled}
       index={index}
       className={index === undefined ? itemClass : cx(itemClass, virtualItem)}
@@ -490,9 +464,6 @@ export function Combobox(props: ComboboxProps) {
     </BaseCombobox.Item>
   );
 
-  // A group section: a heading (base-ui associates it with the group) followed by
-  // a `Collection` that renders the group's filtered items. The headerless group
-  // carrying the free-text "Add …" row has no `label`, so no heading is shown.
   const renderGroup = (grp: InternalGroup) => (
     <BaseCombobox.Group key={grp.label ?? "__create"} items={grp.items} className={groupClass}>
       {grp.label != null && (
@@ -504,11 +475,6 @@ export function Combobox(props: ComboboxProps) {
     </BaseCombobox.Group>
   );
 
-  // A grid cell (`role="gridcell"`). Centred label with the check tucked into the
-  // corner when selected; the free-text "Add …" cell spans its whole row. Cells are
-  // navigated by roving highlight, never tab stops, so base-ui's `disabled` sets
-  // `aria-disabled` here without harming focusability (allowlisted in
-  // aria-disabled-convention.test.ts).
   const renderGridItem = (option: InternalOption) => {
     const hasIcon = option.icon != null && !option.create;
     return (
@@ -537,9 +503,6 @@ export function Combobox(props: ComboboxProps) {
     );
   };
 
-  // A grid group: the heading plus a presentation wrapper of the group's filtered
-  // items, tiled into `Row`s. `grp.items` arrives already query-filtered, so the
-  // rows re-chunk as the user types.
   const renderGridGroup = (grp: InternalGroup) => (
     <BaseCombobox.Group key={grp.label ?? "__create"} items={grp.items} className={groupClass}>
       {grp.label != null && (
@@ -559,8 +522,6 @@ export function Combobox(props: ComboboxProps) {
       placeholder={placeholder}
       aria-disabled={disabled || undefined}
       readOnly={disabled || readOnly}
-      // base-ui's `Field.Label` already names the input, so this only emits an
-      // attribute for the label-less arms.
       {...fieldNameAttrs(nameProps)}
       {...rest}
     />

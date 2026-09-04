@@ -21,8 +21,6 @@ describe("ChipList", () => {
 
   it("keeps an explicit list role even with the list marker removed", () => {
     render(<ChipList items={TAGS} />);
-    // Set explicitly so Safari (which drops the implicit role under
-    // `list-style: none`) still exposes the list.
     expect(screen.getByRole("list")).toHaveAttribute("role", "list");
     for (const item of screen.getAllByRole("listitem")) {
       expect(item).toHaveAttribute("role", "listitem");
@@ -40,7 +38,6 @@ describe("ChipList", () => {
       const { container } = render(<ChipList items={TAGS.slice(0, 2)} intent="primary" />);
       const chips = container.querySelectorAll("li > *");
       expect(chips).toHaveLength(2);
-      // Both chips share the same generated class set (same intent/saliency/size).
       expect(chips[0]?.className).toBe(chips[1]?.className);
     });
 
@@ -57,8 +54,6 @@ describe("ChipList", () => {
         />,
       );
       const chips = container.querySelectorAll("li > *");
-      // The overriding chip carries a different intent recipe class than the
-      // inheriting one.
       expect(chips[0]?.className).not.toBe(chips[1]?.className);
     });
 
@@ -76,7 +71,6 @@ describe("ChipList", () => {
         />,
       );
       const chips = container.querySelectorAll("li > *");
-      // Same size class on both: the list's `sm` wins over the item's `lg`.
       expect(chips[0]?.className).toBe(chips[1]?.className);
     });
   });
@@ -122,10 +116,8 @@ describe("ChipList", () => {
       render(<ChipList items={TAGS} max={2} />);
       expect(screen.getByText("Alpha")).toBeInTheDocument();
       expect(screen.getByText("Beta")).toBeInTheDocument();
-      // The overflow chips are not inline.
       expect(screen.queryByText("Gamma")).not.toBeInTheDocument();
       expect(screen.queryByText("Delta")).not.toBeInTheDocument();
-      // 2 visible chips + 1 see-more, each in its own listitem.
       expect(screen.getAllByRole("listitem")).toHaveLength(3);
       expect(screen.getByRole("button", { name: "See more" })).toBeInTheDocument();
     });
@@ -142,13 +134,11 @@ describe("ChipList", () => {
       const popup = await screen.findByRole("dialog");
       expect(within(popup).getByText("Gamma")).toBeInTheDocument();
       expect(within(popup).getByText("Delta")).toBeInTheDocument();
-      // The hidden chips render as their own list inside the popover.
       expect(within(popup).getByRole("list")).toBeInTheDocument();
     });
 
     it("supports a function seeMoreLabel reporting the hidden count", async () => {
       render(<ChipList items={TAGS} max={1} seeMoreLabel={(n) => `+${n}`} />);
-      // 4 items, 1 shown -> 3 hidden.
       expect(screen.getByRole("button", { name: "+3" })).toBeInTheDocument();
     });
 
@@ -196,8 +186,6 @@ describe("ChipList", () => {
       const onAncestor = vi.fn();
       const handleRemove = vi.fn();
       const user = userEvent.setup();
-      // A common layout: the whole list sits inside a clickable region. Removing a
-      // chip should act on that chip alone, never trip the surrounding handler.
       render(
         <div onClick={onAncestor}>
           <ChipList

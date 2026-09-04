@@ -80,8 +80,6 @@ export function InternalSwitch({
   ref,
   ...rest
 }: InternalSwitchProps) {
-  // One mutually-exclusive value attribute (base-ui convention, consistent with
-  // the checkbox/radio controls), so CSS and consumers can target each state.
   const valueAttrs = {
     "data-checked": checked ? "" : undefined,
     "data-unchecked": !checked ? "" : undefined,

@@ -32,9 +32,6 @@ export const fieldRoot = recipe({
   },
   compoundVariants: [
     {
-      // Shrink-wrapping a *column* takes an explicit cross-axis alignment;
-      // in a row (`start`/`end`) the items already size to their content, and
-      // the baseline alignment set above must survive.
       variants: { fit: "content", labelPosition: "top" },
       style: { alignItems: "flex-start" },
     },
@@ -57,7 +54,6 @@ export const fieldStack = recipe({
   variants: {
     labelPosition: {
       top: {},
-      // Claim the width the inline label leaves behind.
       start: { flexGrow: 1 },
       end: { flexGrow: 1 },
     },

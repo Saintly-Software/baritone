@@ -53,8 +53,6 @@ describe("Toast", () => {
     await user.click(screen.getByRole("button", { name: "Show" }));
 
     const toast = await screen.findByRole("dialog", { name: "Heads up" });
-    // The base-ui viewport owns announcements; the Notice must not add its own
-    // status/alert live region inside the dialog (that would double-announce).
     expect(toast.querySelector('[role="presentation"]')).not.toBeNull();
     expect(toast.querySelector('[role="status"]')).toBeNull();
     expect(toast.querySelector('[role="alert"]')).toBeNull();
@@ -186,19 +184,15 @@ describe("Toast", () => {
     const toast = await screen.findByRole("dialog", { name: "Uploading" });
     expect(toast).toHaveTextContent("Starting up");
 
-    // A description-only update keeps the title and the (data-bag) action.
     await user.click(screen.getByRole("button", { name: "Progress" }));
     await waitFor(() => expect(toast).toHaveTextContent("Almost there"));
     expect(toast).toHaveAccessibleName("Uploading");
     expect(toast).not.toHaveTextContent("Starting up");
     expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
 
-    // The Notice starts at the `primary` intent recipe class.
     const noticeEl = toast.querySelector<HTMLElement>('[role="presentation"]');
     expect(noticeEl?.className).toContain(noticeRecipe({ intent: "primary", saliency: "high" }));
 
-    // An intent-only update recolours the Notice (the `negative` recipe class)
-    // yet keeps the title, the description, and the other data field (the action).
     await user.click(screen.getByRole("button", { name: "Fail" }));
     await waitFor(() =>
       expect(noticeEl?.className).toContain(noticeRecipe({ intent: "negative", saliency: "high" })),
@@ -212,25 +206,17 @@ describe("Toast", () => {
   });
 
   it("fires toasts from outside React via a module-scope manager, packing the design fields", async () => {
-    // The manager lives outside any component — the whole point is that no
-    // useToast() (and so no React tree) is needed to fire.
     const manager = createToastManager();
     render(<BaritoneProvider toastManager={manager}>{null}</BaritoneProvider>);
 
     manager.add({ title: "Couldn't save", intent: "negative", timeout: 0 });
 
     const toast = await screen.findByRole("dialog", { name: "Couldn't save" });
-    // The top-level `intent` was packed into base-ui's `data` bag and read back
-    // by the Notice, exactly as useToast().add would have done.
     const noticeEl = toast.querySelector<HTMLElement>('[role="presentation"]');
     expect(noticeEl?.className).toContain(noticeRecipe({ intent: "negative", saliency: "high" }));
   });
 
   it("replaces the visual data wholesale on a module-scope manager's update", async () => {
-    // The manager has no reactive toast list to merge against, so — unlike
-    // useToast().update — a partial update drops the visual fields it omits.
-    // This is the documented caveat; pin it so a regression to merge-semantics
-    // (or a dropped pack() on the update path) can't pass silently.
     const manager = createToastManager();
     render(<BaritoneProvider toastManager={manager}>{null}</BaritoneProvider>);
 
@@ -250,8 +236,6 @@ describe("Toast", () => {
     expect(within(toast).getByTestId("icon")).toBeInTheDocument();
     expect(within(toast).getByRole("button", { name: "Cancel" })).toBeInTheDocument();
 
-    // An intent-only update recolours the Notice but, replacing `data` wholesale,
-    // drops the previously-set icon and actions.
     manager.update(id, { intent: "negative" });
 
     const noticeEl = toast.querySelector<HTMLElement>('[role="presentation"]');
@@ -267,7 +251,6 @@ describe("Toast", () => {
       useToast();
       return null;
     }
-    // Silence React's expected error boundary logging for this render.
     const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<Orphan />)).toThrow(/Toast\.Provider/);
     spy.mockRestore();

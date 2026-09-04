@@ -1,4 +1,3 @@
-// Components
 export { BaritoneTheme, type BaritoneThemeProps } from "./components/BaritoneTheme";
 export { BaritoneProvider, type BaritoneProviderProps } from "./components/BaritoneProvider";
 export { Button, type ButtonProps } from "./components/Button";
@@ -139,9 +138,6 @@ export {
   type TableValue,
   type TableRowFor,
 } from "./components/Table";
-// `DataTable` is intentionally NOT re-exported here — it ships from its own entry
-// point (`@saintly-software/baritone/datatable`) so the main barrel never pulls in
-// the `@tanstack/react-table` peer dependency. See `src/datatable.ts`.
 export {
   MetricCard,
   type MetricCardProps,
@@ -168,7 +164,6 @@ export {
 } from "./components/Combobox";
 export {
   Field,
-  // The toolkit for building a form control on `Field` — see AGENTS.md.
   fieldControlAttrs,
   fieldNameAttrs,
   joinIds,
@@ -323,20 +318,8 @@ export {
   type InaccessibleTooltipProps,
 } from "./components/InaccessibleTooltip";
 
-// `InternalTooltip` itself is intentionally NOT exported — it's the shared
-// tooltip *surface* that both public tooltips compose. The two exported
-// tooltips differ only in how their trigger is constrained:
-//   • `Tooltip` (above) mandates a `Tooltip.Trigger` button, so the hint is
-//     hover-, focus-, and tap-reachable — the accessible default.
-//   • `InaccessibleTooltip` attaches to an arbitrary element and leaves
-//     reachability to the caller — the bluntly-named escape hatch.
-// Either way, tooltip content must stay supplemental; anything a user actually
-// needs to read should use the exported `Popover` instead.
-
-// Theme: contract, factory, default themes, contrast tooling, vocabulary
 export * from "./theme";
 
-// Layout atoms (Sprinkles)
 export { atoms, type Atoms } from "./styles/sprinkles.css";
 export type { MarginProps, PaddingProps } from "./styles/spacingProps";
 export {
@@ -346,7 +329,6 @@ export {
   type VisibilityBreakpoint,
 } from "./styles/layoutProps";
 
-// Shared CSS variables (for advanced composition)
 export {
   iconColorVar,
   iconVerticalAlignVar,
@@ -360,7 +342,6 @@ export {
   surfacePaddingVar,
 } from "./styles/vars.css";
 
-// Recipes (advanced: extend the system with new components of each type)
 export {
   componentIntentRecipe,
   type ComponentIntentVariants,
@@ -378,10 +359,8 @@ export { formControlRecipe, type FormControlVariants } from "./styles/recipes/fo
 export { iconRecipe, type IconVariants } from "./styles/recipes/icon.css";
 export { focusRingRecipe, type FocusRingVariants } from "./styles/recipes/focusRing.css";
 
-// Polymorphism helpers
 export { useRender, composeRefs, type RenderProp } from "./utils/render";
 export { cx } from "./utils/cx";
-// Type helpers for re-typing the mutually-exclusive prop unions (see `Field`).
 export type { DistributiveOmit, DistributivePartial } from "./utils/types";
 export {
   useOverlayHandle,

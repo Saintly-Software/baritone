@@ -64,16 +64,13 @@ export const ValidatesAndSubmits: Story = {
     const email = canvas.getByLabelText("Email");
     const submit = canvas.getByRole("button", { name: "Create account" });
 
-    // Invalid input surfaces the validator message as the field's help/error line.
     await userEvent.type(email, "not-an-email");
     await waitFor(() =>
       expect(canvas.getByText("Enter a valid email address")).toBeInTheDocument(),
     );
     expect(email).toHaveAttribute("aria-invalid", "true");
-    // The form can't submit while a field is invalid.
     expect(submit).toHaveAttribute("aria-disabled", "true");
 
-    // Fixing it clears the error and re-enables submit.
     await userEvent.clear(email);
     await userEvent.type(email, "ada@example.com");
     await waitFor(() =>

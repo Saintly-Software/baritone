@@ -64,8 +64,6 @@ describe("Card", () => {
         Body
       </Card>,
     );
-    // The header is a real <header> nested inside the <article>, so in a browser it
-    // scopes to the section rather than becoming the page `banner` landmark.
     const header = screen.getByRole("heading", { name: "Post" }).closest("header");
     expect(header).not.toBeNull();
     expect(header?.closest("article")).not.toBeNull();
@@ -73,7 +71,6 @@ describe("Card", () => {
 
   it("keeps Card.Header a <div> for a plain div card (so it can't be a banner)", () => {
     const { container } = render(<Card header={<Card.Header title="Plain" />}>Body</Card>);
-    // No <header> element at all — a top-level <header> would map to `banner`.
     expect(container.querySelector("header")).toBeNull();
     expect(screen.getByRole("heading", { name: "Plain" })).toBeInTheDocument();
   });
@@ -104,8 +101,6 @@ describe("Card", () => {
     it("is a visual state on a static card — no invalid ARIA on the container", () => {
       const { rerender } = render(<Card>Pick me</Card>);
       const card = screen.getByText("Pick me");
-      // Selection is conveyed by the control inside (a checkbox); a plain
-      // container can't validly carry aria-selected/aria-pressed, so it doesn't.
       expect(card).not.toHaveAttribute("aria-selected");
       expect(card).not.toHaveAttribute("aria-pressed");
 
@@ -149,7 +144,6 @@ describe("Card", () => {
       const link = screen.getByRole("link", { name: "Tab A" });
       expect(link).toHaveAttribute("aria-current", "true");
 
-      // Unselected emits nothing (aria-current="false" is announced by some AT).
       rerender(
         <Card selected={false} href="/a" header={<Card.Header title="Tab A" />}>
           Body
@@ -186,7 +180,6 @@ describe("Card", () => {
       expect(button).toHaveAttribute("aria-disabled", "true");
       expect(button).not.toHaveAttribute("disabled");
 
-      // Disabled but reachable: it can be tabbed to.
       await user.tab();
       expect(button).toHaveFocus();
 
@@ -207,7 +200,6 @@ describe("Card", () => {
       );
       const primary = screen.getByRole("button", { name: "Open" });
       const dismiss = screen.getByRole("button", { name: "Dismiss" });
-      // The card itself isn't the control, so the footer button isn't nested in it.
       expect(primary).not.toContainElement(dismiss);
       expect(screen.getByText("Body").closest("button")).toBeNull();
     });
@@ -238,7 +230,6 @@ describe("Card", () => {
         </Card>,
       );
       const link = screen.getByRole("link", { name: "Read the docs" });
-      // The article's pattern: the link lives in the heading.
       expect(link.closest("h3")).not.toBeNull();
     });
 
@@ -264,7 +255,6 @@ describe("Card", () => {
         </Card>,
       );
       const link = screen.getByRole("link", { name: "Report" });
-      // A boolean `download` renders the bare attribute (empty value).
       expect(link).toHaveAttribute("download", "");
 
       rerender(
@@ -293,7 +283,6 @@ describe("Card", () => {
           Ship worldwide
         </Card>,
       );
-      // Closed by default: header (the trigger) shows, body does not.
       const trigger = screen.getByRole("button", { name: /Shipping/ });
       expect(screen.queryByText("Ship worldwide")).not.toBeInTheDocument();
 
@@ -316,7 +305,6 @@ describe("Card", () => {
       );
       await user.click(screen.getByRole("button", { name: /Details/ }));
       expect(onOpenChange).toHaveBeenCalledWith(true);
-      // Still controlled-closed, so the body stays hidden.
       expect(screen.queryByText("Body")).not.toBeInTheDocument();
     });
 
@@ -335,13 +323,10 @@ describe("Card", () => {
           Ship worldwide
         </Card>,
       );
-      // The header action is its own control (not part of a whole-header button):
-      // using it runs its handler and does not expand the card.
       await user.click(screen.getByRole("button", { name: "Header action" }));
       expect(onHeaderAction).toHaveBeenCalledTimes(1);
       expect(screen.queryByText("Ship worldwide")).not.toBeInTheDocument();
 
-      // Only the disclosure trigger (labelled by the title) toggles.
       await user.click(screen.getByRole("button", { name: /Shipping/ }));
       expect(screen.getByText("Ship worldwide")).toBeInTheDocument();
     });
@@ -388,7 +373,6 @@ describe("Card", () => {
       ).toBeInTheDocument();
       expect(screen.getByText("Add an extra layer of security.")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Enable" })).toBeInTheDocument();
-      // Unlike a rich Card.Row, this isn't a description list.
       expect(container.querySelector("dl")).toBeNull();
     });
 
@@ -464,7 +448,6 @@ describe("Card", () => {
         />,
       );
       const rows = container.querySelectorAll("dl > div");
-      // The plain row highlights on hover; the action row opts out — different recipe.
       expect((rows[0] as HTMLElement).className).not.toEqual((rows[1] as HTMLElement).className);
     });
 

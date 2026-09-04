@@ -141,8 +141,6 @@ export interface BadgeBlankProps extends BadgeBaseProps {
 export type BadgeProps = (BadgeIconProps | BadgeCountProps | BadgeTextProps | BadgeBlankProps) &
   BadgeColourProps;
 
-// The content and colour props live on the union arms; widen once internally so
-// the body can read them without narrowing on each access.
 type BadgeAllProps = BadgeBaseProps & {
   icon?: IconSlot<BadgeIconState>;
   count?: number;
@@ -184,7 +182,6 @@ export function Badge(props: BadgeProps) {
     ...htmlProps
   } = props as BadgeAllProps;
 
-  // Exactly one content kind wins, in priority order; none of them means blank.
   let content: React.ReactNode = null;
   if (icon != null) {
     content = renderIcon(icon, { state: { intent, saliency, size } });
@@ -195,9 +192,6 @@ export function Badge(props: BadgeProps) {
   }
   const blank = content == null;
 
-  // The escape hatch replaces the palette scheme outright rather than layering
-  // over it (see `badgeCustomColor`). The types make the two exclusive, so this
-  // picks the one the caller asked for.
   const custom = color != null;
 
   return useRender({
@@ -206,19 +200,12 @@ export function Badge(props: BadgeProps) {
     props: {
       ref,
       className: cx(
-        // The custom-colour scheme is a static style with no hover/active, so
-        // only the intent recipe needs guarding. `interactive: "auto"` — a badge
-        // is an indicator, not a hit target, so the inert `<span>` it renders by
-        // default must not light up under the cursor; only a `render` that makes
-        // it a link/button earns that.
         custom
           ? badgeCustomColor
           : componentIntentRecipe({ intent, saliency, interactive: "auto" }),
         badgeRecipe({ size, shape, blank }),
         className,
       ),
-      // The consumer's own `style` is spread last so it still wins — this only
-      // adds the one custom property the escape hatch reads.
       style: custom ? { ...assignInlineVars({ [badgeColorVar]: color }), ...style } : style,
       children: content,
       ...htmlProps,

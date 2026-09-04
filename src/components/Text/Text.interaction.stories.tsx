@@ -31,9 +31,7 @@ export const RootDefaults: Story = {
     const base = getComputedStyle(canvas.getByText("Default body copy"));
     const bold = getComputedStyle(canvas.getByText("Bolded body copy"));
 
-    // The weight override leaves the size alone…
     expect(bold.fontSize).toBe(base.fontSize);
-    // …but does make the text heavier.
     expect(Number(bold.fontWeight)).toBeGreaterThan(Number(base.fontWeight));
   },
 };

@@ -61,7 +61,6 @@ export const badgeRecipe = recipe({
       round: { borderRadius: vars.radius.full },
       square: { borderRadius: vars.radius.sm },
     },
-    // A content-less badge; the concrete diameter comes from the size compound.
     blank: {
       true: { paddingInline: 0 },
       false: {},
@@ -129,8 +128,6 @@ export const badgeCustomColor = style({
   borderColor: badgeColorVar,
   background: badgeColorVar,
   color: badgeCustomFg,
-  // Publish the derived foreground the same way the intent recipe does, so an
-  // `<Icon>` or nested `<Text>` inside the badge tracks it without knowing why.
   vars: {
     [iconColorVar]: badgeCustomFg,
     [textColorVar]: badgeCustomFg,

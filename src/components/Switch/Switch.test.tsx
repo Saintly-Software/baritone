@@ -5,8 +5,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { DistributiveOmit } from "../../utils/types";
 import { Switch } from "./index";
 
-// A tiny controlled host mirroring the documented usage, so the tests exercise
-// the component exactly as a consumer would wire it.
 function Notifications({
   value: initial = false,
   onChange,
@@ -95,7 +93,6 @@ describe("Switch", () => {
     const toggle = screen.getByRole("switch", { name: "Notifications" });
 
     expect(toggle).toHaveAttribute("aria-disabled", "true");
-    // The native attribute would yank it out of the tab order.
     expect(toggle).not.toBeDisabled();
 
     await user.tab();
@@ -136,10 +133,8 @@ describe("Switch", () => {
     const user = userEvent.setup();
     render(<Notifications icon={<svg data-testid="glyph" />} />);
 
-    // Off: the single glyph is present…
     expect(screen.getByTestId("glyph")).toBeInTheDocument();
 
-    // …and still present after toggling on.
     await user.click(screen.getByRole("switch", { name: "Notifications" }));
     expect(screen.getByTestId("glyph")).toBeInTheDocument();
   });
@@ -153,20 +148,17 @@ describe("Switch", () => {
       />,
     );
 
-    // Off shows only the inactive glyph.
     expect(screen.getByTestId("off")).toBeInTheDocument();
     expect(screen.queryByTestId("on")).toBeNull();
 
     await user.click(screen.getByRole("switch", { name: "Notifications" }));
 
-    // On shows only the active glyph.
     expect(screen.getByTestId("on")).toBeInTheDocument();
     expect(screen.queryByTestId("off")).toBeNull();
   });
 
   it("keeps the label as the accessible name — the glyph is decorative", () => {
     render(<Notifications value icon={<svg data-testid="glyph" />} />);
-    // The switch is still named by its label, not by anything in the thumb.
     expect(screen.getByRole("switch", { name: "Notifications" })).toBeInTheDocument();
   });
 
@@ -175,9 +167,6 @@ describe("Switch", () => {
     expect(screen.getByRole("switch", { name: "Wi-Fi" })).toBeInTheDocument();
   });
 
-  // `label` used to silently win over `aria-label`. They're mutually exclusive
-  // now — the track would show one name and announce another — so the pair is a
-  // type error, and a JS caller that gets past the types gets a thrown error.
   it("throws when label and aria-label are both passed", () => {
     expect(() =>
       render(
@@ -203,8 +192,6 @@ describe("Switch", () => {
     expect(toggle).toHaveAccessibleDescription("We'll only ping you about outages.");
   });
 
-  // One message slot: the same line stays put and changes *presentation* with
-  // `state`, rather than a separate error line appearing.
   it("renders the helpText as an error when invalid", () => {
     const { rerender } = render(<Notifications helpText="Required" />);
     expect(screen.getByText("Required").querySelector("svg")).toBeNull();

@@ -16,7 +16,6 @@ describe("CardList", () => {
     expect(list.tagName).toBe("UL");
     const items = within(list).getAllByRole("listitem");
     expect(items).toHaveLength(3);
-    // Each card is wrapped in an <li>.
     for (const item of items) {
       expect(item.tagName).toBe("LI");
     }

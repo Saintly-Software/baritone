@@ -10,17 +10,14 @@ import { Text } from "../Text";
 import { TextInput } from "../TextInput";
 import { BaritoneTheme } from "./index";
 
-// Two example tenants. Each supplies only a small `BrandSeed` — a hue (and
-// maybe chroma) for `primary`, fonts, corner radius — and inherits the rest of
-// the accessible token set from `buildDefaultTokens`.
 const BRANDS = {
   Acme: {
-    intents: { primary: { h: 292, c: 0.17 } }, // violet
+    intents: { primary: { h: 292, c: 0.17 } },
     fonts: { sans: '"Inter", system-ui, sans-serif' },
   },
   Globex: {
-    intents: { primary: { h: 155, c: 0.13 }, secondary: { h: 210, c: 0.15 } }, // green + blue
-    radius: { md: "3px", lg: "6px" }, // sharper corners
+    intents: { primary: { h: 155, c: 0.13 }, secondary: { h: 210, c: 0.15 } },
+    radius: { md: "3px", lg: "6px" },
   },
 } satisfies Record<string, BrandSeed>;
 
@@ -117,8 +114,6 @@ const meta: Meta<typeof BaritoneTheme> = {
 };
 export default meta;
 
-// The interactive Playground drives a few brand knobs live, rather than the raw
-// `tokens`/`scheme` props, so the control panel demonstrates *supplying tokens*.
 interface PlaygroundArgs {
   scheme: "light" | "dark";
   primaryHue: number;

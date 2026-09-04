@@ -4,15 +4,12 @@ import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ToggleButton, type ToggleButtonBaseProps } from "./index";
 
-// A throwaway glyph so the button has content to render.
 const Star = () => (
   <svg data-testid="star" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
     <path d="M12 2l2.4 6.5L21 11l-6.6 2.5L12 20l-2.4-6.5L3 11l6.6-2.5z" />
   </svg>
 );
 
-// A tiny controlled host mirroring the documented usage, so the tests exercise
-// the component exactly as a consumer would wire it.
 function Favourite({
   value: initial = false,
   onChange,
@@ -54,7 +51,6 @@ describe("ToggleButton", () => {
 
   it("reflects the controlled value as pressed", () => {
     render(<Favourite value />);
-    // `pressed: true` matches aria-pressed="true".
     expect(screen.getByRole("button", { name: "Favourite", pressed: true })).toBeInTheDocument();
   });
 
@@ -126,13 +122,11 @@ describe("ToggleButton", () => {
         />,
       );
 
-      // Off: the "Mute" name and the sound glyph.
       const button = screen.getByRole("button", { name: "Mute" });
       expect(screen.getByTestId("glyph")).toHaveTextContent("sound");
 
       await user.click(button);
 
-      // On: both slots have flipped.
       expect(screen.getByRole("button", { name: "Unmute" })).toBeInTheDocument();
       expect(screen.getByTestId("glyph")).toHaveTextContent("muted");
     });
@@ -157,7 +151,6 @@ describe("ToggleButton", () => {
       await user.click(screen.getByRole("button", { name: "Favourite" }));
 
       expect(onChange).not.toHaveBeenCalled();
-      // State is unchanged — still reports its (off) pressed state to AT.
       expect(screen.getByRole("button", { name: "Favourite" })).toHaveAttribute(
         "aria-pressed",
         "false",

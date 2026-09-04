@@ -17,7 +17,6 @@ describe("SrOnly", () => {
         Read more <SrOnly>about pricing</SrOnly>
       </a>,
     );
-    // Present for screen readers: still queryable by its text.
     expect(screen.getByText("about pricing")).toBeInTheDocument();
   });
 
@@ -27,13 +26,11 @@ describe("SrOnly", () => {
     expect(el).toHaveClass(srOnly);
 
     const styles = getComputedStyle(el);
-    // Collapsed and clipped out of view, but never removed from the a11y tree.
     expect(styles.position).toBe("absolute");
     expect(styles.width).toBe("1px");
     expect(styles.height).toBe("1px");
     expect(styles.overflow).toBe("hidden");
     expect(styles.clip).toBe("rect(0px, 0px, 0px, 0px)");
-    // The technique deliberately avoids these a11y-tree-removing declarations.
     expect(styles.display).not.toBe("none");
     expect(styles.visibility).not.toBe("hidden");
   });

@@ -82,12 +82,9 @@ function AccordionItemHeader({
   className,
   ref,
 }: AccordionItemHeaderProps) {
-  // Guard on the resolved node, not the raw slot — a slot can resolve to nothing.
   const iconNode = renderIcon(icon);
   return (
     <span ref={ref} className={cx(accordionHeaderContent, className)}>
-      {/* Leading group (icon + text), and the flex spacer that pushes the chip to
-          the end, so it's always rendered. */}
       <span className={accordionHeaderLeading}>
         {iconNode != null && <span className={accordionHeaderIcon}>{iconNode}</span>}
         <span className={accordionHeaderText}>
@@ -230,11 +227,6 @@ export type AccordionProps<T> = AccordionBaseProps<T> &
 function AccordionRoot<const T>(props: AccordionProps<T>) {
   const { items, disabled = false, "aria-label": ariaLabel, className, ref } = props;
 
-  // base-ui keeps the open set as an array regardless of `multiple`, so single
-  // mode is just "an array of at most one". Bridge both discriminated unions —
-  // `multiple` (single `T | null` ⇄ `T[]`) and controlled vs uncontrolled — onto
-  // that one array-shaped model. Controlled is detected by `onChange`, mirroring
-  // `Tabs` (so a controlled `value` of `null` / `[]` still reads as controlled).
   const multiple = props.multiple === true;
   const controlled = props.onChange != null;
   const valueProps = controlled
@@ -247,7 +239,6 @@ function AccordionRoot<const T>(props: AccordionProps<T>) {
             : [],
       };
 
-  // Translate base-ui's array back to the caller's shape.
   const emit = (next: T[]) => {
     if (props.multiple) props.onChange?.(next);
     else props.onChange?.(next[0] ?? null);
@@ -258,15 +249,8 @@ function AccordionRoot<const T>(props: AccordionProps<T>) {
       ref={ref}
       multiple={multiple}
       {...valueProps}
-      // Every toggle funnels through an item's `onOpenChange` (below), which
-      // vetoes disabled items/groups before base-ui commits — so a change that
-      // reaches here is already allowed and just needs emitting.
       onValueChange={(next) => emit(next as T[])}
       aria-label={ariaLabel}
-      // Disabled is modelled with `aria-disabled` + the per-item veto, NOT
-      // base-ui's `disabled` (which natively disables each trigger, dropping it
-      // from the tab order). So a disabled accordion stays fully reachable — see
-      // AGENTS.md.
       aria-disabled={disabled || undefined}
       className={cx(accordionRoot, disabled && accordionRootDisabled, className)}
     >
@@ -276,10 +260,6 @@ function AccordionRoot<const T>(props: AccordionProps<T>) {
           <BaseAccordion.Item
             key={String(item.value)}
             value={item.value}
-            // Veto toggling a disabled item (or any item while the group is
-            // disabled). base-ui calls this before committing and skips the
-            // commit when `cancel()` ran — so the trigger still focuses, it just
-            // won't open/close. Works the same controlled or uncontrolled.
             onOpenChange={(_open, details) => {
               if (disabled || item.disabled) details.cancel();
             }}
@@ -291,9 +271,6 @@ function AccordionRoot<const T>(props: AccordionProps<T>) {
           >
             <BaseAccordion.Header className={accordionHeader}>
               <BaseAccordion.Trigger
-                // `aria-disabled` (not the native attribute) keeps the trigger
-                // tabbable; the per-item dim only applies when the group itself
-                // isn't disabled, so the group's dim never double-applies.
                 aria-disabled={itemDisabled || undefined}
                 className={cx(accordionTrigger, focusRingRecipe({ type: "visible" }))}
               >

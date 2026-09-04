@@ -195,7 +195,6 @@ function ChipCopyAdornment({ content }: { content: string }) {
   const [copied, setCopied] = React.useState(false);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Clear the pending revert if the chip unmounts mid-feedback.
   React.useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
   const handleCopy = () => {
@@ -207,10 +206,7 @@ function ChipCopyAdornment({ content }: { content: string }) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(() => setCopied(false), 2000);
       },
-      () => {
-        // Swallow a rejected clipboard write (denied permission, insecure
-        // context) — the chip just doesn't show success feedback.
-      },
+      () => {},
     );
   };
 
@@ -241,14 +237,12 @@ function ChipAdornment(props: ChipAdornmentProps) {
 
   const interactive = href != null || onClick != null;
   const overriding = intent != null;
-  // Only the clickable kinds can be inert; a disabled chip drags them along.
   const inert = interactive && (disabled === true || chipDisabled);
 
   const className = cx(
     chipAdornmentRecipe({
       interactive,
       size,
-      // Pass intent+saliency only to override; omitting both inherits the chip's.
       intent: overriding ? intent : undefined,
       saliency: overriding ? saliency : undefined,
     }),
@@ -257,16 +251,10 @@ function ChipAdornment(props: ChipAdornmentProps) {
 
   const handleActivate = (event: React.MouseEvent<HTMLElement>) => {
     if (inert) {
-      // No native `disabled` (and `<a>` has none), so the activation still fires
-      // — swallow it ourselves so the control stays focusable but inert.
       event.preventDefault();
       event.stopPropagation();
       return;
     }
-    // A button adornment is its own hit target: its click shouldn't also fire a
-    // clickable ancestor (e.g. a row wrapping the chip), so stop it bubbling
-    // unless `forcePropagation` opts back in. Links keep bubbling — they navigate
-    // anyway and never take `forcePropagation`.
     if (onClick != null && forcePropagation !== true) {
       event.stopPropagation();
     }
@@ -289,15 +277,10 @@ function ChipAdornment(props: ChipAdornmentProps) {
     elementProps["aria-disabled"] = inert || undefined;
     elementProps.onClick = handleActivate;
   } else if (label != null) {
-    // Regular, named: expose the icon as an image with the given name.
     elementProps.role = "img";
     elementProps["aria-label"] = label;
   }
 
-  // A purely decorative adornment (not a button/link, unnamed) whose glyph
-  // resolved to nothing has nothing to show — omit it rather than render an empty
-  // adornment box. `RenderElement` (not the `useRender` hook) so this early return
-  // stays within the Rules of Hooks.
   if (iconNode == null && !interactive && label == null) return null;
 
   return (
@@ -448,10 +431,6 @@ function ChipRoot({
     [intent, saliency, size, disabled],
   );
 
-  // A clickable label is a real `<button>`; a disabled chip keeps it focusable
-  // but inert, so swallow the activation ourselves (no native `disabled`) —
-  // mirrors Chip.Adornment. `loading` already swaps the label out for the
-  // spinner, so `disabled` is the only inert case the button itself can hit.
   const handleLabelClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     if (disabled) {
       event.preventDefault();
@@ -461,28 +440,14 @@ function ChipRoot({
     onClick?.(event);
   };
 
-  // Shared styling for the label when it's a `<button>` (clickable or a popover
-  // trigger): strip the native button chrome back to plain text and add the
-  // focus ring.
   const interactiveLabelClassName = cx(
     chipLabelRecipe({ interactive: true }),
     focusRingRecipe({ type: "visible", offset: "sm" }),
   );
 
-  // Children are text-only, so the chip owns the label element — one flex item it
-  // can truncate, sat between the adornment lists. It takes one of three shapes:
-  // a popover trigger (`popover`), a plain clickable `<button>` (`onClick`), or a
-  // non-interactive span.
   let label: React.ReactNode = null;
   if (children != null) {
     if (popover != null) {
-      // The label is the popover's trigger. base-ui hands us the toggle handler
-      // plus the `aria-haspopup` / `aria-expanded` / `aria-controls` wiring (and a
-      // ref to anchor against) through `htmlAttrs`; we merge them onto our own
-      // label `<button>` the way base-ui itself merges — mirroring InternalButton,
-      // which is how Drawer/Modal/Popover use a real button as their trigger. A
-      // disabled chip swallows the click before base-ui's toggle runs, so the
-      // label stays focusable but the popover stays shut.
       label = (
         <BasePopover.Trigger
           render={(htmlAttrs) => {
@@ -510,8 +475,6 @@ function ChipRoot({
         />
       );
     } else if (onClick != null) {
-      // With an `onClick` the label is a real `<button>` so it's the
-      // keyboard-focusable hit target; otherwise it's a plain span.
       label = (
         <button
           type="button"
@@ -532,37 +495,19 @@ function ChipRoot({
     defaultElement: "span",
     props: {
       ref,
-      // The chip look comes from the shared `chipBoxClassName` — the one source of
-      // truth `Link`'s `appearance="chip"` renders from too, so the two never
-      // drift. Its `interactive: "auto"` leaves the pointer/hover/active to the
-      // rendered element: the chip's own hit targets are the label button and the
-      // adornments, so the root is an inert `<span>` tag unless `render` makes it a
-      // link, and only then should it take a pointer and light up under the cursor.
       className: cx(chipBoxClassName({ intent, saliency, size, shape, width }), className),
       "aria-disabled": disabled || loading || undefined,
       "aria-busy": loading || undefined,
-      // Loading swaps the whole content out for a decorative spinner; the
-      // recipe's flex-centring places it and `aria-busy` announces the state.
       children: loading ? (
         <InternalSpinner />
       ) : (
         <ChipAdornmentContext.Provider value={adornmentContext}>
-          {/* `icon` is the shorthand first lead adornment — it always sits ahead of
-              any supplied `leadAdornments`. `Children.toArray` assigns stable keys
-              to the positional lists. */}
           {icon != null && <ChipAdornment icon={icon} />}
           {React.Children.toArray(leadAdornments)}
           {label}
           {React.Children.toArray(trailAdornments)}
-          {/* `trailIcon` mirrors the lead `icon`: a decorative trailing shorthand
-              that sits just after any supplied `trailAdornments`. */}
           {trailIcon != null && <ChipAdornment icon={trailIcon} />}
-          {/* The built-in copy button, appended when `contentToCopy` is set. It's
-              a clickable adornment, so it inherits the chip's disabled state. */}
           {contentToCopy != null && <ChipCopyAdornment content={contentToCopy} />}
-          {/* The built-in remove "×" always sits last, after any supplied
-              trailing adornments. It's a clickable adornment, so it inherits the
-              chip's disabled state through context (inert but focusable). */}
           {handleRemove != null && (
             <ChipAdornment icon={<CloseGlyph />} label="Remove" onClick={handleRemove} />
           )}
@@ -572,10 +517,6 @@ function ChipRoot({
     },
   });
 
-  // With a `popover`, the chip *is* the popover's trigger: clone the supplied
-  // <Popover> and slot the whole chip in as its `trigger`, so base-ui's Root wraps
-  // the chip (and the label Trigger inside it) and renders the floating surface
-  // alongside. Skipped while loading, since no label — hence no trigger — exists.
   if (popover != null && children != null && !loading) {
     return React.cloneElement(popover, { trigger: chip });
   }

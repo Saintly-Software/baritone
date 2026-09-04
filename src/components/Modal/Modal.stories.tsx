@@ -126,8 +126,6 @@ export const Loading: Story = {
 
 export const ImperativeClose: Story = {
   name: "Imperative close (async)",
-  // Behavioural demo of the imperative-close mechanism — kept as a test, hidden
-  // from the sidebar so the showcase stays focused on visual variants.
   tags: ["!dev"],
   render: (args) => {
     const modal = useOverlayHandle(Modal);

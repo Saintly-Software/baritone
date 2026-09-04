@@ -14,9 +14,6 @@ export {
 } from "./createTheme";
 export { buildDefaultTokens, type BrandSeed } from "./defaultTokens";
 
-// The consumer-extensible font vocabulary. `FontRegistry` is the module-augmentation
-// seam (declare `module "@saintly-software/baritone"` and add keys); `FontName` is
-// what the `font` prop accepts.
 export {
   fontVarName,
   fontFamilyVars,
@@ -25,9 +22,6 @@ export {
   type BuiltinFontName,
 } from "./fonts";
 
-// The consumer-extensible letter-spacing (tracking) vocabulary, mirroring the font
-// seam above. `LetterSpacingRegistry` is the module-augmentation seam;
-// `LetterSpacingName` is what the `letterSpacing` prop accepts.
 export {
   letterSpacingVarName,
   letterSpacingVars,
@@ -36,9 +30,6 @@ export {
   type BuiltinLetterSpacingName,
 } from "./letterSpacings";
 
-// The consumer-extensible font-size, font-weight, and line-height vocabularies,
-// mirroring the font seam above. Each `*Registry` is a module-augmentation seam;
-// each `*Name` is what the matching prop (`size` / `weight` / `lineHeight`) accepts.
 export {
   fontSizeVarName,
   sizeLineHeightVarName,
@@ -63,9 +54,6 @@ export {
   type BuiltinLineHeightName,
 } from "./lineHeights";
 
-// The consumer-extensible border-width vocabulary, the rule-weight analogue of the
-// typographic seams above. `BorderWidthRegistry` is the module-augmentation seam;
-// `BorderWidthName` is what a border-width prop (e.g. Divider's `thickness`) accepts.
 export {
   borderWidthVarName,
   borderWidthVars,

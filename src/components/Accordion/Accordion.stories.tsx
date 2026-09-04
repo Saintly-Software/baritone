@@ -15,8 +15,6 @@ function ServerGlyph() {
   );
 }
 
-// A fully-featured item set — leading icons, trailing status chips, subtitles,
-// and a disabled item — so the default story is a genuine kitchen sink.
 const ITEMS = [
   {
     value: "production",

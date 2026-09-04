@@ -68,7 +68,6 @@ describe("Fieldset", () => {
       </Fieldset>,
     );
     const input = screen.getByRole("textbox", { name: "Street" });
-    // The native attribute would drop the field out of the tab order.
     expect(input).not.toBeDisabled();
 
     await user.tab();
@@ -116,7 +115,6 @@ describe("Fieldset", () => {
       </Fieldset>,
     );
     expect(screen.getByRole("textbox", { name: "Email" })).toHaveAttribute("aria-disabled", "true");
-    // Inner fieldset isn't itself disabled, but it inherits the outer's disable.
     expect(screen.getByRole("textbox", { name: "Nickname" })).toHaveAttribute(
       "aria-disabled",
       "true",
@@ -137,7 +135,6 @@ describe("Fieldset", () => {
         <FieldsetLegend>Group</FieldsetLegend>
       </Fieldset>,
     );
-    // The disabled variant adds an extra class (the 0.55 opacity fade).
     expect(screen.getByText("Group").className).not.toEqual(enabledClass);
   });
 });

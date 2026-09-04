@@ -32,8 +32,6 @@ describe("Meter", () => {
 
   it("defaults aria-valuetext to the formatted percentage", () => {
     render(<Meter label="Storage" value={72} />);
-    // The default association must survive: we never forward an undefined
-    // aria-valuetext (base-ui's merge would clobber the computed default).
     expect(screen.getByRole("meter")).toHaveAttribute("aria-valuetext", "72%");
   });
 
@@ -95,7 +93,6 @@ describe("Meter", () => {
         format={{ style: "unit", unit: "gigabyte", unitDisplay: "short" }}
       />,
     );
-    // Intl renders "4.2 GB" (narrow no-break space between number and unit).
     expect(screen.getByText(/4\.2\s*GB/)).toBeInTheDocument();
   });
 
@@ -114,8 +111,6 @@ describe("Meter", () => {
 
   it("keeps the displayed value out of the accessibility tree", () => {
     render(<Meter label="Storage" value={72} showValue />);
-    // The read-out is aria-hidden; the value reaches AT via aria-valuenow /
-    // aria-valuetext, so the meter's name stays just its label.
     expect(screen.getByRole("meter", { name: "Storage" })).toBeInTheDocument();
   });
 

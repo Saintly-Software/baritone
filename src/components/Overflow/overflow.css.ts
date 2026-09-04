@@ -4,23 +4,13 @@ import { SPACE_KEYS } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 import { hover } from "../../theme/oklch";
 
-// How far the gradient fade reaches in from a scrollable edge. base-ui publishes
-// the exact pixel overflow at each edge on the viewport (the
-// `--scroll-area-overflow-*` vars), so `min(FADE, …)` fades an edge in only as
-// far as it can actually scroll — a flush edge stays crisp — and never deeper
-// than this. Sized a touch wider than a nav button so the button floats *over*
-// visibly-fading content rather than a hard cut.
 const FADE = "64px";
 
-// The floating nav button's diameter and its inset from the scrolling edge.
 const BUTTON = "32px";
-const GUTTER = vars.space[1]; // 4px
+const GUTTER = vars.space[1];
 
-// The thumb's resting thickness / the scrollbar rail's cross-axis size.
 const BAR = "10px";
 
-// How long the scrollbar lingers before fading back out after you stop hovering
-// / scrolling. Reveal is near-instant; the delay only applies to the fade-out.
 const REVEAL_DELAY = "400ms";
 
 /**
@@ -71,8 +61,8 @@ export const root = style({
  */
 export const viewport = style({
   flex: "1 1 auto",
-  minWidth: 0, // see `Flex`
-  minHeight: 0, // see `Flex`
+  minWidth: 0,
+  minHeight: 0,
   overscrollBehavior: "contain",
 });
 
@@ -110,8 +100,6 @@ export const track = recipe({
       vertical: {
         flexDirection: "column",
         alignItems: "center",
-        // Fill the viewport's width so centered controls have a box to center
-        // in; the column's height grows with content and scrolls.
         minWidth: "100%",
         width: "max-content",
       },
@@ -220,7 +208,6 @@ export const navButton = style({
   cursor: "pointer",
   fontSize: "18px",
   lineHeight: 0,
-  // Hidden resting state (instant flip in the reveal rules below).
   opacity: 0,
   visibility: "hidden",
   pointerEvents: "none",
@@ -250,10 +237,6 @@ export const navChevron = style({
   display: "block",
 });
 
-// --- Placement: pin each button to its edge, centered on the cross axis. ------
-// Driven by `data-orientation` on the root + `data-side` on the button, so a
-// single `navButton` class covers all four positions.
-
 globalStyle(`${root}[data-orientation="horizontal"] ${navButton}[data-side="start"]`, {
   left: GUTTER,
   top: "50%",
@@ -275,11 +258,6 @@ globalStyle(`${root}[data-orientation="vertical"] ${navButton}[data-side="end"]`
   transform: "translateX(-50%)",
 });
 
-// --- Reveal: light a button up only when its edge actually overflows. ---------
-// A horizontal root only ever carries the x-overflow attrs, a vertical root only
-// the y-overflow attrs, so these four rules cover both orientations with the
-// start/end `data-side` pairing. Specificity (0,4,0) beats the base `navButton`
-// class, so these win while the attribute is present.
 const revealed = {
   opacity: 1,
   visibility: "visible",
@@ -291,9 +269,6 @@ globalStyle(`${root}[data-overflow-x-end] ${navButton}[data-side="end"]`, reveal
 globalStyle(`${root}[data-overflow-y-start] ${navButton}[data-side="start"]`, revealed);
 globalStyle(`${root}[data-overflow-y-end] ${navButton}[data-side="end"]`, revealed);
 
-// --- Chevron direction: point the glyph the way the button scrolls. -----------
-// The base glyph points right (end of a horizontal row); rotate for the other
-// three directions.
 globalStyle(
   `${root}[data-orientation="horizontal"] ${navButton}[data-side="start"] ${navChevron}`,
   {

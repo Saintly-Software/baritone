@@ -78,18 +78,12 @@ function RadioGroupItem<T>({
   className,
 }: RadioGroupItemProps<T>) {
   const { size, state } = React.useContext(RadioGroupItemContext);
-  // The visible label and the `role="radio"` element are wired explicitly: the
-  // `role="radio"` lives on a span, so a wrapping `<label>` only names the hidden
-  // input (which is aria-hidden), not the radio. Point `aria-labelledby` straight
-  // at the label text so the radio's accessible name is always the visible label.
   const labelId = React.useId();
   const content = children ?? defaultLabel(value);
   return (
     <label className={cx(radioItem({ size }), disabled && radioItemDisabled, className)}>
       <Radio.Root
         value={value}
-        // `readOnly` + `aria-disabled` (not `disabled`) so a disabled option stays
-        // in the roving tab order and reachable, while base-ui vetoes selecting it.
         readOnly={disabled}
         aria-disabled={disabled || undefined}
         aria-labelledby={content != null ? labelId : undefined}
@@ -193,11 +187,8 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
     className,
   } = props as RadioGroupBaseProps<T> & FieldLabellingInput;
 
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
-  // Everything the control's focusable element needs from the field, in one
-  // object — see `fieldControlAttrs`.
   const controlProps: FieldControlInput = {
     label,
     "aria-label": ariaLabel,
@@ -223,21 +214,14 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
         <BaseRadioGroup
           value={value}
           onValueChange={(next, details) => onChange(next, details.event)}
-          // The `Field` marks the label; base-ui turns this into `aria-required`.
           required={required}
-          // Group-level disable also goes through `readOnly` (base-ui forwards it to
-          // every radio) + `aria-disabled`, so the options stay keyboard-reachable.
           readOnly={disabled}
           aria-disabled={disabled || undefined}
           name={name}
-          // base-ui's `Field.Label` already names the group, so this only emits an
-          // attribute for the label-less arms.
           {...fieldControlAttrs(controlProps)}
           className={cx(radioGroupRoot({ orientation }), disabled && radioGroupDisabled, className)}
         >
           {children({
-            // The stable generic item, narrowed to this group's `T`. The cast is
-            // purely a type-level instantiation — the runtime function is the same.
             RadioGroupItem: RadioGroupItem as (props: RadioGroupItemProps<T>) => React.ReactNode,
           })}
         </BaseRadioGroup>

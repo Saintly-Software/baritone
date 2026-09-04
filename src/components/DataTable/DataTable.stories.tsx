@@ -11,9 +11,6 @@ interface Person {
   balance: number;
 }
 
-// Kept at module scope so the references stay stable across renders — a fresh
-// `data`/`columns` array every render would throw away TanStack's row model.
-// Roles repeat so the grouping stories have something to gather.
 const people: Person[] = [
   { id: "1", name: "Ada Lovelace", email: "ada@example.com", role: "Engineering", balance: 4200 },
   { id: "2", name: "Grace Hopper", email: "grace@example.com", role: "Engineering", balance: 9600 },
@@ -40,15 +37,11 @@ const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" 
 const col = createDataTableColumnHelper<Person>();
 const columns = col.columns([
   col.accessor("name", { header: "Name" }),
-  // A custom cell renderer — any React node, here a real `Link`.
   col.accessor("email", {
     header: "Email",
     cell: (info) => <Link href={`mailto:${info.getValue()}`}>{info.getValue()}</Link>,
   }),
   col.accessor("role", { header: "Role" }),
-  // `meta.align` is DataTable's house column option (a v9 type-only meta slot).
-  // `aggregationFn` + `aggregatedCell` roll the column up on group-header rows —
-  // inert until a story turns grouping on.
   col.accessor("balance", {
     header: "Balance",
     meta: { align: "end" },
@@ -135,9 +128,6 @@ export const GroupedCollapsed: Story = {
   ),
 };
 
-// A Category → Subcategory breakdown for the merged presentation: the grouped
-// `category` reads down the same indented column as each `subcategory` leaf, with
-// a summed `amount` alongside. Kept at module scope for a stable reference.
 interface Expense {
   id: string;
   category: string;
@@ -157,10 +147,7 @@ const expenses: Expense[] = [
 
 const expenseCol = createDataTableColumnHelper<Expense>();
 const expenseColumns = expenseCol.columns([
-  // The host column: its `header` names the merged outline, and its cells carry
-  // both the group value (on header rows) and each subcategory (on leaf rows).
   expenseCol.accessor("subcategory", { header: "Category" }),
-  // Grouped away in `groupDisplay="merge"` — its value moves into the host column.
   expenseCol.accessor("category", { header: "Category" }),
   expenseCol.accessor("amount", {
     header: "Amount",

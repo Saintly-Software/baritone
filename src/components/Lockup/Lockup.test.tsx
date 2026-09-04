@@ -36,7 +36,6 @@ describe("Lockup", () => {
 
   it("keeps the text in the accessible tree when hideText is set", () => {
     render(<Lockup title="Baritone" subtitle="Design system" hideText />);
-    // Still queryable (present for screen readers), just visually hidden.
     expect(screen.getByText("Baritone")).toBeInTheDocument();
     expect(screen.getByText("Design system")).toBeInTheDocument();
   });

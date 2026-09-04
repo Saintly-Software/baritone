@@ -191,58 +191,31 @@ function ToggleGroupItem<T extends string>(props: ToggleGroupItemProps<T>) {
     className,
   };
 
-  // `icon` is the union discriminant — its presence selects the icon-only arm.
-  // The `!= null` test mirrors `InternalButton`'s own icon-only check, so a
-  // nullish `icon` never lands here as an unnamed square. Build the exact `Button`
-  // shape for each arm and hand it straight to `InternalButton`, so the segment
-  // reuses `Button`'s icon/label layout (slot gap + vertical alignment owned
-  // there) rather than re-implementing it via `children`.
   const consumerProps: ButtonProps =
     props.icon != null
       ? {
           ...colour,
           icon: props.icon,
-          // Icon-only: the required `aria-label` *is* the accessible name, so it
-          // rides `consumerProps` — `InternalButton` forwards `aria-label` only on
-          // the icon-only arm (a labelled button's name must be its visible text).
           "aria-label": props["aria-label"],
         }
       : {
           ...colour,
-          // Labelled: default the visible label to the `value` (handy for enums).
           children: props.children ?? value,
           startIcon: props.startIcon,
           endIcon: props.endIcon,
         };
 
-  // A *labelled* segment's authored `aria-label` can't ride `consumerProps`: on a
-  // labelled button `aria-label` is type-`never` and `InternalButton` drops it
-  // (the name there must be the visible label). So it rides the `htmlAttrs` seam,
-  // which is merged *under* the button's own props — which never set `aria-label`
-  // for a labelled button — letting the authored name survive. The icon-only arm
-  // already carries its `aria-label` on `consumerProps` above, so it's excluded.
   const labelledAriaLabel = props.icon == null ? props["aria-label"] : undefined;
 
   return (
     <Toggle
       value={value}
-      // base-ui's `Toggle` computes its props (the `aria-pressed` flag, the toggle
-      // `onClick`, and the composite's roving `tabIndex` / focus wiring) and hands
-      // them in through `InternalButton`'s `htmlAttrs` seam — the same seam an
-      // overlay `Trigger` uses. So the rendered element stays a real `<button>`
-      // that is the composite item, with no extra wrapper.
       render={(toggleProps) => (
         <InternalButton
           consumerProps={consumerProps}
           htmlAttrs={
-            // The active-tab-stop marker and a labelled segment's authored
-            // `aria-label` ride this seam (see above); data-* isn't statically
-            // known on base-ui's props, hence the localized cast (same pattern as
-            // the overlay triggers).
             {
               ...toggleProps,
-              // The selected segment carries the active-tab-stop marker, so Tab
-              // focuses it rather than the first segment.
               ...(selected ? { [ACTIVE_COMPOSITE_ITEM_ATTR]: "" } : {}),
               ...(labelledAriaLabel != null ? { "aria-label": labelledAriaLabel } : {}),
             } as InternalButtonHtmlAttrs
@@ -535,12 +508,9 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
     required = false,
     className,
     ref,
-    // The public type is discriminated by `clearable`; internally we work with the
-    // widened arm (value/onChange over `T | null`) and narrow back at the call site.
   } = props as ToggleGroupClearableProps<T> & ToggleGroupSharedProps<T> & FieldLabellingInput;
 
   const invalid = state === "invalid";
-  // see `useIsFieldDisabled`
   const inheritedDisabled = useIsFieldDisabled();
   const disabled = disabledProp || inheritedDisabled;
   const nameProps: FieldLabellingInput = {
@@ -548,14 +518,9 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
     "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
   };
-  // base-ui's group value is an array (it supports multi-select); single-select
-  // is just a one-element array, and a cleared/unselected group is the empty
-  // array. Memoised so the controlled value is referentially stable across renders.
   const groupValue = React.useMemo(() => (value === null ? [] : [value]), [value]);
 
   const itemContext = React.useMemo<ToggleGroupItemContextValue>(
-    // Pass `value` through as-is: when it's `null`, no segment's `value === null`,
-    // so none renders selected — and an empty-string segment stays distinct.
     () => ({ selectedValue: value, intent, saliency, size }),
     [value, intent, saliency, size],
   );
@@ -567,39 +532,21 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
       state={state}
       required={required}
       labelPosition={labelPosition}
-      // Shrink-wrap around the segmented row (`content`) by default — but when the
-      // group is asked to `fill`, the `Field` has to span too, or the group's
-      // `width: 100%` would only fill the shrink-wrapped field, not the container.
       fit={width === "fill" ? "fill" : "content"}
       disabled={disabled}
       slotProps={slotProps}
     >
-      {/*
-        base-ui's toolbar isn't a field control, so its field context can't reach
-        it — the naming and description wiring comes from the render prop.
-      */}
       {({ nameAttrs, describedBy }) => (
         <ToggleGroupItemContext.Provider value={itemContext}>
           <BaseToggleGroup
             ref={ref}
             value={groupValue}
-            // Wire the keyboard to match the paint: base-ui's composite reads this
-            // to choose the roving-focus axis, so Up/Down move between segments in a
-            // vertical group and Left/Right in a horizontal one. (base-ui exposes it
-            // as `data-orientation`; the element is `role="group"`, which — unlike
-            // `toolbar`/`radiogroup` — has no `aria-orientation`, so none is set.)
             orientation={orientation}
             onValueChange={(next, details) => {
-              // Veto every change when disabled — the whole control is read-only.
-              // base-ui shares this `details` with the toggle, so `cancel()` stops
-              // the controlled value from changing (no flicker).
               if (disabled) {
                 details.cancel();
                 return;
               }
-              // Re-pressing the active segment clears it: base-ui reports an empty
-              // array. When `clearable`, that's a real change to `null`; otherwise
-              // the group keeps exactly one value, so veto it.
               const selected = next[0];
               if (selected === undefined) {
                 if (clearable) {
@@ -615,29 +562,16 @@ export function ToggleGroup<T extends string>(props: ToggleGroupProps<T>) {
             aria-describedby={joinIds(ariaDescribedby, describedBy)}
             aria-invalid={invalid || undefined}
             aria-required={required || undefined}
-            // Disabled is modelled like the other groups: `aria-disabled` on the
-            // container (announced) + the veto above, NOT base-ui's `disabled` (which
-            // would natively disable every toggle, dropping the group from the tab
-            // order and stopping arrow navigation). So a disabled group stays fully
-            // Tab/arrow reachable — see AGENTS.md.
             aria-disabled={disabled || undefined}
             className={cx(
               toggleGroupRoot({ orientation }),
-              // The width property itself comes from the shared shorthand resolver
-              // (the single source `Box` / `Flex` / `Button` use), so this never
-              // drifts from the other primitives. `resolveWidth(undefined)` is a
-              // no-op, so the unset default stays `inline-flex` shrink-wrap.
               atoms({ width: resolveWidth(width) }),
-              // A filled horizontal toolbar grows its segments to share the width;
-              // a vertical column already shares it via `align-items: stretch`.
               orientation === "horizontal" && width === "fill" && toggleGroupFillRow,
               disabled && toggleGroupDisabled,
               className,
             )}
           >
             {children({
-              // The stable generic item, narrowed to this group's `T`. The cast is
-              // purely a type-level instantiation — the runtime function is the same.
               ToggleGroupItem: ToggleGroupItem as (
                 props: ToggleGroupItemProps<T>,
               ) => React.ReactNode,

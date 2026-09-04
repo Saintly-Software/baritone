@@ -15,8 +15,6 @@ export const helpTextRecipe = recipe({
     alignItems: "flex-start",
   },
   variants: {
-    // Tracks the `Text` size the same-named prop selects; only the icon↔text gap
-    // differs, so the row stays proportional as the type scales.
     variant: {
       xs: { gap: vars.space[1] },
       sm: { gap: vars.space[1] },

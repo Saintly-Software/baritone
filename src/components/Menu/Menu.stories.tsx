@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Menu } from "./index";
 
-// Throwaway bare glyphs — passed as `icon={<Glyph />}` and auto-wrapped in `Icon`.
 const DuplicateGlyph = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
     <rect x="9" y="9" width="12" height="12" rx="2" />
@@ -42,19 +41,15 @@ export const KitchenSink: Story = {
       defaultOpen
       trigger={<Menu.Trigger>Actions</Menu.Trigger>}
       items={[
-        // A plain (neutral) button row.
         <Menu.Item key="rename" onClick={() => alert("Rename")}>
           Rename
         </Menu.Item>,
-        // A row with a leading icon.
         <Menu.Item key="duplicate" icon={<DuplicateGlyph />} onClick={() => alert("Duplicate")}>
           Duplicate
         </Menu.Item>,
-        // A link row — a real `<a href>`.
         <Menu.Item key="source" href="https://example.com/source">
           View source
         </Menu.Item>,
-        // One row per supported intent (neutral is covered by "Rename" above).
         <Menu.Item key="share" intent="secondary" onClick={() => alert("Share")}>
           Share
         </Menu.Item>,
@@ -72,11 +67,9 @@ export const KitchenSink: Story = {
         >
           Delete
         </Menu.Item>,
-        // A disabled button row.
         <Menu.Item key="billing" onClick={() => alert("Billing")} disabled>
           Billing
         </Menu.Item>,
-        // A disabled link row.
         <Menu.Item key="docs" href="https://example.com/docs" disabled>
           Documentation
         </Menu.Item>,

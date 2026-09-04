@@ -9,8 +9,6 @@ import { ToggleGroup } from "./index";
 
 type View = "list" | "board" | "calendar";
 
-// A tiny controlled host mirroring the documented usage, so the type-safe
-// render-prop pattern is exercised exactly as a consumer would write it.
 function ViewToggle({
   value: initial = "list",
   onChange,
@@ -100,11 +98,8 @@ describe("ToggleGroup", () => {
         )}
       </ToggleGroup>,
     );
-    // The authored name wins over the flattened "List 3"...
     expect(screen.getByRole("button", { name: "List view" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "List 3" })).not.toBeInTheDocument();
-    // ...and a segment without aria-label still names itself from its (rich)
-    // children — the flattened text, not a fallback to the `value`.
     expect(screen.getByRole("button", { name: "Board 7" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "board" })).not.toBeInTheDocument();
   });
@@ -114,7 +109,6 @@ describe("ToggleGroup", () => {
     render(<ViewToggle value="board" />);
 
     await user.tab();
-    // Tab enters the group on the *selected* segment, even though it isn't first.
     expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
   });
 
@@ -126,12 +120,10 @@ describe("ToggleGroup", () => {
     await user.tab();
     expect(screen.getByRole("button", { name: "List" })).toHaveFocus();
 
-    // The arrow keys move the roving focus but must NOT select (no auto-activation).
     await user.keyboard("{ArrowRight}");
     expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
     expect(onChange).not.toHaveBeenCalled();
 
-    // Enter selects the focused segment.
     await user.keyboard("{Enter}");
     expect(onChange).toHaveBeenCalledWith("board", expect.any(Event));
   });
@@ -141,7 +133,6 @@ describe("ToggleGroup", () => {
     const onChange = vi.fn();
     render(<ViewToggle value="list" onChange={onChange} />);
 
-    // Re-pressing the selected segment must not clear it — one value is always set.
     await user.click(screen.getByRole("button", { name: "List" }));
 
     expect(onChange).not.toHaveBeenCalled();
@@ -163,8 +154,6 @@ describe("ToggleGroup", () => {
           )}
         </ToggleGroup>,
       );
-      // The flanking icons are aria-hidden, so the visible label still names the
-      // segment — the icons are laid out inside the same button by InternalButton.
       const button = screen.getByRole("button", { name: "List" });
       expect(button).toContainElement(screen.getByTestId("start-glyph"));
       expect(button).toContainElement(screen.getByTestId("end-glyph"));
@@ -185,11 +174,9 @@ describe("ToggleGroup", () => {
           )}
         </ToggleGroup>,
       );
-      // Named by the required aria-label — there's no visible text to name it...
       const iconOnly = screen.getByRole("button", { name: "List view" });
       expect(iconOnly).toContainElement(screen.getByTestId("glyph"));
       expect(iconOnly.textContent).toBe("");
-      // ...and it's still a real segment: the selected value reads as pressed.
       expect(iconOnly).toHaveAttribute("aria-pressed", "true");
     });
 
@@ -212,8 +199,6 @@ describe("ToggleGroup", () => {
       expect(onChange).toHaveBeenCalledWith("board", expect.any(Event));
     });
 
-    // Compile-time guards for the discriminated union — mirror `Button`: `icon`
-    // makes `aria-label` required and forbids `children`/`startIcon`/`endIcon`.
     it("type-enforces the icon-only arm", () => {
       render(
         <ToggleGroup<View> aria-label="View" value="list" onChange={() => {}}>
@@ -244,11 +229,9 @@ describe("ToggleGroup", () => {
       await user.tab();
       expect(screen.getByRole("button", { name: "List" })).toHaveFocus();
 
-      // Horizontal axis: Right advances...
       await user.keyboard("{ArrowRight}");
       expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
 
-      // ...and the cross axis (Down) is inert, so it can't move between segments.
       await user.keyboard("{ArrowDown}");
       expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
     });
@@ -260,22 +243,18 @@ describe("ToggleGroup", () => {
       await user.tab();
       expect(screen.getByRole("button", { name: "List" })).toHaveFocus();
 
-      // Vertical axis: Down advances between segments...
       await user.keyboard("{ArrowDown}");
       expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
 
-      // ...and the cross axis (Right) is inert now.
       await user.keyboard("{ArrowRight}");
       expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
 
-      // Up walks back.
       await user.keyboard("{ArrowUp}");
       expect(screen.getByRole("button", { name: "List" })).toHaveFocus();
     });
 
     it("reflects the axis on the group's data-orientation", () => {
       const { rerender } = render(<ViewToggle value="list" />);
-      // The default toolbar is horizontal.
       expect(screen.getByRole("group", { name: "View" })).toHaveAttribute(
         "data-orientation",
         "horizontal",
@@ -286,9 +265,6 @@ describe("ToggleGroup", () => {
         "data-orientation",
         "vertical",
       );
-      // The group is `role="group"`, which — unlike `toolbar`/`radiogroup` — has no
-      // `aria-orientation`; the axis is conveyed by the roving-focus keys (asserted
-      // above) and `data-orientation`, not an ARIA attribute base-ui doesn't emit.
       expect(screen.getByRole("group", { name: "View" })).not.toHaveAttribute("aria-orientation");
     });
 
@@ -302,10 +278,6 @@ describe("ToggleGroup", () => {
   });
 
   describe("width", () => {
-    // Guards the cross-component coupling `fit={width === "fill" ? …}` in
-    // `index.tsx`, which reaches from the group's own `width` into a *different*
-    // component (`Field`). Asserted through the shared class tokens each side
-    // actually emits, so it can't be silently dropped or inverted by a refactor.
     function widthGroup(width?: "fill") {
       return render(
         <ToggleGroup<View> aria-label="View" width={width} value="list" onChange={() => {}}>
@@ -319,17 +291,11 @@ describe("ToggleGroup", () => {
       );
     }
 
-    // The full-width atom the group carries, from the *shared* resolver — the same
-    // single source `Box` / `Flex` / `Button` use — so this asserts reuse, not a
-    // re-encoded literal.
     const fillAtom = atoms({ width: resolveWidth("fill") });
 
     it("spans the container and fills the wrapping Field when width='fill'", () => {
       const { container } = widthGroup("fill");
-      // The group box takes the shared full-width atom...
       expect(screen.getByRole("group", { name: "View" })).toHaveClass(fillAtom);
-      // ...and the wrapping Field flips to fit='fill' (the field root is the
-      // outermost element), so the fill isn't swallowed by the field's shrink-wrap.
       expect(container.firstChild).toHaveClass(fieldRoot({ fit: "fill", labelPosition: "top" }));
     });
 
@@ -341,7 +307,6 @@ describe("ToggleGroup", () => {
   });
 
   describe("clearable", () => {
-    // A controlled clearable host: starts unselected and can return to unselected.
     function ClearableViewToggle({
       value: initial = null,
       onChange,
@@ -400,11 +365,6 @@ describe("ToggleGroup", () => {
       expect(screen.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "false");
     });
 
-    // Guards the "no selection" sentinel: `null`, not `""`, means "nothing
-    // selected". An empty-string segment value is a real, distinct value, so it
-    // must not read as selected just because the group is empty — otherwise it
-    // would take the selected styling and the active roving tab stop. (Regression
-    // guard for the old `value ?? ""` sentinel, which collided with `value=""`.)
     it("keeps an empty-string segment unselected while the group value is null", () => {
       type Filter = "" | "unread";
       render(
@@ -417,8 +377,6 @@ describe("ToggleGroup", () => {
           )}
         </ToggleGroup>,
       );
-      // The active-composite-item marker only rides the selected segment; with the
-      // group empty, no segment — including the empty-string one — should carry it.
       expect(screen.getByRole("button", { name: "All" })).not.toHaveAttribute(
         "data-composite-item-active",
       );
@@ -432,13 +390,10 @@ describe("ToggleGroup", () => {
     const user = userEvent.setup();
     render(<ViewToggle value="board" disabled />);
 
-    // The group carries the disabled semantics...
     expect(screen.getByRole("group", { name: "View" })).toHaveAttribute("aria-disabled", "true");
-    // ...but no segment gets the native attribute that would drop it from focus.
     const selected = screen.getByRole("button", { name: "Board" });
     expect(selected).not.toBeDisabled();
 
-    // Tab still reaches the group, landing on the selected segment.
     await user.tab();
     expect(selected).toHaveFocus();
   });
@@ -451,11 +406,9 @@ describe("ToggleGroup", () => {
     await user.tab();
     expect(screen.getByRole("button", { name: "List" })).toHaveFocus();
 
-    // Arrow keys keep working even though the group is disabled...
     await user.keyboard("{ArrowRight}");
     expect(screen.getByRole("button", { name: "Board" })).toHaveFocus();
 
-    // ...but activating the focused segment can't change the value.
     await user.keyboard("{Enter}");
     expect(onChange).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "List" })).toHaveAttribute("aria-pressed", "true");
@@ -489,10 +442,6 @@ describe("ToggleGroup", () => {
       expect(group).not.toHaveAttribute("aria-label");
     });
 
-    // `label` and `aria-label` used to coexist, with `label` silently winning.
-    // They're mutually exclusive now: the type union rejects the pair outright,
-    // and a JS caller who gets past the types gets a thrown error rather than a
-    // control that shows one name and announces another.
     it("throws when label and aria-label are both passed", () => {
       expect(() =>
         render(
@@ -542,7 +491,6 @@ describe("ToggleGroup", () => {
       expect(group).toHaveAttribute("aria-invalid", "true");
       const line = screen.getByText("Pick a view.");
       expect(group.getAttribute("aria-describedby")).toBe(line.getAttribute("id"));
-      // One slot: the line is the error now, carrying HelpText's warning glyph.
       expect(line.querySelector("svg")).not.toBeNull();
     });
 
@@ -573,9 +521,6 @@ describe("ToggleGroup", () => {
       );
     });
 
-    // A vertical group keeps every field affordance — the label still names it, the
-    // help text still wires through `aria-describedby`, invalid still flags — under
-    // an inline `labelPosition`, which is the awkward layout case.
     it("keeps label / help / invalid wiring on a vertical group with an inline label", () => {
       render(
         <ToggleGroup<View>

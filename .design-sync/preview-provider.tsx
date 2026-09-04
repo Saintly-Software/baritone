@@ -1,22 +1,3 @@
-// design-sync preview wrapper.
-//
-// Why this exists (do not delete): the repo's `.storybook/preview.tsx` decorator
-// themes stories by importing `lightTheme`/`darkTheme` from `../src/theme` — the
-// vanilla-extract *source* `.css.ts` files. The design-sync converter bundles
-// previews with esbuild, which does NOT run the VE compiler, so those
-// `createTheme()` calls execute at runtime and throw "Styles were unable to be
-// assigned to a file" on every preview. This wrapper reproduces the decorator
-// faithfully but sources the theme from the COMPILED `../dist` (plain class
-// strings + a pure token builder), so nothing hits the VE runtime.
-//
-// It also mirrors the theme's CSS custom properties onto `document.body`: base-ui
-// overlays (Modal, Drawer, Popover, Menu, Combobox, Select, Tooltip) portal out
-// to the body, outside this wrapper — without the vars there, portaled surfaces
-// render unthemed, exactly as the repo's decorator comment documents.
-//
-// Wired via cfg.provider ({component:"PreviewRoot"}) + cfg.extraEntries. The real
-// consumer-facing wrap guidance (BaritoneTheme / lightTheme class + styles.css)
-// lives in .design-sync/conventions.md, not here.
 import * as React from "react";
 import { BaritoneTheme, buildDefaultTokens, createInlineTheme, vars } from "../dist/index.js";
 

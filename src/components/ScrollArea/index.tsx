@@ -90,8 +90,6 @@ export function ScrollArea({
         aria-label={ariaLabel}
         className={cx(viewport, fadeClass[orientation])}
       >
-        {/* base-ui's Content sets `min-width: fit-content` inline, so wide content
-            overflows (horizontal scroll) while text still wraps (vertical). */}
         <BaseScrollArea.Content>{children}</BaseScrollArea.Content>
       </BaseScrollArea.Viewport>
       {showVertical && (

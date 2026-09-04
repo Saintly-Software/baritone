@@ -5,8 +5,6 @@ import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
 import type { DistributiveOmit } from "../../utils/types";
 import { Checkbox } from "./index";
 
-// Checkbox is controlled, so the stories drive it from local state — the same
-// shape a consumer would use.
 function ControlledCheckbox(
   props: DistributiveOmit<React.ComponentProps<typeof Checkbox>, "value" | "onChange">,
 ) {
@@ -44,8 +42,6 @@ export default meta;
 
 type Story = StoryObj<typeof ControlledCheckbox>;
 
-// Interactive default — renamed from "Playground". Ships with `helpText` so the
-// default view shows the described-by wiring, not a bare box.
 export const Basic: Story = {
   args: {
     helpText: "We send at most one email a week. Unsubscribe anytime.",
@@ -74,8 +70,6 @@ interface StateRow {
   state?: FormState;
 }
 
-// Every meaningful checkbox state, including the combinations (invalid ×
-// checked/indeterminate × disabled) that don't get their own story.
 const stateRows: StateRow[] = [
   { label: "Unchecked" },
   { label: "Checked", value: true },

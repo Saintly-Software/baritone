@@ -6,9 +6,6 @@ import { cell as cellRecipe, tableCaption, tableRoot } from "./table.css";
 /** Horizontal alignment of a column's header and body cells. */
 export type TableAlign = "start" | "center" | "end";
 
-// Dev/test only, matching Field's `assertExclusiveNames`: the naming check below
-// is deterministic on props, so any render in dev/test/CI trips it long before
-// production — and the whole guard dead-code-eliminates out of the bundle.
 const isDev = (): boolean =>
   typeof process === "undefined" || process.env.NODE_ENV !== "production";
 
@@ -120,9 +117,6 @@ export interface TableProps<K extends string, Rows extends readonly object[]> ex
   ref?: React.Ref<HTMLTableElement>;
 }
 
-// The runtime body reads columns/rows through this widened shape — the generics
-// exist only to type the call site, so the implementation works one concrete
-// (string-keyed) row shape without re-narrowing on every field access.
 type TableRuntimeProps = Omit<TableProps<string, readonly Record<string, TableValue>[]>, "rows"> & {
   rows: ReadonlyArray<Record<string, TableValue>>;
 };
@@ -159,11 +153,6 @@ export function Table<const K extends string, const Rows extends readonly object
   const { columns, rows, caption, getRowKey, className, ref, ...rest } =
     props as unknown as TableRuntimeProps;
 
-  // A visible `caption` and an `aria-label`/`aria-labelledby` name the table
-  // twice, and the aria value wins in the accessible name — so the table would
-  // show one name and announce another. Reject the combination in dev, mirroring
-  // Field's `assertExclusiveNames` (a name mismatch is an a11y bug, not a
-  // condition to degrade through).
   if (isDev()) {
     const names = [
       caption != null && "caption",
@@ -184,10 +173,6 @@ export function Table<const K extends string, const Rows extends readonly object
       {caption != null && <caption className={tableCaption}>{caption}</caption>}
       <thead>
         <tr>
-          {/* Keyed by column position, not `column.key`: the columns are a
-              static ordered list, and positional keys stay stable even if two
-              columns happen to share a `key` (which is a valid, if unusual, way
-              to render the same field twice) — so React never warns. */}
           {columns.map((column, columnIndex) => (
             <th
               key={columnIndex}

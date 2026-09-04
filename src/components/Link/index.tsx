@@ -19,7 +19,6 @@ import { linkBase } from "./link.css";
  */
 export interface InlineLinkProps extends Omit<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
-  // Colour is locked to the primary text token, not the `color` attribute.
   "color"
 > {
   /** The default inline-anchor look. */
@@ -49,12 +48,7 @@ export interface InlineLinkProps extends Omit<
  */
 interface ButtonLinkCommonProps extends Omit<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
-  // Colour comes from intent/saliency, not the `color` attribute…
-  | "color"
-  // …and the accessible name is arm-specific (the visible label vs. a required
-  // aria-label), so each arm redefines `aria-label` and `children`.
-  | "aria-label"
-  | "children"
+  "color" | "aria-label" | "children"
 > {
   /** The button look. */
   appearance: "button";
@@ -211,12 +205,7 @@ export type ButtonLinkProps = LabelledButtonLinkProps | IconButtonLinkProps;
  */
 export interface ChipLinkProps extends Omit<
   React.AnchorHTMLAttributes<HTMLAnchorElement>,
-  // Colour comes from intent/saliency, not the `color` attribute…
-  | "color"
-  // …and the accessible name is always the visible label, so an `aria-label`
-  // (which would silently override it) is intentionally unsupported (matches
-  // `Chip`/`Button`).
-  | "aria-label"
+  "color" | "aria-label"
 > {
   /** The chip look. */
   appearance: "chip";
@@ -308,32 +297,9 @@ export type LinkProps = InlineLinkProps | ButtonLinkProps | ChipLinkProps;
  * `<a>`, and a per-link `render` always overrides the provider.
  */
 export function Link(props: LinkProps) {
-  // Honour an enclosing `LinkProvider`: with no per-link `render`, an internal
-  // link resolves to the provider's router link (external / new-tab / download
-  // links resolve to `undefined` → a plain `<a>`). Read once, *before* the
-  // appearance branch, so the hook order stays stable across renders. `props`
-  // exposes `render`/`href`/`target`/`download` on both union arms (all anchor
-  // props), so it's safe to read them here.
   const render = useLinkRender(props.render, props);
 
   if (props.appearance === "button") {
-    // A button-styled link: hand the shared `InternalButton` the Button knobs plus
-    // the anchor seam (`href`/`render`/…). `InternalGenericButtonAnchor` sees the
-    // link seam and renders the button chrome onto an `<a>`/router link. Both arms
-    // flow through here unchanged: the labelled arm carries `children`, while the
-    // icon-only arm carries `icon` + `aria-label`, which `InternalButton` reads as
-    // its icon-only mode (square box, forwarded name) — the same path `Button`'s
-    // `IconButtonProps` takes, so the two are pixel-identical.
-    // The `appearance` discriminant is Link's own and isn't part of Button's API, so
-    // it's stripped here (InternalButton would treat it as the Button appearance).
-    // The consumer's own `render` is stripped too and replaced with the resolved
-    // one (so the provider is honoured); it's `undefined` for a plain/external
-    // link, which `InternalGenericButtonAnchor` renders as an `<a href>`.
-    // The cast bridges the ref/attribute variance across the internal boundary:
-    // Button's props type `ref` as `Ref<HTMLButtonElement>`, but a button-link's
-    // rendered element is an anchor (or an inert element when disabled), so this
-    // arm's `ref` is the wider `Ref<HTMLElement>`, and it carries anchor-only
-    // attributes (`download`, `hrefLang`, …) that flow straight through to the `<a>`.
     const { appearance: _appearance, render: _render, ...buttonProps } = props;
     return (
       <InternalButton
@@ -345,19 +311,11 @@ export function Link(props: LinkProps) {
   }
 
   if (props.appearance === "chip") {
-    // A chip-styled link: hand the shared `InternalChip` the Chip knobs plus the
-    // resolved anchor seam. It renders the chip chrome (via `chipBoxClassName` —
-    // the same recipe `Chip` uses) onto an `<a>`/router link. The `appearance`
-    // discriminant is Link's own, and the consumer's `render` is replaced with the
-    // provider-resolved one (`undefined` for a plain/external link), so both are
-    // stripped here.
     const { appearance: _appearance, render: _render, ...chipProps } = props;
     return <InternalChip {...(chipProps as InternalChipProps)} render={render} />;
   }
 
   const { appearance: _appearance, render: _render, className, children, ref, ...rest } = props;
-  // `RenderElement` (not the `useRender` hook) because this render sits behind the
-  // earlier `appearance === "button"` return.
   return (
     <RenderElement
       render={render}

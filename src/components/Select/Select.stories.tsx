@@ -130,8 +130,6 @@ interface StateRow {
   helpText?: string;
 }
 
-// Every validation state plus disabled / loading — the combinations that used to
-// be their own stories, folded into one table.
 const stateRows: StateRow[] = [
   { label: "neutral" },
   { label: "warning", state: "warning", helpText: "This choice seems unusual." },
@@ -145,7 +143,6 @@ const stateRows: StateRow[] = [
   { label: "loading", loading: true },
 ];
 
-// Select is controlled, so each row drives its own local state.
 function StateSelect(row: StateRow) {
   const [value, setValue] = React.useState<string | null>("apple");
   return (

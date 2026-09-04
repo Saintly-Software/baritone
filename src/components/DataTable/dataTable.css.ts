@@ -196,8 +196,6 @@ export const selectionInput = style({
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  // `max(…)` covers the box when it is larger, and floors the hit area at 1.5rem
-  // (24px) otherwise — the `size="sm"` box is only 1rem, below the a11y minimum.
   width: "max(100%, 1.5rem)",
   height: "max(100%, 1.5rem)",
   margin: 0,
