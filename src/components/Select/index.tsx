@@ -208,20 +208,12 @@ function CheckGlyph() {
 }
 
 /**
- * Select — a "form control" element type for picking from a list, built on
- * base-ui's `Select` (listbox semantics, keyboard navigation, typeahead, focus
- * management) and composing `Field` for the label / help / error layout and ARIA
- * wiring, like `TextInput` and `RadioGroup`. It takes a `state`, not
- * intent/saliency, and is named by exactly one of `label` / `aria-label` /
- * `aria-labelledby` (they're mutually exclusive — see `FieldLabellingProps`).
- *
- * It's discriminated on `multiple`: a single select commits one `string | null`;
- * a multi select commits a `string[]` and renders each option with a composed
- * `InternalCheckbox` reflecting whether it's chosen. Both offer a clear button
- * (suppress with `hideClearButton`).
- *
- * Disabled follows the system convention: `aria-disabled` + base-ui's `readOnly`
- * rather than the native `disabled` attribute, so the trigger stays focusable.
+ * A "form control" element type for picking from a list, built on base-ui's
+ * `Select` and composing `Field`. Takes a `state`, not intent/saliency.
+ * Discriminated on `multiple`: single commits one `string | null`, multi a
+ * `string[]` (each option showing an `InternalCheckbox`). Both offer a clear
+ * button (`hideClearButton` to suppress). Disabled uses `aria-disabled` +
+ * `readOnly` so the trigger stays focusable.
  *
  * @example
  * const [value, setValue] = React.useState<string | null>(null);

@@ -67,16 +67,11 @@ export interface PopoverProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
 }
 
 /**
- * Popover — a "surface" element type shown in a floating layer, anchored to a
- * trigger. Its API mirrors `Card`: it composes `header` / `footer` props (or
- * `<Popover.Header>` / `<Popover.Footer>` children) around its content, with
- * `padding` controlling internal spacing. The surface itself is always the
- * default neutral, low-saliency shade.
- *
- * Built on base-ui's `Popover`, so the ARIA wiring, focus management, and
- * dismissal are handled for you. It opens from a `<Popover.Trigger>` (a `Button`)
- * passed via `trigger`, and — being non-modal by default — closes on outside
- * click or `Escape` while leaving the rest of the page interactive.
+ * A "surface" element type shown in a floating layer, anchored to a trigger. Its
+ * API mirrors `Card`: composes `header` / `footer` props (or subcomponent
+ * children) with `padding` for internal spacing. Built on base-ui's `Popover`
+ * (ARIA, focus, dismissal handled); opens from a `<Popover.Trigger>` via
+ * `trigger`, and is non-modal — closes on outside click or Escape.
  */
 function PopoverRoot({
   trigger,
@@ -132,11 +127,8 @@ function PopoverRoot({
 }
 
 /**
- * The trigger that opens the popover. Renders a `Button` (so all of Button's
- * intents / saliencies / sizes / icons are available), wired up by base-ui so it
- * carries the right `aria-haspopup` / `aria-expanded` and toggles the popover.
- * Must be passed to `<Popover trigger={...} />` so it sits inside the popover's
- * context.
+ * The trigger that opens the popover — a `Button`, wired by base-ui with
+ * `aria-haspopup` / `aria-expanded`. Must be passed to `<Popover trigger={...} />`.
  */
 export type PopoverTriggerProps = ButtonProps;
 

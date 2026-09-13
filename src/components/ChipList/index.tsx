@@ -105,17 +105,11 @@ function ChipListRow({
 }
 
 /**
- * ChipList — renders a set of chips as a semantic list, flowed in a wrapping row
- * (default) or stacked in a column. Each chip is supplied as a `<ChipList.Item>`
- * (a `Chip`'s props); the list applies shared `intent` / `saliency` (each
- * overridable per item) and `size` (applied to every chip and not overridable,
- * which also sets the spacing between chips).
- *
- * Pass `max` to cap how many chips show inline: any beyond it collapse behind a
- * trailing "See more" chip whose `Popover` lists the rest.
- *
- * The list is a real `<ul>` (`role="list"`) of `<li>`s (`role="listitem"`), so
- * it's announced as a list with one item per chip.
+ * Renders a set of chips as a semantic list (`<ul>` of `<li>`s), in a wrapping row
+ * (default) or a column. Each chip is a `<ChipList.Item>`; the list applies shared
+ * `intent` / `saliency` (overridable per item) and `size` (not overridable). Pass
+ * `max` to cap inline chips — the rest collapse behind a "See more" chip whose
+ * `Popover` lists them.
  *
  * @example
  * <ChipList

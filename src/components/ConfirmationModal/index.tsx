@@ -132,22 +132,13 @@ function chain<E>(
 }
 
 /**
- * ConfirmationModal — a focused confirm/cancel dialog built on {@link Modal}. Use
- * it to gate a deliberate action (delete, discard, sign out) behind an explicit
- * "are you sure?".
- *
- * It's a thin preset over `Modal`: the surface, focus trap, Escape/backdrop
- * behaviour, and ARIA wiring all come from `Modal`. On top it lays out an
- * intent-tinted `icon` + `header`, the body, and a footer with a **cancel**
- * button (dismisses) and a **confirm** button (coloured by `intent`, `high`
- * saliency).
- *
- * Give it actions two ways: full {@link ConfirmationConfirmProps}/
- * {@link ConfirmationCancelProps} via `confirm`/`cancel`, or the
- * `handleConfirm`/`handleCancel` callback shorthands. Confirm dismisses the
- * dialog by default; for an async confirm, call `event.preventDefault()` in the
- * handler and close it yourself once the work resolves (`loading` shows the
- * spinner and locks the dialog meanwhile).
+ * A focused confirm/cancel dialog built on {@link Modal}, to gate a deliberate
+ * action behind an explicit "are you sure?". A thin preset: the surface, focus,
+ * and ARIA come from `Modal`, plus an intent-tinted `icon` + `header`, the body,
+ * and a footer with cancel and (intent-coloured) confirm buttons. Give it actions
+ * via `confirm`/`cancel` or the `handleConfirm`/`handleCancel` shorthands. Confirm
+ * dismisses by default; for an async confirm, `event.preventDefault()` and close
+ * it yourself (`loading` locks the dialog meanwhile).
  *
  * @example
  * <ConfirmationModal

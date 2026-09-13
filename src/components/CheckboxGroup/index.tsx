@@ -20,15 +20,10 @@ import { checkboxGroupRoot } from "./checkboxGroup.css";
 export type CheckboxGroupOrientation = "vertical" | "horizontal";
 
 /**
- * Shared knobs the group hands down to every `CheckboxGroupItem` via context, so
- * an item never has to repeat the group's `size` / `state` / `disabled`, and the
- * item can read the current selection + toggle it without the group re-creating
- * a component per render. The render-prop only carries the *type* `T`; the
- * runtime config flows through here.
- *
- * The selection (`value` / `toggle`) is type-erased to `unknown` here on
- * purpose: the public `CheckboxGroupItem` is bound to the group's `T` at the
- * type level (see `CheckboxGroup`), so an item only ever feeds back a `T`.
+ * Shared config the group hands every `CheckboxGroupItem` via context — its
+ * `size` / `state` / `disabled` and the current selection + toggle. The selection
+ * is type-erased to `unknown` here; the public `CheckboxGroupItem` is bound to the
+ * group's `T` at the type level.
  */
 interface CheckboxGroupItemContextValue {
   size: Size;
@@ -77,16 +72,8 @@ function defaultLabel(value: unknown): React.ReactNode {
 }
 
 /**
- * One checkbox option. Stable module-level component (not re-created per render)
- * so React reconciles it normally; type-narrowing to `T` happens purely at the
- * type level where the group hands it to the render-prop.
- *
- * Behaviourally it's the same row as the standalone `Checkbox` — base-ui's
- * `Checkbox.Root` owns the role / keyboard / form wiring, `InternalCheckbox`
- * owns the look, and the box is named explicitly with `aria-labelledby` because
- * base-ui's hidden `<input>` is `aria-hidden`. The only difference is that
- * checked state and toggling are driven by the group's selection array (via
- * context) instead of a local boolean.
+ * One checkbox option — the same row as the standalone `Checkbox`, but with its
+ * checked state and toggling driven by the group's selection array via context.
  */
 function CheckboxGroupItem<T>({
   value,
@@ -176,21 +163,12 @@ interface CheckboxGroupBaseProps<T> {
 export type CheckboxGroupProps<T> = CheckboxGroupBaseProps<T> & FieldLabellingProps;
 
 /**
- * CheckboxGroup — a "form control" element type for picking *any number* of
- * values from a small set. It's the multi-select sibling of `RadioGroup`: same
- * `Field`-composed label / help / error layout, same type-safe compound API, but
- * the selection is an *array* and each option is an independent checkbox (no
- * roving focus — every box is its own tab stop).
- *
- * It's a **type-safe compound component**: the group is generic over the value
- * type `T` (inferred from `value`), and hands the render-prop a
- * `CheckboxGroupItem` bound to that `T`. So the options can only ever be values
- * from the same union/enum — works for any enum, not just one. See
- * https://tkdodo.eu/blog/building-type-safe-compound-components
- *
- * Each row is the same box + label as the standalone `Checkbox` (built on
- * base-ui's `Checkbox.Root` + `InternalCheckbox`); the group itself is a
- * labelled `role="group"`, so the whole control reads as one named set.
+ * A "form control" element type for picking *any number* of values from a small
+ * set — the multi-select sibling of `RadioGroup` (same `Field` layout and
+ * type-safe compound API, but the selection is an array and each box is its own
+ * tab stop). Generic over the value type `T` (inferred from `value`), handing the
+ * render-prop a `CheckboxGroupItem` bound to that `T`. The group is a labelled
+ * `role="group"`.
  *
  * @example
  * type Topic = "product" | "billing" | "security";

@@ -143,16 +143,10 @@ interface RadioGroupBaseProps<T> {
 export type RadioGroupProps<T> = RadioGroupBaseProps<T> & FieldLabellingProps;
 
 /**
- * RadioGroup — a "form control" element type for picking one value from a small
- * set. Built on base-ui's `RadioGroup` (roving focus, arrow-key navigation, ARIA
- * `radiogroup` wiring) and composing `Field` for the label / help / error layout
- * and ARIA wiring, like `TextInput`.
- *
- * It's a **type-safe compound component**: the group is generic over the value
- * type `T` (inferred from `value`), and hands the render-prop a `RadioGroupItem`
- * bound to that `T`. So the options can only ever be values from the same
- * union/enum — works for any enum, not just one. See
- * https://tkdodo.eu/blog/building-type-safe-compound-components
+ * A "form control" element type for picking one value from a small set, built on
+ * base-ui's `RadioGroup` and composing `Field`. A type-safe compound component:
+ * generic over the value type `T` (inferred from `value`), handing the render-prop
+ * a `RadioGroupItem` bound to that `T`, so the options share one union/enum.
  *
  * @example
  * type ThemeValue = "system" | "light" | "dark";

@@ -83,29 +83,12 @@ export type ToggleButtonProps = ToggleButtonBaseProps &
   (ToggleButtonControlledProps | ToggleButtonUncontrolledProps);
 
 /**
- * ToggleButton — an icon-only button with an on / off (`aria-pressed`) state,
- * for toolbar-style toggles (bold, mute, pin, …). It's a thin wrapper over the
- * very same `InternalButton` that powers `Button`: the pressed state drives the
- * `aria-pressed` flag and the click, and the `icon` is the button's only content.
- *
- * The pressed state can be **controlled** (`value` + `onChange`) or
- * **uncontrolled** (`defaultValue`, or nothing, and the component tracks its own
- * state). Either way `onChange` — when given — receives the next boolean *and*
- * the DOM event. `icon` and `aria-label` may each be a function of the pressed
- * state, so the glyph / name can flip with the toggle.
- *
- * The pressed state is expressed through saliency — `intent` / `saliency`
- * describe the *on* look, and the *off* look drops to `low` (ghost) saliency —
- * so the two states are visibly distinct while reusing the shared `component`
- * colour recipe (no toggle-specific colours).
- *
- * The toggle wiring (the `aria-pressed` flag, the `aria-label`, and the toggle
- * `onClick`) rides in through `InternalButton`'s `htmlAttrs` seam, exactly like
- * an overlay `Trigger` — the consumer-facing visual props (intent, size, …) go
- * through `consumerProps`. `aria-label` *must* travel via `htmlAttrs` because
- * `InternalButton` deliberately strips it from `consumerProps`; routing the
- * toggle `onClick` there too means the disabled guard gates it for free (so a
- * disabled toggle can't flip its own uncontrolled state either).
+ * An icon-only button with an on / off (`aria-pressed`) state, for toolbar-style
+ * toggles. A thin wrapper over the same `InternalButton` that powers `Button`.
+ * The pressed state is **controlled** (`value` + `onChange`) or **uncontrolled**
+ * (`defaultValue`); `onChange` receives the next boolean and the DOM event. `icon`
+ * and `aria-label` may each be a function of the pressed state. The *on* look is
+ * `intent` / `saliency`, the *off* look drops to `low` (ghost).
  *
  * @example
  * // Controlled

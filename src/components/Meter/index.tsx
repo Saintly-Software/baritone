@@ -99,19 +99,11 @@ export interface MeterProps {
 }
 
 /**
- * Meter — a static, read-only gauge for a value within a known range (storage
- * used, score, capacity), built on base-ui's `Meter` for the semantics
- * (`role="meter"`, the `aria-value*` wiring, the value→percentage math) with the
- * system's colour scheme on top.
- *
- * The filled indicator is coloured by `intent` × `saliency` — the same vocabulary
- * as `Chip` / `Button` — reading the `text` colour ramp so the bar stays a solid,
- * visible ink at every saliency, over a neutral track. A `label` sits above the
- * track (opposite an optional `showValue` read-out) and an optional `description`
- * sits below; each renders as a `Text` you can tune through `slotProps`.
- *
- * It is *not* a progress bar: use it for a measurement, not the completion of a
- * task.
+ * A static, read-only gauge for a value within a known range (storage, score,
+ * capacity), built on base-ui's `Meter` (`role="meter"`, `aria-value*`, the
+ * value→percentage math). The fill is coloured by `intent` × `saliency`; a
+ * `label` sits above the track (opposite an optional `showValue`) and an optional
+ * `description` below. Not a progress bar — use it for a measurement, not a task.
  *
  * @example
  * <Meter label="Storage" value={72} showValue description="of your 100 GB quota" />
