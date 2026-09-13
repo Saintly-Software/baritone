@@ -7,26 +7,17 @@ import type { SolidButtonProps } from "../Button";
 import { buttonGroupItemRecipe, buttonGroupRoot } from "./buttonGroup.css";
 
 /**
- * A member of a {@link ButtonGroup} — the full `Button` API (the default
- * "solid" appearance) **minus `size`**, because the group owns sizing so every
- * member matches. Item-level `intent` / `saliency` are still allowed and
- * override the group's defaults for that one button; everything else
- * (`children`, `startIcon` / `endIcon`, `loading`, `disabled` +
- * `disabledReason`, `onClick`, native button attributes, `ref`, …) works
- * exactly as on a standalone `Button`.
- *
- * The text appearance is intentionally out of scope: a `ButtonGroup` joins
- * chrome-bearing controls into one surface, and the underlined text look has no
- * chrome to join — so `appearance` / `variant` aren't part of this API.
+ * A member of a {@link ButtonGroup} — the full solid `Button` API minus `size`
+ * (the group owns sizing). Item-level `intent` / `saliency` override the group's
+ * defaults; everything else works as on a standalone `Button`. The text
+ * appearance is out of scope (no chrome to join).
  */
 export type ButtonGroupItemProps = Omit<SolidButtonProps, "size" | "appearance" | "variant">;
 
 /**
- * `ButtonGroup.Item` — a **configuration element**, not a rendered one. It only
- * carries props: `ButtonGroup` reads them off the elements you pass in `items`
- * and renders each as a positioned button itself (so it can square the inner
- * corners and collapse the shared borders). Rendering an `Item` on its own emits
- * nothing; it's meaningful only inside a `ButtonGroup`'s `items`.
+ * `ButtonGroup.Item` — a **configuration element**, not a rendered one:
+ * `ButtonGroup` reads its props off `items` and renders the positioned button
+ * itself. Rendering an `Item` on its own emits nothing.
  */
 export function ButtonGroupItem(_props: ButtonGroupItemProps): React.ReactNode {
   return null;
@@ -54,21 +45,13 @@ export interface ButtonGroupProps extends Omit<
 }
 
 /**
- * ButtonGroup — a visually-joined cluster of buttons sharing sizing and, by
- * default, intent/saliency: a row of real `<button>`s whose borders merge into
- * one hairline seam and whose outer corners round while the inner ones square
- * off, so the set reads as a single segmented control.
- *
- * Unlike `ToggleGroup` (a single-select segmented *value*), the members here are
- * independent actions — each keeps its own `onClick`, `disabled`, icons, and can
- * override the group's `intent` / `saliency`. There's no roving tab stop: the
- * buttons are ordinary tab stops in array order, so keyboard order is exactly the
- * source order.
- *
- * The members are passed as `ButtonGroup.Item` elements through `items` (a
- * config-only element the group reads props off of), which is what lets the group
- * own the per-position corner/border collapsing. `size` is owned by the group;
- * `intent` / `saliency` set group-wide defaults that any `Item` may override.
+ * A visually-joined cluster of buttons sharing sizing and, by default,
+ * intent/saliency — a row of real `<button>`s whose borders merge into one seam
+ * and whose outer corners round, so the set reads as one segmented control. Unlike
+ * `ToggleGroup`, the members are independent actions (each its own `onClick`,
+ * `disabled`, icons), and they're ordinary tab stops in source order. Passed as
+ * `ButtonGroup.Item` config elements through `items`; `size` is group-owned,
+ * `intent` / `saliency` are overridable defaults.
  *
  * @example
  * <ButtonGroup
@@ -78,19 +61,6 @@ export interface ButtonGroupProps extends Omit<
  *       Previous
  *     </ButtonGroup.Item>,
  *     <ButtonGroup.Item key="next" onClick={goNext}>Next</ButtonGroup.Item>,
- *   ]}
- * />
- *
- * @example
- * // Group defaults with a per-member override.
- * <ButtonGroup
- *   intent="neutral"
- *   saliency="low"
- *   items={[
- *     <ButtonGroup.Item key="edit" onClick={edit}>Edit</ButtonGroup.Item>,
- *     <ButtonGroup.Item key="del" intent="negative" saliency="high" onClick={remove}>
- *       Delete
- *     </ButtonGroup.Item>,
  *   ]}
  * />
  */

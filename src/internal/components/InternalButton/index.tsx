@@ -29,12 +29,9 @@ import {
 } from "./internalButton.css";
 
 /**
- * Raw HTML attributes merged onto the rendered `<button>`. This is the seam for
- * base-ui's `render` callback: an overlay `Trigger`/`Close` hands the props it
- * computed (`onClick`, `aria-haspopup`, `aria-expanded`, `data-*`, `ref`, …)
- * straight through here, so the button stays the real interactive element with
- * no extra wrapper. (`ref` rides along in this object — that's base-ui's render
- * convention, see `HTMLProps`.)
+ * Raw HTML attributes merged onto the rendered `<button>` — the seam for base-ui's
+ * `render` callback, so an overlay `Trigger`/`Close` hands its computed props
+ * straight through with no extra wrapper. (`ref` rides along, per base-ui.)
  */
 export type InternalButtonHtmlAttrs = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   ref?: React.Ref<HTMLButtonElement>;
@@ -43,9 +40,7 @@ export type InternalButtonHtmlAttrs = React.ButtonHTMLAttributes<HTMLButtonEleme
 /**
  * The link seam: when any of these is set, `InternalGenericButtonAnchor` renders
  * the button chrome onto an `<a>`/router-link instead of a `<button>`. `Button`
- * itself never sets them (they stay `undefined`, so it's always a real button);
- * `Link`'s `appearance="button"` arm supplies them to get a button-styled link
- * that reuses this recipe wholesale rather than duplicating the styles.
+ * never sets them; `Link`'s `appearance="button"` arm supplies them.
  */
 export interface InternalButtonAnchorSeam {
   render?: RenderProp;
@@ -71,22 +66,11 @@ export interface InternalButtonProps {
 }
 
 /**
- * InternalButton — the implementation behind the public `Button`. It owns the
- * button-specific chrome: the shared colour/typography recipe, the focus ring,
- * the loading-spinner overlay, and the disabled-explanation tooltip. The element
- * itself is rendered by `InternalGenericButtonAnchor`, which owns the element
- * rendering (a `<button>`), the `type` default, and the shared disabled model
- * (`aria-disabled` + swallowed activation). `Button` is a thin wrapper that just
- * forwards its props as `consumerProps`.
- *
- * The extra `htmlAttrs` seam is what lets the overlay components (`Drawer`,
- * `Modal`, `Popover`) use a real button as their trigger/close: each base-ui
- * `Trigger`/`Close` passes its computed props straight in via `render`, rather
- * than cloning a `<Button>` element and stacking a second layer of prop merging
- * on top of Button's own.
- *
- * **Internal by design — not exported from the package.** Like `InternalTooltip`
- * and `InternalCheckbox`, it's a building block the system composes from.
+ * The implementation behind the public `Button`, owning the button chrome (colour/
+ * typography recipe, focus ring, loading spinner, disabled tooltip). The element
+ * is rendered by `InternalGenericButtonAnchor`. The `htmlAttrs` seam lets overlay
+ * components reuse a real button as their trigger/close via base-ui's `render`.
+ * Internal — not exported.
  */
 export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps) {
   const {
