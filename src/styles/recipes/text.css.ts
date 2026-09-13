@@ -19,19 +19,10 @@ const resolved = fallbackVar(override, fallbackVar(textColorVar, vars.text.color
 
 /**
  * "text intent" recipe — resolves the text colour and mirrors it to `--iconColor`
- * so any `Icon` rendered inside matches the surrounding text. By default the
- * colour is read from the ambient `--textColor` (set by a surrounding `surface`/
- * `component`), falling back to the neutral/mid token when standalone; passing
- * `intent` and/or `saliency` overrides it with the matching `text.color` token.
- * This is the colour half of the old `textRecipe`; the other element types (e.g.
- * the `component` recipe) reuse the same colour+icon pattern.
- *
- * It also publishes `--iconAlign`, the optical vertical alignment an inline `Icon`
- * takes inside text — so a glyph dropped mid-sentence sits centred against the copy
- * instead of low on the baseline, without callers hand-tuning `vertical-align`. Only
- * inline flow needs this: `Icon` reads it with a `baseline` fallback, and in flex
- * contexts (`Button`, `Chip`, `Flex`) `vertical-align` is a no-op, so this is scoped
- * to the text-flow recipe rather than the shared `--iconColor` set everywhere.
+ * so a nested `Icon` matches. Reads the ambient `--textColor` by default (falling
+ * back to neutral/mid), overridden by `intent`/`saliency`. Also publishes
+ * `--iconAlign`, the optical vertical alignment an inline `Icon` takes inside text
+ * (scoped to text flow, since `vertical-align` is a no-op in flex contexts).
  */
 export const textIntentRecipe = recipe({
   base: {
@@ -61,18 +52,10 @@ export type TextIntentVariants = NonNullable<RecipeVariants<typeof textIntentRec
 
 /**
  * "text size" recipe — the shared typography base plus a built-in `size` variant.
- *
- * Every typographic dimension resolves through a single `--text…` indirection the
- * base reads: family (`--textFont`), tracking (`--textLetterSpacing`), size
- * (`--textSize`), leading (`--textLineHeight`), and weight (`--textWeight`). This
- * lets each be an *open*, consumer-defined vocabulary — `Text`/`Heading` set the
- * vars per instance to a `var(--<x>-<name>)` the theme published (see
- * `theme/fontSizes.ts`, `theme/fontWeights.ts`, `theme/lineHeights.ts`).
- *
- * The `size` variant remains for module-scope callers that apply a *built-in* size
- * to a raw element as a class (it just sets `--textSize`/`--textLineHeight` to the
- * per-size tokens); pair with `typographyWeight` for the weight. Colour-agnostic;
- * pair with `textIntentRecipe`.
+ * Every dimension resolves through a `--text…` var the base reads (`--textFont` /
+ * `--textLetterSpacing` / `--textSize` / `--textLineHeight` / `--textWeight`),
+ * each an open vocabulary `Text`/`Heading` set per instance. The `size` variant is
+ * for module-scope callers applying a built-in size as a class. Colour-agnostic.
  */
 export const textSizeRecipe = recipe({
   base: {
@@ -102,10 +85,8 @@ export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>
 
 /**
  * "typography weight" recipe — the built-in `weight` knob for module-scope callers
- * (e.g. `MetricCard`) that apply a weight to a raw element as a class. Sets the
- * `--textWeight` var the `textSizeRecipe` base reads, so it must be composed
- * alongside that base. The `weight` prop on `Text`/`Heading` sets the same var
- * inline instead (supporting consumer-defined weights). See `theme/fontWeights.ts`.
+ * applying a weight as a class. Sets the `--textWeight` var the `textSizeRecipe`
+ * base reads, so compose it alongside that base.
  */
 export const typographyWeight = recipe({
   variants: {

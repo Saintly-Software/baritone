@@ -22,13 +22,10 @@ const sizes = {
 
 /**
  * "Component intent" recipe — the colour scheme shared by the "component" element
- * type (Chip, Icon, and future Button/Badge/Avatar). Sets the border, background,
- * and text colour, and publishes that foreground to descendants via `--iconColor`
- * (for `Icon`) and `--textColor` (for `Text`), so an inline icon or nested `Text`
- * matches without knowing the intent, and an `<Button intent='negative'
- * saliency='high'>` and a `<Chip>` with the same props render identically. Hover/active are computed from
- * `default` via oklch relative-colour math; low saliency hovers to the `mid`
- * shade. Also publishes the focus-ring colour for the shared `focusRingRecipe`.
+ * type (Chip, Button, Badge, Icon). Sets border/background/text and publishes the
+ * foreground via `--iconColor` / `--textColor`, so nested icons/text match without
+ * knowing the intent. Hover/active are computed from `default` via oklch math; also
+ * publishes the focus-ring colour for `focusRingRecipe`.
  */
 export const componentIntentRecipe = recipe({
   base: {
@@ -139,19 +136,11 @@ export const componentTypographyRecipe = recipe({
   },
   variants: {
     /**
-     * Who gets the control affordances — the pointer cursor and the unselectable
-     * label (`componentIntentRecipe`'s matching variant owns the hover/active
-     * background half).
-     *
-     *   - `control` (default) — always. For the components that *are* a control:
-     *     Button, Tabs, a Notice's action.
-     *   - `auto` — leave both to the element itself. For a polymorphic root that
-     *     is usually inert: a Chip is a static tag until `render` makes it a
-     *     link, and a tag that shows a pointer is advertising a click that does
-     *     nothing (its own text is also worth being able to select). Declaring
-     *     nothing is what makes this work in both directions — a `<span>` keeps
-     *     the default arrow, while an `<a href>` still gets its pointer from the
-     *     UA stylesheet.
+     * Who gets the control affordances (pointer cursor + unselectable label).
+     *   - `control` (default) — always, for components that *are* a control.
+     *   - `auto` — leave both to the element, for a polymorphic root usually inert
+     *     (a Chip is a static tag until `render` makes it a link), so a `<span>`
+     *     keeps the arrow while an `<a href>` gets its pointer from the UA.
      */
     interactive: {
       control: { cursor: "pointer", userSelect: "none" },

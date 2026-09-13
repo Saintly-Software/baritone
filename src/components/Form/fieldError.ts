@@ -2,15 +2,10 @@ import * as React from "react";
 import type { FormState } from "../../theme/constants";
 
 /**
- * The slice of a TanStack Form field the adapters actually read — a structural
- * type, deliberately not the 23-generic `FieldApi`.
- *
- * A real `field` (from `<form.Field>` / `<form.AppField>` or `useFieldContext`)
- * is assignable to this, so `<FormTextInput field={field} />` type-checks — and,
- * because `TValue` flows through, wiring a control to a field whose value type
- * doesn't match (a `number` field on a text input) is a compile error rather than
- * a runtime surprise. Depending on the surface instead of the concrete class also
- * keeps these components trivially testable with a hand-rolled stub.
+ * The slice of a TanStack Form field the adapters read — a structural type, not
+ * the 23-generic `FieldApi`. A real `field` is assignable to it, and `TValue`
+ * flows through so a value-type mismatch is a compile error. Also keeps the
+ * components testable with a hand-rolled stub.
  */
 export interface FieldLike<TValue> {
   /** The field's name/path — forwarded to the control's `name` for form submission. */
@@ -73,12 +68,9 @@ export function firstFieldErrorMessage(
 
 /**
  * Whether a field's error list holds a *real* error — any entry that isn't a
- * "no error" placeholder (`null` / `undefined` / `false` / `""`). TanStack leaves
- * such placeholders in `meta.errors` for validators that passed, so a non-empty
- * array doesn't by itself mean the field is invalid. Used to flip a control to
- * `invalid` even when {@link firstFieldErrorMessage} can't extract a display string
- * (e.g. a validator returning a bare `{ code, minimum }` object) — otherwise the
- * field would render neutral while `form.canSubmit` stays `false`.
+ * "no error" placeholder (`null` / `undefined` / `false` / `""`), which TanStack
+ * leaves in `meta.errors` for validators that passed. Flips a control to `invalid`
+ * even when {@link firstFieldErrorMessage} can't extract a display string.
  */
 export function hasFieldError(errors: readonly unknown[] | undefined): boolean {
   if (errors == null) return false;
@@ -116,19 +108,10 @@ export interface FieldErrorSource {
 
 /**
  * Translate a field's validation state into the `{ state, helpText }` a Baritone
- * form control renders — the core of the integration.
- *
- * When there's a visible error (gated by `showErrorsWhen`), the control goes
- * `state="invalid"` and the error message *replaces* `helpText`. Otherwise the
- * caller's own `helpText` / `state` pass through unchanged — so a field can show
- * inline guidance while valid and the error while not, from one `helpText` slot
- * (Baritone's one-message rule; there is no separate `errorMessage`).
- *
- * Invalidity is decided by {@link hasFieldError}, not by whether a message could be
- * extracted: a field whose only error is a non-standard object (no string/element
- * `message`) still flips to `invalid` — just without help text — rather than
- * rendering neutral while `form.canSubmit` stays `false`. Give such fields a string
- * or `{ message }` error to show text.
+ * form control renders. On a visible error (gated by `showErrorsWhen`) the control
+ * goes `invalid` and the message replaces `helpText`; otherwise the caller's own
+ * `helpText` / `state` pass through. Invalidity is decided by {@link hasFieldError},
+ * so a non-standard error object still flips to `invalid`, just without help text.
  */
 export function resolveFieldDisplay(
   field: FieldErrorSource,

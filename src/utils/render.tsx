@@ -73,15 +73,10 @@ export interface UseRenderParams {
 }
 
 /**
- * Polymorphic render, delegating to base-ui's `useRender` so we inherit its
- * ref-merging, event-handler chaining, and `preventBaseUIHandler` support rather
- * than maintaining a parallel implementation. Our `defaultElement` is base-ui's
- * `defaultTagName` (an intrinsic tag name). Refs are still passed inside `props` —
- * base-ui reads `props.ref` and merges it, so call sites keep their existing shape.
- *
- * This is a hook (base-ui's `useRender` calls `useMergedRefs` internally), so it
- * must be called unconditionally. To render polymorphically from a conditional
- * branch (behind an early `return`), use {@link RenderElement} instead.
+ * Polymorphic render, delegating to base-ui's `useRender` for ref-merging,
+ * handler chaining, and `preventBaseUIHandler` support. Refs pass inside `props`.
+ * A hook, so call it unconditionally; for a conditional branch use
+ * {@link RenderElement}.
  */
 export function useRender({ render, defaultElement, props }: UseRenderParams): React.ReactElement {
   return baseUseRender({
@@ -92,11 +87,9 @@ export function useRender({ render, defaultElement, props }: UseRenderParams): R
 }
 
 /**
- * Component form of {@link useRender}, for call sites that render polymorphically
- * from a conditional branch — e.g. after an early `return` for a disabled or
- * collapsed variant. Rendering a component conditionally is fine (the hook inside
- * runs unconditionally whenever the component renders), whereas calling
- * `useRender` directly after an early `return` would break the Rules of Hooks.
+ * Component form of {@link useRender}, for rendering polymorphically from a
+ * conditional branch (after an early `return`), where calling `useRender` directly
+ * would break the Rules of Hooks.
  */
 export function RenderElement(params: UseRenderParams): React.ReactElement {
   return useRender(params);

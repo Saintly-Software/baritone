@@ -13,10 +13,9 @@ export interface FormApiLike {
   handleSubmit: () => void | Promise<void>;
   /**
    * The form-context provider from `useAppForm()` (`form.AppForm`). When present it
-   * wraps the children, so `form.SubmitButton` and any other form components resolve
-   * their context here — no separate `<form.AppForm>` needed. When absent (a plain
-   * `useForm()`), the children render directly and a native `<Button type="submit">`
-   * still drives submission.
+   * wraps the children so `form.SubmitButton` etc. resolve their context — no
+   * separate `<form.AppForm>` needed. Absent (a plain `useForm()`), children render
+   * directly and a native `<Button type="submit">` still drives submission.
    */
   AppForm?: React.ComponentType<React.PropsWithChildren>;
 }
@@ -25,13 +24,10 @@ export interface FormProps extends Omit<FlexProps, "render" | "onSubmit"> {
   /** The form instance from `useAppForm()` (or a plain `useForm()`). */
   form: FormApiLike;
   /**
-   * A raw DOM-submit hook: fires on **every** submit attempt, synchronously, after
-   * the browser default is prevented and `form.handleSubmit()` is kicked off — but
-   * *before* it resolves and regardless of whether validation passes, so it can't
-   * tell a successful submit from a rejected one. Use it for submit-*attempt* side
-   * effects (e.g. analytics); success / failure side effects belong on the form
-   * config's `onSubmit` / `onSubmitInvalid` in `useAppForm()`. You do **not** call
-   * `handleSubmit` here — `<Form>` wires it for you.
+   * A raw DOM-submit hook firing on **every** submit attempt, after the default is
+   * prevented and `handleSubmit()` kicked off but before it resolves — so it can't
+   * tell success from failure. For submit-*attempt* side effects (analytics);
+   * success/failure belong on the `useAppForm()` config. Don't call `handleSubmit` here.
    */
   onSubmit?: (event: React.FormEvent<HTMLFormElement>) => void;
   /** Skip native browser validation — TanStack owns validation. Defaults to `true`. */
