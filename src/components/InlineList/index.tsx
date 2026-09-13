@@ -28,29 +28,12 @@ export interface InlineListProps
 }
 
 /**
- * InlineList — a horizontal run of items separated by a delimiter, wrapping when
- * it runs out of room. The classic "byline" / metadata line:
- * `12 lines · 340 words · Updated 2h ago`.
- *
- * It owns only the *mechanics* of a separated inline flow, so it stays reusable
- * wherever that shape appears (a card's metadata, an article header, a list
- * row): it interleaves the `separator` between items, spaces everything with
- * `gap`, and wraps. Two details make it safe to hand any content:
- *   - **Falsy children are dropped** (via `React.Children.toArray` +
- *     `filter(Boolean)`, so `0` / `""` go too), so a conditional item —
- *     `{isLyrics && <Text>…</Text>}` or `{count && <Text>…</Text>}` — never
- *     leaves a dangling separator when it's absent.
- *   - **Separators are `aria-hidden`, `inert`, and non-selectable**, so
- *     assistive tech reads (and a copy-paste yields) just the items, never the
- *     dots — and an interactive delimiter node can't steal focus or clicks.
- *
- * It deliberately does *not* use list semantics (`ul` / `li`): a metadata line
- * is decorative separation, and announcing "list, 3 items" would be noise. For a
- * genuine list, reach for `List`.
- *
- * Typography is inherited, not imposed — the separator tracks whatever text
- * context the list sits in. For the common muted metadata line, style the items
- * (e.g. `<Text size="sm" saliency="low">`) and pass a matching `separator`.
+ * A horizontal run of items separated by a delimiter, wrapping when it runs out of
+ * room — the classic metadata line (`12 lines · 340 words · Updated 2h ago`).
+ * Interleaves the `separator`, spaces with `gap`, and wraps. Falsy children are
+ * dropped (so a conditional item leaves no dangling separator), and separators are
+ * `aria-hidden` / `inert` / non-selectable. Not a semantic list — for that, use
+ * `List`. Typography is inherited, not imposed.
  *
  * @example
  * <InlineList>

@@ -15,10 +15,9 @@ export interface LockupIconState {
 }
 
 /**
- * Props for the Lockup's title slot. It layers onto the title's own defaults
- * (high-saliency, `lg` size). Set `level` to render the title as a semantic
- * `Heading` (`h1`–`h6`) instead of a `Text` — a pure semantics switch, so the
- * visual size still comes from `size` and the lockup looks the same either way.
+ * Props for the Lockup's title slot, layered onto its defaults (high-saliency,
+ * `lg`). Set `level` to render the title as a semantic `Heading` — a pure
+ * semantics switch; the visual size still comes from `size`.
  */
 export interface LockupTitleSlotProps extends Omit<
   React.HTMLAttributes<HTMLElement>,
@@ -43,11 +42,8 @@ export interface LockupTitleSlotProps extends Omit<
 }
 
 /**
- * Props forwarded into each of the Lockup's three slots. Every field is partial:
- * you're layering overrides onto the slot's own defaults, so `slotProps={{ title:
- * { size: "xl" }, icon: { size: "lg" } }}` just re-sizes those pieces while
- * the rest of the lockup stays as-is. To replace a slot's content entirely, use
- * the `slots` prop instead.
+ * Overrides layered onto each of the Lockup's three slots' defaults. To replace a
+ * slot's content entirely, use the `slots` prop instead.
  */
 export interface LockupSlotProps {
   /** Props for the title `Text` (or `Heading`, when `title.level` is set). */
@@ -59,11 +55,9 @@ export interface LockupSlotProps {
 }
 
 /**
- * ReactNode overrides for the Lockup's three slots. A slot given here is rendered
- * verbatim, replacing the primitive the lockup would otherwise build from the
- * top-level `icon` / `title` / `subtitle` props (and bypassing that slot's
- * `slotProps`). Use this when you need full control over a slot's markup;
- * otherwise prefer the top-level content props with `slotProps` tweaks.
+ * ReactNode overrides for the Lockup's three slots — rendered verbatim, replacing
+ * the primitive the lockup would build (and bypassing `slotProps`). For full
+ * control over a slot's markup; otherwise prefer the content props + `slotProps`.
  */
 export interface LockupSlots {
   /** Replaces the wrapped icon. */
@@ -124,13 +118,10 @@ function renderTitle(title: React.ReactNode, slot: LockupTitleSlotProps | undefi
 }
 
 /**
- * Lockup — an icon locked up with a title and optional subtitle, after the logo
- * design idea of a fixed "lockup" of mark and wordmark. A flexible media object:
- * the mark sits inline with the stacked text, each of the three pieces is
- * optional, and each renders as a system primitive (`Icon`, `Text`/`Heading`)
- * you can tune through `slotProps` or replace wholesale through `slots`. Colours
- * are inherited from the surrounding surface, so a lockup drops into a coloured
- * `component`/`surface` and matches automatically.
+ * An icon locked up with a title and optional subtitle — a media object where the
+ * mark sits inline with the stacked text. Each of the three pieces is optional and
+ * renders as a system primitive, tunable through `slotProps` or replaceable
+ * through `slots`. Colours are inherited from the surrounding surface.
  */
 export function Lockup({
   title,

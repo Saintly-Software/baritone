@@ -81,20 +81,10 @@ export interface InfoButtonProps {
 }
 
 /**
- * InfoButton — a small icon-only button that opens an informational `Popover`.
- * Use it for the "i" affordance next to a label or field that reveals a short
- * explanation on click.
- *
- * It composes the exported `Popover` (so focus management, `Escape` / outside
- * dismissal, and ARIA wiring come for free) with an icon-only trigger built on
- * the very same `InternalButton` that powers `Button`. Like `ToggleButton`, the
- * `aria-label` and the popover-toggle wiring ride in through `InternalButton`'s
- * `htmlAttrs` seam — base-ui's `Popover.Trigger` supplies the toggle props, and
- * the required `aria-label` names the otherwise-textless button.
- *
- * `intent` / `saliency` / `size` style the trigger (shared with `Button` /
- * `Chip`); the floating surface itself stays the default neutral, low-saliency
- * `Popover`.
+ * A small icon-only button that opens an informational `Popover` — the "i"
+ * affordance next to a label or field. Composes the exported `Popover` with an
+ * icon-only `InternalButton` trigger; the required `aria-label` names the
+ * textless button. `intent` / `saliency` / `size` style the trigger.
  *
  * @example
  * <InfoButton aria-label="About billing cycles">

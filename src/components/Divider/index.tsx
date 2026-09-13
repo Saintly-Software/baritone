@@ -78,18 +78,11 @@ export interface DividerProps
 }
 
 /**
- * Divider — a rule that separates content, built on base-ui's `Separator` for
- * the semantics (`role="separator"` plus the `aria-orientation` wiring).
- *
- * The rule is coloured by `intent` × `saliency` — the same vocabulary as
- * `Chip` / `Button` — reading the `component` *border* ramp, so `neutral` / `low`
- * (the default) is the quiet hairline you want almost everywhere, and a louder
- * intent is there when the split itself is meaningful. `thickness` picks a
- * `borderWidth` — a built-in (`thin` / `thick`) or a name the active theme
- * published — and the margin props (`my`, `mx`, …) space it from its neighbours.
- *
- * Pass `children` to label it: the rule breaks around the label, positioned by
- * `labelPosition`. A `vertical` divider stretches to the height of a flex row.
+ * A rule that separates content, built on base-ui's `Separator`
+ * (`role="separator"` + `aria-orientation`). Coloured by `intent` × `saliency`
+ * (default `neutral`/`low`, the quiet hairline); `thickness` picks a `borderWidth`
+ * and the margin props space it. Pass `children` to label it (positioned by
+ * `labelPosition`); a `vertical` divider stretches to a flex row's height.
  *
  * @example
  * <Divider my="4" />

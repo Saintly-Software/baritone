@@ -196,19 +196,12 @@ export interface FileListProps extends Omit<React.HTMLAttributes<HTMLUListElemen
 }
 
 /**
- * FileList — renders a set of files as a list of chips, stacked vertically
- * (default) or flowed horizontally. Provide files as the `items` array (each a
- * `FileInfo` with a unique `id`, a browser `File`, and an optional `download`
- * flag), or compose the rows yourself with `FileList.Item` `children` for
- * advanced cases. Pass `onRemove` to give each chip a remove "×", and
- * `onDownload` to give items marked `download` a download button — both call
- * back with that file's `id`.
- *
- * Each row is a `Chip` showing a file-type icon (derived from the `File`'s MIME
- * type / extension) and the filename, inside a semantic `<ul>` / `<li>`.
- * A long filename ellipsizes when the chip is width-constrained. The whole list
- * can be `disabled` — chips dim and adornment buttons go inert while staying
- * keyboard-reachable (`aria-disabled`, per AGENTS.md).
+ * Renders a set of files as a list of chips, stacked (default) or horizontal.
+ * Provide files as the `items` array (each a `FileInfo`), or compose rows with
+ * `FileList.Item` children. `onRemove` gives each chip a remove "×" and
+ * `onDownload` gives `download` items a download button — both called with the
+ * file's `id`. Each row is a `Chip` with a file-type icon and filename in a
+ * semantic `<ul>`/`<li>`; `disabled` dims the list (chips stay focusable).
  *
  * @example
  * const [files, setFiles] = React.useState<FileInfo[]>([

@@ -30,21 +30,12 @@ export interface BaritoneProviderProps {
 }
 
 /**
- * BaritoneProvider — the client-side application provider for the design system.
- * Wrap your app in it once (inside your `BaritoneTheme`) and the global client
- * services it owns are set up for the whole tree.
- *
- * Today it sets up the **toast system**: it renders base-ui's `Toast.Provider`
- * around your app *and* mounts the toast viewport for you, so calling
- * `useToast().add(...)` anywhere below just works — there's no separate viewport
- * to place. It's the deliberate client-side counterpart to `BaritoneTheme`, which
- * stays a pure, server-renderable token wrapper (so it can live in an SSR root
- * layout); anything needing React state/context lives here instead.
- *
- * The viewport portals to `<body>`, so — like every other portalled surface in
- * the system (`Modal`/`Drawer`/`Popover`) — it resolves its theme tokens from the
- * theme class on `<body>`. Apply your `BaritoneTheme` such that `<body>` carries
- * the theme (e.g. `render={<body />}`) so toasts are themed too.
+ * The client-side application provider for the design system — wrap your app in it
+ * once, inside `BaritoneTheme`. Today it sets up the toast system: it renders
+ * base-ui's `Toast.Provider` and mounts the viewport, so `useToast().add(...)`
+ * just works anywhere below. The client-side counterpart to the server-renderable
+ * `BaritoneTheme`. The viewport portals to `<body>`, so apply your theme such that
+ * `<body>` carries the theme class (e.g. `render={<body />}`) for themed toasts.
  *
  * @example
  * // App root (a client component)

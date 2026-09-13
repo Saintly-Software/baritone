@@ -67,23 +67,12 @@ interface CheckboxBaseProps {
 export type CheckboxProps = CheckboxBaseProps & FieldLabellingProps;
 
 /**
- * Checkbox — a single boolean "form control", built on base-ui's `Checkbox` for
- * behaviour (role, keyboard, form wiring) and wrapped in a `Field` for ARIA, the
- * same way `TextInput` and `RadioGroup` are.
- *
- * The visual is the presentational `InternalCheckbox`, slotted in via base-ui's
- * `render` prop: base-ui makes the box the focusable `role="checkbox"` element
- * and feeds it `data-checked` / `data-disabled` / `data-invalid`, while
- * `InternalCheckbox` owns the look (box, glyph, focus ring). Because base-ui's
- * hidden `<input>` is `aria-hidden`, a wrapping `<label>` would only name *it*,
- * not the box — so, exactly like `RadioGroup`, the box is named explicitly with
- * `aria-labelledby` pointing at the visible label. Without a visible `label`,
- * name the box with `aria-label` / `aria-labelledby` instead.
- *
- * `value` stays a single `boolean` (the checked state); `indeterminate` layers a
- * "mixed" presentation on top for a parent-of-a-set summary. Validation follows
- * the shared `state` model, with an optional `helpText` line beneath the box
- * (reddened when invalid) — matching `TextInput`, `RadioGroup`, `CheckboxGroup`.
+ * A single boolean "form control", built on base-ui's `Checkbox` and wrapped in a
+ * `Field`. The box is named explicitly with `aria-labelledby` (base-ui's hidden
+ * `<input>` is `aria-hidden`), or with `aria-label` / `aria-labelledby` when
+ * there's no visible `label`. `value` is a `boolean`; `indeterminate` layers a
+ * "mixed" presentation for a parent-of-a-set summary. Validation follows the
+ * shared `state` model with an optional `helpText`.
  *
  * @example
  * const [agreed, setAgreed] = React.useState(false);
