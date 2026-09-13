@@ -2,27 +2,11 @@ import { LETTER_SPACING_KEYS, type LetterSpacingKey } from "./constants";
 import { vars } from "./contract.css";
 
 /**
- * The consumer-defined letter-spacing (tracking) vocabulary — a second *open*
- * vocabulary in Baritone, mirroring the `font` one in {@link module:./fonts}.
- *
- * The built-in steps (`tighter`…`widest`) are a closed, token-backed scale baked
- * into the theme contract. But a brand often wants tracking values outside that
- * ramp — a hand-tuned `em` for an all-caps eyebrow, a display headline's negative
- * track — and the exact set only exists at *its* build/runtime. So, like `font`,
- * the open half can't ride the vanilla-extract contract; it's a naming convention
- * (`--letterSpacing-<name>` custom properties, published by the theme) plus this
- * augmentable type seam.
- *
- * Baritone ships `LetterSpacingRegistry` empty, so the `letterSpacing` prop starts
- * as a loose `string`. An app declares its own names by augmenting the interface,
- * which tightens `letterSpacing` to the built-ins plus their declared names with
- * autocompletion — while Baritone stays ignorant of what those names are.
- *
- * The declared names must line up with the values handed to the theme (the
- * `letterSpacings` option on {@link createDesignSystemTheme} /
- * {@link createInlineTheme} / `BaritoneTheme`), which emits one
- * `--letterSpacing-<name>` per entry. The built-in steps are always emitted, so
- * they need no registry entry.
+ * The consumer-defined letter-spacing (tracking) vocabulary — an *open* vocabulary
+ * mirroring {@link FontRegistry} (see {@link module:./fonts} for the full pattern).
+ * Built-in steps (`tighter`…`widest`); other names come from the theme's
+ * `letterSpacings` option (emitting `--letterSpacing-<name>`) plus augmenting this
+ * interface to tighten the `letterSpacing` prop.
  *
  * @example
  * // Somewhere in the consuming app (e.g. a `baritone.d.ts`):

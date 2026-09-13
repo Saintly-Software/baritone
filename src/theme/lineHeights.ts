@@ -3,28 +3,10 @@ import { vars } from "./contract.css";
 
 /**
  * The consumer-defined line-height (leading) vocabulary — an *open* vocabulary
- * mirroring the `font` one in {@link module:./fonts}.
- *
- * The built-in steps (`none`…`loose`) are a closed, token-backed scale of unitless
- * multipliers baked into the theme contract. But a brand often wants a leading
- * outside that ramp, and the exact set only exists at *its* build/runtime. So, like
- * `font`, the open half can't ride the vanilla-extract contract; it's a naming
- * convention (`--lineHeight-<name>` custom properties, published by the theme) plus
- * this augmentable type seam.
- *
- * `lineHeight` is an *override*: left unset, `size` supplies each element's
- * line-height (the built-in sizes keep their tuned per-size leading). Setting
- * `lineHeight` picks a value from this vocabulary instead.
- *
- * Baritone ships `LineHeightRegistry` empty, so the `lineHeight` prop starts as a
- * loose `string`. An app declares its own names by augmenting the interface, which
- * tightens `lineHeight` to the built-ins plus their declared names with
- * autocompletion — while Baritone stays ignorant of what those names are.
- *
- * The declared names must line up with the values handed to the theme (the
- * `lineHeights` option on {@link createDesignSystemTheme} / {@link createInlineTheme}
- * / `BaritoneTheme`), which emits one `--lineHeight-<name>` per entry. The built-in
- * steps are always emitted, so they need no registry entry.
+ * mirroring {@link FontRegistry} (see {@link module:./fonts} for the full pattern).
+ * Built-in steps (`none`…`loose`); other names come from the theme's `lineHeights`
+ * option (emitting `--lineHeight-<name>`) plus augmenting this interface.
+ * `lineHeight` is an override — left unset, `size` supplies the leading.
  *
  * @example
  * // Somewhere in the consuming app (e.g. a `baritone.d.ts`):

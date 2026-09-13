@@ -2,25 +2,11 @@ import { TEXT_WEIGHTS, type TextWeight } from "./constants";
 import { vars } from "./contract.css";
 
 /**
- * The consumer-defined font-weight vocabulary — an *open* vocabulary mirroring the
- * `font` one in {@link module:./fonts}.
- *
- * The built-in steps (`default`, `semibold`, `bold`, `superbold`) are a closed,
- * token-backed scale baked into the theme contract. But a brand often wants a
- * weight outside that set — a hairline `300`, a black `900` — and the exact set
- * only exists at *its* build/runtime. So, like `font`, the open half can't ride the
- * vanilla-extract contract; it's a naming convention (`--fontWeight-<name>` custom
- * properties, published by the theme) plus this augmentable type seam.
- *
- * Baritone ships `FontWeightRegistry` empty, so the `weight` prop starts as a loose
- * `string`. An app declares its own names by augmenting the interface, which
- * tightens `weight` to the built-ins plus their declared names with autocompletion
- * — while Baritone stays ignorant of what those names are.
- *
- * The declared names must line up with the values handed to the theme (the
- * `weights` option on {@link createDesignSystemTheme} / {@link createInlineTheme} /
- * `BaritoneTheme`), which emits one `--fontWeight-<name>` per entry. The built-in
- * steps are always emitted, so they need no registry entry.
+ * The consumer-defined font-weight vocabulary — an *open* vocabulary mirroring
+ * {@link FontRegistry} (see {@link module:./fonts} for the full pattern). Built-in
+ * steps (`default`/`semibold`/`bold`/`superbold`); other names come from the
+ * theme's `weights` option (emitting `--fontWeight-<name>`) plus augmenting this
+ * interface to tighten the `weight` prop.
  *
  * @example
  * // Somewhere in the consuming app (e.g. a `baritone.d.ts`):

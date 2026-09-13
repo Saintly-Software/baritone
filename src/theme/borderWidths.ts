@@ -2,25 +2,11 @@ import { BORDER_WIDTH_KEYS, type BorderWidthKey } from "./constants";
 import { vars } from "./contract.css";
 
 /**
- * The consumer-defined border-width vocabulary — an *open* vocabulary mirroring the
- * `font-weight` one in {@link module:./fontWeights}.
- *
- * The built-in steps (`thin`, `thick`) are a closed, token-backed scale baked into
- * the theme contract. But a brand often wants a rule outside that set — a hairline
- * `0.5px`, an emphatic `4px` — and the exact set only exists at *its* build/runtime.
- * So, like `font-weight`, the open half can't ride the vanilla-extract contract; it's
- * a naming convention (`--borderWidth-<name>` custom properties, published by the
- * theme) plus this augmentable type seam.
- *
- * Baritone ships `BorderWidthRegistry` empty, so a border-width prop (e.g. Divider's
- * `thickness`) starts as a loose `string`. An app declares its own names by augmenting
- * the interface, which tightens the prop to the built-ins plus their declared names
- * with autocompletion — while Baritone stays ignorant of what those names are.
- *
- * The declared names must line up with the values handed to the theme (the
- * `borderWidths` option on {@link createDesignSystemTheme} / {@link createInlineTheme} /
- * `BaritoneTheme`), which emits one `--borderWidth-<name>` per entry. The built-in
- * steps are always emitted, so they need no registry entry.
+ * The consumer-defined border-width vocabulary — an *open* vocabulary mirroring
+ * {@link FontRegistry} (see {@link module:./fonts} for the full pattern). Built-in
+ * steps (`thin`, `thick`); other names come from the theme's `borderWidths` option
+ * (emitting `--borderWidth-<name>`) plus augmenting this interface to tighten a
+ * border-width prop (e.g. Divider's `thickness`).
  *
  * @example
  * // Somewhere in the consuming app (e.g. a `baritone.d.ts`):

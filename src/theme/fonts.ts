@@ -1,24 +1,19 @@
 import { vars } from "./contract.css";
 
 /**
- * The consumer-defined font vocabulary — the one *open* vocabulary in Baritone.
+ * The consumer-defined font vocabulary — the canonical *open* vocabulary in
+ * Baritone (the weight / size / leading / tracking / border-width registries all
+ * mirror this one).
  *
- * Everything else (`INTENTS`, `TEXT_SIZES`, `TEXT_WEIGHTS`, …) is a closed tuple
- * baked into the theme contract when Baritone compiles. Fonts are different: the
- * set of families an app wants only exists at *its* build/runtime, after Baritone
- * is already compiled. So `font` can't ride the vanilla-extract contract; instead
- * it's a naming convention (`--font-<name>` custom properties, published by the
- * theme) plus this augmentable type seam.
+ * A closed tuple baked into the theme contract can't express the set of families
+ * an app wants, since that only exists at *its* build/runtime. So `font` rides a
+ * naming convention (`--font-<name>` custom properties, published by the theme)
+ * plus this augmentable type seam instead of the vanilla-extract contract.
  *
- * Baritone ships `FontRegistry` empty, so the `font` prop starts as a loose
- * `string`. An app declares its own names by augmenting the interface, which
- * tightens `font` to `sans | mono | <their names>` with autocompletion — while
- * Baritone stays ignorant of what those names are.
- *
- * The declared names must line up with the families handed to the theme (the
- * `fonts` option on {@link createDesignSystemTheme} / {@link createInlineTheme} /
- * `BaritoneTheme`), which emits one `--font-<name>` per entry. The built-in
- * `sans` and `mono` are always emitted, so they need no registry entry.
+ * Shipped empty, so the `font` prop starts as a loose `string`; an app augments
+ * the interface to tighten it to `sans | mono | <their names>` with
+ * autocompletion. The declared names must line up with the theme's `fonts` option,
+ * which emits one `--font-<name>` per entry; `sans` / `mono` are always emitted.
  *
  * @example
  * // Somewhere in the consuming app (e.g. a `baritone.d.ts`):
