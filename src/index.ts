@@ -276,6 +276,8 @@ export {
 export { InfoButton, type InfoButtonProps, type InfoButtonIntent } from "./components/InfoButton";
 export {
   Drawer,
+  useControlledDrawer,
+  type UseControlledDrawerReturn,
   type DrawerProps,
   type DrawerSide,
   type DrawerPadding,
@@ -287,6 +289,8 @@ export {
 } from "./components/Drawer";
 export {
   Modal,
+  useControlledModal,
+  type UseControlledModalReturn,
   type ModalProps,
   type ModalSize,
   type ModalPadding,

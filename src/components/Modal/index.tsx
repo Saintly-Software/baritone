@@ -7,6 +7,7 @@ import type { HeadingLevel } from "../../theme/constants";
 import { cx } from "../../utils/cx";
 import { InternalButton } from "../../internal/components/InternalButton";
 import { InternalSpinner } from "../../internal/components/InternalSpinner";
+import { type ControlledOverlay, useControlledOverlay } from "../../internal/useControlledOverlay";
 import type { ButtonProps } from "../Button";
 import { Heading } from "../Heading";
 import { Text } from "../Text";
@@ -264,6 +265,26 @@ function ModalFooter({ className, children, ref, ...rest }: ModalFooterProps) {
       {children}
     </div>
   );
+}
+
+export interface UseControlledModalReturn extends ControlledOverlay {
+  /** Spread onto `<Modal>` to bind its controlled open state. */
+  modalProps: Pick<ModalProps, "open" | "onOpenChange">;
+}
+
+/**
+ * Manages a `Modal`'s open state from the parent. Returns open/close/toggle
+ * controls plus a `modalProps` bundle to spread onto `<Modal>`. Use it when the
+ * modal must be driven from outside its trigger — opened from a menu item, or
+ * closed after an async action. To only close without owning the open state,
+ * prefer `useOverlayHandle(Modal)`.
+ */
+export function useControlledModal(defaultOpen = false): UseControlledModalReturn {
+  const overlay = useControlledOverlay(defaultOpen);
+  return {
+    ...overlay,
+    modalProps: { open: overlay.isOpen, onOpenChange: overlay.setOpen },
+  };
 }
 
 ModalRoot.displayName = "Modal";
