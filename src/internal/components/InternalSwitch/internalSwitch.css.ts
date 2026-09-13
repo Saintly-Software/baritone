@@ -14,16 +14,11 @@ const thumb = createVar();
 const pad = createVar();
 
 /**
- * The switch "track" — a pill-shaped presentational control. Not an `<input>`:
- * it reflects `data-checked` / `data-unchecked` (and `data-disabled`) that the
- * component sets from props. It shares the *outline* visual language of
- * `checkboxControl` (form surface background + neutral border, accent on select)
- * so a switch and a checkbox read identically across themes — the difference is
- * the shape (full radius pill) and the sliding accent `switchThumb` inside.
- *
- * It is intentionally not focusable; the focus ring is drawn by the shared
- * `focusRingRecipe({ type: "within" })`, so a focusable element the consumer
- * slots inside (e.g. a visually-hidden `<input>`) lights the ring when tabbed to.
+ * The switch "track" — a pill-shaped presentational control reflecting
+ * `data-checked` / `data-disabled` set from props. Shares `checkboxControl`'s
+ * outline language so a switch and checkbox read identically, differing in shape
+ * and the sliding `switchThumb`. Not focusable; the ring is drawn by
+ * `focusRingRecipe({ type: "within" })` off a slotted focusable element.
  */
 export const switchTrack = recipe({
   base: {

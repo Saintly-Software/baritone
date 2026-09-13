@@ -68,17 +68,11 @@ export const buttonSpinner = style({
 const textFg = createVar();
 
 /**
- * `appearance="text"` recipe — the hyperlink look. A `<Button appearance="text">`
- * drops the component chrome (background, border, control height, padding) and
- * renders as underlined text whose colour comes from the `text.color` tokens, so
- * it reads like a `Link` but is a real `<button>` driven by `intent`/`saliency`.
- * Typography is supplied separately by `textSizeRecipe` (the `variant` knob).
- *
- * Colour is stored in `--textFg` so hover/active can derive from it with the same
- * oklch relative-colour math the `component`/`Link` schemes use, and it's mirrored
- * to `--iconColor` (via `currentColor`) so a `startIcon`/`endIcon` tracks the text
- * — including through the hover/active shift. Disabled dims to the shared control
- * opacity rather than a token, since `text.color` has no disabled shade.
+ * `appearance="text"` recipe — the hyperlink look: drops the component chrome and
+ * renders as underlined `text.color` text, a real `<button>` driven by
+ * `intent`/`saliency` (typography from `textSizeRecipe`). Colour is stored in
+ * `--textFg` so hover/active derive from it via oklch math and mirror to
+ * `--iconColor`; disabled dims to the shared control opacity (no token shade).
  */
 export const textButtonRecipe = recipe({
   base: {
