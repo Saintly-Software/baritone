@@ -19,11 +19,8 @@ export interface BadgeIconState {
 export type BadgeShape = "round" | "square";
 
 /**
- * Props shared by every badge kind. The content is carried by the kind-specific
- * props below rather than `children`, so `children` is removed from the
- * underlying span attributes (as is the native `color` attribute, which the
- * escape hatch below redefines). The `shape` axis is orthogonal to the content
- * kind — any kind can be `square`.
+ * Props shared by every badge kind. Content is carried by the kind-specific props
+ * below rather than `children`; `shape` is orthogonal to the content kind.
  */
 interface BadgeBaseProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "color" | "children"> {
   size?: Size;
@@ -44,29 +41,14 @@ export interface BadgeIntentColourProps {
 
 /**
  * `<Badge color="#7c3aed" />` — the colour **escape hatch**, for a badge whose
- * fill is data rather than a design decision: a per-tag colour, a
- * customer-chosen label colour, a language/category swatch. These are values the
- * palette can't enumerate, because they aren't the system's to choose.
- *
- * Prefer `intent`/`saliency`. Everything the palette *can* express should go
- * through it: an `intent` badge re-themes with the rest of the system, this one
- * is frozen at whatever you pass. Reach here only when the colour genuinely
- * isn't the system's to pick.
- *
- * Mutually exclusive with `intent`/`saliency` rather than overriding them: this
- * replaces the token-driven colour scheme outright, so accepting both would
- * leave one silently doing nothing.
- *
- * The text/icon colour is derived from the fill (black or white, whichever
- * survives on it) — you supply the fill, not the pair. Note the fill is used
- * as-is: it can't respond to a theme change, and nothing checks it against the
- * surface *behind* the badge.
+ * fill is data (a per-tag colour) rather than a design decision. Prefer
+ * `intent`/`saliency`, which re-theme with the system; this is frozen at whatever
+ * you pass and unchecked for contrast. Mutually exclusive with `intent`/`saliency`.
  */
 export interface BadgeCustomColourProps {
   /**
-   * Paint the badge any CSS colour, replacing `intent` × `saliency`. Takes
-   * anything CSS `color` does — a hex/rgb/oklch value, a custom property,
-   * `currentColor`. The foreground is derived for contrast.
+   * Paint the badge any CSS colour, replacing `intent` × `saliency`. The
+   * foreground is derived for contrast.
    */
   color: NonNullable<React.CSSProperties["color"]>;
   /** Unsupported alongside `color` — the custom fill replaces the palette scheme. */
@@ -85,11 +67,7 @@ export type BadgeColourProps = BadgeIntentColourProps | BadgeCustomColourProps;
 
 /** A badge whose content is a single icon — typically an `<Icon>` that inherits the badge's colour. */
 export interface BadgeIconProps extends BadgeBaseProps {
-  /**
-   * The badge's icon — a bare glyph (auto-wrapped in `Icon`), an explicit
-   * `<Icon>`, or a `(props, state)` render function. Inherits the badge's
-   * foreground via `--iconColor`.
-   */
+  /** The badge's icon — a bare glyph, an `<Icon>`, or a render function. */
   icon: IconSlot<BadgeIconState>;
   count?: never;
   max?: never;
@@ -127,16 +105,9 @@ export interface BadgeBlankProps extends BadgeBaseProps {
 }
 
 /**
- * A Badge, as one of four content kinds discriminated by its content prop:
- *   - **icon** — pass `icon`,
- *   - **count** — pass `count` (optionally `max`),
- *   - **text** — pass `text`,
- *   - **blank** — pass none of them for a bare content-less indicator.
- *
- * Each kind is independently `round` (default) or `square` via `shape`, and
- * independently coloured by the palette or by a custom `color`
- * ({@link BadgeColourProps}) — both axes are orthogonal to the content, so they
- * intersect the four kinds instead of multiplying them into sixteen arms.
+ * A Badge, as one of four content kinds: `icon`, `count` (optionally `max`),
+ * `text`, or blank (none of them). Intersected with {@link BadgeColourProps},
+ * since colour and `shape` are orthogonal to the content kind.
  */
 export type BadgeProps = (BadgeIconProps | BadgeCountProps | BadgeTextProps | BadgeBlankProps) &
   BadgeColourProps;
@@ -152,17 +123,11 @@ type BadgeAllProps = BadgeBaseProps & {
 };
 
 /**
- * Badge — a small "component" element type: a filled indicator that shows an
- * `icon`, a `count` (capped by `max`), `text`, or — with none of those — a bare
- * blank indicator. Shares the colour scheme/recipe with `Chip`/`Button`, so
- * `<Badge intent="negative" saliency="high">` matches those with the same props;
- * a per-`size` box and a `round`/`square` silhouette come from its own recipe.
- *
- * A badge is an indicator, not a control: it renders a static `<span>` that is
- * not a hit target, so it takes no hover/active background — that would advertise
- * a click it can't perform. A `render` that makes it a link or button restores
- * them, off the rendered element rather than a prop (see the `interactive`
- * variants in `component.css.ts`).
+ * A small "component" element type: a filled indicator showing an `icon`, a
+ * `count` (capped by `max`), `text`, or a bare blank dot. Shares the colour
+ * recipe with `Chip`/`Button`. An indicator, not a control — a static `<span>`
+ * with no hover/active background; a `render` that makes it a link/button restores
+ * them off the rendered element.
  */
 export function Badge(props: BadgeProps) {
   const {

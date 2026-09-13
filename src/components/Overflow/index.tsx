@@ -29,14 +29,12 @@ export type OverflowScrollMode = "item" | "page";
 export interface OverflowProps {
   /**
    * The controls to lay out in a single non-wrapping row (`horizontal`) or
-   * column (`vertical`). They keep their intrinsic size and overflow — with a
-   * scrollbar, edge fades, and floating nav buttons — instead of wrapping.
+   * column (`vertical`); they overflow with a scrollbar rather than wrapping.
    */
   children: React.ReactNode;
   /**
-   * Flow + scroll axis. `horizontal` (default) fills the available width and
-   * hugs its row's height; `vertical` needs a bounded height (a `maxHeight` /
-   * `height` via `className` / `style`) for its column to overflow.
+   * Flow + scroll axis. `horizontal` (default) fills the available width;
+   * `vertical` needs a bounded height for its column to overflow.
    * @default "horizontal"
    */
   orientation?: OverflowOrientation;
@@ -84,11 +82,8 @@ function scrollBehavior(): ScrollBehavior {
 }
 
 /**
- * Absolute scroll offset that brings the next clipped control fully into view.
- * Positions are measured from live rects (layout-direction agnostic within an
- * axis) and converted to the viewport's scroll coordinates, so it works for a
- * mixed bag of control sizes. Returns `null` when there's nothing more to reveal
- * that way.
+ * Absolute scroll offset that brings the next clipped control fully into view,
+ * measured from live rects. Returns `null` when there's nothing more to reveal.
  */
 function nextItemOffset(
   vp: HTMLElement,
@@ -160,22 +155,11 @@ function Chevron() {
 }
 
 /**
- * Overflow — a single row (or column) of controls that scrolls instead of
- * wrapping. Built on base-ui's `ScrollArea`, it adds three affordances that all
- * appear only when there's actually more to see in that direction:
- *
- * - **Floating nav buttons** at the start/end edges. Clicking one slides toward
- *   the next clipped control (`scrollBy="item"`) or by a whole viewport
- *   (`scrollBy="page"`). They're pointer conveniences kept out of the tab order
- *   — the keyboard path is to Tab through the controls, which scrolls each
- *   focused control into view on its own.
- * - **Gradient edge fades** that grow in as content hides past an edge (driven
- *   by base-ui's live per-edge overflow metrics) and stay crisp at a flush edge.
- * - **A hover-reveal scrollbar** for pointer dragging.
- *
- * Supports `horizontal` (default) and `vertical` orientations. A vertical
- * `Overflow` needs a bounded height; a horizontal one just needs a bounded width
- * (its container's is enough).
+ * A single row (or column) of controls that scrolls instead of wrapping. Built on
+ * base-ui's `ScrollArea`, adding floating nav buttons (kept out of the tab order),
+ * gradient edge fades, and a hover-reveal scrollbar — each shown only when there's
+ * more to see. `horizontal` (default) needs a bounded width, `vertical` a bounded
+ * height.
  *
  * @example
  * // A toolbar of actions that scrolls when the window is narrow.

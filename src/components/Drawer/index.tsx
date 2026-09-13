@@ -72,23 +72,19 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   /** Edge the drawer slides in from. Default `right`. */
   side?: DrawerSide;
   /**
-   * Width of the panel: `xs` (14rem / 224px), `sm` (26rem / 416px), `md`
-   * (default, 38rem / 608px), `lg` (52rem / 832px), or `xl` (64rem / 1024px).
-   * Every step is capped to the viewport, so a wide drawer shrinks to fit on
-   * small screens rather than overflowing.
+   * Width of the panel: `xs` / `sm` / `md` (default) / `lg` / `xl`, each capped
+   * to the viewport so a wide drawer shrinks to fit on small screens.
    */
   width?: DrawerWidth;
   /**
-   * Loading state: overlays a spinner on the body content (the header and footer
-   * stay visible and interactive, so the drawer can still be closed) and marks
-   * the panel `aria-busy`. Purely visual — it does not, on its own, prevent
-   * closing; pair with `disabled` for that.
+   * Loading state: overlays a spinner on the body (header and footer stay
+   * interactive) and marks the panel `aria-busy`. Visual only; pair with
+   * `disabled` to prevent closing.
    */
   loading?: boolean;
   /**
-   * When `true`, the drawer cannot be closed by any means — Escape, the close
-   * button, or swipe are all vetoed (outside-press is always prevented). Use it
-   * to keep the user in the panel while a blocking action is in flight.
+   * When `true`, the drawer cannot be closed by any means (Escape, close button,
+   * swipe all vetoed). Use it while a blocking action is in flight.
    */
   disabled?: boolean;
   /** Controlled open state. */
@@ -98,16 +94,13 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
   /** Called when the open state changes (base-ui signature). */
   onOpenChange?: RootProps["onOpenChange"];
   /**
-   * Imperative handle from `useOverlayHandle(Drawer)`. Lets you close the drawer
-   * from code — e.g. after an async action — without lifting `open` into
-   * component state. `handle.close()` is still vetoed while `disabled`, and the
-   * declarative `.Close` part / controlled `open` keep working alongside it.
+   * Imperative handle from `useOverlayHandle(Drawer)`, to close the drawer from
+   * code without lifting `open` into state. Still vetoed while `disabled`.
    */
   handle?: RootProps["handle"];
   /**
-   * Modal behaviour. Default (base-ui) `true`: focus is trapped, page scroll is
-   * locked, and the page behind is inert. `'trap-focus'` traps focus but leaves
-   * the page scrollable/interactive; `false` is non-modal.
+   * Modal behaviour. Default `true` (focus trapped, scroll locked, page inert);
+   * `'trap-focus'` leaves the page interactive; `false` is non-modal.
    */
   modal?: RootProps["modal"];
   /** Element to focus when the drawer opens (base-ui default: first tabbable). */
@@ -122,17 +115,12 @@ export interface DrawerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 
 }
 
 /**
- * Drawer — a "surface" element type shown in a panel that slides in from the edge
- * of the screen. Like `Popover` / `Modal`, it composes `header` / `footer` props
- * (or `<Drawer.Header>` / `<Drawer.Footer>` children) around its content, and takes
- * `saliency` / `padding` / `width` surface knobs.
- *
- * Built on base-ui's `Drawer`, so the ARIA wiring, focus management, and
- * swipe-to-dismiss are handled for you. It opens from a `<Drawer.Trigger>` (a
- * `Button`) passed via `trigger`, slides in from the `right` by default (`left`
- * also supported), and is modal: the backdrop is always rendered (even for nested
- * drawers). Clicking outside never closes it; pass `disabled` to additionally veto
- * Escape, the close button, and swipe while a blocking action is in flight.
+ * A "surface" element type shown in a panel that slides in from the screen edge.
+ * Like `Popover` / `Modal`, composes `header` / `footer` props (or subcomponent
+ * children) around its content, with `saliency` / `padding` / `width` knobs. Built
+ * on base-ui's `Drawer` (ARIA, focus, swipe-to-dismiss handled); opens from a
+ * `<Drawer.Trigger>` via `trigger`, slides in from `right` by default. Modal, and
+ * outside-clicks never close it; `disabled` additionally vetoes Escape/close/swipe.
  */
 function DrawerRoot({
   trigger,
@@ -209,11 +197,8 @@ function DrawerRoot({
 }
 
 /**
- * The trigger that opens the drawer. Renders a `Button` (so all of Button's
- * intents / saliencies / sizes / icons are available), wired up by base-ui so it
- * carries the right `aria-haspopup` / `aria-expanded` and toggles the drawer.
- * Must be passed to `<Drawer trigger={...} />` so it sits inside the drawer's
- * context.
+ * The trigger that opens the drawer — a `Button`, wired by base-ui with
+ * `aria-haspopup` / `aria-expanded`. Must be passed to `<Drawer trigger={...} />`.
  */
 export type DrawerTriggerProps = ButtonProps;
 
@@ -258,10 +243,8 @@ export interface DrawerHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElem
   level?: HeadingLevel;
   /**
    * Overflow actions for the header, rendered as a `Menu` behind an icon-only
-   * "more options" trigger placed at the header's end. Each entry is a
-   * `<Menu.Item>` element (see {@link MenuProps.items}); falsy entries are skipped.
-   * Use this for secondary, per-item actions — the footer's `actions` is for the
-   * primary button row.
+   * "more options" trigger. Each entry a `<Menu.Item>`. For secondary actions;
+   * the footer's `actions` is the primary button row.
    */
   actions?: MenuProps["items"];
   /** Accessible name for the header actions menu trigger. Default `"Actions"`. */

@@ -62,11 +62,9 @@ export interface ComboboxOption {
   value: string;
   label: string;
   /**
-   * Optional glyph shown before the label in the list and above it (with the
-   * label as a caption) in the grid. Pass a bare glyph (`icon={<Tag />}`,
-   * auto-wrapped in `Icon`), an explicit `<Icon>` for a custom size/label, or a
-   * `(props, state) => …` render function for full control. Decorative: `label`
-   * stays the accessible name and the typeahead text, so search still works.
+   * Optional glyph before the label (above it in the grid) — a bare glyph, an
+   * `<Icon>`, or a render function. Decorative; `label` stays the accessible name
+   * and typeahead text.
    */
   icon?: IconSlot<ComboboxOptionIconState>;
   /** Renders the option but blocks selection (kept visible, `aria-disabled`). */
@@ -119,11 +117,9 @@ export interface ComboboxSearchCopy {
 }
 
 /**
- * Async search configuration. Presence of this object switches the Combobox into
- * async mode: internal filtering is disabled, `results` drive the list, and the
- * popup shows a spinner / error / empty state. `onSearch` is called with the
- * current query on every input change — debounce and wire up an `AbortController`
- * in your handler.
+ * Async search configuration. Its presence switches the Combobox into async mode:
+ * internal filtering is off, `results` drive the list, and `onSearch` fires with
+ * the query on every input change (debounce / abort in your handler).
  */
 export interface ComboboxSearch {
   /** Show the loading (spinner) state in the popup. */
@@ -176,10 +172,8 @@ interface ComboboxBaseProps extends Omit<
   /** Allow committing values that aren't in the list (an "Add …" row appears). */
   freeText?: boolean;
   /**
-   * Lay the options out as a grid of this many columns instead of a single
-   * column. Arrow keys then navigate in two dimensions. Best for short, tile-like
-   * options (icons, swatches, emoji). Ignored (falls back to a list) when `< 2`,
-   * and takes precedence over `virtualized`.
+   * Lay options out as a grid of this many columns (2-D arrow navigation), for
+   * short tile-like options. Ignored when `< 2`; takes precedence over `virtualized`.
    */
   columns?: number;
   /** Window long lists (only the visible rows are mounted). */
@@ -271,15 +265,12 @@ function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 /**
- * Combobox — a typeahead / autocomplete "form control" built on base-ui's
- * `Combobox`. Single or multiple selection (discriminated on `multiple`), with a
- * string `value` / `onValueChange` shape. Supports synchronous options,
- * async search (spinner / empty / error states in the popup), free-text entry,
- * a multi-column grid view (`columns`), and windowed virtualization for long lists.
- *
- * Like the other form controls it takes a `state` (not intent/saliency), composes
- * `Field` for its label / help / error layout and ARIA wiring, and models disabled
- * with `aria-disabled` + `readOnly` so it stays keyboard-focusable.
+ * A typeahead / autocomplete "form control" built on base-ui's `Combobox`. Single
+ * or multiple selection (discriminated on `multiple`), with a string `value` /
+ * `onValueChange` shape. Supports sync options, async search, free-text entry, a
+ * multi-column grid (`columns`), and virtualization for long lists. Like the other
+ * form controls it takes a `state`, composes `Field`, and models disabled with
+ * `aria-disabled` + `readOnly`.
  */
 export function Combobox(props: ComboboxProps) {
   const {
@@ -667,11 +658,9 @@ interface VirtualListProps {
 }
 
 /**
- * The windowed list body for `virtualized`. Reads the currently filtered items
- * from base-ui and renders only the rows in (and just around) the scroll
- * viewport, each absolutely positioned by its index — so a list of thousands
- * mounts a handful of nodes. Keyboard highlight scrolling is handled by the
- * parent via `scrollRef` + `onItemHighlighted`.
+ * The windowed list body for `virtualized`. Renders only the rows in (and around)
+ * the scroll viewport, each positioned by its index, so a list of thousands mounts
+ * a handful of nodes. The parent handles highlight scrolling via `scrollRef`.
  */
 function VirtualList({ scrollRef, renderOption }: VirtualListProps) {
   const filtered = BaseCombobox.useFilteredItems<InternalOption>();
@@ -706,9 +695,8 @@ function VirtualList({ scrollRef, renderOption }: VirtualListProps) {
 
 /**
  * Tile a filtered option list into `Combobox.Row`s of `cols` cells. The free-text
- * "Add …" option (if present) is peeled onto its own trailing full-width row so it
- * never lands mid-way through a partial row of real options. base-ui reads the
- * resulting DOM rows to drive 2-D arrow-key navigation.
+ * "Add …" option is peeled onto its own trailing full-width row. base-ui reads the
+ * resulting DOM rows for 2-D arrow-key navigation.
  */
 function gridRowsFrom(
   items: readonly InternalOption[],
