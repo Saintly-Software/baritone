@@ -14,11 +14,9 @@ const BAR = "10px";
 const REVEAL_DELAY = "400ms";
 
 /**
- * Per-edge gradient masks driven by base-ui's overflow metrics, one axis each.
- * Each `--scroll-area-overflow-<axis>-<edge>` var is the pixels of content
- * hidden past that edge (0 when flush), so the fade only appears on a side that
- * can actually scroll further, and tracks the scroll position live. Fallbacks of
- * `0px` keep content sharp before base-ui has measured (SSR / first paint).
+ * Per-edge gradient masks driven by base-ui's `--scroll-area-overflow-*` metrics
+ * (pixels hidden past each edge, 0 when flush), so a fade appears only on a side
+ * that can scroll further. `0px` fallbacks keep content sharp before measurement.
  */
 const xFade = `linear-gradient(
   to right,
@@ -37,14 +35,10 @@ const yFade = `linear-gradient(
 )`;
 
 /**
- * Groups the viewport, scrollbar, and floating nav buttons (the last two are
- * `position: absolute`, so only the viewport is in flow). It's a flex column so
- * the viewport can fill it *and* be constrained by it: a definite `height` or a
- * `max-height` on the root both bound the viewport, which is what lets a vertical
- * `Overflow` grow to a cap and then scroll (a plain `height: 100%` viewport can't
- * resolve against a `max-height`-only parent). A horizontal `Overflow` needs no
- * height — it hugs its row and just wants a bounded width (its container's is
- * enough); a vertical one wants a bounded `height` / `max-height`.
+ * Groups the viewport, scrollbar, and floating nav buttons. A flex column so a
+ * `height` or `max-height` on the root bounds the viewport — which lets a vertical
+ * `Overflow` grow to a cap and then scroll (a `height: 100%` viewport can't
+ * resolve against a `max-height`-only parent). Horizontal needs only a bounded width.
  */
 export const root = style({
   position: "relative",
@@ -79,11 +73,9 @@ export const viewportFadeVertical = style({
 });
 
 /**
- * The layout track holding the controls — a single non-wrapping row (or column)
- * that grows past the viewport and scrolls. `width: max-content` (horizontal)
- * keeps every control at its intrinsic size instead of shrinking to fit, which
- * is the whole point: the controls overflow rather than squash. The `gap`
- * variant is the space between them.
+ * The layout track holding the controls — a single non-wrapping row (or column).
+ * `width: max-content` keeps every control at its intrinsic size so they overflow
+ * rather than squash. The `gap` variant is the space between them.
  */
 export const track = recipe({
   base: {
@@ -173,20 +165,12 @@ export const thumb = style({
 });
 
 /**
- * A floating scroll button. It's a *pointer convenience* — kept out of the tab
- * order (`tabIndex={-1}` on the element), because the accessible path through a
- * row of controls is Tab, which scrolls each focused control into view on its
- * own. The button is a circular raised surface that floats over the fading edge.
- *
- * Hidden by default (no edge to scroll toward → nothing to show); the reveal
- * rules below light it up only when the matching edge actually overflows, using
- * base-ui's `data-overflow-*` attributes on the root. Show/hide is instant:
- * `visibility` (also dropping it from hit-testing and the accessibility tree
- * when inactive) and `opacity` flip together. We deliberately *don't* fade the
- * button in — the element rests at `visibility: hidden`, and Chrome stalls an
- * opacity transition that starts from a first-painted hidden element, pinning it
- * at 0. The content's edge gradient (the mask below) is the animated affordance;
- * the button just appears. Only the hover wash transitions.
+ * A floating scroll button — a pointer convenience kept out of the tab order
+ * (`tabIndex={-1}`), since the accessible path is Tab. Hidden by default and
+ * revealed only when the matching edge overflows (via base-ui's `data-overflow-*`).
+ * Show/hide flips `visibility` + `opacity` instantly: we deliberately don't fade
+ * it in, since Chrome pins an opacity transition that starts from `visibility:
+ * hidden` at 0. Only the hover wash transitions.
  */
 export const navButton = style({
   position: "absolute",

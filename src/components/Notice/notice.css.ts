@@ -9,26 +9,16 @@ const fg = createVar();
 const bd = createVar();
 
 /**
- * A Notice's saliency maps onto the `component` saliency it borrows its palette
- * from — the same tokens `Chip`/`Button` use:
- *   - `high` → component **`mid`** (a washed fill, like a mid-saliency Button),
- *   - `low`  → component **`low`** (the subtle, near-transparent shade).
- * A Notice never uses the component's loud `high` fill — a callout shouldn't
- * shout like a primary button.
+ * A Notice's saliency maps onto the `component` saliency it borrows: `high` →
+ * `mid` (washed fill), `low` → `low`. A Notice never uses the loud `high` fill.
  */
 const COMPONENT_SALIENCY = { high: "mid", low: "low" } as const;
 
 /**
- * Notice root recipe — a block-level callout that borrows the `component` colour
- * scheme (shared with `Chip`/`Button`) rather than the washed `surface` palette,
- * so `<Notice intent="warning">` matches a Button/Chip of the same intent at the
- * mapped saliency (see {@link COMPONENT_SALIENCY}). Unlike `componentIntentRecipe`
- * it's static (no hover/active) since a Notice is a container, not a control. The
- * resolved foreground is published as `--iconColor`/`--textColor` so a nested
- * `Icon`/`Text` matches automatically.
- *
- * The `shape` knob mirrors `Chip`: `square` (default) keeps the shared component
- * radius; `pill` fully rounds the ends.
+ * Notice root recipe — a block-level callout borrowing the `component` colour
+ * scheme (see {@link COMPONENT_SALIENCY}), static (no hover/active) since a Notice
+ * is a container. Publishes the foreground as `--iconColor`/`--textColor`. `shape`
+ * mirrors `Chip` (`square` default, `pill`).
  */
 export const noticeRecipe = recipe({
   base: {
@@ -127,11 +117,8 @@ export const noticeActions = style({
 });
 
 /**
- * `Notice.Icon` colour override. By default a notice icon inherits the notice's
- * foreground through `--iconColor`; passing an `intent` republishes `--iconColor`
- * on the icon itself at the given `component` `intent`×`saliency` token, so the
- * `Icon`'s own `color` (which reads `--iconColor`) picks up the override. Mirrors
- * `chipAdornmentRecipe`'s intent-override mechanism.
+ * `Notice.Icon` colour override — republishes `--iconColor` on the icon at the
+ * given `component` `intent`×`saliency` token. Mirrors `chipAdornmentRecipe`.
  */
 export const noticeIconRecipe = recipe({
   variants: {
@@ -157,11 +144,8 @@ export const noticeIconRecipe = recipe({
 export type NoticeIconRecipeVariants = NonNullable<RecipeVariants<typeof noticeIconRecipe>>;
 
 /**
- * `Notice.Action` layout tweak on top of the shared component scheme. The colour
- * (`componentIntentRecipe`), box + size (`componentTypographyRecipe`), and focus
- * ring are the same ones `Button` uses, so an action looks like a small button;
- * this recipe only squares the box for the icon-only form (equal padding, a 1:1
- * aspect) so a lone glyph isn't stretched wide by the size's inline padding.
+ * `Notice.Action` layout tweak on top of the shared component scheme (which makes
+ * it look like a small `Button`) — only squares the box for the icon-only form.
  */
 export const noticeActionRecipe = recipe({
   base: {},
@@ -177,12 +161,9 @@ export const noticeActionRecipe = recipe({
 export type NoticeActionRecipeVariants = NonNullable<RecipeVariants<typeof noticeActionRecipe>>;
 
 /**
- * `Notice.Close` — the bare "×" dismiss button in the notice's top corner.
- * Chromeless (no fill or border): it inherits the notice's foreground through the
- * published `--iconColor` and just dims at rest, brightening on hover. A fixed
- * square keeps it a comfortable hit target. Mirrors the interactive
- * `chipAdornmentRecipe` look, standalone. Inert (`aria-disabled`) when a disabled
- * Notice makes it so — dimmer still, `not-allowed`.
+ * `Notice.Close` — the chromeless "×" dismiss button, inheriting the notice's
+ * foreground and dimming at rest / brightening on hover. Inert (`aria-disabled`,
+ * `not-allowed`) when a disabled Notice makes it so.
  */
 export const noticeClose = style({
   display: "inline-flex",
