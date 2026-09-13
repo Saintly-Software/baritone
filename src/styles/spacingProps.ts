@@ -39,49 +39,34 @@ export interface PaddingProps {
 }
 
 /**
- * Text-layout props surfaced on the typography components. `textAlign`,
- * `whiteSpace`, `overflowWrap`, and `textTransform` map straight to a single CSS
- * property via the sprinkles, so they behave like the other atoms props
- * (responsive-capable). `letterSpacing` and `lineHeight` are the exceptions: their
- * vocabularies are open-ended and consumer-defined (like `font`), so they're routed
- * through the `--textLetterSpacing` / `--textLineHeight` vars rather than enumerated
- * atoms.
+ * Text-layout props on the typography components. `textAlign` / `whiteSpace` /
+ * `overflowWrap` / `textTransform` map straight to a CSS property via the
+ * sprinkles; `letterSpacing` / `lineHeight` have open, consumer-defined
+ * vocabularies, so they route through the `--textLetterSpacing` /
+ * `--textLineHeight` vars instead.
  */
 export interface TypographyAtomProps {
   /** `text-align` — logical `start`/`center`/`end` (RTL-safe) or physical `left`/`right`. */
   textAlign?: Atoms["textAlign"];
-  /**
-   * `white-space` — controls collapsing and wrapping: `nowrap` keeps text on a
-   * single line; `pre` preserves newlines and spaces without wrapping; `pre-wrap`
-   * preserves them while still wrapping; `pre-line` collapses runs of spaces but
-   * keeps newlines; `break-spaces` is like `pre-wrap` but also wraps trailing
-   * spaces.
-   */
+  /** `white-space` — `nowrap` / `pre` / `pre-wrap` / `pre-line` / `break-spaces`. */
   whiteSpace?: Atoms["whiteSpace"];
   /**
-   * `overflow-wrap` — `break-word` breaks a long unbroken token only when it would
-   * overflow; `anywhere` also does so but lets the break count toward min-content
-   * sizing (so the element can shrink narrower).
+   * `overflow-wrap` — `break-word` breaks a long token only on overflow;
+   * `anywhere` also lets the break count toward min-content sizing.
    */
   overflowWrap?: Atoms["overflowWrap"];
-  /** `text-transform` — `uppercase`/`lowercase`/`capitalize` to recase the rendered text. */
+  /** `text-transform` — `uppercase`/`lowercase`/`capitalize`. */
   textTransform?: Atoms["textTransform"];
   /**
-   * Letter-spacing (tracking), by name. The built-in `em`-based steps
-   * (`tighter`…`widest`) are always available; other names are consumer-defined —
-   * the theme publishes them through its `letterSpacings` option (as
-   * `--letterSpacing-<name>` custom properties) and declares the names on
-   * {@link LetterSpacingName}'s registry. Resolves to `var(--letterSpacing-<name>)`.
-   * `widest` suits small uppercase labels/eyebrows.
+   * Letter-spacing (tracking), by name. Built-in steps (`tighter`…`widest`) plus
+   * consumer-defined names (see {@link LetterSpacingName}). Resolves to
+   * `var(--letterSpacing-<name>)`.
    */
   letterSpacing?: LetterSpacingName;
   /**
-   * Line-height (leading), by name — an *override* for the size's paired default.
-   * The built-in unitless steps (`none`…`loose`) are always available; other names
-   * are consumer-defined — the theme publishes them through its `lineHeights` option
-   * (as `--lineHeight-<name>` custom properties) and declares the names on
-   * {@link LineHeightName}'s registry. Resolves to `var(--lineHeight-<name>)`. Left
-   * unset, `size` supplies the line-height.
+   * Line-height (leading), by name — an override for the size's paired default.
+   * Built-in steps (`none`…`loose`) plus consumer-defined names (see
+   * {@link LineHeightName}). Left unset, `size` supplies the line-height.
    */
   lineHeight?: LineHeightName;
 }

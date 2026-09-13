@@ -10,10 +10,9 @@ const cardPaddingBreakpoint = `screen and (min-width: ${breakpoints.md})`;
 const bleedInline = `calc(${surfacePaddingVar} * -1)`;
 
 /**
- * Card root layout — a vertical stack with even spacing, so the optional
- * `header`, the content, and the optional `footer` lay out top-to-bottom. The
- * `gap` is block-direction only, so it doesn't fight the inline negative margins
- * used by `Card.Bleed` / `Card.Divider`.
+ * Card root layout — a vertical stack laying out header, content, and footer
+ * top-to-bottom. `gap` is block-direction only, so it doesn't fight the inline
+ * negative margins used by `Card.Bleed` / `Card.Divider`.
  */
 export const cardRoot = style({
   display: "flex",
@@ -24,11 +23,9 @@ export const cardRoot = style({
 });
 
 /**
- * The card's internal padding, made responsive (and no longer a prop): the
- * surface's own default padding covers small screens, and this bumps
- * `--surfacePadding` up a step from the `md` breakpoint. Driving it through the
- * same `--surfacePadding` the surface reads keeps `Card.Bleed` / `Card.Divider`
- * in sync at every width.
+ * The card's responsive internal padding — bumps `--surfacePadding` up a step
+ * from the `md` breakpoint. Driving it through the same `--surfacePadding` the
+ * surface reads keeps `Card.Bleed` / `Card.Divider` in sync at every width.
  */
 export const cardResponsivePadding = style({
   "@media": {
@@ -37,25 +34,19 @@ export const cardResponsivePadding = style({
 });
 
 /**
- * An interactive (clickable / linkable) card. The card itself stays a plain
- * container — a single real control inside it (the header title, rendered as a
- * link/button) is stretched over the whole surface with an `::after` overlay, the
- * accessible technique from https://inclusive-components.design/cards/. This just
- * needs to be the positioning context for that overlay.
+ * An interactive (clickable / linkable) card — the positioning context for the
+ * header title's stretched `::after` overlay
+ * (https://inclusive-components.design/cards/).
  */
 export const cardInteractive = style({
   position: "relative",
 });
 
 /**
- * The card's single primary control: the header title rendered as the one real
- * link (or button). It looks exactly like the heading text — inherits the font
- * and colour, no underline, no button chrome — but its `::after` stretches across
- * the whole card so the entire surface is one click target. This avoids making
- * the card's *content* the link's accessible name (the title alone names it) and
- * avoids nesting other controls inside a button/anchor: secondary controls escape
- * the overlay via `position: relative` (see `cardFooter` etc.). The focus ring is
- * drawn on the stretched pseudo, so a keyboard focus outlines the whole card.
+ * The card's single primary control: the header title as the one real link/button,
+ * styled like the heading text but with an `::after` that stretches across the
+ * whole card so the entire surface is one click target. Secondary controls escape
+ * the overlay via `position: relative`; the focus ring is drawn on the pseudo.
  */
 export const cardOverlayLink = style({
   display: "inline",
@@ -85,14 +76,9 @@ export const cardOverlayLink = style({
 });
 
 /**
- * The `selected` state — a card that reads as chosen (e.g. it holds a checked
- * checkbox, or is one of several picked in a multi-select grid). It accents the
- * surface edge: the hairline border is recoloured to the primary focus colour and
- * an inset ring thickens it to a deliberate ~2px outline, so selection isn't a
- * barely-there recolour. Crucially it's *not* the only signal — the pattern pairs
- * this with a real selected control inside the card (a checked `Checkbox`, an
- * `aria-pressed` overlay button), which is what assistive tech and colour-blind
- * users rely on; the accent is sighted reinforcement. See `Card`'s `selected`.
+ * The `selected` state — accents the surface edge (recoloured border + inset ring
+ * to a ~2px outline). Sighted reinforcement only; a real selected control inside
+ * the card is what assistive tech relies on. See `Card`'s `selected`.
  */
 export const cardSelectedRecipe = recipe({
   variants: {
@@ -229,12 +215,9 @@ export const cardRows = style({
 
 /**
  * One row: term/title on the start, description/actions on the end. The inline
- * negative margin + matching padding let a `hoverable` row's highlight extend a
- * little past the text on every side (and the block pair grows the hit area)
- * without shifting the content or touching the card edge — so plain rows can
- * light up on hover like a scannable list. A row that carries its own action
- * stays `hoverable: false`: the action's hover is the affordance that matters,
- * and a whole-row wash behind it would just be noise.
+ * negative margin + matching padding let a `hoverable` row's highlight extend
+ * past the text without shifting content. A row with its own action stays
+ * `hoverable: false`, since a whole-row wash behind it would be noise.
  */
 export const cardRowRecipe = recipe({
   base: {
@@ -361,21 +344,18 @@ export const cardCollapsibleResponsivePadding = style({
 });
 
 /**
- * The collapsible card's header band — holds the `Card.Header` (which lays out
- * the title/subtitle plus the disclosure trigger). Padding comes from the
- * republished `--surfacePadding`. Unlike the old "the whole header is the button"
- * model, only the trigger button toggles, so the rest of the header can carry its
- * own interactive elements.
+ * The collapsible card's header band, holding the `Card.Header` and its disclosure
+ * trigger. Only the trigger button toggles, so the rest of the header can carry
+ * its own interactive elements.
  */
 export const cardCollapsibleHeader = style({
   padding: surfacePaddingVar,
 });
 
 /**
- * The disclosure trigger — a compact icon button (the chevron) that sits at the
- * end of the header. Resets the native button look and adds the subtle neutral
- * wash on hover, like `Accordion`'s trigger; `aria-disabled` (never the native
- * attribute) keeps it tabbable while the root vetoes the toggle.
+ * The disclosure trigger — a compact chevron icon button at the header's end,
+ * with a neutral hover wash like `Accordion`'s trigger. `aria-disabled` keeps it
+ * tabbable while the root vetoes the toggle.
  */
 export const cardCollapsibleTriggerButton = style({
   display: "inline-flex",

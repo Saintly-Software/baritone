@@ -47,16 +47,14 @@ export interface ModalProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "
   /** Max width of the panel: `sm`, `md` (default), or `lg`. */
   size?: ModalSize;
   /**
-   * Loading state: overlays a spinner on the body content (the header and footer
-   * stay visible and interactive, so the modal can still be closed) and marks
-   * the panel `aria-busy`. Purely visual — it does not, on its own, prevent
-   * closing; pair with `disabled` for that.
+   * Loading state: overlays a spinner on the body (header and footer stay
+   * interactive) and marks the panel `aria-busy`. Visual only; pair with
+   * `disabled` to prevent closing.
    */
   loading?: boolean;
   /**
-   * When `true`, the modal cannot be closed by any means — Escape and the close
-   * button are both vetoed (outside-press is always prevented). Use it to keep
-   * the user in the panel while a blocking action is in flight.
+   * When `true`, the modal cannot be closed by any means (Escape and the close
+   * button both vetoed). Use it while a blocking action is in flight.
    */
   disabled?: boolean;
   /** Controlled open state. */
@@ -66,16 +64,13 @@ export interface ModalProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "
   /** Called when the open state changes (base-ui signature). */
   onOpenChange?: RootProps["onOpenChange"];
   /**
-   * Imperative handle from `useOverlayHandle(Modal)`. Lets you close the modal
-   * from code — e.g. after an async action — without lifting `open` into
-   * component state. `handle.close()` is still vetoed while `disabled`, and the
-   * declarative `.Close` part / controlled `open` keep working alongside it.
+   * Imperative handle from `useOverlayHandle(Modal)`, to close the modal from code
+   * without lifting `open` into state. Still vetoed while `disabled`.
    */
   handle?: RootProps["handle"];
   /**
-   * Modal behaviour. Default (base-ui) `true`: focus is trapped, page scroll is
-   * locked, and the page behind is inert. `'trap-focus'` traps focus but leaves
-   * the page scrollable/interactive; `false` is non-modal.
+   * Modal behaviour. Default `true` (focus trapped, scroll locked, page inert);
+   * `'trap-focus'` leaves the page interactive; `false` is non-modal.
    */
   modal?: RootProps["modal"];
   /** Element to focus when the modal opens (base-ui default: first tabbable). */
@@ -90,18 +85,12 @@ export interface ModalProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "
 }
 
 /**
- * Modal — a "surface" element type shown in a panel centred over the page. Its
- * API mirrors `Drawer`: it composes `header` / `footer` props (or
- * `<Modal.Header>` / `<Modal.Footer>` children) around its content, with
- * `padding` controlling internal spacing. The surface itself is always the
- * default neutral, low-saliency shade.
- *
- * Built on base-ui's `Dialog`, so the ARIA wiring and focus management are
- * handled for you. It opens from a `<Modal.Trigger>` (a `Button`) passed via
- * `trigger`, comes in three widths (`sm` / `md` / `lg`), and is modal: the
- * backdrop is always rendered (even for nested modals). Clicking outside never
- * closes it; pass `disabled` to additionally veto Escape and the close button
- * while a blocking action is in flight.
+ * A "surface" element type shown in a panel centred over the page. Its API mirrors
+ * `Drawer`: composes `header` / `footer` props (or subcomponent children) with
+ * `padding` for internal spacing. Built on base-ui's `Dialog` (ARIA and focus
+ * handled); opens from a `<Modal.Trigger>` via `trigger`, in three widths (`sm` /
+ * `md` / `lg`). Modal, and outside-clicks never close it; `disabled` additionally
+ * vetoes Escape and the close button.
  */
 function ModalRoot({
   trigger,
