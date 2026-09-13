@@ -118,31 +118,15 @@ type TextInputInternalProps = TextInputBaseProps &
   };
 
 /**
- * TextInput — a "form control" element type composing `Field`, which owns the
- * label / help / error layout and the ARIA wiring. Takes a `state` instead of
- * intent/saliency. Disabled uses `aria-disabled` so the field stays focusable
- * (e.g. to surface an explanatory tooltip), consistent with the rest of the
- * system.
- *
- * Set `multiline` to render a `<textarea>` whose height is driven by `rows`
- * (single-line inputs take `size` instead — the two are mutually exclusive). An
- * `info` node adds an `InfoButton` next to the label, `labelPosition` inlines the
- * label, and `slotProps` re-tunes the label / helpText / info slots.
- *
- * Name it with exactly one of `label`, `aria-label`, or `aria-labelledby` — they
- * are mutually exclusive (see `FieldLabellingProps`).
- *
- * `onChange` follows the shared form-control shape — it's called with the string
- * value first and the raw React change event second, so read the value from the
- * first argument rather than `event.target.value`.
+ * A "form control" element type composing `Field` for the label / help / error
+ * layout and ARIA. Takes a `state` instead of intent/saliency, with disabled via
+ * `aria-disabled`. `multiline` renders a `<textarea>` sized by `rows` (else `size`
+ * applies — mutually exclusive). Name it with exactly one of `label` /
+ * `aria-label` / `aria-labelledby`. `onChange` is called with the string value
+ * first and the raw event second.
  *
  * @example
  * <TextInput label="Email" type="email" placeholder="you@example.com" />
- *
- * @example
- * // Controlled: the value arrives first, the raw event second.
- * const [email, setEmail] = React.useState("");
- * <TextInput label="Email" value={email} onChange={(value) => setEmail(value)} />
  *
  * @example
  * // Multiline, with a label InfoButton

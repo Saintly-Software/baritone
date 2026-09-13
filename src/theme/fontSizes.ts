@@ -2,31 +2,15 @@ import { TEXT_SIZES, type TextSize } from "./constants";
 import { vars } from "./contract.css";
 
 /**
- * The consumer-defined font-size vocabulary — an *open* vocabulary mirroring the
- * `font` one in {@link module:./fonts}.
+ * The consumer-defined font-size vocabulary — an *open* vocabulary mirroring
+ * `font`. The built-in ramp (`xs`…`9xl`) is a closed, token-backed scale, but a
+ * brand may want sizes outside it that only exist at its build/runtime, so the
+ * open half rides a naming convention (`--fontSize-<name>`) plus this augmentable
+ * type seam rather than the vanilla-extract contract.
  *
- * The built-in ramp (`xs`…`9xl`) is a closed, token-backed scale baked into the
- * theme contract (see `text.size`). But a brand often wants a size outside that
- * ramp — a hero display step, a dense data figure — and the exact set only exists
- * at *its* build/runtime. So, like `font`, the open half can't ride the
- * vanilla-extract contract; it's a naming convention (`--fontSize-<name>` custom
- * properties, published by the theme) plus this augmentable type seam.
- *
- * Baritone ships `FontSizeRegistry` empty, so the `size` prop starts as a loose
- * `string`. An app declares its own names by augmenting the interface, which
- * tightens `size` to the built-ins plus their declared names with autocompletion
- * — while Baritone stays ignorant of what those names are.
- *
- * The declared names must line up with the values handed to the theme (the
- * `sizes` option on {@link createDesignSystemTheme} / {@link createInlineTheme} /
- * `BaritoneTheme`), which emits one `--fontSize-<name>` per entry. The built-in
- * sizes are always emitted, so they need no registry entry.
- *
- * A consumer-defined size is either a bare `font-size` (its line-height defaults to
- * the `md` step) or a `{ fontSize, lineHeight }` pair that carries its own paired
- * default leading, Tailwind-style — its `fontSize` scale bundles the line-height.
- * The built-in sizes always keep their tuned per-size line-heights, and the
- * `lineHeight` prop overrides either.
+ * Shipped empty, so `size` starts as a loose `string`; an app augments the
+ * interface to tighten it to the built-ins plus its declared names. The declared
+ * names must line up with the `sizes` option handed to the theme.
  *
  * @example
  * // Somewhere in the consuming app (e.g. a `baritone.d.ts`):
@@ -42,10 +26,9 @@ import { vars } from "./contract.css";
 export interface FontSizeRegistry {}
 
 /**
- * A consumer-defined size value: a bare `font-size` string, or a
- * `{ fontSize, lineHeight }` pair whose `lineHeight` becomes the size's paired
- * default leading (which the `lineHeight` prop still overrides). Mirrors Tailwind's
- * `fontSize` scale, where an entry can carry its line-height.
+ * A consumer-defined size value: a `{ fontSize, lineHeight }` pair whose
+ * `lineHeight` becomes the size's paired default leading (overridable by the
+ * `lineHeight` prop). Mirrors Tailwind's `fontSize` scale.
  */
 export type SizeValue = { fontSize: string; lineHeight?: string };
 
@@ -72,31 +55,21 @@ export function fontSizeVarName(name: string): string {
 }
 
 /**
- * The CSS custom property that holds a size's *paired* line-height (the default
- * leading `size` applies when the `lineHeight` prop is unset). Deliberately a
- * distinct namespace from {@link lineHeightVarName}'s `--lineHeight-<name>`: the two
- * vocabularies are independent, so a consumer size and a standalone leading may reuse
- * the same name without one clobbering the other.
+ * The CSS custom property holding a size's *paired* line-height. A distinct
+ * namespace from {@link lineHeightVarName}, so a consumer size and a standalone
+ * leading can reuse the same name without colliding.
  */
 export function sizeLineHeightVarName(name: string): string {
   return `--sizeLineHeight-${name}`;
 }
 
 /**
- * The custom properties the *size vocabulary* publishes — its `--fontSize-<name>`
- * and each size's paired `--sizeLineHeight-<name>` (a size is a font-size + leading
- * pair, exactly like the `text.size` tokens). The built-in ramp (`xs`…`9xl`) is
- * routed through the contract vars so a runtime theme/brand swap still flows through;
- * each consumer entry adds its `--fontSize-<name>` plus, for a `{ fontSize, lineHeight }`
- * pair, a paired `--sizeLineHeight-<name>`. Spread into a theme class's `vars` (build
- * time) or a `style` object (runtime). (The standalone leading scale — `none`…`loose`
- * — is a *separate* namespace, `--lineHeight-<name>`, published by
- * {@link lineHeightVars}; keeping the two apart means a consumer size and a standalone
- * leading can share a name without colliding.)
- *
- * The built-in size names are reserved: entries by those names in `sizes` are
- * ignored (they stay token-backed). Customise the built-in ramp through the theme
- * tokens (`BrandSeed.fontScale`) instead.
+ * The custom properties the *size vocabulary* publishes — `--fontSize-<name>` and
+ * each size's paired `--sizeLineHeight-<name>`. The built-in ramp routes through
+ * the contract vars (so a runtime brand swap flows through); each consumer entry
+ * adds its own. Spread into a theme class's `vars` (build time) or a `style`
+ * object (runtime). Built-in names are reserved — customise the ramp through the
+ * theme tokens (`BrandSeed.fontScale`) instead.
  */
 export function fontSizeVars(
   sizes: Record<string, string | SizeValue> = {},

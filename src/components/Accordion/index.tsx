@@ -35,11 +35,7 @@ export interface AccordionItemHeaderProps {
   title: React.ReactNode;
   /** Optional supporting line beneath the title. */
   subtitle?: React.ReactNode;
-  /**
-   * Leading glyph before the title. Pass a bare glyph (`icon={<ServerGlyph />}`,
-   * auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
-   * `(props, state) => …` render function for full control.
-   */
+  /** Leading glyph before the title — a bare glyph, an `<Icon>`, or a render function. */
   icon?: IconSlot<AccordionItemHeaderIconState>;
   /**
    * Trailing element after the title, before the chevron — typically a status
@@ -52,27 +48,13 @@ export interface AccordionItemHeaderProps {
 }
 
 /**
- * The header content for an `Accordion` item: a `title` with an optional
- * `subtitle`, plus an optional leading `icon` and trailing `chip`. Pass it to an
- * item's `header`. It renders only the header content — the surrounding `<h3>`,
- * the `<button>` trigger and the disclosure chevron are supplied by `Accordion`
- * itself. The whole header lives inside the trigger button, so the `icon` /
- * `chip` should be decorative (the title is the trigger's accessible name).
+ * The header content for an `Accordion` item — a `title` with optional `subtitle`,
+ * leading `icon`, and trailing `chip`. Passed to an item's `header`; the `<h3>`,
+ * trigger `<button>`, and chevron are supplied by `Accordion`. The header lives
+ * inside the trigger, so `icon` / `chip` should be decorative.
  *
  * @example
  * { header: <Accordion.ItemHeader title="Shipping" subtitle="2–4 business days" />, ... }
- *
- * @example
- * {
- *   header: (
- *     <Accordion.ItemHeader
- *       title="Production"
- *       icon={<ServerGlyph />}
- *       chip={<Chip intent="positive" saliency="low" size="sm">Healthy</Chip>}
- *     />
- *   ),
- *   ...
- * }
  */
 function AccordionItemHeader({
   title,
@@ -183,23 +165,13 @@ export type AccordionProps<T> = AccordionBaseProps<T> &
   );
 
 /**
- * Accordion — a vertical stack of collapsible items, built on base-ui's
- * `Accordion` (each item gets a heading + disclosure `button` + a `region` panel,
- * with the ARIA wiring and keyboard handling done for you). Each item is a
- * "surface" (like `Card`); its `header` is typically an `<Accordion.ItemHeader />`
- * and its `children` are the panel content.
- *
- * Like `Tabs`, it's **type-safe over its values**: the component is generic over
- * `T` (inferred from the `items` array — `const` so string/number literals survive
- * without `as const`), so an item `value` and the open-value props are bound to
- * the same union/enum. See https://tkdodo.eu/blog/building-type-safe-compound-components
- *
- * Two discriminated unions shape the open-state API:
- * - **`multiple`** (like `FileUpload`): omitted/`false` keeps one item open at a
- *   time, so `value` / `onChange` / `initialValue` speak a single `T | null`;
- *   `multiple` lets any number open, so they speak a `T[]`.
- * - **controlled vs uncontrolled** (like `Tabs`): pass `value` + `onChange` to
- *   drive it, or `initialValue` (or nothing) to let it manage its own state.
+ * A vertical stack of collapsible items, built on base-ui's `Accordion` (heading
+ * + disclosure button + `region` panel per item, ARIA handled). Each item is a
+ * "surface" whose `header` is typically an `<Accordion.ItemHeader />`. Generic
+ * over `T` (inferred from `items`), so item values and the open-value props share
+ * one union/enum. Two discriminated unions shape the API: `multiple` (single
+ * `T | null` vs `T[]`) and controlled (`value`/`onChange`) vs uncontrolled
+ * (`initialValue`).
  *
  * @example
  * // Single-open, uncontrolled
@@ -211,11 +183,7 @@ export type AccordionProps<T> = AccordionBaseProps<T> &
  *       header: <Accordion.ItemHeader title="Shipping" subtitle="2–4 business days" />,
  *       children: <Text>We ship worldwide.</Text>,
  *     },
- *     {
- *       value: "returns",
- *       header: <Accordion.ItemHeader title="Returns" />,
- *       children: <Text>30-day returns.</Text>,
- *     },
+ *     { value: "returns", header: <Accordion.ItemHeader title="Returns" />, children: <Text>30-day returns.</Text> },
  *   ]}
  * />
  *

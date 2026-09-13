@@ -12,9 +12,8 @@ import { lineHeightVars } from "./lineHeights";
 
 /**
  * The consumer-defined font vocabulary for a theme. Each entry publishes a
- * `--font-<name>` custom property whose value is a `font-family` stack; the
- * `font` prop on `Text`/`Heading` selects one by name. `sans`/`mono` are always
- * published from the tokens, so they need no entry here.
+ * `--font-<name>` family stack, selected by the `font` prop. `sans`/`mono` are
+ * always published from the tokens.
  */
 export interface FontOptions {
   /** Extra named families, e.g. `{ display: '"Playfair Display", serif' }`. */
@@ -27,11 +26,9 @@ export interface FontOptions {
 }
 
 /**
- * The consumer-defined letter-spacing (tracking) vocabulary for a theme, the
- * tracking analogue of {@link FontOptions}. Each entry publishes a
- * `--letterSpacing-<name>` custom property; the `letterSpacing` prop on
- * `Text`/`Heading` selects one by name. The built-in steps (`tighter`…`widest`)
- * are always published from the tokens, so they need no entry here.
+ * The consumer-defined letter-spacing vocabulary, the tracking analogue of
+ * {@link FontOptions}. Each entry publishes a `--letterSpacing-<name>`, selected
+ * by the `letterSpacing` prop; the built-in steps are always published.
  */
 export interface LetterSpacingOptions {
   /** Extra named tracking values, e.g. `{ eyebrow: "0.2em" }`. */
@@ -44,13 +41,10 @@ export interface LetterSpacingOptions {
 }
 
 /**
- * The consumer-defined font-size vocabulary for a theme, the size analogue of
- * {@link FontOptions}. Each entry publishes a `--fontSize-<name>` custom property;
- * the `size` prop on `Text`/`Heading` selects one by name. The built-in ramp
- * (`xs`…`9xl`) is always published from the tokens, so it needs no entry here. An
- * entry is a bare `font-size` (its line-height defaults to `md`) or a
- * `{ fontSize, lineHeight }` pair that also carries the size's paired default leading
- * (Tailwind-style); the `lineHeight` prop overrides either.
+ * The consumer-defined font-size vocabulary, the size analogue of
+ * {@link FontOptions}. Each entry publishes a `--fontSize-<name>`, selected by the
+ * `size` prop; the built-in ramp (`xs`…`9xl`) is always published. An entry is a
+ * bare `font-size` or a `{ fontSize, lineHeight }` pair carrying the paired default leading.
  */
 export interface FontSizeOptions {
   /**
@@ -62,26 +56,24 @@ export interface FontSizeOptions {
 }
 
 /**
- * The consumer-defined font-weight vocabulary for a theme, the weight analogue of
- * {@link FontOptions}. Each entry publishes a `--fontWeight-<name>` custom property;
- * the `weight` prop selects one by name. The built-in steps are always published.
+ * The consumer-defined font-weight vocabulary, the weight analogue of
+ * {@link FontOptions}. Each entry publishes a `--fontWeight-<name>`, selected by
+ * the `weight` prop; the built-in steps are always published.
  */
 export interface FontWeightOptions {
   /** Extra named weights, e.g. `{ black: "900" }`. */
   weights?: Record<string, string>;
   /**
-   * The weight a bare `<Text>` (no `weight` prop) uses. Defaults to `default`. Set
-   * e.g. `"semibold"` for a heavier body voice. (`Heading` always applies its own
-   * per-level weight, so this affects `Text`.)
+   * The weight a bare `<Text>` uses. Defaults to `default`. (`Heading` applies its
+   * own per-level weight, so this affects `Text`.)
    */
   defaultWeight?: FontWeightName;
 }
 
 /**
- * The consumer-defined line-height (leading) vocabulary for a theme, the leading
- * analogue of {@link FontOptions}. Each entry publishes a `--lineHeight-<name>`
- * custom property; the `lineHeight` prop selects one by name. The built-in steps
- * (`none`…`loose`) and the per-size defaults are always published from the tokens.
+ * The consumer-defined line-height vocabulary, the leading analogue of
+ * {@link FontOptions}. Each entry publishes a `--lineHeight-<name>`, selected by
+ * the `lineHeight` prop; the built-in steps are always published.
  */
 export interface LineHeightOptions {
   /** Extra named leadings, e.g. `{ airy: "2.2" }`. */
@@ -89,11 +81,10 @@ export interface LineHeightOptions {
 }
 
 /**
- * The consumer-defined border-width vocabulary for a theme, the rule-weight analogue
- * of {@link FontSizeOptions}. Each entry publishes a `--borderWidth-<name>` custom
- * property; a border-width prop (e.g. Divider's `thickness`) selects one by name. The
- * built-in steps (`thin`, `thick`) are always published from the tokens, so they need
- * no entry here.
+ * The consumer-defined border-width vocabulary, the rule-weight analogue of
+ * {@link FontSizeOptions}. Each entry publishes a `--borderWidth-<name>`, selected
+ * by a border-width prop (e.g. Divider's `thickness`); the built-in steps are
+ * always published.
  */
 export interface BorderWidthOptions {
   /** Extra named widths, e.g. `{ hair: "0.5px" }`. */
@@ -210,15 +201,10 @@ export function createDesignSystemTheme(
 
 /**
  * Runtime theming. Maps a token set to an inline-style object of CSS custom
- * properties (`{ '--…': value }`) you spread onto an element's `style`. Use this
- * for brands whose values only arrive at runtime (e.g. per-tenant colours),
- * since it needs neither the VE compiler nor a pre-generated class. Pass `fonts`
- * to publish consumer families (`--font-<name>`) and `defaultFont` to pick the
- * family bare text uses; likewise `letterSpacings` / `defaultLetterSpacing` for
- * the tracking vocabulary, `sizes` for extra `--fontSize-<name>`, `weights` /
- * `defaultWeight` for the weight vocabulary, `lineHeights` for extra
- * `--lineHeight-<name>` leadings, and `borderWidths` for extra `--borderWidth-<name>`
- * rule weights.
+ * properties you spread onto an element's `style`, for brands whose values only
+ * arrive at runtime — it needs neither the VE compiler nor a pre-generated class.
+ * The consumer-vocabulary options (`fonts` / `sizes` / `weights` / …) publish the
+ * same `--<name>` properties as {@link createDesignSystemTheme}.
  */
 export function createInlineTheme(
   tokens: ThemeTokensInput,

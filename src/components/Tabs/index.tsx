@@ -28,19 +28,9 @@ export interface TabsItemProps<T> {
    * attribute), so it stays in the roving tab order while selection is vetoed.
    */
   disabled?: boolean;
-  /**
-   * Icon placed before the label; inherits text colour. Pass a bare glyph
-   * (`leadIcon={<Bell />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
-   * custom size/label, or a `(props, state) => …` render function for full
-   * control.
-   */
+  /** Icon before the label — a bare glyph, an `<Icon>`, or a render function. */
   leadIcon?: IconSlot<TabIconState>;
-  /**
-   * Icon placed after the label; inherits text colour. Pass a bare glyph
-   * (`trailIcon={<Bell />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
-   * custom size/label, or a `(props, state) => …` render function for full
-   * control.
-   */
+  /** Icon after the label — same forms as `leadIcon`. */
   trailIcon?: IconSlot<TabIconState>;
 }
 
@@ -70,11 +60,9 @@ interface TabsBaseProps<T> {
   /** Ref to the root element. */
   ref?: React.Ref<HTMLDivElement>;
   /**
-   * Panel content, rendered below the tab strip inside the same tabs context —
-   * typically one `<Tabs.Panel>` per tab `value`. base-ui cross-wires each
-   * panel's `aria-labelledby` to its tab and each tab's `aria-controls` to its
-   * panel by matching `value`s. Omit it entirely to render just the tab strip
-   * and place the active view yourself.
+   * Panel content below the strip — typically one `<Tabs.Panel>` per tab `value`,
+   * cross-wired by base-ui. Omit to render just the strip and place the active
+   * view yourself.
    */
   children?: React.ReactNode;
 }
@@ -100,22 +88,12 @@ interface TabsUncontrolledProps<T> {
 export type TabsProps<T> = TabsBaseProps<T> & (TabsControlledProps<T> | TabsUncontrolledProps<T>);
 
 /**
- * Tabs — a horizontal tablist for switching the active view. Built on base-ui's
- * `Tabs` (roving focus, arrow-key navigation, `tablist` / `tab` ARIA wiring). It
- * renders the tab strip and, optionally, panel content: pass one `<Tabs.Panel>`
- * per tab `value` as `children` and base-ui shows the active one and wires the
- * `aria-controls` / `aria-labelledby` pair. Omit `children` to render just the
- * strip and place the content for each `value` yourself.
- *
- * Like `RadioGroup`, it's **type-safe over its values**: the component is generic
- * over `T` (inferred from the `tabs` array — `const` so string/number literals
- * survive without `as const`), and `value` / `onChange` / `initialValue` are all
- * bound to that same `T`. So a tab `value`, the controlled `value`, and the
- * uncontrolled `initialValue` can only ever be members of the same union/enum.
- * See https://tkdodo.eu/blog/building-type-safe-compound-components
- *
- * Controlled vs uncontrolled is a discriminated union: pass `value` + `onChange`
- * to drive it, or `initialValue` (or nothing) to let it manage its own state.
+ * A horizontal tablist for switching the active view, built on base-ui's `Tabs`
+ * (roving focus, arrow-key navigation, ARIA wiring). Pass one `<Tabs.Panel>` per
+ * tab `value` as `children` for base-ui to show/wire, or omit `children` to render
+ * just the strip. Generic over `T` (inferred from `tabs`), so tab values and
+ * `value` / `onChange` / `initialValue` share one union/enum. Controlled
+ * (`value` + `onChange`) vs uncontrolled (`initialValue`) is a discriminated union.
  *
  * @example
  * type View = "overview" | "activity" | "settings";
@@ -208,10 +186,8 @@ export interface TabsPanelProps extends Omit<
    */
   value: string | number;
   /**
-   * Keep the panel mounted in the DOM while hidden instead of unmounting it
-   * (base-ui's `keepMounted`). Off by default — panels are lazy, mounting on
-   * first activation — so turn it on to preserve panel state (scroll position,
-   * form input, an in-flight fetch) across tab switches.
+   * Keep the panel mounted while hidden (base-ui's `keepMounted`). Off by default
+   * (panels are lazy); turn it on to preserve panel state across tab switches.
    */
   keepMounted?: boolean;
   /** Extra className merged onto the panel element. */
@@ -223,12 +199,9 @@ export interface TabsPanelProps extends Omit<
 }
 
 /**
- * Tabs.Panel — the content region for one tab, rendered as a `<Tabs>` child.
- * Wraps base-ui's `Tabs.Panel` (`role="tabpanel"`): it's shown only while the
- * tab whose `value` matches is active, and base-ui wires the `aria-controls` /
- * `aria-labelledby` relationship both ways. base-ui makes the active panel
- * focusable so keyboard users can page into content with no other focusable
- * child, so it carries the shared focus ring.
+ * Tabs.Panel — the content region for one tab (`role="tabpanel"`), shown while the
+ * tab with the matching `value` is active. base-ui makes the active panel
+ * focusable, so it carries the shared focus ring.
  */
 function TabsPanel({ value, keepMounted, className, children, ref, ...rest }: TabsPanelProps) {
   return (

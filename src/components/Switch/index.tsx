@@ -82,61 +82,20 @@ type SwitchIconProps =
 export type SwitchProps = SwitchBaseProps & SwitchIconProps & FieldLabellingProps;
 
 /**
- * Switch — a single boolean "form control", built on base-ui's `Switch` for
- * behaviour (role, keyboard, form wiring) and wrapped in a `Field` for ARIA, the
- * same way `Checkbox`, `TextInput`, and `RadioGroup` are.
- *
- * The visual is the presentational `InternalSwitch`, slotted in via base-ui's
- * `render` prop: base-ui makes the track the focusable `role="switch"` element
- * and feeds it `data-checked` / `data-disabled` / `data-invalid`, while
- * `InternalSwitch` owns the look (track, sliding thumb, focus ring). Because
- * base-ui's hidden `<input>` is `aria-hidden`, a wrapping `<label>` would only
- * name *it*, not the track — so, exactly like `Checkbox`, the track is named
- * explicitly with `aria-labelledby` pointing at the visible label.
- *
- * A switch and a checkbox are the same shape of control (one boolean), so the
- * API is deliberately identical: `value` is a `boolean` and validation follows
- * the shared `state` model.
- *
- * An optional glyph can ride inside the thumb: `icon` reuses one glyph for both
- * states, or `activeIcon` + `inactiveIcon` show a different glyph per state (the
- * two spellings are a discriminated union, so they can't be mixed).
- *
- * `labelPosition` places the visible label `end` (default), `start`, or `top`
- * relative to the track — RTL-safe, via flex direction only, so the DOM order
- * and accessible name never move. `helpText` adds an inline help / validation
- * line under the row (auto-wired through `Field`), and
- * `aria-label` / `aria-labelledby` name the control when there is no visible
- * `label` (e.g. an icon-only switch) — exactly one of the three, they're
- * mutually exclusive.
+ * A single boolean "form control", built on base-ui's `Switch` and wrapped in a
+ * `Field`, with the same API as `Checkbox` (`value` is a `boolean`, validation
+ * follows the shared `state` model). An optional thumb glyph rides via `icon` (one
+ * glyph) or `activeIcon` + `inactiveIcon` (per-state, a discriminated union).
+ * `labelPosition` places the label `end` (default) / `start` / `top`; name an
+ * icon-only switch with `aria-label` / `aria-labelledby`.
  *
  * @example
  * const [enabled, setEnabled] = React.useState(false);
  * <Switch label="Enable notifications" value={enabled} onChange={setEnabled} />
  *
  * @example
- * // Label above, with inline help.
- * <Switch
- *   label="Notifications"
- *   labelPosition="top"
- *   description="We'll only ping you about outages."
- *   value={on}
- *   onChange={setOn}
- * />
- *
- * @example
  * // Icon-only: no visible label, so name it explicitly.
  * <Switch aria-label="Wi-Fi" icon={<WifiSvg />} value={on} onChange={setOn} />
- *
- * @example
- * // A check when on, a cross when off.
- * <Switch
- *   label="Wi-Fi"
- *   value={on}
- *   onChange={setOn}
- *   activeIcon={<CheckSvg />}
- *   inactiveIcon={<CrossSvg />}
- * />
  */
 export function Switch(props: SwitchProps) {
   const {
