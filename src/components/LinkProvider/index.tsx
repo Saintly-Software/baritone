@@ -3,22 +3,14 @@ import * as React from "react";
 import type { RenderProp } from "../../utils/render";
 
 /**
- * The props the design system hands your router link when a `Link` (or any
- * component that reads {@link useLinkRender}) routes through a `LinkProvider`.
- * It's the fully-resolved anchor: the destination in `href`, plus the merged
- * `className` (the system's styling), `children`, any `onClick`, the composed
- * `ref`, and whatever `data-*` / `aria-*` the component computed.
- *
- * Map `href` onto whatever prop your router's link uses — `href` for Next.js,
- * `to` for React Router / TanStack Router — and spread the rest so the styling
- * and behaviour ride along.
+ * The fully-resolved anchor props the design system hands your router link when a
+ * `Link` routes through a `LinkProvider`: the `href`, the merged `className`,
+ * `children`, and everything else the component computed. Map `href` onto your
+ * router's destination prop (`href` for Next.js, `to` for React/TanStack Router)
+ * and spread the rest.
  */
 export interface LinkRenderProps {
-  /**
-   * The resolved destination URL. It's also the no-JS fallback and the link's
-   * accessible name source, so it's always a real URL string (never a router
-   * descriptor object).
-   */
+  /** The resolved destination URL — also the no-JS fallback and accessible name source. */
   href: string;
   /** The system's link styling — spread it onto your router link. */
   className?: string;
@@ -45,25 +37,15 @@ export interface LinkRenderProps {
 export type LinkRenderFn = (props: LinkRenderProps) => React.ReactNode;
 
 /**
- * Whether an `href` should be handed to the app's client router (a client-side
- * navigation) rather than left as a plain, full-page `<a>`. It's purely
- * *syntactic* so it is safe to run during SSR — it never touches `window`:
+ * Whether an `href` should be client-routed rather than left as a full-page
+ * `<a>` — the default test a {@link LinkProvider} applies. Purely syntactic (SSR-
+ * safe, never touches `window`):
  *
- * - **External** (returns `false`): a URL carrying a scheme (`https:`, `http:`,
- *   `mailto:`, `tel:`, `sms:`, …) or a protocol-relative URL (`//host/path`).
- *   These leave your app's origin (or aren't HTTP at all), so a client router
- *   can't own them. A **fragment-only** href (`#footnote-1`) is external too: a
- *   same-document jump to an anchor is browser behaviour, not a navigation, and
- *   routers with structured APIs mishandle it (TanStack Router, for instance,
- *   resolves `to="#foo"` as a relative *path* against the current pathname).
- * - **Internal** (returns `true`): an absolute path (`/about`), a relative one
- *   (`./x`, `../x`, `x`), or a same-document `?query` — the things the router
- *   owns. A path *carrying* a fragment (`/a#foo`) is a real navigation and stays
- *   internal; only a bare `#…` is excluded.
- *
- * It's the default URL test a {@link LinkProvider} applies. Pass the provider
- * your own `isInternal` to widen or narrow it — e.g. to keep a legacy `/admin`
- * subtree on full-page loads while routing everything else.
+ * - **External** (`false`): a scheme (`https:`, `mailto:`, …), a protocol-relative
+ *   URL (`//host`), or a fragment-only href (`#footnote` — a same-document jump
+ *   the browser owns, which structured routers mishandle).
+ * - **Internal** (`true`): an absolute (`/about`) or relative (`./x`) path, or a
+ *   `?query`. A path carrying a fragment (`/a#foo`) stays internal.
  */
 export function isInternalHref(href: string): boolean {
   if (href.startsWith("//")) return false;
@@ -90,51 +72,26 @@ export interface LinkProviderProps {
    */
   render: LinkRenderFn;
   /**
-   * Override which destinations are client-routed. Receives the `href` and
-   * returns `true` to route it through `render`, or `false` to leave a plain
-   * `<a>`. Defaults to {@link isInternalHref}.
-   *
-   * New-tab (`target`) and `download` links are *always* left as plain anchors
-   * regardless of this predicate — the browser, not a client router, owns
-   * opening a new browsing context or saving a file.
+   * Override which destinations are client-routed. Defaults to
+   * {@link isInternalHref}. New-tab (`target`) and `download` links are always
+   * left as plain anchors regardless.
    */
   isInternal?: (href: string) => boolean;
   children: React.ReactNode;
 }
 
 /**
- * LinkProvider — wire the design system's `Link` to your app's router once, for
- * the whole tree below it, instead of threading `render` through every link.
- *
- * `Link` stays router-agnostic on its own (it renders a plain styled `<a>`, or
- * takes a per-link `render`). Wrap your app in a `LinkProvider` and every
- * *internal* `Link` — inline or `appearance="button"` — automatically renders
- * through your router's link, keeping the system's styling while the router owns
- * client-side navigation. External links (`https:`, `mailto:`, `tel:`, …),
- * fragment-only links (`#footnote-1` — a same-document jump the browser owns,
- * not a navigation), new-tab links (`target`), and `download`s fall back to a
- * real `<a>`, so a single provider at the root is safe for every kind of link.
- *
- * Precedence for a given `Link`: a per-link `render` prop always wins (the
- * escape hatch — route one link with bespoke router props, or force a plain
- * element); otherwise the provider handles internal links; otherwise it's a
- * plain `<a href>`.
- *
- * Scopes nest — a subtree can supply a different `LinkProvider` (or none) to
- * override the router for that region.
+ * Wire the design system's `Link` to your app's router once, for the whole tree
+ * below, instead of threading `render` through every link. Every internal `Link`
+ * routes through your router; external, fragment-only, new-tab, and `download`
+ * links fall back to a plain `<a>`. Precedence: a per-link `render` wins, else the
+ * provider handles internal links, else a plain `<a href>`. Scopes nest.
  *
  * @example
- * // App root (Next.js App Router — a client component):
- * import Link from "next/link";
- *
+ * // Next.js — the destination prop is already `href`, so just spread:
  * <LinkProvider render={(props) => <Link {...props} />}>
  *   <App />
  * </LinkProvider>;
- *
- * // Anywhere below, no `render` needed — this routes through Next's <Link>:
- * <Link href="/dashboard">Dashboard</Link>
- * // …while this stays a plain external anchor:
- * <Link href="https://example.com">Docs</Link>
  *
  * @example
  * // React Router / TanStack Router use `to`, so map `href` onto it:
@@ -152,25 +109,11 @@ export function LinkProvider({ render, isInternal = isInternalHref, children }: 
 
 /**
  * Resolves the `render` a `Link`-like component should hand to `useRender`,
- * honouring an enclosing {@link LinkProvider}. Returns, in order:
- *
- * 1. `explicitRender` — a per-link `render` always wins (route this one link with
- *    bespoke router props, or force a plain element);
- * 2. the provider's router link — when there is a provider, the link has an
- *    `href`, it's not a new-tab (`target`) or `download` link, and the provider
- *    considers the `href` internal;
- * 3. `undefined` — otherwise, so the caller falls back to its `defaultElement`
- *    (for `Link`, a plain `<a>`).
- *
- * A component becomes router-aware just by routing its own `render` through this:
- *
- * ```tsx
- * const render = useLinkRender(props.render, props);
- * return useRender({ render, defaultElement: "a", props: { href, className, … } });
- * ```
- *
- * Call it unconditionally (it reads context) — before any early `return` so the
- * hook order stays stable.
+ * honouring an enclosing {@link LinkProvider}. Returns, in order: an explicit
+ * per-link `render`; the provider's router link (when the link has an internal
+ * `href` and isn't a new-tab / `download` link); or `undefined` (fall back to the
+ * caller's `defaultElement`). Call it unconditionally, before any early `return`,
+ * to keep hook order stable.
  */
 export function useLinkRender(
   explicitRender: RenderProp | undefined,

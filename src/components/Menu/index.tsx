@@ -26,10 +26,7 @@ type PositionerProps = React.ComponentProps<typeof BaseMenu.Positioner>;
 
 /**
  * `Menu.Item`'s colour intent — the `neutral` default plus the accent intents.
- * Derived from the recipe's own list, so the type and the styles can't drift.
- *
- * Narrower than `Chip`/`Button`'s full `Intent`: `primary` is the call-to-action
- * colour, and a row in a list of peers isn't a CTA.
+ * Narrower than `Chip`/`Button`'s full `Intent` (no CTA `primary`).
  */
 export type MenuItemIntent = (typeof MENU_ITEM_INTENTS)[number];
 
@@ -42,50 +39,37 @@ export interface MenuItemIconState {
 export interface MenuItemProps {
   /** Colour intent for the row's icon/text and its highlight wash. Default `neutral`. */
   intent?: MenuItemIntent;
-  /**
-   * Leading glyph before the label. Pass a bare glyph (`icon={<PenLine />}`,
-   * auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
-   * `(props, state) => …` render function for full control.
-   */
+  /** Leading glyph before the label — a bare glyph, an `<Icon>`, or a render function. */
   icon?: IconSlot<MenuItemIconState>;
   /** The row's visible label — also its accessible name and keyboard type-ahead text. */
   children: string;
   /**
-   * Activation handler, makes the row a real `<button>` (via
-   * `InternalGenericButtonAnchor`). Can be combined with `href`/`render` (e.g. to
-   * fire analytics alongside the navigation) — all three chain rather than
-   * override each other.
+   * Activation handler; makes the row a real `<button>`. Chains with `href` /
+   * `render` rather than overriding them.
    */
   onClick?: React.MouseEventHandler<HTMLElement>;
   /** Destination for an external link — makes the row a real `<a href>`. */
   href?: string;
   /**
-   * Router-link element for internal, client-side navigation (the base-ui
-   * `render` seam, like `Link`/`Card`) — e.g. `render={<RouterLink to="/settings" />}`.
-   * Its presence (with or without `href`) makes the row a link.
+   * Router-link element for internal navigation (e.g. `render={<RouterLink to=… />}`).
+   * Its presence makes the row a link.
    */
   render?: RenderProp;
   /** Disables the row. Uses `aria-disabled`/`data-disabled` (never the native attribute). */
   disabled?: boolean;
   /**
-   * Keep the menu open after this row activates, instead of the default
-   * dismiss-on-click. Meant for a button row whose action doesn't navigate away
-   * and that a user may want to fire repeatedly (a stepper, a "mark all"
-   * toggle). No effect on link rows — those navigate away, closing the menu.
+   * Keep the menu open after this row activates, instead of dismissing. For a
+   * button row a user may fire repeatedly. No effect on link rows.
    */
   keepOpen?: boolean;
 }
 
 /**
- * Wires a base-ui render callback's computed props (`htmlAttrs`) onto
+ * Wires a base-ui render callback's `htmlAttrs` onto
  * `InternalGenericButtonAnchor`, folding in the item's own
- * `onClick`/`href`/`render`/`disabled` — mirrors `InternalButton`'s `htmlAttrs`
- * seam. The host's `onClick` (base-ui's highlight/keyboard/close wiring) is
- * pulled out and chained after the consumer's own, so both run exactly once.
- * base-ui's own `aria-disabled` is dropped rather than merged: since we never
- * tell base-ui this item is disabled (see `MenuItem`), it always hands back
- * `aria-disabled={false}` here, which would otherwise clobber the real value
- * `InternalGenericButtonAnchor` computes from our own `disabled` prop.
+ * `onClick`/`href`/`render`/`disabled`. base-ui's `onClick` is chained after the
+ * consumer's so both run once; its `aria-disabled` is dropped, since it would
+ * clobber the value `InternalGenericButtonAnchor` computes from our `disabled`.
  */
 function MenuItemAnchor({
   intent = "neutral",
@@ -269,26 +253,18 @@ interface MenuTriggerOwnProps {
 }
 
 /**
- * `Menu.Trigger` props. By default it renders a `Button`, so all of Button's
- * `intent`/`saliency`/`size`/`icons`/`loading`/`disabled` apply. Pass a base-ui
- * `render` (an element, or `(htmlAttrs) => element`) to use a fully custom
- * trigger element instead — it receives the popup wiring
- * (`aria-haspopup`/`aria-expanded` + the toggle handler), and the Button props
- * no longer apply.
+ * `Menu.Trigger` props. By default it renders a `Button` (all of Button's props
+ * apply). Pass a base-ui `render` for a custom trigger instead — it receives the
+ * popup wiring, and the Button props no longer apply.
  */
 export type MenuTriggerProps =
   | (ButtonProps & MenuTriggerOwnProps & { render?: never })
   | (MenuTriggerOwnProps & { render: BaseMenuTriggerRender });
 
 /**
- * The trigger that opens the menu. Renders a `Button` (so all of Button's
- * intents/saliencies/sizes/icons are available), wired up by base-ui so it
- * carries the right `aria-haspopup`/`aria-expanded` and toggles the menu. Must
- * be passed to `<Menu trigger={...} />` so it sits inside the menu's context.
- *
- * Pass `render` for a custom, non-Button trigger (an avatar, an icon-only
- * control): base-ui hands your element the same popup wiring via its `render`
- * seam — the house polymorphism convention, never `asChild`.
+ * The trigger that opens the menu — a `Button` by default, wired by base-ui with
+ * `aria-haspopup`/`aria-expanded`. Pass `render` for a custom, non-Button
+ * trigger. Must be passed to `<Menu trigger={...} />`.
  */
 function MenuTrigger(props: MenuTriggerProps) {
   const { openOnHover, delay, closeDelay } = props;

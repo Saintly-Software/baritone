@@ -13,13 +13,9 @@ import { chipLabelRecipe } from "./chip.css";
 import { chipAdornmentRecipe } from "./chipAdornment.css";
 
 /**
- * What a Chip publishes to its adornments. The adornment doesn't apply the chip's
- * *intent* to its own colour (it inherits it via `--iconColor`, or overrides with
- * its own `intent`), but it publishes the resolved `intent` so an icon render
- * function can branch on the effective colour. It also needs the chip's `saliency`
- * to tint an override at the right shade, the chip's `size` to scale its glyph to
- * the box it sits in, and the chip's `disabled` so a clickable adornment goes
- * inert with the chip.
+ * What a Chip publishes to its adornments — the resolved `intent` / `saliency` /
+ * `size` (so an icon render function can branch and scale to the box) and
+ * `disabled` (so a clickable adornment goes inert with the chip).
  */
 interface ChipAdornmentContextValue {
   intent?: Intent;
@@ -39,17 +35,9 @@ export interface ChipIconState {
 }
 
 interface ChipAdornmentBaseProps {
-  /**
-   * The icon to render — a bare glyph (auto-wrapped in `Icon`), an explicit
-   * `<Icon>`, or a `(props, state)` render function. It inherits the chip's
-   * foreground unless `intent` overrides it.
-   */
+  /** The icon to render — a bare glyph, an `<Icon>`, or a render function. */
   icon: IconSlot<ChipIconState>;
-  /**
-   * Colour intent for this adornment. Defaults to the parent Chip's intent (the
-   * adornment simply inherits its colour); set this to tint just this adornment
-   * a different intent. It keeps the chip's saliency.
-   */
+  /** Colour intent for this adornment. Defaults to the parent Chip's intent. */
   intent?: Intent;
 }
 
@@ -78,16 +66,14 @@ export interface ChipButtonAdornmentProps extends ChipAdornmentBaseProps {
   /** Required accessible name for the icon-only button. */
   label: string;
   /**
-   * Disables the button. Applied as `aria-disabled` (never the native attribute)
-   * so it stays keyboard-focusable; the click is swallowed. A disabled Chip also
-   * makes its clickable adornments inert.
+   * Disables the button via `aria-disabled` (never the native attribute) so it
+   * stays keyboard-focusable; the click is swallowed. A disabled Chip also makes
+   * its clickable adornments inert.
    */
   disabled?: boolean;
   /**
-   * A button adornment is its own hit target, so by default its click is stopped
-   * from bubbling past the chip — it won't also trigger a clickable ancestor
-   * (e.g. a clickable row wrapping the chip). Set this to let the click propagate
-   * up as usual.
+   * By default a button adornment's click is stopped from bubbling past the chip.
+   * Set this to let it propagate up to a clickable ancestor.
    */
   forcePropagation?: boolean;
   href?: never;
@@ -186,10 +172,8 @@ function CheckGlyph() {
 
 /**
  * The built-in copy-to-clipboard adornment appended when a Chip is given
- * `contentToCopy`. It's a clickable `Chip.Adornment` that writes the text to the
- * clipboard on activation and, as success feedback, briefly swaps its glyph to a
- * checkmark and its accessible name to "Copied" before reverting. Being a
- * clickable adornment it inherits the chip's disabled state through context.
+ * `contentToCopy`. On activation it writes the text and briefly swaps its glyph
+ * to a checkmark and its name to "Copied" before reverting.
  */
 function ChipCopyAdornment({ content }: { content: string }) {
   const [copied, setCopied] = React.useState(false);
@@ -220,11 +204,9 @@ function ChipCopyAdornment({ content }: { content: string }) {
 }
 
 /**
- * Chip.Adornment — a small icon slotted before/after a Chip's label via the
- * `leadAdornments` / `trailAdornments` props (or dropped directly in the Chip's
- * children). It inherits the Chip's colour and (for clickable kinds) its
- * disabled state through context, and is one of three kinds discriminated by its
- * props: a regular icon, a `<button>` (`onClick`), or an `<a>` (`href`).
+ * Chip.Adornment — a small icon slotted before/after a Chip's label. Inherits the
+ * Chip's colour and (for clickable kinds) disabled state through context. One of
+ * three kinds: a regular icon, a `<button>` (`onClick`), or an `<a>` (`href`).
  */
 function ChipAdornment(props: ChipAdornmentProps) {
   const { icon, intent, label, onClick, href, disabled, render, forcePropagation } = props;
@@ -303,55 +285,37 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
    */
   shape?: "square" | "pill";
   /**
-   * The chip's width. `fit` (default) keeps the chip `inline-flex`, hugging its
-   * content. `fill` stretches it to its container's full width — useful when
-   * chips stack in a column and should share one edge. The label truncates
-   * either way.
+   * The chip's width. `fit` (default) hugs its content; `fill` stretches it to
+   * the container's full width. The label truncates either way.
    */
   width?: "fit" | "fill";
   /** Uses `aria-disabled` (keyboard-focusable) rather than `disabled`. */
   disabled?: boolean;
   /**
-   * Makes the chip's text label clickable: the label renders as a real
-   * `<button>` (keyboard-focusable, Enter/Space-activated) and this fires on
-   * activation. Only the label is the hit target — adornments keep their own
-   * actions. A disabled chip makes the label inert but still focusable
-   * (`aria-disabled`, never the native attribute), swallowing the click. Has no
-   * effect without text `children`.
+   * Makes the chip's text label a clickable `<button>` that fires this. Only the
+   * label is the hit target. A disabled chip swallows the click but stays
+   * focusable. No effect without text `children`.
    */
   onClick?: React.MouseEventHandler<HTMLElement>;
   /**
-   * Attaches a `<Popover>` opened by clicking the chip's text label. Pass a fully
-   * configured `<Popover>` element (its `header` / `footer` / content / placement
-   * — the whole Popover API): the chip slots itself in as that popover's
-   * `trigger`, rendering the label as a real `<button>` that base-ui wires up, so
-   * it carries `aria-haspopup` / `aria-expanded` / `aria-controls` and toggles the
-   * surface. Only the label is the trigger — adornments keep their own actions. A
-   * disabled chip's label stays keyboard-focusable (`aria-disabled`) but swallows
-   * the click, so the popover won't open. Composes with `onClick` (which still
-   * fires before the popover opens). Has no effect without text `children`, or
-   * while `loading`.
+   * Attaches a `<Popover>` opened by the chip's text label (the chip becomes its
+   * `trigger`, wiring `aria-haspopup` / `aria-expanded`). Composes with `onClick`.
+   * No effect without text `children`, or while `loading`.
    */
   popover?: React.ReactElement<PopoverProps>;
   /**
-   * Loading state: replaces the chip's entire content — both adornment lists and
-   * the label — with a centred spinner, and marks the chip `aria-busy` and inert
-   * (`aria-disabled`, like `disabled`). The chip keeps its height; its width
-   * collapses to fit the spinner.
+   * Loading state: replaces the chip's content with a centred spinner and marks
+   * it `aria-busy` and inert. Keeps its height; width collapses to fit the spinner.
    */
   loading?: boolean;
   /**
-   * Shorthand for a leading icon — prepends a decorative `<Chip.Adornment>` as the
-   * *first* lead adornment, before any `leadAdornments`. A bare glyph (auto-wrapped
-   * in `Icon`), an explicit `<Icon>`, or a `(props, state)` render function; it
-   * inherits the chip's colour like any adornment.
+   * Shorthand for a leading icon — prepends a decorative `<Chip.Adornment>` before
+   * any `leadAdornments`. A bare glyph, an `<Icon>`, or a render function.
    */
   icon?: IconSlot<ChipIconState>;
   /**
-   * Shorthand for a trailing icon — mirrors `icon` at the other end, appending a
-   * decorative `<Chip.Adornment>` *after* any `trailAdornments` (and before the
-   * built-in `contentToCopy` / `handleRemove` buttons). Same forms as `icon`; it
-   * inherits the chip's colour like any adornment.
+   * Shorthand for a trailing icon — mirrors `icon`, appended after any
+   * `trailAdornments` (and before the built-in copy / remove buttons).
    */
   trailIcon?: IconSlot<ChipIconState>;
   /** Adornments rendered before the label — each a `<Chip.Adornment>`. */
@@ -359,50 +323,34 @@ export interface ChipProps extends Omit<React.HTMLAttributes<HTMLElement>, "colo
   /** Adornments rendered after the label — each a `<Chip.Adornment>`. */
   trailAdornments?: Array<React.ReactElement<ChipAdornmentProps>>;
   /**
-   * When provided, appends a built-in copy-to-clipboard trailing adornment that
-   * writes this string to the clipboard on click. It's a labelled clickable
-   * `Chip.Adornment` ("Copy") that briefly shows a checkmark + "Copied" as
-   * success feedback, and — being clickable — inherits the chip's disabled state.
-   * It sits after `trailIcon`, before the `handleRemove` "×".
+   * Appends a built-in copy-to-clipboard trailing adornment that writes this
+   * string on click, showing a checkmark + "Copied". Sits after `trailIcon`,
+   * before `handleRemove`.
    */
   contentToCopy?: string;
   /**
-   * When provided, appends a built-in clickable remove "×" adornment that calls
-   * this on activation. It always sits last among the trailing adornments, after
-   * any `trailAdornments` you supply. Like any clickable adornment it inherits
-   * the chip's disabled state — inert but still keyboard-focusable
-   * (`aria-disabled`) when the chip is `disabled`.
+   * Appends a built-in remove "×" adornment that calls this on activation, always
+   * last among the trailing adornments.
    */
   handleRemove?: () => void;
   /** Render as a different element/component (base-ui `render` pattern). */
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;
   /**
-   * The chip's text label, and only text — a single string (or an array of
-   * strings, e.g. interpolated `{a}/{b}`). Icons and actions go through
-   * `leadAdornments` / `trailAdornments` (each a `Chip.Adornment`), never the
+   * The chip's text label, and only text (a string, or an array of strings).
+   * Icons and actions go through `leadAdornments` / `trailAdornments`, never the
    * children, so the chip can wrap the label in its own truncating element.
    */
   children?: string | string[];
 }
 
 /**
- * Chip — a "component" element type. Shares the colour scheme/recipe with Button
- * et al., so `<Chip intent="negative" saliency="high">` matches a Button with
- * the same props. Hover/active states are derived from tokens at use-site.
- *
- * Unlike a Button, though, a Chip is a *tag* by default, not a control: its hit
- * targets are the label (given `onClick` / `popover`) and the adornments, each
- * carrying its own affordances. So the chip body itself takes no pointer cursor
- * and no hover — it would be promising a click that does nothing — and its text
- * stays selectable. Passing a `render` that makes the chip a link restores both,
- * off the rendered element rather than a prop (see the `interactive` variants in
- * `component.css.ts`).
- *
- * Decorate it with `Chip.Adornment`s via `leadAdornments` / `trailAdornments`
- * (icons that can also be a `<button>` or an `<a>`); they inherit the chip's
- * colour and disabled state, and the chip's flex layout spaces them around the
- * label.
+ * A "component" element type sharing the colour recipe with Button et al., so
+ * `<Chip intent="negative" saliency="high">` matches a Button with the same
+ * props. Unlike a Button it's a *tag* by default, not a control: its hit targets
+ * are the label (given `onClick` / `popover`) and the adornments, so the chip
+ * body itself takes no pointer cursor and its text stays selectable. Decorate it
+ * with `Chip.Adornment`s via `leadAdornments` / `trailAdornments`.
  */
 function ChipRoot({
   intent,

@@ -1,7 +1,3 @@
-// Canonical vocabulary for the design system. These tuples drive both the
-// theme contract shape and the generated recipe variants, so the type-safe
-// variant API and the CSS variables can never drift apart.
-
 export const INTENTS = [
   "primary",
   "secondary",
@@ -24,11 +20,6 @@ export type SurfaceSaliency = (typeof SURFACE_SALIENCIES)[number];
 export const FORM_STATES = ["neutral", "warning", "invalid", "valid"] as const;
 export type FormState = (typeof FORM_STATES)[number];
 
-// The full typography size scale a `size` prop can take — a Tailwind-style ramp
-// shared by `Text` and `Heading`. The two components differ only in semantics
-// (Heading renders `h1`–`h6` and defaults to high saliency; Text renders body
-// tags), not in the sizes they can render. Mirrors the keys of the `text.size`
-// token scale.
 export const TEXT_SIZES = [
   "xs",
   "sm",

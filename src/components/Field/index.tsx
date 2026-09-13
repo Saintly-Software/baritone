@@ -21,44 +21,28 @@ const labelClass = cx(
 );
 
 /**
- * Per-slot overrides for the label and help-text pieces. Every field is partial —
- * you're layering props onto the slot's own defaults, so
- * `slotProps={{ label: { className: "…" }, helpText: { variant: "sm" } }}`
- * re-tunes just those pieces. A `className` set here merges onto (doesn't
- * replace) the slot's built-in class.
+ * Per-slot overrides for the label and help-text pieces, layered onto each slot's
+ * own defaults. A `className` set here merges onto (doesn't replace) the built-in class.
  */
 export interface FieldSlotProps {
   /** Props for the `<label>` above (or beside) the control. */
   label?: React.ComponentPropsWithoutRef<typeof BaseField.Label>;
   /** Props for the `HelpText` under the control, in every `state`. */
   helpText?: Partial<HelpTextProps>;
-  /**
-   * Props for the label's `InfoButton` (only rendered when `info` is set). Use it
-   * to override the default `aria-label`, or to tune `side` / `intent` / etc.
-   */
+  /** Props for the label's `InfoButton` (only rendered when `info` is set). */
   info?: Partial<InfoButtonProps>;
 }
 
 /**
- * The three ways to give a form control an accessible name — **mutually
- * exclusive** by construction:
+ * The three **mutually exclusive** ways to give a form control an accessible name:
  *
- * - **`label`** — a visible `<label>`, associated with the control. The default,
- *   and the right answer nearly always: a visible label helps everyone, not just
- *   screen-reader users.
- * - **`aria-label`** — an invisible string name, for a control whose purpose is
- *   already obvious from its visuals (an icon-only control).
- * - **`aria-labelledby`** — names the control by pointing at an element that
- *   already exists elsewhere on the page.
+ * - **`label`** — a visible `<label>` (the default, and nearly always right).
+ * - **`aria-label`** — an invisible string name, for a visually obvious control.
+ * - **`aria-labelledby`** — names the control by pointing at an existing element.
  *
- * Passing more than one is a type error, because there is no sensible way to
- * resolve it: `aria-labelledby` and `aria-label` both *override* the visible
- * `<label>` in the accessible-name calculation, so a control showing one name
- * and announcing another is always a bug. Picking exactly one also means there
- * is no precedence order to remember.
- *
- * Compose it into a control's props with an intersection (a union can't be
- * `extend`ed):
+ * Passing more than one is a type error: `aria-label`/`aria-labelledby` override
+ * the visible `<label>`, so a control showing one name and announcing another is
+ * a bug. Compose into a control's props with an intersection:
  *
  * ```ts
  * export type MyControlProps = MyControlBaseProps & FieldLabellingProps;
@@ -80,20 +64,11 @@ const isDev = (): boolean =>
   typeof process === "undefined" || process.env.NODE_ENV !== "production";
 
 /**
- * Enforce the labelling props' mutual exclusivity at runtime, for the JS callers
- * the type-level union can't reach. **Throws** — a control that shows one name
- * and announces another is an accessibility bug, not a condition to degrade
- * through, and a `console.warn` is too easy to scroll past.
- *
- * Dev/test only, matching `warnOnContrastIssues`: the check is deterministic on
- * props, so any render in dev, a test, or CI trips it long before production —
- * while in production a mislabelled control still beats a white screen for the
- * assistive-tech user this rule exists to protect. (It also lets the whole check
- * dead-code-eliminate out of the bundle.)
- *
- * `Field` calls this for every control that hands it the labelling props. A
- * control that renders its *own* label instead (`Checkbox` / `Switch`, whose
- * label lives inside the clickable row) has to call it directly.
+ * Enforce the labelling props' mutual exclusivity at runtime, for JS callers the
+ * type union can't reach. **Throws** — a mislabelled control is a bug, not a
+ * degradable condition. Dev/test only, so it dead-code-eliminates from the
+ * bundle. `Field` calls it for its controls; a control that renders its own label
+ * (`Checkbox` / `Switch`) must call it directly.
  */
 export function assertExclusiveNames(props: FieldLabellingInput, component: string): void {
   if (!isDev()) return;
@@ -113,17 +88,12 @@ export function assertExclusiveNames(props: FieldLabellingInput, component: stri
 
 /**
  * Resolve the naming attributes to spread onto a form control's focusable
- * element. Because the three labelling props are mutually exclusive there is no
- * precedence to apply — at most one is ever set.
- *
- * Pass `labelId` when the visible label has to name the control *by reference*
- * (base-ui's `Checkbox`/`Switch` hide their real `<input>`, so a wrapping
- * `<label>` would name that instead of the control). Omit it when base-ui's
- * `Field.Label` already names the control on its own.
+ * element. Pass `labelId` when the visible label must name the control by
+ * reference (base-ui's `Checkbox`/`Switch` hide their real `<input>`).
  *
  * Only *defined* attributes are returned: spreading `aria-label={undefined}`
- * through base-ui's `mergeProps` clobbers the name coming from the field
- * context, silently unlabelling the control.
+ * through base-ui's `mergeProps` clobbers the field context's name, silently
+ * unlabelling the control.
  */
 export function fieldNameAttrs(
   props: FieldLabellingInput,
@@ -144,28 +114,17 @@ export interface FieldControlInput extends FieldLabellingInput {
 
 /**
  * Every ARIA attribute a form control's focusable element needs from its field,
- * in one spread:
+ * in one spread — {@link fieldNameAttrs} plus the caller's `aria-describedby`:
  *
  * ```tsx
  * <BaseSwitch.Root {...fieldControlAttrs(props, labelId)} />
  * ```
  *
- * That is {@link fieldNameAttrs} plus the caller's `aria-describedby`. Both have
- * the same hazard, which is the whole reason this exists: base-ui's `mergeProps`
- * copies an explicit `undefined` over the value the field context already put
- * there, so `aria-describedby={undefined}` silently unwires the `helpText` and
- * `aria-label={undefined}` silently unlabels the control. Only keys that are
- * actually set come back, so spreading the result is always safe.
- *
- * Note base-ui *appends* the field's own `helpText` id to whatever
- * `aria-describedby` this emits, rather than replacing it — so a caller's
- * description and the field's help text are both announced. For a control
- * base-ui can't reach, combine the ids yourself with {@link joinIds} instead.
- *
- * It's a plain function, not a hook: there's no state, and the controls call it
- * from their own bodies — outside the `Field`'s provider, since `Field` only
- * renders them as `children` — so a context-reading hook couldn't see the field
- * anyway.
+ * Only keys that are actually set come back, so spreading is safe: base-ui's
+ * `mergeProps` would otherwise copy an explicit `undefined` over the field
+ * context's value, silently unwiring the name or `helpText`. base-ui appends the
+ * field's own `helpText` id rather than replacing this one. For a control base-ui
+ * can't reach, combine the ids yourself with {@link joinIds}.
  */
 export function fieldControlAttrs(
   props: FieldControlInput,
@@ -188,26 +147,16 @@ export function joinIds(...ids: Array<string | undefined | false>): string | und
 }
 
 /**
- * The wiring a control needs when base-ui can't reach it — handed to `Field`'s
- * render-prop `children`.
- *
- * base-ui wires its *own* components (`Field.Control`, `Select`, `RadioGroup`,
- * `Checkbox`, `Switch`) through the field context automatically, so those can
- * just be plain `children`. A control base-ui doesn't know about — a bare
- * `<div role="group">`, a toolbar — is invisible to that context, and has to be
- * pointed at the label and the help / error text explicitly.
+ * The wiring a control needs when base-ui can't reach it (a bare
+ * `<div role="group">`, a toolbar) — handed to `Field`'s render-prop `children`.
+ * base-ui's own components are wired through the field context automatically.
  */
 export interface FieldWiring {
-  /**
-   * The naming attributes to spread onto the control. Resolves to
-   * `aria-labelledby` pointing at the visible label, or to whichever of
-   * `aria-label` / `aria-labelledby` the caller passed.
-   */
+  /** The naming attributes to spread onto the control. */
   nameAttrs: { "aria-label"?: string; "aria-labelledby"?: string };
   /**
-   * The id of the rendered `helpText`, for the control's `aria-describedby`.
-   * `undefined` when there's no help text to describe it with.
-   * Combine it with any caller-supplied `aria-describedby` via {@link joinIds}.
+   * The id of the rendered `helpText` for `aria-describedby`, or `undefined`.
+   * Combine with any caller-supplied `aria-describedby` via {@link joinIds}.
    */
   describedBy: string | undefined;
   /** The visible label's id, or `undefined` when there is no visible label. */
@@ -215,9 +164,8 @@ export interface FieldWiring {
 }
 
 /**
- * Fold a slot's caller-supplied `className` (base-ui's `string | (state) => …`
- * form) together with the built-in `base` class, returning the function form
- * base-ui always accepts. Keeps our base class and lets the caller add to it.
+ * Fold a slot's caller-supplied `className` together with the built-in `base`
+ * class, returning the function form base-ui accepts.
  */
 function mergeSlotClass<S>(
   base: string,
@@ -229,48 +177,28 @@ function mergeSlotClass<S>(
 interface FieldBaseProps {
   /**
    * The control this field wraps — a `Field.Control` or any base-ui form
-   * component, which base-ui's field context wires up on its own.
-   *
-   * For a control base-ui *can't* reach (a bare `<div role="group">`, a toolbar),
-   * pass a function instead: it receives the {@link FieldWiring} to spread onto
-   * the control yourself.
+   * component (wired through the field context automatically). For a control
+   * base-ui can't reach, pass a function receiving the {@link FieldWiring} to
+   * spread yourself.
    */
   children: React.ReactNode | ((wiring: FieldWiring) => React.ReactNode);
   /**
-   * The field's one message line, under the control: inline help, or the
-   * validation error, depending on `state`. Rendered as a `HelpText` and wired to
-   * the control's `aria-describedby` — it *combines* with any `aria-describedby`
-   * you put on the control (base-ui appends rather than replaces), so an external
-   * description and this one are both announced.
-   *
-   * `state="invalid"` renders it negative, with `HelpText`'s warning glyph. There
-   * is deliberately no separate `errorMessage`: one slot means one line to read
-   * and no question about which of two messages wins. Swap the copy yourself when
-   * the error needs different words:
-   *
-   * ```tsx
-   * <TextInput state={error ? "invalid" : "neutral"} helpText={error ?? "We'll never share it."} />
-   * ```
+   * The field's one message line under the control — inline help, or the
+   * validation error when `state="invalid"` (negative, with a warning glyph).
+   * Rendered as a `HelpText` and combined with any `aria-describedby` on the
+   * control. There is deliberately no separate `errorMessage`.
    */
   helpText?: React.ReactNode;
   /**
-   * Extra explanation surfaced in an `InfoButton` (the "i" affordance) beside the
-   * `label`. It sits *next to* the label rather than inside it, so it never
-   * becomes part of the control's accessible name and clicking it doesn't
-   * activate the control. Rendered only when there's a visible `label` — with no
-   * label there's nothing to hang it on. Give the button an accessible name via
-   * `slotProps.info["aria-label"]` (defaults to "More information").
+   * Extra explanation surfaced in an `InfoButton` beside the `label` (never part
+   * of the control's accessible name). Rendered only with a visible `label`; name
+   * the button via `slotProps.info["aria-label"]` (defaults to "More information").
    */
   info?: React.ReactNode;
   /**
-   * Mark the field required — renders a marker (`*`) after the label text.
-   *
-   * The marker is *decorative* (`aria-hidden`), and sits beside the `<label>`
-   * rather than inside it, so it can't leak into the control's accessible name.
-   * The *semantics* come from the control — a native `<input>` takes the native
-   * `required`, and base-ui gives its non-native controls `aria-required` — so
-   * pass `required` to the control too. Every form control in this package does
-   * both.
+   * Mark the field required — a decorative (`aria-hidden`) `*` marker beside the
+   * label. The announced semantics come from the control, so pass `required`
+   * there too.
    */
   required?: boolean;
   /** Validation state. `invalid` reddens the `helpText` and sets `aria-invalid`. */
@@ -280,10 +208,9 @@ interface FieldBaseProps {
   /** Claim the line (`fill`, default) or shrink-wrap the content (`content`). */
   fit?: "fill" | "content";
   /**
-   * Dim the label and help text. This does **not** disable the control — pass
-   * `disabled` to that yourself, modelled as `aria-disabled` + `readOnly` so it
-   * stays focusable (see AGENTS.md). Ignored in favour of an enclosing
-   * `Fieldset`'s disabled state when that is set.
+   * Dim the label and help text. Does **not** disable the control — pass
+   * `disabled` there yourself (see AGENTS.md). Overridden by an enclosing
+   * `Fieldset`'s disabled state.
    */
   disabled?: boolean;
   /** Per-slot overrides for the label / help-text / info pieces. */
@@ -295,40 +222,17 @@ interface FieldBaseProps {
 export type FieldProps = FieldBaseProps & FieldLabellingProps;
 
 /**
- * Field — the layout + ARIA primitive every form control is built from: it pairs
- * a label and help / error text with an arbitrary control, so that wiring lives
- * in one place instead of being re-derived per component.
+ * The layout + ARIA primitive every form control is built from: it pairs a label
+ * and help / error text with an arbitrary control, keeping that wiring in one
+ * place. It owns naming (`label` / `aria-label` / `aria-labelledby`, mutually
+ * exclusive), description (`helpText` → `aria-describedby`), validation
+ * (`state="invalid"` → `aria-invalid` + negative help text), and layout
+ * (`labelPosition`, `fit`, `info`, `required`).
  *
- * It owns four things:
- *
- * 1. **Naming.** `label` / `aria-label` / `aria-labelledby` are mutually
- *    exclusive (see {@link FieldLabellingProps}) — enforced in the types and
- *    warned about at runtime. A visible `label` is associated with the control by
- *    base-ui; for a control base-ui can't reach, spread {@link fieldNameAttrs}
- *    onto the focusable element yourself.
- * 2. **Description.** `helpText` renders a `HelpText` wired to the control's
- *    `aria-describedby`, *combining* with any `aria-describedby` the caller set
- *    rather than replacing it.
- * 3. **Validation.** `state="invalid"` renders the `helpText` negative (with
- *    `HelpText`'s warning glyph) and marks the control `aria-invalid`. One
- *    message slot, not two — see `helpText`.
- * 4. **Layout.** `labelPosition` puts the label above (default) or inline, and
- *    `fit` decides whether the field claims the line or shrink-wraps. An `info`
- *    node hangs an `InfoButton` beside the label, and `required` marks it.
- *
- * `required` here is the *visible* half of required-ness (the marker beside the
- * label); the announced half lives on the control, which the field can't reach.
- * Pass `required` to both — every form control in this package does.
- *
- * There is deliberately no `id` prop: an `id` on base-ui's `Field.Root` doesn't
- * reach the control (base-ui generates one regardless), so it would be a lie.
- * Put `id` on the control instead — base-ui points the label's `for` at it.
- *
- * Note it deliberately does **not** forward `disabled` to base-ui's `Field.Root`:
- * base-ui propagates that to controls as the *native* `disabled` attribute, which
- * drops them from the tab order. Field's `disabled` is presentational (it dims
- * the label and help text); the control models the real thing with
- * `aria-disabled` + `readOnly`. See AGENTS.md.
+ * `required` here is only the visible marker; pass `required` to the control too
+ * for the announced semantics. There is deliberately no `id` prop (put `id` on
+ * the control), and `disabled` is presentational only — it does not forward to
+ * base-ui's `Field.Root` (see AGENTS.md).
  *
  * @example
  * // The common case — a labelled control with help text.

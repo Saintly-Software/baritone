@@ -39,43 +39,22 @@ import {
   utilityCell,
 } from "./dataTable.css";
 
-/**
- * DataTable's column meta — house presentational options layered onto a TanStack
- * column through its `meta` slot, rather than a parallel column API. Wired as a
- * v9 type-only `columnMeta` feature slot (see {@link dataTableFeatures}), so
- * `columnDef.meta` is typed as this and nothing else.
- */
+/** Presentational options for a DataTable column, set through its `meta` slot. */
 export interface DataTableColumnMeta {
   /** Horizontal alignment of the column's header and body cells. Default `start`. */
   align?: "start" | "center" | "end";
   /**
-   * In `groupDisplay="merge"`, marks this column as the host for the merged group
-   * label — the column whose cells carry the group value + toggle + count on
-   * header rows and the row's own value (indented by depth) on leaf rows. At most
-   * one column should set it; a grouped column may (it then stays visible as the
-   * outline instead of being dropped). If none set it, the first non-grouped,
-   * non-aggregated column hosts the label. Ignored under the default
-   * `groupDisplay="columns"`.
+   * Under `groupDisplay="merge"`, host the merged group-label outline in this
+   * column. At most one column should set it; defaults to the first non-grouped,
+   * non-aggregated column. Ignored under `groupDisplay="columns"`.
    */
   groupLabel?: boolean;
 }
 
 /**
- * The feature set every DataTable runs with. Core plus the grouping stack —
- * `columnGroupingFeature` (group state + grouped/aggregated cell APIs),
- * `rowExpandingFeature` (collapse/expand the groups), and `rowAggregationFeature`
- * (so a column's `aggregationFn` / `aggregatedCell` compute per group) — with
- * their two row-model slots, plus `rowSelectionFeature` (the `rowSelection` state
- * and per-row / select-all APIs behind the checkbox column). Sorting / filtering
- * / pagination are further v9 plugins we can register here later. React's
- * `useTable` injects its own reactivity feature on top of this.
- *
- * The features are always registered; with no `grouping` the grouped row model
- * is a pass-through, and with selection off (`enableRowSelection` unset) the
- * selection option is forced `false`, so a plain table pays nothing
- * behaviourally. The `columnMeta` slot is phantom at runtime (its value is
- * stripped); only its type is used, to type `columnDef.meta` as
- * {@link DataTableColumnMeta}.
+ * The TanStack v9 feature set every DataTable runs with: the grouping,
+ * expansion, aggregation, and row-selection features plus their row models. The
+ * `columnMeta` slot types `columnDef.meta` as {@link DataTableColumnMeta}.
  */
 export const dataTableFeatures = tableFeatures({
   columnMeta: {} as DataTableColumnMeta,
@@ -93,21 +72,14 @@ export type DataTableFeatures = typeof dataTableFeatures;
 
 /**
  * A DataTable column definition — a TanStack `ColumnDef` bound to DataTable's
- * feature set. Build these with {@link createDataTableColumnHelper} (recommended,
- * for per-column value inference) or as plain objects.
- *
- * `TValue` is `any` for the same reason TanStack's own `columnHelper.columns()`
- * returns `ColumnDef<…, any>[]`: a table's columns are heterogeneous — each has
- * its own value type — and `any` is what lets them share one array. Columns
- * authored through the helper stay individually type-checked; the widening is
- * only at this array boundary.
+ * feature set. Build these with {@link createDataTableColumnHelper} for
+ * per-column value inference, or as plain objects.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- see doc comment
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- heterogeneous columns share one array, as TanStack's own columnHelper does
 export type DataTableColumn<TData extends RowData> = ColumnDef<DataTableFeatures, TData, any>;
 
 /**
- * A column helper pre-bound to DataTable's feature set — `createColumnHelper`
- * with the `DataTableFeatures` generic already applied, so callers write
+ * A column helper pre-bound to DataTable's feature set, so callers write
  * `createDataTableColumnHelper<Person>()` and never repeat the feature type.
  *
  * @example
@@ -126,10 +98,9 @@ export function createDataTableColumnHelper<TData extends RowData>() {
 }
 
 /**
- * A DataTable must be named. Provide exactly one of a visible `caption` (renders
- * a `<caption>`, which also names the table for assistive tech), `aria-label` (a
- * literal string), or `aria-labelledby` (the id of a visible heading). The union
- * makes providing none — or two — a type error, mirroring `CardList`.
+ * A DataTable must be named. Provide exactly one of a visible `caption`,
+ * `aria-label`, or `aria-labelledby` (the id of a visible heading); none — or
+ * more than one — is a type error.
  */
 export type DataTableName =
   | { caption: React.ReactNode; "aria-label"?: never; "aria-labelledby"?: never }
@@ -140,132 +111,75 @@ export interface DataTableBaseProps<TData extends RowData> extends Omit<
   React.TableHTMLAttributes<HTMLTableElement>,
   "aria-label" | "aria-labelledby" | "children"
 > {
-  /**
-   * The rows to render. Keep this reference stable across renders (component
-   * state, `useMemo`, or a query result) — a fresh array every render throws
-   * away TanStack's memoised row model.
-   */
+  /** The rows to render. Keep the reference stable across renders. */
   data: ReadonlyArray<TData>;
   /**
-   * The column definitions. Build them with {@link createDataTableColumnHelper}
-   * for per-column value inference. Keep this reference stable across renders too.
+   * The column definitions, built with {@link createDataTableColumnHelper}. Keep
+   * the reference stable across renders.
    */
   columns: ReadonlyArray<DataTableColumn<TData>>;
   /**
    * Derive a stable row id from each datum (e.g. `(row) => row.id`). Defaults to
-   * the row's index; supply it whenever the data can reorder, so React keys and
-   * row selection stay pinned to the row, not its position.
+   * the row index; supply it whenever the data can reorder, so React keys and
+   * selection stay pinned to the row rather than its position.
    */
   getRowId?: (row: TData, index: number) => string;
   /**
-   * Column ids to group rows by, applied in order — group by the first id, then
-   * by the second within each group, and so on. Each id must match a column's id
-   * (an `accessor` column's id is its key unless you set one). Omit or pass `[]`
-   * for a flat table.
-   *
-   * Grouping inserts a collapsible header row per distinct value, carrying the
-   * group's label, its row count, and an expand/collapse toggle. Columns with an
-   * `aggregationFn` (and optional `aggregatedCell`) show a rolled-up value on
-   * those header rows. This is a controlled input: the table renders whatever you
-   * pass — drive it from a "group by" control or a static config — and owns only
-   * the expanded/collapsed state (see `defaultExpanded`).
+   * Column ids to group rows by, in order, each inserting a collapsible header
+   * row per distinct value with the group's label, count, and toggle. Columns
+   * with an `aggregationFn` show a rolled-up value there. Controlled; omit or
+   * pass `[]` for a flat table.
    */
   grouping?: ReadonlyArray<string>;
   /**
-   * Whether groups start expanded. Defaults to `true` (every group open). Set
-   * `false` to start fully collapsed. Only seeds the initial render — the table
-   * owns expansion after that, toggled per group; changing this later won't
-   * re-collapse an open table.
+   * Whether groups start expanded. Default `true`. Seeds the initial render only;
+   * the table owns expansion after that.
    */
   defaultExpanded?: boolean;
   /**
    * How grouped rows present, when `grouping` is set. Default `"columns"`.
    *
-   * - `"columns"`: the grouped column stays its own column — group-header rows
-   *   carry the label there and leaf rows leave it blank (a placeholder). The
-   *   original layout.
-   * - `"merge"`: the grouped column(s) are not rendered as their own columns.
-   *   Instead the group label (value + toggle + count) is hosted in one column,
-   *   indented by nesting depth, and leaf rows render that column's own value
-   *   indented to match — a single outline column instead of a blank leftmost one.
-   *   The host is the column whose `meta.groupLabel` is `true`, else the first
-   *   column that is neither grouped nor aggregated (so an aggregated total keeps
-   *   rolling up per group rather than being replaced by the label); if every
-   *   remaining column aggregates, the innermost grouped column stays on as the
-   *   outline. Set the host column's `header` to name the outline (e.g.
-   *   `"Category"`). Inert without `grouping`.
-   *
-   * `"merge"` assumes flat columns. It drops a grouped leaf at render time
-   * without touching column-visibility state, so a grouped leaf nested inside a
-   * column group leaves that group's parent header at its original `colSpan` —
-   * wider than the body. Use `"columns"` when your columns are nested under group
-   * headers.
+   * - `"columns"`: the grouped column stays its own column; leaf rows leave it blank.
+   * - `"merge"`: the grouped column is folded into one indented outline column,
+   *   hosted by the `meta.groupLabel` column (else the first non-grouped,
+   *   non-aggregated one). Set that column's `header` to name the outline. Assumes
+   *   flat columns — use `"columns"` when columns are nested under group headers.
    */
   groupDisplay?: "columns" | "merge";
   /**
-   * Turn on row selection: a leading checkbox column with a "select all" box in
-   * the header and a checkbox per row. Pass `true` to make every row selectable,
-   * or a predicate `(row) => boolean` to allow it only for some (the rest render
-   * a disabled box). Omit for no selection column at all.
-   *
-   * Strongly pair with a stable {@link getRowId} — selection is tracked by id, so
-   * without one it pins to the row *index* and mis-tracks when the data reorders.
-   * When `grouping` is on, each group header also gets a tri-state box that
-   * selects or clears its rows in one click.
+   * Turn on row selection: a leading checkbox column with a select-all header box
+   * and a per-row box. Pass `true` for every row, or a predicate to allow only
+   * some (the rest render a disabled box). Pair with a stable {@link getRowId},
+   * since selection is tracked by id.
    */
   enableRowSelection?: boolean | ((row: TData) => boolean);
   /**
-   * The selected rows' ids (controlled). Pair with {@link onSelectionChange} and
-   * keep the reference stable across renders. Omit to let the table own selection
-   * internally (seed that with {@link defaultSelectedRowIds}). Ignored unless
-   * {@link enableRowSelection} is set.
+   * The selected row ids (controlled). Pair with {@link onSelectionChange}. Omit
+   * to let the table own selection (seed with {@link defaultSelectedRowIds}).
+   * Ignored unless {@link enableRowSelection} is set.
    */
   selectedRowIds?: ReadonlyArray<string>;
-  /**
-   * Initial selected ids for the uncontrolled mode; the table then owns the
-   * selection. Ignored once {@link selectedRowIds} is provided (controlled), and
-   * only read on the first render.
-   */
+  /** Initial selected ids for uncontrolled mode; read on the first render only. */
   defaultSelectedRowIds?: ReadonlyArray<string>;
   /**
-   * Called after a selection change with the selected row ids and the matching
-   * rows from the current `data`. Fires in both controlled and uncontrolled
-   * modes. The ids are the source of truth — prefer them for persistence, since a
-   * selected id can outlive a row that's been paged or filtered out of `data`.
+   * Called after a selection change with the selected ids and their matching
+   * rows. Fires in both modes. The ids are the source of truth — a selected id
+   * can outlive a row paged or filtered out of `data`.
    */
   onSelectionChange?: (selectedRowIds: string[], selectedRows: TData[]) => void;
   /**
-   * Render an expandable detail panel for a row. When provided, each data row
-   * grows a leading disclosure toggle; clicking it reveals a full-width panel
-   * beneath the row containing whatever this returns — called with the row's own
-   * datum, so `(row) => <RowDetails person={row} />` is the shape. It runs only
-   * for open rows (never eagerly for collapsed ones), so an expensive panel costs
-   * nothing until it's opened.
-   *
-   * Panels start collapsed and toggle independently; the table owns that
-   * expanded/collapsed state. Every data row is expandable by default — narrow
-   * that with {@link enableRowExpansion} to show a toggle on only some rows.
-   * Group-header rows keep their own toggle and never get a detail toggle. Omit
-   * for no expansion column at all, so an existing `DataTable` is unchanged. Pair
-   * with a stable {@link getRowId} so an open panel stays pinned to its row when
-   * `data` reorders.
+   * Render an expandable detail panel for a row: each data row grows a disclosure
+   * toggle whose panel shows what this returns for the row's datum. Called only
+   * for open rows. Pair with a stable {@link getRowId}. Omit for no expansion column.
    */
   renderDetailPanel?: (row: TData) => React.ReactNode;
   /**
-   * Gate which rows can expand, when {@link renderDetailPanel} is set. Pass `true`
-   * (the default) to let every data row expand, a predicate `(row) => boolean` to
-   * allow it only for some — the rest render no toggle, just an empty expander cell
-   * so the column still lines up — or `false` to turn the feature off entirely,
-   * dropping the expander column even though `renderDetailPanel` is provided (handy
-   * for flagging it on and off without threading `renderDetailPanel` through a
-   * conditional). Mirrors {@link enableRowSelection}'s shape. Ignored without
-   * `renderDetailPanel`; group-header rows are never gated by it.
+   * Gate which rows can expand, when {@link renderDetailPanel} is set. `true`
+   * (default) for every row, a predicate for some, or `false` to drop the
+   * expander column entirely. Group-header rows are never gated.
    */
   enableRowExpansion?: boolean | ((row: TData) => boolean);
-  /**
-   * What to render when `data` is empty — shown as a single cell spanning every
-   * column. With none, the body is simply empty (just the header shows).
-   */
+  /** What to render when `data` is empty — one cell spanning every column. */
   empty?: React.ReactNode;
   ref?: React.Ref<HTMLTableElement>;
 }
@@ -273,36 +187,21 @@ export interface DataTableBaseProps<TData extends RowData> extends Omit<
 /** DataTable props — the base props plus the required accessible name. */
 export type DataTableProps<TData extends RowData> = DataTableBaseProps<TData> & DataTableName;
 
-/**
- * Stable empty grouping, shared by every ungrouped table. A fresh `[]` each
- * render would churn the controlled `grouping` state (and its derived row model)
- * on every pass; one frozen module-scope array keeps the reference steady.
- */
+/** Stable empty grouping shared by every ungrouped table, to keep the reference steady. */
 const NO_GROUPING: string[] = [];
 
-/**
- * Shared empty set for the "no columns hidden" case (the default `"columns"`
- * presentation, and `"merge"` before any `grouping` is set) — one module-scope
- * value, so the non-merge path allocates nothing per render.
- */
+/** Shared empty set for the "no columns hidden" case. */
 const EMPTY_SET: ReadonlySet<string> = new Set();
 
 const isDev = (): boolean =>
   typeof process === "undefined" || process.env.NODE_ENV !== "production";
 
 /**
- * DataTable — renders a set of columns and rows as a semantic `<table>`, built on
- * TanStack React Table v9 (headless: it owns the row/column model; we own the
- * markup, styles, and a11y). Renders the columns you pass and, when `grouping` is
- * set, collapsible group-header rows; with `enableRowSelection` it grows a
- * leading checkbox column, and with `renderDetailPanel` a leading expander column
- * whose toggle reveals a full-width detail panel beneath the row. Sorting /
- * filtering / pagination are v9 features we can layer on later without changing
- * this surface.
- *
- * Pass `data` and `columns` (build columns with {@link createDataTableColumnHelper}),
- * and name the table with `caption`, `aria-label`, or `aria-labelledby`. Set a
- * column's alignment through its `meta.align`.
+ * Renders columns and rows as a semantic `<table>`, built on TanStack React
+ * Table v9. `grouping` adds collapsible group-header rows, `enableRowSelection` a
+ * leading checkbox column, and `renderDetailPanel` a leading expander column with
+ * per-row detail panels. Name the table with `caption`, `aria-label`, or
+ * `aria-labelledby`; set column alignment through `meta.align`.
  *
  * @example
  * const col = createDataTableColumnHelper<Person>();
@@ -315,7 +214,7 @@ const isDev = (): boolean =>
  * <DataTable caption="People" data={people} columns={columns} getRowId={(p) => p.id} />
  *
  * @example
- * // Group by role, with a per-group balance total (aggregation lives on the column).
+ * // Group by role, with a per-group balance total.
  * const columns = col.columns([
  *   col.accessor("name", { header: "Name" }),
  *   col.accessor("role", { header: "Role" }),
@@ -328,61 +227,6 @@ const isDev = (): boolean =>
  * ]);
  *
  * <DataTable caption="People" data={people} columns={columns} grouping={["role"]} />
- *
- * @example
- * // `groupDisplay="merge"`: a single indented outline column. Group by Category,
- * // list Subcategory rows in that same first column, and keep a summed Amount.
- * // The grouped `category` column isn't rendered on its own; set the host
- * // column's `header` ("Category") to name the outline.
- * const col = createDataTableColumnHelper<Expense>();
- * const columns = col.columns([
- *   col.accessor("subcategory", { header: "Category" }),
- *   col.accessor("category", { header: "Category" }),
- *   col.accessor("amount", {
- *     header: "Amount",
- *     meta: { align: "end" },
- *     cell: (info) => usd.format(info.getValue()),
- *     aggregationFn: "sum",
- *     aggregatedCell: (info) => usd.format(info.getValue()),
- *   }),
- * ]);
- *
- * <DataTable
- *   caption="Spending by category"
- *   data={expenses}
- *   columns={columns}
- *   grouping={["category"]}
- *   groupDisplay="merge"
- * />
- *
- * @example
- * // Row selection, controlled by id (pair with a stable `getRowId`).
- * const [selected, setSelected] = React.useState<string[]>([]);
- * <DataTable
- *   caption="People"
- *   data={people}
- *   columns={columns}
- *   getRowId={(p) => p.id}
- *   enableRowSelection
- *   selectedRowIds={selected}
- *   onSelectionChange={setSelected}
- * />
- *
- * @example
- * // Expandable per-row detail panels: each row grows a disclosure toggle, and
- * // `renderDetailPanel` returns the panel's contents from the row's datum.
- * <DataTable
- *   caption="People"
- *   data={people}
- *   columns={columns}
- *   getRowId={(p) => p.id}
- *   renderDetailPanel={(person) => (
- *     <dl>
- *       <dt>Email</dt>
- *       <dd>{person.email}</dd>
- *     </dl>
- *   )}
- * />
  */
 export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   const {
@@ -711,9 +555,8 @@ interface SelectionCheckboxProps {
   indeterminate?: boolean;
   /**
    * Lock the box (a non-selectable row): dim it and veto toggling, but keep it
-   * focusable and announce `aria-disabled` — never the native `disabled`
-   * attribute, which drops it from the tab order (the house convention; see
-   * AGENTS.md). base-ui's own `Checkbox` models disabled the same way.
+   * focusable via `aria-disabled` rather than the native `disabled` attribute
+   * (the house convention; see AGENTS.md).
    */
   readOnly?: boolean;
   /** Toggle handler; receives the raw change event (Shift state included). */
@@ -724,10 +567,8 @@ interface SelectionCheckboxProps {
 
 /**
  * The checkbox in a selection cell: a real, focusable `<input type="checkbox">`
- * (state, keyboard, accessible name) laid transparently over the presentational
- * {@link InternalCheckbox} (the look, including the focus ring and the mixed
- * dash). A native checkbox can only show "mixed" through the DOM `indeterminate`
- * property — there's no attribute — so it's set from a ref whenever it changes.
+ * laid transparently over the presentational {@link InternalCheckbox}. The
+ * "mixed" state is set from a ref, since it has no HTML attribute.
  */
 function SelectionCheckbox({
   checked,
@@ -766,16 +607,10 @@ function SelectionCheckbox({
 const vetoToggle = (event: React.MouseEvent<HTMLInputElement>): void => event.preventDefault();
 
 /**
- * The ids of columns the author gave a per-group aggregate — those with an
- * explicit `aggregationFn` or `aggregatedCell` in the column defs they passed.
- * Used to keep such a column from becoming the default merged-label host (which
- * would swallow its total).
- *
- * Read off the *authored* defs, not the resolved `column.columnDef`: v9 fills in
- * a default `aggregationFn: "auto"` and a default `aggregatedCell` on every
- * resolved column, so the resolved shape can't tell an intended aggregate from a
- * plain column. Recurses into group columns' `columns`; a leaf's id is its
- * explicit `id`, else its `accessorKey` (matching how the table derives it).
+ * The ids of columns given an explicit `aggregationFn` or `aggregatedCell`, so
+ * such a column is never chosen as the default merged-label host. Reads the
+ * authored defs (recursing into group columns), since v9 fills defaults onto
+ * resolved columns.
  */
 function collectAggregatedIds<TData extends RowData>(
   defs: ReadonlyArray<DataTableColumn<TData>>,
@@ -805,16 +640,9 @@ function groupRowLabel(row: { groupingValue?: unknown }): string {
 }
 
 /**
- * A row's own descriptive value — its first cell carrying a usable primitive
- * (typically the name/label column, but skipping a leading display/empty cell) —
- * used to give a per-row control an unambiguous name. Returns `undefined` when no
- * cell has a sensible string form (all empty, object-, or function-valued), so
- * the caller can supply its own generic fallback.
- *
- * Skips grouped and placeholder cells: under grouping, the grouped column's cell
- * carries the *group's* value (shared by every row in the group), so using it
- * would give every row's control the same name. Skipping it falls through to the
- * row's own first distinguishing value instead.
+ * A row's first cell carrying a usable primitive, for naming a per-row control.
+ * Skips grouped and placeholder cells (whose value is shared across the group)
+ * and returns `undefined` when no cell has a sensible string form.
  */
 function rowPrimaryValue<TData extends RowData>(
   row: Row<DataTableFeatures, TData>,
@@ -830,10 +658,8 @@ function rowPrimaryValue<TData extends RowData>(
 }
 
 /**
- * The accessible name for a data row's selection box. A bare "Select row" is
- * ambiguous when every row shares it, so lead with the row's descriptive value
- * (via {@link rowPrimaryValue}) — mirroring the group box's `Select all rows in
- * <value>` — falling back to "Select row" when the row has no usable value.
+ * The accessible name for a data row's selection box — `Select <value>` from
+ * {@link rowPrimaryValue}, falling back to "Select row".
  */
 function rowSelectLabel<TData extends RowData>(row: Row<DataTableFeatures, TData>): string {
   const value = rowPrimaryValue(row);
@@ -841,10 +667,8 @@ function rowSelectLabel<TData extends RowData>(row: Row<DataTableFeatures, TData
 }
 
 /**
- * The accessible name for a row's detail-panel toggle — "Expand"/"Collapse"
- * (reflecting the current state, matching the group toggle) followed by the row's
- * descriptive value (via {@link rowPrimaryValue}), e.g. "Expand details for Ada
- * Lovelace". Falls back to a generic "row details" when the row has no usable value.
+ * The accessible name for a row's detail-panel toggle, e.g. "Expand details for
+ * Ada Lovelace" (from {@link rowPrimaryValue}), falling back to "row details".
  */
 function rowExpandLabel<TData extends RowData>(
   row: Row<DataTableFeatures, TData>,
@@ -855,11 +679,7 @@ function rowExpandLabel<TData extends RowData>(
   return `${expanded ? "Collapse" : "Expand"} ${target}`;
 }
 
-/**
- * The disclosure chevron — decorative; the toggle `<button>` around it carries
- * the semantics. Points down when expanded and rotates to point right when
- * collapsed (driven by `data-expanded`), mirroring `Accordion`.
- */
+/** The decorative disclosure chevron; points down when expanded, right when collapsed. */
 function ChevronGlyph({ expanded }: { expanded: boolean }) {
   return (
     <svg
@@ -888,19 +708,14 @@ interface DisclosureToggleProps {
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   /** Accessible name — the toggle carries no visible label. */
   "aria-label": string;
-  /**
-   * The id of the panel this toggle controls, when one is in the DOM (the detail
-   * panel, while open). Group toggles omit it — they show/hide rows in place, with
-   * no single controlled element to point at.
-   */
+  /** The id of the panel this toggle controls, when one is in the DOM. */
   "aria-controls"?: string;
 }
 
 /**
- * The bare, focusable disclosure button shared by the group-header toggle and the
- * row detail-panel toggle — the button chrome, focus-ring pairing, and rotating
- * {@link ChevronGlyph} in one place so the two can't drift. The semantics
- * (`onClick`, name, optional `aria-controls`) are supplied per use.
+ * The bare, focusable disclosure button shared by the group-header and row
+ * detail-panel toggles. Semantics (`onClick`, name, `aria-controls`) are supplied
+ * per use.
  */
 function DisclosureToggle({
   expanded,

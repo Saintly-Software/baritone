@@ -77,11 +77,9 @@ export interface NoticeIconProps {
 }
 
 /**
- * Notice.Icon — the leading icon of a `Notice`, with control over its colour.
- * Drop it in the notice's `icon` prop instead of a bare glyph when you want the
- * icon tinted a different `intent`/`saliency` than the notice's own foreground;
- * otherwise passing a plain node to `icon` (wrapped in a colour-inheriting
- * `<Icon>`) is enough.
+ * Notice.Icon — the leading icon of a `Notice`, tinted a different
+ * `intent`/`saliency` than the notice's foreground. For the notice's own colour,
+ * a plain node in `icon` is enough.
  */
 function NoticeIcon({ children, intent, saliency = "mid", size, label }: NoticeIconProps) {
   return (
@@ -179,12 +177,10 @@ export interface NoticeActionIconOnlyProps extends NoticeActionCommonProps {
 export type NoticeActionProps = NoticeActionTextProps | NoticeActionIconOnlyProps;
 
 /**
- * Notice.Action — a control for the notice's `actions` row. Looks like a small
- * `Button` (it shares the component colour/size recipes and the focus ring) but
- * can be either a `<button>` (`onClick`) or a link (`href`, or a router link via
- * `render`), and either text (`children`, with an optional leading `icon`) or
- * icon-only (`icon` + a required `label`). Inherits a disabled Notice's inert
- * state through context.
+ * Notice.Action — a control for the notice's `actions` row, styled like a small
+ * `Button`. Either a `<button>` (`onClick`) or a link (`href`/`render`), and
+ * either text (`children` + optional `icon`) or icon-only (`icon` + required
+ * `label`). Inherits a disabled Notice's inert state.
  */
 function NoticeAction(props: NoticeActionProps) {
   const {
@@ -258,11 +254,9 @@ export interface NoticeCloseProps extends Omit<
 }
 
 /**
- * Notice.Close — the "×" dismiss button, rendered top-right of a Notice. Pass it
- * a handler via the notice's `close` prop (a function auto-wraps into one), or
- * supply a `<Notice.Close>` directly to set its `label`/glyph. It's a real
- * focusable `<button>` with an accessible name (default "Dismiss"); a disabled
- * Notice makes it inert (`aria-disabled`) while it stays focusable.
+ * Notice.Close — the "×" dismiss button, top-right of a Notice. Supplied via the
+ * notice's `close` prop (a handler, or a `<Notice.Close>` to set its
+ * `label`/glyph). A focusable `<button>` named "Dismiss" by default.
  */
 function NoticeClose({
   onClick,
@@ -323,10 +317,8 @@ export interface NoticeProps
    */
   disabled?: boolean;
   /**
-   * A leading icon. Pass a bare glyph (an `<svg>`, auto-wrapped in a
-   * colour-inheriting `<Icon>`), an explicit `<Icon>`, or a `(props, state)`
-   * render function — or a `<Notice.Icon>` to tint the icon a different
-   * `intent`/`saliency`.
+   * A leading icon — a bare glyph, an `<Icon>`, a render function, or a
+   * `<Notice.Icon>` to tint it a different `intent`/`saliency`.
    */
   icon?: IconSlot<NoticeIconState>;
   /** Supporting text rendered beneath the title. */
@@ -354,17 +346,12 @@ export interface NoticeProps
 }
 
 /**
- * Notice — a block-level callout / inline message. It borrows the `component`
- * colour scheme (shared with `Chip`/`Button`) rather than the washed `surface`
- * palette, so `<Notice intent="warning">` matches a Button/Chip of the same
- * intent; its `saliency` (`high`/`low`) maps onto the component `mid`/`low`
- * shades (see `notice.css`). Static — a container, not a control.
- *
- * Lay it out with a leading `icon` (a plain glyph, or a `<Notice.Icon>` to recolour
- * it), the `children` as the title, an optional status `chip` on the title line,
- * a `description` beneath, an `actions` row of `<Notice.Action>`s, and a top-right
- * `close` dismiss. It announces itself as a live region (`role="alert"` for
- * negative/warning intents, `role="status"` otherwise) unless you override `role`.
+ * A block-level callout / inline message, using the `component` colour scheme
+ * (shared with `Chip`/`Button`) so `<Notice intent="warning">` matches them.
+ * Static — a container, not a control. Composes a leading `icon`, the `children`
+ * as title, an optional status `chip`, a `description`, an `actions` row, and a
+ * top-right `close`. Announces itself as a live region (`role="alert"` for
+ * negative/warning, `role="status"` otherwise) unless `role` is overridden.
  */
 function NoticeRoot({
   intent,

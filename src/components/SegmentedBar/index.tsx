@@ -21,15 +21,9 @@ import {
 } from "./segmentedBar.css";
 
 /**
- * The intents handed to segments that don't name a colour, in order. Six
- * positions, ordered so *adjacent* ones sit far apart in hue — the pairs most
- * likely to touch in the track are the ones that most need telling apart.
- *
- * Assignment is by **position**, which is only safe for a fixed set of segments.
- * If the set can change (a filter, a "top N" that reshuffles), give each segment
- * an explicit `intent` or `color` keyed off its identity — otherwise dropping one
- * segment repaints every segment after it, and the colours stop meaning anything
- * across renders.
+ * The intents handed to segments that don't name a colour, ordered so adjacent
+ * ones sit far apart in hue. Assignment is by **position**, only safe for a fixed
+ * set of segments; give each an explicit `intent`/`color` if the set can change.
  */
 const DEFAULT_SEGMENT_INTENTS = [
   "primary",
@@ -51,18 +45,10 @@ export interface SegmentedBarSegmentIntentColour {
 }
 
 /**
- * The colour **escape hatch**, for a segment whose fill is data rather than a
- * design decision: a per-area colour a user picked, a category colour that comes
- * down with the row. These are values the palette can't enumerate, because they
- * aren't the system's to choose.
- *
- * Prefer `intent`/`saliency` — an intent segment re-themes with the rest of the
- * system, this one is frozen at whatever you pass, and nothing checks it for
- * contrast against the track or its neighbours.
- *
- * Mutually exclusive with `intent`/`saliency` rather than overriding them: it
- * replaces the token-driven scheme outright, so accepting both would leave one
- * silently doing nothing.
+ * The colour **escape hatch**, for a segment whose fill is data (a user-picked
+ * category colour) rather than a design decision. Prefer `intent`/`saliency`,
+ * which re-theme with the system and are contrast-checked; this is frozen at
+ * whatever you pass. Mutually exclusive with `intent`/`saliency`.
  */
 export interface SegmentedBarSegmentCustomColour {
   /**
@@ -129,11 +115,9 @@ export interface SegmentedBarProps {
    */
   segments: SegmentedBarSegment[];
   /**
-   * The denominator for every share. Defaults to the sum of the values (so the
-   * track always fills). Pass a larger number — a target, a capacity, a whole
-   * that the segments only partly account for — to leave the difference as
-   * unfilled track. A `total` *below* the sum is ignored: the shares have to add
-   * up to at most the whole.
+   * The denominator for every share. Defaults to the sum of the values. Pass a
+   * larger number to leave the difference as unfilled track; a `total` below the
+   * sum is ignored.
    */
   total?: number;
   /**
@@ -149,12 +133,9 @@ export interface SegmentedBarProps {
   /** Accessible name via a referenced element's id, when there's no visible `label`. */
   "aria-labelledby"?: string;
   /**
-   * Show the legend beneath the track. Default `true`.
-   *
-   * Setting it to `false` hides the legend **visually only** — it stays in the
-   * accessibility tree, because the track itself is a picture (`aria-hidden`) and
-   * the legend is the only thing carrying the actual numbers. A bar with neither
-   * would announce nothing at all.
+   * Show the legend beneath the track. Default `true`. `false` hides it visually
+   * only — it stays in the accessibility tree, since the track is `aria-hidden`
+   * and the legend carries the numbers.
    */
   showLegend?: boolean;
   /** Show each segment's percentage share in its legend row. Default `true`. */
@@ -178,25 +159,14 @@ export interface SegmentedBarProps {
 }
 
 /**
- * SegmentedBar — a single bar divided into the parts that make up a whole, with a
- * legend naming each part. The shape for "what is this total made of": time by
- * project, spend by category, storage by file type.
- *
- * Each segment is coloured by `intent` × `saliency` — the same vocabulary as
- * `Chip` / `Meter` — defaulting to a fixed sequence of intents so a bar is legible
- * with nothing but labels and values. A segment whose colour is *data* (a
- * user-chosen category colour) can take a `color` escape hatch instead.
- *
- * Shares are computed from the values, so callers pass counts, not percentages;
- * pass a `total` larger than their sum to leave a remainder unfilled.
- *
- * **Accessibility.** The track is a picture of the legend, so it's `aria-hidden`
- * and the legend is a real list — one item per segment, each announcing its label,
- * share, and value. Colour is therefore never the only thing carrying identity.
- * That's also why `showLegend={false}` only hides it visually.
- *
- * It is *not* a `Meter`: use `Meter` for one value against a range, and this for
- * one whole split into parts.
+ * A single bar divided into the parts that make up a whole, with a legend naming
+ * each part — "what is this total made of": time by project, spend by category.
+ * Segments are coloured by `intent` × `saliency` (defaulting by position), or a
+ * `color` escape hatch for data colours. Shares are computed from the values, so
+ * pass counts, not percentages; a `total` larger than their sum leaves a
+ * remainder unfilled. The track is `aria-hidden`; the legend is the real list, so
+ * `showLegend={false}` only hides it visually. Use `Meter` for one value against
+ * a range, this for one whole split into parts.
  *
  * @example
  * <SegmentedBar
