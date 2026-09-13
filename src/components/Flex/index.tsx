@@ -16,10 +16,8 @@ export type FlexAlign = "start" | "center" | "end" | "stretch" | "baseline";
 /** `justify-content`, in friendly terms. */
 export type FlexJustify = "start" | "center" | "end" | "between" | "around" | "evenly";
 /**
- * Flow direction — `row` (default) or `column`. The `*-reverse` directions are
- * intentionally omitted: they flip the visual order without touching the DOM
- * order, which desyncs the reading/tab order from what's on screen (a common
- * accessibility bug). Reorder the children instead.
+ * Flow direction — `row` (default) or `column`. `*-reverse` is omitted: it
+ * desyncs the reading/tab order from the visual order. Reorder the children instead.
  */
 export type FlexDirection = "row" | "column";
 
@@ -103,12 +101,10 @@ export interface FlexProps
 }
 
 /**
- * Flex — a flexbox container primitive, so common layouts don't have to reach for
- * `atoms` directly. Renders a `<div>` with `display: flex` (or `inline-flex`);
- * `align` / `justify` take friendly values (`start` / `center` / `end` / …) mapped
- * to the flexbox keywords, `direction` / `wrap` set the flow, and the `gap`,
- * margin (`m` / `mx` / …) and padding (`p` / `px` / …) props are wired straight to
- * the spacing scale (each responsive-capable). Use `render` to change the element.
+ * A flexbox container primitive. Renders a `<div>` with `display: flex` (or
+ * `inline-flex`); `align` / `justify` take friendly values, `direction` / `wrap`
+ * set the flow, and `gap` / margin / padding map to the spacing scale. Use
+ * `render` to change the element.
  */
 function FlexRoot({
   align,
@@ -218,13 +214,9 @@ export interface FlexItemProps
 }
 
 /**
- * Flex.Item — a flex child with per-child layout knobs, so a single child can
- * override the container without reaching for `atoms` directly. `align` /
- * `alignSelf` set the cross-axis alignment, `grow` / `shrink` control how it
- * flexes, `width` / `height` / `minWidth` / `minHeight` map to the atoms sizing
- * scale, and the margin (`m` / `mx` / …) and padding (`p` / `px` / …) props are
- * wired to the spacing scale (each responsive-capable). Use `render` to change
- * the element. Purely optional — plain children work fine inside `Flex`.
+ * Flex.Item — a flex child with per-child layout knobs (`alignSelf`, `grow` /
+ * `shrink`, sizing, margin / padding), so one child can override the container.
+ * Optional — plain children work fine inside `Flex`.
  */
 export function FlexItem({
   align,
