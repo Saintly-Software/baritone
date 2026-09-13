@@ -2,12 +2,6 @@ import { style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
-/**
- * Full-height dim layer behind the drawer. Always rendered (the component sets
- * `forceRender`, so nested drawers/modals still get one). `--drawer-swipe-progress`
- * is published by base-ui while swiping (0 → 1 as the panel is dragged off), so the
- * scrim fades out in step with the gesture.
- */
 export const drawerBackdrop = style({
   position: "fixed",
   inset: 0,
@@ -25,11 +19,6 @@ export const drawerBackdrop = style({
   },
 });
 
-/**
- * Fixed full-viewport layer that holds the popup and pins it to one edge. Sits
- * above the backdrop (later sibling in the portal). `side` only changes which
- * edge the panel hugs.
- */
 export const drawerViewport = recipe({
   base: {
     position: "fixed",
@@ -46,23 +35,6 @@ export const drawerViewport = recipe({
   defaultVariants: { side: "right" },
 });
 
-/**
- * The drawer surface. The colour/border/radius/padding come from the shared
- * `surfaceRecipe`; this adds the panel layout (a full-height vertical stack of
- * header / scrollable body / footer), the elevation shadow, and the slide-in
- * transition.
- *
- * The resting transform is `translateX(var(--drawer-swipe-movement-x))` — base-ui
- * publishes that variable (0 at rest, following the drag while swiping). The
- * `data-starting-style` / `data-ending-style` frames push the panel fully off its
- * edge so it slides in and out. The trailing (screen-edge) corners are squared so
- * the panel reads as attached to the edge.
- *
- * `width` only changes the panel's width; every step stays capped by the same
- * `maxWidth`, so on narrow viewports the panel shrinks to fit rather than
- * overflowing. The wider steps rely on that cap — `xl` is 1024px, so it only
- * reaches its full width on a desktop-sized viewport.
- */
 export const drawerPopup = recipe({
   base: {
     boxSizing: "border-box",
@@ -121,7 +93,6 @@ export const drawerPopup = recipe({
 export type DrawerViewportVariants = NonNullable<RecipeVariants<typeof drawerViewport>>;
 export type DrawerPopupVariants = NonNullable<RecipeVariants<typeof drawerPopup>>;
 
-/** Header row: title/subtitle stack on the start, optional actions on the end. */
 export const drawerHeader = style({
   display: "flex",
   alignItems: "flex-start",
@@ -130,10 +101,6 @@ export const drawerHeader = style({
   flexShrink: 0,
 });
 
-/**
- * Trailing slot of the header — holds any header `children` and the actions
- * `Menu` trigger, aligned to the header's end (opposite the title/subtitle).
- */
 export const drawerHeaderActions = style({
   display: "flex",
   alignItems: "center",
@@ -148,12 +115,6 @@ export const drawerHeaderText = style({
   minWidth: 0,
 });
 
-/**
- * The scrollable body region. Grows to fill the space between header and footer
- * (so the footer sits at the bottom on short content) and scrolls on overflow,
- * keeping header and footer fixed. Establishes the positioning context for the
- * loading overlay.
- */
 export const drawerBody = style({
   position: "relative",
   flex: "1 1 auto",
@@ -161,18 +122,11 @@ export const drawerBody = style({
   overflowY: "auto",
 });
 
-/**
- * Loading: hide the body content with `opacity` (not `display`) so it keeps its
- * size while the spinner overlays it, and turn off pointer events so the dimmed
- * content can't be interacted with. Header and footer (outside this element) stay
- * live, so the panel can still be closed.
- */
 export const drawerBodyContentLoading = style({
   opacity: 0,
   pointerEvents: "none",
 });
 
-/** Footer row: actions, end-aligned by default. */
 export const drawerFooter = style({
   display: "flex",
   alignItems: "center",
@@ -181,10 +135,6 @@ export const drawerFooter = style({
   flexShrink: 0,
 });
 
-/**
- * Centres the spinner over the (hidden) body content without affecting layout.
- * The ring glyph itself is the shared `InternalSpinner`.
- */
 export const drawerSpinner = style({
   position: "absolute",
   inset: 0,

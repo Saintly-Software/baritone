@@ -4,7 +4,6 @@ import { Chip } from "../Chip";
 import { Text } from "../Text";
 import { Accordion } from "./index";
 
-/** A small decorative glyph for the icon demo. */
 function ServerGlyph() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -99,14 +98,8 @@ export default meta;
 
 type Story = StoryObj<typeof Environments>;
 
-/**
- * Kitchen sink — single-open (default) with the full feature set: leading icons,
- * trailing status chips, subtitles, and a disabled ("Legacy") item. Opening one
- * item collapses the others; the `disabled` control locks the whole group.
- */
 export const KitchenSink: Story = {};
 
-/** Multi-open: any number of panels can be expanded at once. */
 export const Multiple: Story = {
   render: () => {
     function MultiEnvironments() {

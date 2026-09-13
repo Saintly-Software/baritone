@@ -1,15 +1,6 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "../../theme/contract.css";
 
-/**
- * Popover surface layout — a vertical stack mirroring `Card`, so the optional
- * header, the content, and the optional footer lay out top-to-bottom. The
- * surface colour/border/padding come from the shared `surfaceRecipe`; this adds
- * the elevation shadow (it's floating) and a small open/close transition.
- *
- * `--transform-origin` is published by base-ui's positioner (it points back at
- * the trigger), so the scale animation grows out of the anchor.
- */
 export const popoverPopup = style({
   display: "flex",
   flexDirection: "column",
@@ -33,7 +24,6 @@ export const popoverPopup = style({
   },
 });
 
-/** Header row: title/subtitle stack on the start, optional actions on the end. */
 export const popoverHeader = style({
   display: "flex",
   alignItems: "flex-start",
@@ -48,7 +38,6 @@ export const popoverHeaderText = style({
   minWidth: 0,
 });
 
-/** Footer row: actions, end-aligned by default. */
 export const popoverFooter = style({
   display: "flex",
   alignItems: "center",

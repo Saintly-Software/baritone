@@ -78,7 +78,6 @@ export const Wrapping: Story = {
   ),
 };
 
-/** `Flex.Item` with `grow` — the middle child expands to fill the spare space. */
 export const ItemGrow: Story = {
   render: () => (
     <Flex gap="3" p="4" style={{ border: "1px dashed #ccc" }}>
@@ -91,10 +90,6 @@ export const ItemGrow: Story = {
   ),
 };
 
-/**
- * `Flex.Item` with `shrink={false}` — the first child keeps its width while the
- * others give way in the constrained row.
- */
 export const ItemShrink: Story = {
   render: () => (
     <Flex gap="3" p="4" style={{ maxWidth: 320, border: "1px dashed #ccc" }}>
@@ -107,10 +102,6 @@ export const ItemShrink: Story = {
   ),
 };
 
-/**
- * `width` shorthand — `fill` (100%), `fit` (fit-content), and `inherit`. Each
- * `Flex` here sits in a fixed-width parent so the difference is visible.
- */
 export const WidthShorthand: Story = {
   render: () => (
     <Flex direction="column" gap="3" style={{ width: 320, border: "1px dashed #ccc" }} p="3">
@@ -132,11 +123,6 @@ export const WidthShorthand: Story = {
   ),
 };
 
-/**
- * `hideOn` — the banner is hidden from the `md` breakpoint (768px) upward. Each
- * listed breakpoint is its own band, so `["md", "lg", "xl"]` covers everything
- * ≥768px without leaking. Resize the preview to see it disappear on wider views.
- */
 export const HideOnBreakpoint: Story = {
   render: () => (
     <Flex direction="column" gap="3">
@@ -157,10 +143,6 @@ export const HideOnBreakpoint: Story = {
   ),
 };
 
-/**
- * `showOn` — the panel is shown *only* at the `lg` breakpoint (1024px) and up.
- * Below that it is removed from layout entirely.
- */
 export const ShowOnBreakpoint: Story = {
   render: () => (
     <Flex direction="column" gap="3">
@@ -181,10 +163,6 @@ export const ShowOnBreakpoint: Story = {
   ),
 };
 
-/**
- * Swap layouts across breakpoints — a mobile-only stack and a desktop-only row,
- * each toggled with `showOn`, so the same content re-flows at `md`.
- */
 export const ResponsiveSwap: Story = {
   render: () => (
     <>
@@ -202,7 +180,6 @@ export const ResponsiveSwap: Story = {
   ),
 };
 
-/** `Flex.Item` with `alignSelf` — each child overrides the container `align`. */
 export const ItemSelfAlign: Story = {
   render: () => (
     <Flex gap="3" p="4" align="center" style={{ height: 140, border: "1px dashed #ccc" }}>

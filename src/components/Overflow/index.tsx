@@ -15,81 +15,42 @@ import {
   viewportFadeVertical,
 } from "./overflow.css";
 
-/** Which way the controls flow (and therefore scroll). */
 export type OverflowOrientation = "horizontal" | "vertical";
 
-/**
- * How far a nav-button click travels:
- * - `item` — reveal the next control that's clipped at that edge, aligning it
- *   fully into view. Never leaves a control half-cut.
- * - `page` — jump by one viewport (0–300 → 300–600), like Page Up/Down.
- */
 export type OverflowScrollMode = "item" | "page";
 
 export interface OverflowProps {
-  /**
-   * The controls to lay out in a single non-wrapping row (`horizontal`) or
-   * column (`vertical`). They keep their intrinsic size and overflow — with a
-   * scrollbar, edge fades, and floating nav buttons — instead of wrapping.
-   */
   children: React.ReactNode;
-  /**
-   * Flow + scroll axis. `horizontal` (default) fills the available width and
-   * hugs its row's height; `vertical` needs a bounded height (a `maxHeight` /
-   * `height` via `className` / `style`) for its column to overflow.
-   * @default "horizontal"
-   */
+
   orientation?: OverflowOrientation;
-  /**
-   * How far a nav-button click scrolls — to the next clipped control (`item`) or
-   * by a whole viewport (`page`).
-   * @default "item"
-   */
+
   scrollBy?: OverflowScrollMode;
-  /**
-   * Space between the controls, from the spacing scale.
-   * @default "2"
-   */
+
   gap?: SpaceKey;
-  /**
-   * Accessible label for the button that scrolls toward the start. Defaults to a
-   * direction word for the orientation ("Scroll left" / "Scroll up").
-   */
+
   previousLabel?: string;
-  /**
-   * Accessible label for the button that scrolls toward the end. Defaults to a
-   * direction word for the orientation ("Scroll right" / "Scroll down").
-   */
+
   nextLabel?: string;
-  /** Accessible name for the scrollable region. */
+
   "aria-label"?: string;
-  /** Extra className merged onto the root element (a good place to bound its size). */
+
   className?: string;
-  /** Inline styles for the root element — typically its bounding height/width. */
+
   style?: React.CSSProperties;
-  /** Ref to the root element. */
+
   ref?: React.Ref<HTMLDivElement>;
 }
 
-/** Default nav-button labels per orientation. */
 const NAV_LABELS: Record<OverflowOrientation, { start: string; end: string }> = {
   horizontal: { start: "Scroll left", end: "Scroll right" },
   vertical: { start: "Scroll up", end: "Scroll down" },
 };
 
-/** Honour the user's reduced-motion preference for the button-driven scroll. */
 function scrollBehavior(): ScrollBehavior {
   if (typeof window === "undefined" || !window.matchMedia) return "auto";
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 }
 
-/**
- * Absolute scroll offset that brings the next clipped control fully into view.
- * Positions are measured from live rects (layout-direction agnostic within an
- * axis) and converted to the viewport's scroll coordinates, so it works for a
- * mixed bag of control sizes. Returns `null` when there's nothing more to reveal
- * that way.
- */
 function nextItemOffset(
   vp: HTMLElement,
   tk: HTMLElement,
@@ -139,8 +100,6 @@ function nextItemOffset(
   return Math.max(0, Math.min(target, maxScroll));
 }
 
-/** Decorative chevron; the button carries the accessible name. Points right by
- * default — {@link overflow.css} rotates it per orientation/side. */
 function Chevron() {
   return (
     <svg
@@ -159,41 +118,6 @@ function Chevron() {
   );
 }
 
-/**
- * Overflow — a single row (or column) of controls that scrolls instead of
- * wrapping. Built on base-ui's `ScrollArea`, it adds three affordances that all
- * appear only when there's actually more to see in that direction:
- *
- * - **Floating nav buttons** at the start/end edges. Clicking one slides toward
- *   the next clipped control (`scrollBy="item"`) or by a whole viewport
- *   (`scrollBy="page"`). They're pointer conveniences kept out of the tab order
- *   — the keyboard path is to Tab through the controls, which scrolls each
- *   focused control into view on its own.
- * - **Gradient edge fades** that grow in as content hides past an edge (driven
- *   by base-ui's live per-edge overflow metrics) and stay crisp at a flush edge.
- * - **A hover-reveal scrollbar** for pointer dragging.
- *
- * Supports `horizontal` (default) and `vertical` orientations. A vertical
- * `Overflow` needs a bounded height; a horizontal one just needs a bounded width
- * (its container's is enough).
- *
- * @example
- * // A toolbar of actions that scrolls when the window is narrow.
- * <Overflow aria-label="Formatting" style={{ maxWidth: 480 }}>
- *   <Button>Bold</Button>
- *   <Button>Italic</Button>
- *   <Button>Underline</Button>
- *   // …more controls than fit…
- * </Overflow>
- *
- * @example
- * // Vertical, paging a whole viewport per click.
- * <Overflow orientation="vertical" scrollBy="page" aria-label="Filters" style={{ maxHeight: 320 }}>
- *   <Checkbox label="Unread" />
- *   <Checkbox label="Flagged" />
- *   // …more controls than fit…
- * </Overflow>
- */
 export function Overflow({
   children,
   orientation = "horizontal",

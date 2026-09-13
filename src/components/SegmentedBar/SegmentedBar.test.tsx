@@ -8,7 +8,6 @@ const SEGMENTS: SegmentedBarSegment[] = [
   { id: "health", label: "Health", value: 1 },
 ];
 
-/** The legend `<li>`s, in order. */
 function legendRows() {
   return within(screen.getByRole("list")).getAllByRole("listitem");
 }

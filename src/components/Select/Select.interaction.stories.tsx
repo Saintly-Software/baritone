@@ -27,10 +27,6 @@ const GROUPED: SelectOptionGroup[] = [
   },
 ];
 
-/**
- * Interaction coverage for `Select`. The `play` functions open the listbox and
- * drive selection, asserting the committed value and the ARIA state of options.
- */
 const meta: Meta<typeof Select> = {
   title: "Interaction Tests/Select",
   component: Select,
@@ -46,7 +42,6 @@ export default meta;
 
 type Story = StoryObj<typeof Select>;
 
-/** Opens the menu, picks an option, and asserts the trigger reflects it and the menu closes. */
 export const SingleSelectPicksOption: Story = {
   render: () => {
     const [value, setValue] = React.useState<string | null>(null);
@@ -76,10 +71,6 @@ export const SingleSelectPicksOption: Story = {
   },
 };
 
-/**
- * Grouped options render under labelled headings; selecting one from a group
- * commits its value and closes the listbox.
- */
 export const GroupedSelection: Story = {
   render: () => {
     const [value, setValue] = React.useState<string | null>(null);
@@ -108,10 +99,6 @@ export const GroupedSelection: Story = {
   },
 };
 
-/**
- * A pre-seeded multi-select: the chosen option stays `aria-selected` while hover
- * only sets `data-highlighted`, so highlighting never changes what's selected.
- */
 export const MultiSelectHoverSelectedOption: Story = {
   render: () => {
     const [value, setValue] = React.useState<string[]>(["apple", "cherry"]);

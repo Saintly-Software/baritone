@@ -43,7 +43,6 @@ const round = (n: number) => Math.round(n * 1000) / 1000;
 const INK = ok(0.18, 0.01, 260);
 const PAPER = ok(0.98, 0.008, 260);
 
-/** Choose whichever ink contrasts best against a background. */
 function pickInk(bg: string): string {
   const onPaper = contrastRatio(PAPER, bg) ?? 0;
   const onInk = contrastRatio(INK, bg) ?? 0;
@@ -65,7 +64,6 @@ const DEFAULT_SEED: Record<ColourfulIntent, { h: number; c: number }> = {
 const NEUTRAL_H = 260;
 const NEUTRAL_C = 0.005;
 
-/** The bold "high" background lightness per colourful intent (built-in default). */
 const DEFAULT_BOLD_L: Record<ColourfulIntent, number> = {
   primary: 0.53,
   secondary: 0.55,
@@ -77,37 +75,19 @@ const DEFAULT_BOLD_L: Record<ColourfulIntent, number> = {
 type Triplet = { bgc: string; text: string; border: string };
 type Block = { default: Triplet; disabled: Triplet };
 
-/**
- * A small "brand seed": the handful of knobs most brands actually customise.
- * Everything is optional and merged over the built-in defaults, so a consumer
- * can supply just a brand hue for `primary` (or new fonts) and inherit the rest
- * — including the derived interaction states and the build-time contrast check.
- */
 export interface BrandSeed {
-  /**
-   * Hue + base chroma per colourful intent, merged over the built-in seeds.
-   * Override just `primary` and leave the rest; the `neutral` intent is a
-   * near-greyscale ramp and isn't seeded here.
-   */
   intents?: Partial<Record<ColourfulIntent, Partial<{ h: number; c: number }>>>;
-  /** The bold "high" background lightness (0–1) per colourful intent. */
+
   boldL?: Partial<Record<ColourfulIntent, number>>;
-  /** Font families. */
+
   fonts?: Partial<{ sans: string; mono: string }>;
-  /**
-   * Radius-scale overrides. Also drive the `borderRadius` of surfaces (`lg`),
-   * components and form controls (`md`).
-   */
+
   radius?: Partial<Record<RadiusKey, string>>;
-  /** Spacing-scale overrides. */
+
   space?: Partial<Record<SpaceKey, string>>;
-  /** Border-width-scale overrides. */
+
   borderWidth?: Partial<Record<BorderWidthKey, string>>;
-  /**
-   * Typography-scale overrides. `anchor` is the `md` font-size; `stepLower` /
-   * `stepUpper` are the two increments (`xs`→`xl` and `xl`→`9xl`) that drive the
-   * font-size ramp. `sizes` / `lineHeight` override individual per-size values.
-   */
+
   fontScale?: {
     anchor?: string;
     stepLower?: string;
@@ -115,21 +95,12 @@ export interface BrandSeed {
     sizes?: Partial<Record<TextSize, string>>;
     lineHeight?: Partial<Record<TextSize, string>>;
   };
-  /**
-   * Letter-spacing (tracking) scale overrides, merged over the built-in `em`
-   * steps. Bump e.g. `widest` if your brand's uppercase labels want more track.
-   */
+
   letterSpacing?: Partial<Record<LetterSpacingKey, string>>;
-  /**
-   * Named line-height (leading) scale overrides, merged over the built-in
-   * unitless steps (`none`…`loose`). This is the standalone `lineHeight` prop's
-   * vocabulary; the per-size line-heights are overridden separately via
-   * {@link BrandSeed.fontScale}'s `lineHeight`.
-   */
+
   lineHeight?: Partial<Record<LineHeightKey, string>>;
 }
 
-/** Fully-resolved seed (defaults filled in) threaded through the colour math. */
 interface ResolvedSeed {
   intents: Record<ColourfulIntent, { h: number; c: number }>;
   boldL: Record<ColourfulIntent, number>;
@@ -356,11 +327,6 @@ const SIZE_STEPS: Record<TextSize, { lower: number; upper: number }> = {
   "9xl": { lower: 2, upper: 8 },
 };
 
-/**
- * A per-size font-size as a `calc()` over the live anchor (`md`) + step tokens,
- * so changing an increment reshapes the whole ramp at runtime. Not called for
- * `md` itself, which stays the concrete anchor value.
- */
 function sizeFontSize(size: TextSize): string {
   const { lower, upper } = SIZE_STEPS[size];
   const term = (coef: number, v: string) =>
@@ -386,20 +352,6 @@ function shadows(isDark: boolean) {
   };
 }
 
-/**
- * Produce a complete, accessible set of default token *values* for a scheme,
- * optionally seeded with a brand's intent hues/chroma, fonts, and scale
- * overrides. This doubles as the reference theme and a copy-paste starting point
- * for theme authors: supply a small {@link BrandSeed} and inherit the full,
- * contrast-checked token set. Interaction (hover/active) states are NOT here —
- * they're computed at use-site from `default` via relative-colour math.
- *
- * @example
- * buildDefaultTokens("light", {
- *   intents: { primary: { h: 292, c: 0.17 } }, // brand purple
- *   fonts: { sans: '"Inter", system-ui, sans-serif' },
- * });
- */
 export function buildDefaultTokens(
   scheme: "light" | "dark",
   brand: BrandSeed = {},

@@ -13,13 +13,6 @@ const BAR = "10px";
 
 const REVEAL_DELAY = "400ms";
 
-/**
- * Per-edge gradient masks driven by base-ui's overflow metrics, one axis each.
- * Each `--scroll-area-overflow-<axis>-<edge>` var is the pixels of content
- * hidden past that edge (0 when flush), so the fade only appears on a side that
- * can actually scroll further, and tracks the scroll position live. Fallbacks of
- * `0px` keep content sharp before base-ui has measured (SSR / first paint).
- */
 const xFade = `linear-gradient(
   to right,
   transparent 0,
@@ -36,16 +29,6 @@ const yFade = `linear-gradient(
   transparent 100%
 )`;
 
-/**
- * Groups the viewport, scrollbar, and floating nav buttons (the last two are
- * `position: absolute`, so only the viewport is in flow). It's a flex column so
- * the viewport can fill it *and* be constrained by it: a definite `height` or a
- * `max-height` on the root both bound the viewport, which is what lets a vertical
- * `Overflow` grow to a cap and then scroll (a plain `height: 100%` viewport can't
- * resolve against a `max-height`-only parent). A horizontal `Overflow` needs no
- * height — it hugs its row and just wants a bounded width (its container's is
- * enough); a vertical one wants a bounded `height` / `max-height`.
- */
 export const root = style({
   position: "relative",
   boxSizing: "border-box",
@@ -54,11 +37,6 @@ export const root = style({
   maxWidth: "100%",
 });
 
-/**
- * The scroll container. base-ui already sets `overflow: scroll` and hides the
- * native scrollbars; this fills the root (as a flex child) and carries the
- * gradient fade mask (added per-orientation below).
- */
 export const viewport = style({
   flex: "1 1 auto",
   minWidth: 0,
@@ -66,25 +44,16 @@ export const viewport = style({
   overscrollBehavior: "contain",
 });
 
-/** Fade the inline start/end edges (horizontal orientation). */
 export const viewportFadeHorizontal = style({
   maskImage: xFade,
   maskRepeat: "no-repeat",
 });
 
-/** Fade the block start/end edges (vertical orientation). */
 export const viewportFadeVertical = style({
   maskImage: yFade,
   maskRepeat: "no-repeat",
 });
 
-/**
- * The layout track holding the controls — a single non-wrapping row (or column)
- * that grows past the viewport and scrolls. `width: max-content` (horizontal)
- * keeps every control at its intrinsic size instead of shrinking to fit, which
- * is the whole point: the controls overflow rather than squash. The `gap`
- * variant is the space between them.
- */
 export const track = recipe({
   base: {
     display: "flex",
@@ -117,12 +86,6 @@ export const track = recipe({
 
 export type TrackVariants = NonNullable<RecipeVariants<typeof track>>;
 
-/**
- * A scrollbar rail. The rail is invisible — only the thumb shows — and the whole
- * thing stays hidden until you hover the area or scroll (base-ui flags those
- * with `data-hovering` / `data-scrolling`). Reveal is quick; the fade-out waits
- * out `REVEAL_DELAY` so a resting bar lingers a beat. Mirrors `ScrollArea`.
- */
 export const scrollbar = style({
   display: "flex",
   touchAction: "none",
@@ -153,7 +116,6 @@ export const scrollbar = style({
   },
 });
 
-/** The draggable thumb — a neutral pill that deepens on hover / while dragging. */
 export const thumb = style({
   width: "100%",
   height: "100%",
@@ -172,22 +134,6 @@ export const thumb = style({
   },
 });
 
-/**
- * A floating scroll button. It's a *pointer convenience* — kept out of the tab
- * order (`tabIndex={-1}` on the element), because the accessible path through a
- * row of controls is Tab, which scrolls each focused control into view on its
- * own. The button is a circular raised surface that floats over the fading edge.
- *
- * Hidden by default (no edge to scroll toward → nothing to show); the reveal
- * rules below light it up only when the matching edge actually overflows, using
- * base-ui's `data-overflow-*` attributes on the root. Show/hide is instant:
- * `visibility` (also dropping it from hit-testing and the accessibility tree
- * when inactive) and `opacity` flip together. We deliberately *don't* fade the
- * button in — the element rests at `visibility: hidden`, and Chrome stalls an
- * opacity transition that starts from a first-painted hidden element, pinning it
- * at 0. The content's edge gradient (the mask below) is the animated affordance;
- * the button just appears. Only the hover wash transitions.
- */
 export const navButton = style({
   position: "absolute",
   zIndex: 1,
@@ -230,7 +176,6 @@ export const navButton = style({
   },
 });
 
-/** The chevron glyph inside a nav button; rotated per orientation/side below. */
 export const navChevron = style({
   width: "1em",
   height: "1em",

@@ -5,216 +5,86 @@ import type { WidthShorthand } from "../../styles/layoutProps";
 import type { Intent, Saliency, Size, TextSize } from "../../theme/constants";
 import type { IconSlot } from "../Icon/renderIcon";
 
-/** The button state a `startIcon`/`endIcon`/`icon` render function can branch on. */
 export interface ButtonIconState {
   intent?: Intent;
   saliency?: Saliency;
-  /** Undefined on the text appearance, which sizes via `variant`. */
+
   size?: Size;
   loading: boolean;
   disabled: boolean;
 }
 
-/**
- * Props shared by *every* `Button` arm — the labelled looks and the icon-only
- * one alike. Deliberately silent on `children`/`aria-label`/`icon`: those differ
- * between a labelled button (visible text is the accessible name) and an
- * icon-only button (a required `aria-label` is), so each arm redefines them.
- */
 interface ButtonCommonProps extends Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
   "color" | "aria-label" | "children" | "disabled"
 > {
   intent?: Intent;
   saliency?: Saliency;
-  /**
-   * Disables the button. Applied as `aria-disabled` (not the `disabled`
-   * attribute) so the button stays keyboard-focusable and can surface its
-   * `disabledReason` tooltip. Clicks/keyboard activation are suppressed.
-   */
+
   disabled?: boolean;
-  /**
-   * Explanation shown in a tooltip when the button is disabled and the user
-   * tabs to or hovers it. Not shown in the `loading` state.
-   */
+
   disabledReason?: React.ReactNode;
   ref?: React.Ref<HTMLButtonElement>;
 }
 
-/**
- * Props shared by the *labelled* `Button` arms (`solid` and `text`), whose
- * visible text is the accessible name. The appearance-specific knobs
- * (`size`/`loading` for the default look, `variant` for the text look) live on
- * the two members below.
- */
 export interface ButtonBaseProps extends ButtonCommonProps {
-  /** Required visible text label (also the accessible name). */
   children: React.ReactNode;
-  /**
-   * Unsupported on a labelled button: the accessible name is always the visible
-   * label, so passing an `aria-label` (which would silently override it) is a
-   * type error. It's *required* on the icon-only arm ({@link IconButtonProps}),
-   * which has no visible text to name it.
-   */
+
   "aria-label"?: never;
-  /**
-   * Icon before the label — a bare glyph (`startIcon={<Save />}`, auto-wrapped
-   * in `Icon`), an explicit `<Icon>`, or a `(props, state)` render function.
-   * Inherits text colour.
-   */
+
   startIcon?: IconSlot<ButtonIconState>;
-  /** Icon after the label — same forms as `startIcon`. Inherits text colour. */
+
   endIcon?: IconSlot<ButtonIconState>;
-  /**
-   * Unsupported on a labelled button — pass `startIcon`/`endIcon` alongside the
-   * label instead. `icon` is the discriminant of the icon-only arm
-   * ({@link IconButtonProps}), which has no label.
-   */
+
   icon?: never;
 }
 
-/**
- * The default `Button` — the filled "component" element type, sharing the colour
- * scheme/recipe with `Chip` et al. Carries the `size` and `loading` knobs, which
- * only make sense for a chrome-bearing control.
- */
 export interface SolidButtonProps extends ButtonBaseProps {
-  /** Default look: the filled component control. */
   appearance?: "solid";
   size?: Size;
-  /**
-   * Loading state: disables interaction and overlays a spinner on the label
-   * (the label stays in place to preserve width and the accessible name). The
-   * disabled tooltip is suppressed while loading.
-   */
+
   loading?: boolean;
-  /**
-   * `width` shorthand: `fill` (100%), `fit` (fit-content), or `inherit` — the
-   * same knob `Box`/`Flex` take. A button is `inline-flex` and hugs its label by
-   * default; `fill` stretches it to its container, for the full-width submit or
-   * mobile CTA. The label stays centred (the recipe's `justify-content`).
-   */
+
   width?: WidthShorthand;
-  /** Unsupported on the default appearance — `variant` is a text-appearance knob. */
+
   variant?: never;
 }
 
-/**
- * `<Button appearance="text">` — the hyperlink look: underlined text coloured by
- * `intent`/`saliency`, with no background, border, or fixed control height.
- *
- * The chrome-specific knobs are gone: `size` (typography comes from `variant`
- * instead), `loading` (no room for a spinner overlay), and any icon-only mode
- * (`icon` + `aria-label`) — a bare underlined glyph reads as neither a link nor a
- * button, so it's intentionally unavailable here (`aria-label` is already
- * `never`). `startIcon`/`endIcon` alongside a text label are still supported.
- */
 export interface TextButtonProps extends ButtonBaseProps {
-  /** The hyperlink look. */
   appearance: "text";
-  /** Typography size for the link text, from the shared scale. Default `md`. */
+
   variant?: TextSize;
-  /** Unsupported on the text appearance — typography comes from `variant`. */
+
   size?: never;
-  /** Unsupported on the text appearance — there's no chrome to overlay a spinner. */
+
   loading?: never;
-  /**
-   * Unsupported on the text appearance: the underline spans the element's full
-   * width, so a filled text button drags its underline across the whole row with
-   * the label stranded at one end — it reads as a broken rule, not a link. Wrap
-   * it in a `Box`/`Flex` if you need to position it.
-   */
+
   width?: never;
 }
 
-/**
- * `<Button aria-label="…" icon={…} />` — the icon-only look: a square filled
- * control carrying a single centred glyph and no visible text. Because there's
- * no label to name it, `aria-label` is **required** (the mirror of the labelled
- * arms, which forbid it). It's a variation of the filled component control, not a
- * separate component — so `intent`/`saliency`/`size`/`loading`/`disabled` all
- * behave exactly as on a labelled `Button`.
- *
- * Only offered on the filled (`solid`) look: a bare *underlined* glyph (the text
- * appearance) reads as neither a link nor a button, so `appearance="text"` stays
- * label-only. The `icon` slot replaces the label, so `children` and
- * `startIcon`/`endIcon` are all unavailable here.
- */
 export interface IconButtonProps extends ButtonCommonProps {
-  /** Default look: the filled component control (the only look icon-only offers). */
   appearance?: "solid";
-  /**
-   * The single centred glyph — **required**, and the discriminant of this arm.
-   * A bare glyph (auto-wrapped in `Icon`), an explicit `<Icon>`, or a
-   * `(props, state)` render function; inherits the button's text colour. Typed
-   * `NonNullable` so a nullish value (e.g. a `cond ? <Icon/> : null`) can't slip
-   * through as the icon-only arm and render an *unnamed* button — the required
-   * `aria-label` is only wired up when a glyph is actually present.
-   */
+
   icon: NonNullable<IconSlot<ButtonIconState>>;
-  /**
-   * Accessible name — **required**, because the button is icon-only and has no
-   * visible text to name it (e.g. "Add to favourites"). The mirror image of a
-   * labelled `Button`, which _forbids_ `aria-label` because its visible label is
-   * already the name.
-   */
+
   "aria-label": string;
   size?: Size;
-  /**
-   * Loading state: disables interaction and overlays a spinner on the glyph (the
-   * glyph stays in place to preserve the square box; the `aria-label` keeps
-   * naming the control). The disabled tooltip is suppressed while loading.
-   */
+
   loading?: boolean;
-  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+
   children?: never;
-  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+
   startIcon?: never;
-  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+
   endIcon?: never;
-  /** Unsupported on the icon-only arm — it's always the filled `solid` look. */
+
   variant?: never;
-  /**
-   * Unsupported on the icon-only arm: the square treatment pins a 1:1
-   * `aspect-ratio`, so `width="fill"` wouldn't widen the button — it would
-   * inflate it into a container-sized square. Use a labelled button if you need
-   * a full-width control.
-   */
+
   width?: never;
 }
 
-/**
- * Button props, discriminated on `appearance` and the presence of `icon`: the
- * default filled control ({@link SolidButtonProps}), the hyperlink-style text
- * button ({@link TextButtonProps}), or the icon-only square button
- * ({@link IconButtonProps}, selected by passing `icon` + `aria-label`).
- */
 export type ButtonProps = SolidButtonProps | TextButtonProps | IconButtonProps;
 
-/**
- * Button — a "component" element type. Shares the colour scheme/recipe with
- * `Chip` et al., so `<Button intent="negative" saliency="high">` matches a
- * `<Chip>` with the same props. Hover/active states are derived from tokens at
- * use-site.
- *
- * Pass `appearance="text"` for a hyperlink-style button: underlined text driven
- * by the same `intent`/`saliency`, with `variant` picking the body typography in
- * place of `size` (see {@link TextButtonProps}).
- *
- * Pass `icon` + `aria-label` (and no `children`) for the icon-only look: a square
- * button carrying a single glyph, named by the required `aria-label`
- * (see {@link IconButtonProps}). It shares the filled control's
- * `intent`/`saliency`/`size`/`loading`, so it's a variation of `Button` rather
- * than a separate component.
- *
- * Disabled uses `aria-disabled` (keyboard-reachable) so a disabled button can
- * explain itself via `disabledReason`; loading overlays a spinner on the label.
- *
- * The rendering lives in `InternalButton`; `Button` just forwards its props as
- * `consumerProps`. That split lets the overlay components (`Drawer`, `Modal`,
- * `Popover`) reuse the same button as their trigger/close by feeding base-ui's
- * `render` props in through `InternalButton`'s `htmlAttrs` seam.
- */
 export function Button(props: ButtonProps) {
   return <InternalButton consumerProps={props} />;
 }

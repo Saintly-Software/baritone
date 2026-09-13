@@ -5,24 +5,10 @@ import { vars } from "../../theme/contract.css";
 
 const line = createVar();
 
-/**
- * The rule's thickness, set per instance by the `Divider` component to a
- * `var(--borderWidth-<name>)` the active theme published — the `borderWidth`
- * vocabulary is *open* (consumer-extensible), so it's an inline var, not a variant.
- * See {@link module:../../theme/borderWidths}.
- */
 export const dividerWeightVar = createVar("dividerWeight");
 
 const weight = fallbackVar(dividerWeightVar, vars.borderWidth.thin);
 
-/**
- * Divider root. A flex line: unlabelled it paints the rule on its own box;
- * labelled it grows a rule either side of the label via `::before` / `::after`.
- *
- * The colour reads `component.color[intent][saliency].default.border` — the
- * border ramp, so the rule sits at hairline weight against a surface at every
- * saliency — and the thickness reads the `--borderWidth-<name>` the component sets.
- */
 export const dividerRoot = recipe({
   base: {
     display: "flex",
@@ -41,11 +27,7 @@ export const dividerRoot = recipe({
         minHeight: "1em",
       },
     },
-    /**
-     * Whether there's a label between the rules. Drives *where* the line is
-     * painted: on the element's own box (`false`), or on the two pseudo-element
-     * rules flanking the label (`true`).
-     */
+
     labelled: {
       false: {
         background: line,

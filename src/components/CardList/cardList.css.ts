@@ -3,11 +3,6 @@ import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { SPACE_KEYS } from "../../theme/constants";
 import { vars } from "../../theme/contract.css";
 
-/**
- * The list container — a vertical stack of cards. Resets the default `<ul>`
- * margin / padding / marker (this renders as a real list) and spaces the cards
- * with a `gap` from the spacing scale (default `4`).
- */
 export const cardListRoot = recipe({
   base: {
     display: "flex",
@@ -27,10 +22,6 @@ export const cardListRoot = recipe({
   defaultVariants: { gap: "4" },
 });
 
-/**
- * Each list cell. `display: flex` so its single card stretches to the full width
- * of the row; `min-width`/`min-height: 0` per `Flex`.
- */
 export const cardListItem = style({
   display: "flex",
   flexDirection: "column",

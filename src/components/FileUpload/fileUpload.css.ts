@@ -7,17 +7,6 @@ import { vars } from "../../theme/contract.css";
 const bd = createVar();
 const bg = createVar();
 
-/**
- * The drop target: a tall, dashed, centred box that doubles as the click target —
- * a transparent full-bleed file `<input>` (see `fileUploadInput`) overlays it, so
- * a click anywhere opens the system picker and the control stays natively
- * keyboard-operable (the ring is drawn on this box via `:focus-within`).
- *
- * Token wiring mirrors `formControlRecipe`: the form `state` drives the
- * border/background and publishes the focus-ring colour for the shared
- * `focusRingRecipe`. While a drag hovers it (`data-dragging`), the border switches
- * to the accent (focus) colour to signal it'll accept the drop.
- */
 export const fileUploadDropzone = recipe({
   base: {
     position: "relative",
@@ -70,14 +59,6 @@ export const fileUploadDropzone = recipe({
   defaultVariants: { state: "neutral" },
 });
 
-/**
- * The real `<input type="file">`, stretched transparently over the whole dropzone
- * so a click anywhere opens the system picker while the element stays natively
- * keyboard-operable. It sits above the decorative content (which is
- * `pointer-events: none`) so it captures the clicks; file *drops* are intercepted
- * on the dropzone (which `preventDefault`s the native assignment) so they can be
- * filtered against `acceptedFileTypes` before becoming `FileInfo`s.
- */
 export const fileUploadInput = style({
   position: "absolute",
   inset: 0,
@@ -92,7 +73,6 @@ export const fileUploadInput = style({
   },
 });
 
-/** The upload glyph — muted and decorative (`aria-hidden`); inert to clicks. */
 export const fileUploadIcon = style({
   width: "1.75rem",
   height: "1.75rem",
@@ -100,7 +80,6 @@ export const fileUploadIcon = style({
   pointerEvents: "none",
 });
 
-/** Centred prompt/hint stack; `pointer-events: none` so clicks reach the input. */
 export const fileUploadContent = style({
   display: "flex",
   flexDirection: "column",

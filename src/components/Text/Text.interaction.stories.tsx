@@ -2,11 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
 import { Text } from "./index";
 
-/**
- * Interaction coverage for `Text`, validated against real computed styles: a bare
- * `Text` resolves to its root typography defaults, and `intent`/`saliency` resolve
- * to a distinct colour.
- */
 const meta: Meta<typeof Text> = {
   title: "Interaction Tests/Text",
   component: Text,
@@ -15,10 +10,6 @@ export default meta;
 
 type Story = StoryObj<typeof Text>;
 
-/**
- * With no ancestor to inherit from, a bare `Text` uses the base typography; a
- * `weight` override changes the weight without touching the size.
- */
 export const RootDefaults: Story = {
   render: () => (
     <div>
@@ -36,7 +27,6 @@ export const RootDefaults: Story = {
   },
 };
 
-/** `intent` + `saliency` resolve to a colour token distinct from the neutral default. */
 export const IntentColorResolves: Story = {
   render: () => (
     <div>

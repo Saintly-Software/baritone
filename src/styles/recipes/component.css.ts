@@ -20,16 +20,6 @@ const sizes = {
   lg: { height: "2.5rem", px: vars.space[4], font: vars.text.size.md },
 } as const;
 
-/**
- * "Component intent" recipe — the colour scheme shared by the "component" element
- * type (Chip, Icon, and future Button/Badge/Avatar). Sets the border, background,
- * and text colour, and publishes that foreground to descendants via `--iconColor`
- * (for `Icon`) and `--textColor` (for `Text`), so an inline icon or nested `Text`
- * matches without knowing the intent, and an `<Button intent='negative'
- * saliency='high'>` and a `<Chip>` with the same props render identically. Hover/active are computed from
- * `default` via oklch relative-colour math; low saliency hovers to the `mid`
- * shade. Also publishes the focus-ring colour for the shared `focusRingRecipe`.
- */
 export const componentIntentRecipe = recipe({
   base: {
     borderStyle: "solid",
@@ -49,10 +39,6 @@ export const componentIntentRecipe = recipe({
     },
   },
   variants: {
-    /**
-     * Who gets the hover/active background — see `componentTypographyRecipe`'s
-     * matching variant, which owns the cursor half of the same question.
-     */
     interactive: {
       control: {
         selectors: {
@@ -109,13 +95,6 @@ export const componentIntentRecipe = recipe({
 
 export type ComponentIntentVariants = NonNullable<RecipeVariants<typeof componentIntentRecipe>>;
 
-/**
- * "Component typography" recipe — the non-colour half of the component scheme:
- * the shared box/layout (inline-flex, gap, radius), the type variables
- * (font-family/weight/line-height), interaction transitions, and the `size`
- * knob (control height / inline padding / font-size). Pair with
- * `componentIntentRecipe` for colour and `focusRingRecipe` for the ring.
- */
 export const componentTypographyRecipe = recipe({
   base: {
     display: "inline-flex",
@@ -138,21 +117,6 @@ export const componentTypographyRecipe = recipe({
     },
   },
   variants: {
-    /**
-     * Who gets the control affordances — the pointer cursor and the unselectable
-     * label (`componentIntentRecipe`'s matching variant owns the hover/active
-     * background half).
-     *
-     *   - `control` (default) — always. For the components that *are* a control:
-     *     Button, Tabs, a Notice's action.
-     *   - `auto` — leave both to the element itself. For a polymorphic root that
-     *     is usually inert: a Chip is a static tag until `render` makes it a
-     *     link, and a tag that shows a pointer is advertising a click that does
-     *     nothing (its own text is also worth being able to select). Declaring
-     *     nothing is what makes this work in both directions — a `<span>` keeps
-     *     the default arrow, while an `<a href>` still gets its pointer from the
-     *     UA stylesheet.
-     */
     interactive: {
       control: { cursor: "pointer", userSelect: "none" },
       auto: {},

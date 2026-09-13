@@ -57,7 +57,6 @@ export const Margin: Story = {
   ),
 };
 
-/** `width="fill"` stretches the box to its container; `fit` shrinks to content. */
 export const WidthShorthand: Story = {
   render: () => (
     <Box style={{ width: 320, background: "var(--baritone-color-neutral-100, #f1f1f4)" }} p="3">
@@ -71,13 +70,6 @@ export const WidthShorthand: Story = {
   ),
 };
 
-/**
- * `hideOn` / `showOn` — responsive visibility. Each listed breakpoint is its own
- * band, so hiding is precise and never leaks upward. Here the first box is hidden
- * from `md` up and the second is shown only from `md` up. Resize the preview to
- * see the swap. (Pass a single breakpoint like `hideOn="md"` to hide just the
- * `md` band, 768–1023px.)
- */
 export const ResponsiveVisibility: Story = {
   render: () => (
     <>

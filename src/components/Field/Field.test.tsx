@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import { Fieldset } from "../Fieldset";
 import { Field } from "./index";
 
-/** Resolve an element's `aria-describedby` to the text it actually announces. */
 function describedByText(el: HTMLElement): string[] {
   const ids = (el.getAttribute("aria-describedby") ?? "").split(/\s+/).filter(Boolean);
   return ids.map((id) => document.getElementById(id)?.textContent ?? `<missing:${id}>`);

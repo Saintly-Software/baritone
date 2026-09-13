@@ -96,52 +96,26 @@ function warnIfLineHeightUnset(el: HTMLElement | null, name: string): void {
   );
 }
 
-/**
- * `InternalText` — the shared typography primitive behind `Text` and `Heading`.
- * It owns the whole class composition — colour (`textIntentRecipe`), the shared
- * typography base + italics (`textSizeRecipe` / `typographyDecoration`), and the
- * text-layout + spacing atoms — plus the base-ui `render` polymorphism. The
- * open-ended typographic knobs (`size`, `weight`, `lineHeight`, `font`,
- * `letterSpacing`) resolve through the `--text…` inline vars to a
- * `var(--<x>-<name>)` the active theme published. The two public components differ
- * only in the values they feed in (default element, default `size`/`weight`/
- * `saliency`, and their semantic tag), so they resolve those and delegate here.
- */
 export interface InternalTextProps
   extends
     Omit<React.HTMLAttributes<HTMLElement>, "color">,
     MarginProps,
     PaddingProps,
     TypographyAtomProps {
-  /**
-   * Typography size, by name — drives `font-size` and, unless a `lineHeight` is
-   * given, its paired default line-height. Built-ins `xs`…`9xl` are always
-   * available; other names are consumer-defined via the theme's `sizes` option +
-   * `FontSizeRegistry`. Resolves to `var(--fontSize-<name>)`.
-   */
   size: FontSizeName;
-  /** Override the inherited colour with this intent (resolves saliency to `mid`). */
+
   intent?: Intent;
-  /** Override the inherited colour at this saliency. Falls back to `mid` when standalone. */
+
   saliency?: Saliency;
-  /**
-   * Font weight, by name. Built-ins `default`/`semibold`/`bold`/`superbold` are
-   * always available; other names are consumer-defined via the theme's `weights`
-   * option + `FontWeightRegistry`. Resolves to `var(--fontWeight-<name>)`.
-   */
+
   weight?: FontWeightName;
-  /** Render the text in italics. */
+
   italic?: TypographyDecorationVariants["italic"];
-  /**
-   * Font family, by name. Built-ins `sans` (default) and `mono` are always
-   * available; any other name must be published by the active theme (its `fonts`
-   * option emits a `--font-<name>` custom property) and declared on `FontRegistry`
-   * for type-safety. Resolves to `var(--font-<name>)`.
-   */
+
   font?: FontName;
-  /** The tag rendered when `render` isn't supplied. */
+
   defaultElement: keyof React.JSX.IntrinsicElements;
-  /** base-ui `render` escape hatch (any element/component). */
+
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;

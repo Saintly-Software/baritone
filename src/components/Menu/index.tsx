@@ -24,69 +24,31 @@ import {
 type RootProps = React.ComponentProps<typeof BaseMenu.Root>;
 type PositionerProps = React.ComponentProps<typeof BaseMenu.Positioner>;
 
-/**
- * `Menu.Item`'s colour intent — the `neutral` default plus the accent intents.
- * Derived from the recipe's own list, so the type and the styles can't drift.
- *
- * Narrower than `Chip`/`Button`'s full `Intent`: `primary` is the call-to-action
- * colour, and a row in a list of peers isn't a CTA.
- */
 export type MenuItemIntent = (typeof MENU_ITEM_INTENTS)[number];
 
-/** The row state a `Menu.Item` icon render function can branch on. */
 export interface MenuItemIconState {
   intent: MenuItemIntent;
   disabled: boolean;
 }
 
 export interface MenuItemProps {
-  /** Colour intent for the row's icon/text and its highlight wash. Default `neutral`. */
   intent?: MenuItemIntent;
-  /**
-   * Leading glyph before the label. Pass a bare glyph (`icon={<PenLine />}`,
-   * auto-wrapped in `Icon`), an explicit `<Icon>` for custom size/label, or a
-   * `(props, state) => …` render function for full control.
-   */
+
   icon?: IconSlot<MenuItemIconState>;
-  /** The row's visible label — also its accessible name and keyboard type-ahead text. */
+
   children: string;
-  /**
-   * Activation handler, makes the row a real `<button>` (via
-   * `InternalGenericButtonAnchor`). Can be combined with `href`/`render` (e.g. to
-   * fire analytics alongside the navigation) — all three chain rather than
-   * override each other.
-   */
+
   onClick?: React.MouseEventHandler<HTMLElement>;
-  /** Destination for an external link — makes the row a real `<a href>`. */
+
   href?: string;
-  /**
-   * Router-link element for internal, client-side navigation (the base-ui
-   * `render` seam, like `Link`/`Card`) — e.g. `render={<RouterLink to="/settings" />}`.
-   * Its presence (with or without `href`) makes the row a link.
-   */
+
   render?: RenderProp;
-  /** Disables the row. Uses `aria-disabled`/`data-disabled` (never the native attribute). */
+
   disabled?: boolean;
-  /**
-   * Keep the menu open after this row activates, instead of the default
-   * dismiss-on-click. Meant for a button row whose action doesn't navigate away
-   * and that a user may want to fire repeatedly (a stepper, a "mark all"
-   * toggle). No effect on link rows — those navigate away, closing the menu.
-   */
+
   keepOpen?: boolean;
 }
 
-/**
- * Wires a base-ui render callback's computed props (`htmlAttrs`) onto
- * `InternalGenericButtonAnchor`, folding in the item's own
- * `onClick`/`href`/`render`/`disabled` — mirrors `InternalButton`'s `htmlAttrs`
- * seam. The host's `onClick` (base-ui's highlight/keyboard/close wiring) is
- * pulled out and chained after the consumer's own, so both run exactly once.
- * base-ui's own `aria-disabled` is dropped rather than merged: since we never
- * tell base-ui this item is disabled (see `MenuItem`), it always hands back
- * `aria-disabled={false}` here, which would otherwise clobber the real value
- * `InternalGenericButtonAnchor` computes from our own `disabled` prop.
- */
 function MenuItemAnchor({
   intent = "neutral",
   icon,
@@ -132,13 +94,6 @@ function MenuItemAnchor({
   );
 }
 
-/**
- * Menu.Item — one action row. Renders as a real `<button>` (`onClick`) or a
- * real `<a>`/router link (`href`/`render`) via `InternalGenericButtonAnchor`,
- * wrapped in base-ui's `Menu.Item`/`Menu.LinkItem` so it gets the roving
- * keyboard focus, type-ahead, and `data-highlighted` wiring for free. Pass it
- * as an entry in `<Menu items={[<Menu.Item …/>]} />`.
- */
 function MenuItem(props: MenuItemProps) {
   const { children, keepOpen = false } = props;
   const isLink = props.href != null || props.render != null;
@@ -164,54 +119,29 @@ function MenuItem(props: MenuItemProps) {
 }
 
 export interface MenuProps {
-  /** The element that opens the menu — typically a `<Menu.Trigger>`. */
   trigger?: React.ReactNode;
-  /**
-   * The rows to render, each a `<Menu.Item>` element. Falsy entries are skipped,
-   * so a row can be included conditionally inline —
-   * e.g. `canDelete && <Menu.Item intent="negative" onClick={…}>Delete</Menu.Item>`.
-   */
+
   items: Array<React.ReactElement<MenuItemProps> | null | false | undefined>;
-  /** Controlled open state. */
+
   open?: RootProps["open"];
-  /** Uncontrolled initial open state. */
+
   defaultOpen?: RootProps["defaultOpen"];
-  /** Called when the open state changes (base-ui signature). */
+
   onOpenChange?: RootProps["onOpenChange"];
-  /**
-   * Modal behaviour. Default `true` (base-ui's default for `Menu`, unlike
-   * `Popover`): the rest of the page is inert while the menu is open.
-   */
+
   modal?: RootProps["modal"];
-  /** Which side of the trigger to place the menu (base-ui default `bottom`). */
+
   side?: PositionerProps["side"];
-  /** Alignment along the chosen side (base-ui default `center`). */
+
   align?: PositionerProps["align"];
-  /** Gap in px between the trigger and the menu. Default `8`. */
+
   sideOffset?: PositionerProps["sideOffset"];
-  /** Extra className merged onto the menu surface. */
+
   className?: string;
-  /** Ref to the menu surface element. */
+
   ref?: React.Ref<HTMLDivElement>;
 }
 
-/**
- * Menu — a floating list of actions anchored to a trigger, built on base-ui's
- * `Menu` (roving keyboard focus, type-ahead, and dismissal handled for you).
- * Pass its rows as `items` (each a `<Menu.Item>`); every row renders as a real
- * `<button>` or `<a>`/router link via `InternalGenericButtonAnchor`.
- *
- * @example
- * <Menu
- *   trigger={<Menu.Trigger>Actions</Menu.Trigger>}
- *   items={[
- *     <Menu.Item onClick={() => edit()}>Edit</Menu.Item>,
- *     <Menu.Item onClick={() => duplicate()}>Duplicate</Menu.Item>,
- *     <Menu.Item href="/source">View source</Menu.Item>,
- *     <Menu.Item intent="negative" onClick={() => remove()}>Delete</Menu.Item>,
- *   ]}
- * />
- */
 function MenuRoot({
   trigger,
   items,
@@ -252,44 +182,20 @@ function MenuRoot({
   );
 }
 
-/** base-ui `Menu.Trigger`'s render seam — an element to render as, or `(htmlAttrs) => element`. */
 type BaseMenuTriggerRender = React.ComponentProps<typeof BaseMenu.Trigger>["render"];
 
-/** Hover/open-timing knobs shared by the default-Button and custom-render triggers. */
 interface MenuTriggerOwnProps {
-  /**
-   * Also open the menu when the trigger is hovered, not just on click/keyboard
-   * (base-ui's `openOnHover`). Off by default.
-   */
   openOnHover?: boolean;
-  /** ms to wait before opening on hover. Requires `openOnHover`. Default `100`. */
+
   delay?: number;
-  /** ms to wait before closing after the pointer leaves. Requires `openOnHover`. Default `0`. */
+
   closeDelay?: number;
 }
 
-/**
- * `Menu.Trigger` props. By default it renders a `Button`, so all of Button's
- * `intent`/`saliency`/`size`/`icons`/`loading`/`disabled` apply. Pass a base-ui
- * `render` (an element, or `(htmlAttrs) => element`) to use a fully custom
- * trigger element instead — it receives the popup wiring
- * (`aria-haspopup`/`aria-expanded` + the toggle handler), and the Button props
- * no longer apply.
- */
 export type MenuTriggerProps =
   | (ButtonProps & MenuTriggerOwnProps & { render?: never })
   | (MenuTriggerOwnProps & { render: BaseMenuTriggerRender });
 
-/**
- * The trigger that opens the menu. Renders a `Button` (so all of Button's
- * intents/saliencies/sizes/icons are available), wired up by base-ui so it
- * carries the right `aria-haspopup`/`aria-expanded` and toggles the menu. Must
- * be passed to `<Menu trigger={...} />` so it sits inside the menu's context.
- *
- * Pass `render` for a custom, non-Button trigger (an avatar, an icon-only
- * control): base-ui hands your element the same popup wiring via its `render`
- * seam — the house polymorphism convention, never `asChild`.
- */
 function MenuTrigger(props: MenuTriggerProps) {
   const { openOnHover, delay, closeDelay } = props;
 
@@ -321,7 +227,6 @@ MenuRoot.displayName = "Menu";
 MenuTrigger.displayName = "Menu.Trigger";
 MenuItem.displayName = "Menu.Item";
 
-/** Menu with its compound parts attached. */
 export const Menu = Object.assign(MenuRoot, {
   Trigger: MenuTrigger,
   Item: MenuItem,

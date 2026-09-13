@@ -6,11 +6,6 @@ import { iconColorVar, iconVerticalAlignVar } from "../vars.css";
 
 const fallback = createVar();
 
-/**
- * Icon colour resolution. Inside `Text`/`Chip` (which set `--iconColor`), an
- * icon matches the surrounding text. Standalone, `--iconColor` is unset so it
- * falls back to the `component` token for its intent/saliency.
- */
 export const iconRecipe = recipe({
   base: {
     display: "inline-flex",

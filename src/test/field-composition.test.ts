@@ -3,21 +3,8 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
-/**
- * Convention guard: the label / help / error layout and the ARIA wiring that
- * goes with it live in exactly one place — `src/components/Field`. A control that
- * reaches for base-ui's `Field` directly is re-deriving that wiring, which is how
- * the two bugs this primitive was built to fix happened in the first place:
- * `CheckboxGroup` rendered help text that `aria-describedby` never pointed at,
- * and several controls quietly disagreed about whether `label` or `aria-label`
- * won. See the "Form controls compose `Field`" note in AGENTS.md.
- *
- * `Field` itself is the one legal consumer — it's the thing doing the wrapping.
- */
-
 const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 
-/** The only module allowed to import base-ui's `Field` — it *is* the wrapper. */
 const ALLOWED = ["components/Field/index.tsx"];
 
 const BASE_UI_FIELD_IMPORT = /from\s+["']@base-ui\/react\/field["']/;

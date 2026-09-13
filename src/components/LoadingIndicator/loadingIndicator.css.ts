@@ -6,17 +6,6 @@ import { iconColorVar } from "../../styles/vars.css";
 
 const fallback = createVar();
 
-/**
- * LoadingIndicator root — a centring, colour-resolving box around the shared
- * `InternalSpinner`. The ring is `em`-sized and drawn in `currentColor`, so this
- * recipe only has to set the font-size (`size`) and the resolved colour
- * (`intent`/`saliency`) for the ring to inherit.
- *
- * Colour resolution mirrors `Icon`: placed inside `Text`/`Chip` (which set
- * `--iconColor`) it matches the surrounding text; standalone it falls back to
- * the `component` token for its intent/saliency. Sizes track `Icon`'s ramp so a
- * spinner and a glyph of the same `size` sit at the same footprint.
- */
 export const loadingIndicatorRecipe = recipe({
   base: {
     display: "inline-flex",

@@ -3,12 +3,6 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Icon } from "../Icon";
 import { Tooltip } from "./index";
 
-/**
- * `Tooltip` is the system's **accessible** tooltip. Unlike `InaccessibleTooltip`,
- * its trigger is always a real `<Tooltip.Trigger>` button, so the hint is
- * reachable by hover, keyboard focus, *and* touch. Keep the content strictly
- * supplemental — for anything a user must read, use `Popover`.
- */
 const meta: Meta<typeof Tooltip> = {
   title: "Components/Tooltip",
   component: Tooltip,
@@ -44,10 +38,6 @@ const CopyGlyph = () => (
   </Icon>
 );
 
-/**
- * Hover or tab to the button to reveal the hint. The `play` function drives the
- * hover and waits for the portaled tooltip to appear.
- */
 export const Basic: Story = {
   render: (args) => (
     <div style={{ padding: 64 }}>

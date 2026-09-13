@@ -58,11 +58,6 @@ const cellStyle: CSSProperties = {
   verticalAlign: "baseline",
 };
 
-/**
- * Every typography `size` (rows, the full shared scale) against every `weight`
- * (columns), each cell showing regular and italic. `Text` and `Heading` render
- * the same scale, so the larger rows read as display type.
- */
 export const Sizes: Story = {
   render: () => (
     <div style={{ overflowX: "auto" }}>
@@ -103,16 +98,6 @@ export const Sizes: Story = {
   ),
 };
 
-/**
- * The `font` prop's vocabulary is defined by the *consumer*, not Baritone. An app
- * publishes families as `--font-<name>` custom properties (via the theme's `fonts`
- * option) and, for autocompletion + type-safety, declares those names by augmenting
- * the `FontRegistry` interface. `sans` and `mono` are always available.
- *
- * This story fakes a consumer by declaring a few `--font-*` vars on the wrapper, so
- * `font="serif"` / `"slab"` / `"cursive"` resolve — exactly what a real theme would
- * emit — while `font="mono"` uses the built-in.
- */
 export const CustomFonts: Story = {
   render: () => (
     <div
@@ -143,13 +128,6 @@ export const CustomFonts: Story = {
   ),
 };
 
-/**
- * The built-in `letterSpacing` (tracking) steps, from `tighter` to `widest`.
- * Values are `em`-based, so a step tracks the font-size proportionally. The last
- * row is the canonical use — a small, bold, uppercase eyebrow — where `widest`
- * supplies the tracking that used to require a custom `style`. For values outside
- * this ramp, an app defines its own names — see `CustomLetterSpacing`.
- */
 export const LetterSpacing: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 12 }}>
@@ -182,17 +160,6 @@ export const LetterSpacing: Story = {
   ),
 };
 
-/**
- * Like `font`, the `letterSpacing` vocabulary is defined by the *consumer*, not
- * Baritone. An app publishes tracking values as `--letterSpacing-<name>` custom
- * properties (via the theme's `letterSpacings` option) and, for autocompletion +
- * type-safety, declares those names by augmenting the `LetterSpacingRegistry`
- * interface. The built-in `tighter`…`widest` steps are always available.
- *
- * This story fakes a consumer by declaring a couple of `--letterSpacing-*` vars on
- * the wrapper, so `letterSpacing="eyebrow"` / `"display"` resolve — exactly what a
- * real theme would emit — while `letterSpacing="widest"` uses a built-in.
- */
 export const CustomLetterSpacing: Story = {
   render: () => (
     <div
@@ -219,13 +186,6 @@ export const CustomLetterSpacing: Story = {
   ),
 };
 
-/**
- * The built-in `lineHeight` (leading) steps, `none`…`loose` — unitless multipliers,
- * so a step scales with the font-size. `lineHeight` overrides the line-height `size`
- * otherwise supplies; each block below is the same wrapping paragraph at a different
- * leading. For values outside this ramp, an app defines its own names — see
- * `CustomLineHeight`.
- */
 export const LineHeights: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 16, maxWidth: 360 }}>
@@ -244,15 +204,6 @@ export const LineHeights: Story = {
   ),
 };
 
-/**
- * The `whiteSpace` atom, against the same source string — which contains a hard
- * newline and a run of consecutive spaces. `normal` (the default) collapses both
- * and wraps; `nowrap` collapses them and stays on one line; `pre` preserves both
- * but never wraps; `pre-wrap` preserves them while still wrapping at the container
- * edge (what you want for user-authored copy, log lines, or model output);
- * `pre-line` keeps newlines but collapses the spaces; `break-spaces` is `pre-wrap`
- * that also wraps trailing spaces.
- */
 export const WhiteSpace: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 16, maxWidth: 360 }}>
@@ -274,20 +225,6 @@ export const WhiteSpace: Story = {
   ),
 };
 
-/**
- * Like `font`, the `size` vocabulary is defined by the *consumer*, not Baritone. An
- * app publishes font-sizes as `--fontSize-<name>` custom properties (via the theme's
- * `sizes` option) and, for autocompletion + type-safety, declares those names by
- * augmenting the `FontSizeRegistry` interface. The built-in `xs`…`9xl` ramp is always
- * available. A size given as `{ fontSize, lineHeight }` also publishes a paired
- * `--lineHeight-<name>` — a tight display leading applied by default, no `lineHeight`
- * prop needed (Tailwind-style); a bare `font-size` string falls back to the `md`
- * leading.
- *
- * This story fakes a consumer by declaring the `--fontSize-*` (and, for `hero`, a
- * paired `--sizeLineHeight-*`) vars on the wrapper — exactly what a real theme emits
- * for `sizes: { hero: { fontSize: "4rem", lineHeight: "1.05" }, figure: "2.75rem" }`.
- */
 export const CustomSizes: Story = {
   render: () => (
     <div
@@ -312,15 +249,6 @@ export const CustomSizes: Story = {
   ),
 };
 
-/**
- * Like `font`, the `weight` vocabulary is defined by the *consumer*. An app publishes
- * weights as `--fontWeight-<name>` custom properties (via the theme's `weights`
- * option) and declares those names by augmenting the `FontWeightRegistry` interface.
- * The built-in `default`/`semibold`/`bold`/`superbold` steps are always available.
- *
- * This story fakes a consumer by declaring a couple of `--fontWeight-*` vars on the
- * wrapper, so `weight="hairline"` / `"black"` resolve.
- */
 export const CustomWeights: Story = {
   render: () => (
     <div
@@ -347,16 +275,6 @@ export const CustomWeights: Story = {
   ),
 };
 
-/**
- * Like `font`, the `lineHeight` vocabulary is defined by the *consumer*. An app
- * publishes leadings as `--lineHeight-<name>` custom properties (via the theme's
- * `lineHeights` option) and declares those names by augmenting the
- * `LineHeightRegistry` interface. The built-in `none`…`loose` steps are always
- * available.
- *
- * This story fakes a consumer by declaring a `--lineHeight-*` var on the wrapper, so
- * `lineHeight="airy"` resolves — while `lineHeight="loose"` uses a built-in.
- */
 export const CustomLineHeight: Story = {
   render: () => (
     <div
@@ -381,11 +299,6 @@ export const CustomLineHeight: Story = {
   ),
 };
 
-/**
- * Every `intent` (rows) against every `saliency` (columns). Each cell renders the
- * colour token for that combination, so you can read a full matrix of the text
- * palette at a glance.
- */
 export const IntentsAndSaliencies: Story = {
   render: () => (
     <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>

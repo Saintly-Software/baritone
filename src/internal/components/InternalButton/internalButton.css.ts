@@ -5,37 +5,15 @@ import { vars } from "../../../theme/contract.css";
 import { active, hover } from "../../../theme/oklch";
 import { focusRingColorVar, iconColorVar } from "../../../styles/vars.css";
 
-/**
- * Button-specific layout that sits on top of the shared `component` recipe
- * (`componentTypographyRecipe` + `componentIntentRecipe`). The recipe owns the
- * box, colour, size, and focus ring; everything here is about the loading
- * overlay. The disabled-explanation tooltip surface lives in `InternalTooltip`.
- */
-
-/** Establishes the positioning context for the absolutely-centred spinner. */
 export const buttonBase = style({
   position: "relative",
 });
 
-/**
- * Icon-only square treatment for `<Button icon aria-label>`. The shared
- * `componentTypographyRecipe` sizes a button for a text label (a fixed `height`
- * plus horizontal `paddingInline`), leaving it wider than tall. An icon-only
- * button is a single centred glyph, so zero out the inline padding and pin a 1:1
- * aspect ratio — the button becomes a square of side = the recipe's `height`, at
- * every `size`. Merged last (via `className`) so it wins the `paddingInline`.
- * Mirrors `infoButtonSquare` / `toggleButtonSquare`.
- */
 export const buttonSquare = style({
   paddingInline: 0,
   aspectRatio: "1",
 });
 
-/**
- * Wraps the start icon / label / end icon as a single flex row so the spinner
- * can overlay the whole group. The row carries its own `gap` (the recipe's gap
- * sits between the wrapper and the out-of-flow spinner, so it's a no-op).
- */
 export const buttonContent = style({
   display: "inline-flex",
   alignItems: "center",
@@ -43,19 +21,10 @@ export const buttonContent = style({
   gap: vars.space[2],
 });
 
-/**
- * Loading: hide the label/icons with `opacity` (not `visibility`/`display`) so
- * the button keeps its width *and* keeps its accessible name — the spinner is
- * purely decorative, so the text must still name the control while busy.
- */
 export const buttonContentLoading = style({
   opacity: 0,
 });
 
-/**
- * Centres the spinner over the (hidden) label without affecting layout. The ring
- * glyph itself is the shared `InternalSpinner`.
- */
 export const buttonSpinner = style({
   position: "absolute",
   inset: 0,
@@ -67,19 +36,6 @@ export const buttonSpinner = style({
 
 const textFg = createVar();
 
-/**
- * `appearance="text"` recipe — the hyperlink look. A `<Button appearance="text">`
- * drops the component chrome (background, border, control height, padding) and
- * renders as underlined text whose colour comes from the `text.color` tokens, so
- * it reads like a `Link` but is a real `<button>` driven by `intent`/`saliency`.
- * Typography is supplied separately by `textSizeRecipe` (the `variant` knob).
- *
- * Colour is stored in `--textFg` so hover/active can derive from it with the same
- * oklch relative-colour math the `component`/`Link` schemes use, and it's mirrored
- * to `--iconColor` (via `currentColor`) so a `startIcon`/`endIcon` tracks the text
- * — including through the hover/active shift. Disabled dims to the shared control
- * opacity rather than a token, since `text.color` has no disabled shade.
- */
 export const textButtonRecipe = recipe({
   base: {
     appearance: "none",

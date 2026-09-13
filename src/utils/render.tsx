@@ -2,14 +2,6 @@ import * as React from "react";
 import { useRender as baseUseRender, type UseRenderRenderProp } from "@base-ui/react/use-render";
 import { cx } from "./cx";
 
-/**
- * Polymorphism following base-ui's `render` prop pattern (rather than an
- * `asChild` slot). `render` is either:
- *   - a React element to render *as* (its props are merged with ours), or
- *   - a function `(props) => element` for full control.
- * Otherwise the `defaultElement` is used. Refs are composed; className/style are
- * merged; event handlers are chained.
- */
 export type RenderProp<Props = Record<string, unknown>> =
   | React.ReactElement<Record<string, unknown>>
   | ((props: Props) => React.ReactNode);
@@ -63,26 +55,11 @@ function mergeProps(ours: AnyProps, theirs: AnyProps): AnyProps {
 
 export interface UseRenderParams {
   render: RenderProp | undefined;
-  /**
-   * The element rendered when `render` isn't supplied. An intrinsic tag name only
-   * (`"div"`, `"a"`, …) — base-ui renders it via `createElement` and supports only
-   * string tags. To render *as* a component, use `render` (`render={<Component />}`).
-   */
+
   defaultElement: keyof React.JSX.IntrinsicElements;
   props: AnyProps;
 }
 
-/**
- * Polymorphic render, delegating to base-ui's `useRender` so we inherit its
- * ref-merging, event-handler chaining, and `preventBaseUIHandler` support rather
- * than maintaining a parallel implementation. Our `defaultElement` is base-ui's
- * `defaultTagName` (an intrinsic tag name). Refs are still passed inside `props` —
- * base-ui reads `props.ref` and merges it, so call sites keep their existing shape.
- *
- * This is a hook (base-ui's `useRender` calls `useMergedRefs` internally), so it
- * must be called unconditionally. To render polymorphically from a conditional
- * branch (behind an early `return`), use {@link RenderElement} instead.
- */
 export function useRender({ render, defaultElement, props }: UseRenderParams): React.ReactElement {
   return baseUseRender({
     render: render as UseRenderRenderProp | undefined,
@@ -91,13 +68,6 @@ export function useRender({ render, defaultElement, props }: UseRenderParams): R
   });
 }
 
-/**
- * Component form of {@link useRender}, for call sites that render polymorphically
- * from a conditional branch — e.g. after an early `return` for a disabled or
- * collapsed variant. Rendering a component conditionally is fine (the hook inside
- * runs unconditionally whenever the component renders), whereas calling
- * `useRender` directly after an early `return` would break the Rules of Hooks.
- */
 export function RenderElement(params: UseRenderParams): React.ReactElement {
   return useRender(params);
 }

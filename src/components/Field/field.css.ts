@@ -2,19 +2,6 @@ import { style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
-/**
- * Field root — the visible label plus the control stack.
- *
- * The DOM order is always label-then-control, so the reading order and the
- * accessible name never depend on the visual arrangement; `labelPosition` places
- * the label purely with flex direction, mirroring `switchRow`. `start`/`end` are
- * inline-logical (`row-reverse` keeps the label on the inline-end edge in both
- * LTR and RTL) and align on the baseline, so an inline label sits on the
- * control's first line of text whatever the control's height.
- *
- * `fit` decides whether the field claims the line (`fill` — what a text input
- * wants) or shrink-wraps its content (`content` — what a checkbox row wants).
- */
 export const fieldRoot = recipe({
   base: {
     minWidth: 0,
@@ -39,11 +26,6 @@ export const fieldRoot = recipe({
   defaultVariants: { labelPosition: "top", fit: "fill" },
 });
 
-/**
- * The control together with its help / error text. Rendered in every
- * `labelPosition` so the DOM shape stays constant, and so the help text aligns
- * under the *control* rather than under the label when the label is inline.
- */
 export const fieldStack = recipe({
   base: {
     display: "flex",
@@ -61,28 +43,16 @@ export const fieldStack = recipe({
   defaultVariants: { labelPosition: "top" },
 });
 
-/**
- * Fade the label of a disabled field, matching the opacity `InternalCheckbox` /
- * `InternalSwitch` dim their controls with so a row reads as one disabled unit.
- */
 export const fieldLabelDisabled = style({
   opacity: 0.55,
 });
 
-/** Puts the `info` InfoButton on the same baseline as the label text. */
 export const fieldLabelRow = style({
   display: "flex",
   alignItems: "center",
   gap: vars.space[1],
 });
 
-/**
- * The `required` marker beside the label text — negative-high, so it reads as the
- * conventional red asterisk. It sits in `fieldLabelRow` next to the `<label>`
- * rather than inside it (see the note in `Field`), and is decorative
- * (`aria-hidden`): the control's `aria-required` carries the semantics, so this
- * never has to be announced and can't leak "star" into the accessible name.
- */
 export const fieldRequiredMarker = style({
   color: vars.text.color.negative.high,
 });

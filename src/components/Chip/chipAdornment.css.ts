@@ -6,44 +6,16 @@ import { vars } from "../../theme/contract.css";
 
 const fallback = createVar();
 
-/**
- * The adornment's glyph box, per chip size. Every glyph resolves its box from
- * this one font-size — see `glyphBox`. Sizing the glyph a step ahead of the
- * label reads as even; matching the label exactly makes it look shrunken.
- */
 const glyphSize = {
   sm: "0.75rem",
   md: "1rem",
   lg: "1rem",
 } as const;
 
-/**
- * Carrier for the rule below, composed into the recipe's base. It exists only to
- * give `globalStyle` a class to hang a child selector off — vanilla-extract
- * (rightly) won't let a style block reach outside its own class.
- */
 const glyphBox = style({});
 
 globalStyle(`${glyphBox} > span`, { fontSize: "inherit" });
 
-/**
- * Chip adornment — a small icon slotted before/after a Chip's label, optionally
- * interactive (a button or a link). By default its colour follows the Chip's
- * foreground through the inherited `--iconColor` (so it matches the label, the
- * dimmed `aria-disabled` state included). Passing an `intent` overrides that:
- * the matching `intent`×`saliency` compound variant republishes `--iconColor`
- * for this adornment (and the icon inside it) at the Chip's saliency, so an
- * accent reads correctly without the caller knowing the token.
- *
- * The `interactive` variant adds the affordances shared by the clickable kinds
- * (the button and the link): pointer cursor, a hover lift, and the inert
- * `aria-disabled` look (the control stays focusable — see AGENTS.md).
- *
- * The `size` variant sizes the glyph to the chip it sits in (the Chip passes its
- * own `size` down through context). Like `intent`/`saliency` above, an `<Icon>`'s
- * own `size` prop is deliberately overridden here: the chip owns its adornments'
- * metrics, so a chip can't be knocked out of shape by the icon it's handed.
- */
 export const chipAdornmentRecipe = recipe({
   base: [
     glyphBox,

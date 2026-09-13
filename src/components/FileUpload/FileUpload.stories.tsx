@@ -35,7 +35,6 @@ export default meta;
 
 type Story = StoryObj<typeof FileUpload>;
 
-/** Multiple files: each new pick/drop appends; chips below remove on ×. */
 export const Multiple: Story = {
   args: { helpText: "PNG, JPG or PDF — up to 10MB each." },
   render: ({ label, state, required, disabled, helpText }) => {
@@ -56,7 +55,6 @@ export const Multiple: Story = {
   },
 };
 
-/** Single file: a new pick/drop replaces the staged one. */
 export const Single: Story = {
   args: { label: "Avatar" },
   render: ({ label, state, required, disabled, helpText }) => {
@@ -76,7 +74,6 @@ export const Single: Story = {
   },
 };
 
-/** No `acceptedFileTypes` → any file is allowed (no hint line). */
 export const AnyFileType: Story = {
   render: ({ label, state, required, disabled, helpText }) => {
     const [value, setValue] = React.useState<FileInfo[]>([]);
@@ -95,7 +92,6 @@ export const AnyFileType: Story = {
   },
 };
 
-/** Invalid + required: negative border + `aria-invalid` on the input. */
 export const Invalid: Story = {
   args: { state: "invalid", required: true },
   render: ({ label, state, required, disabled, helpText }) => {
@@ -116,11 +112,6 @@ export const Invalid: Story = {
   },
 };
 
-/**
- * Disabled: the dropzone dims and won't open the picker or accept drops, but the
- * input stays keyboard-focusable (`aria-disabled`, not the native attribute), and
- * staged chips dim with inert-but-focusable remove buttons.
- */
 export const Disabled: Story = {
   args: {
     disabled: true,
@@ -147,7 +138,6 @@ export const Disabled: Story = {
   },
 };
 
-/** An `info` "i" affordance sits next to the label, opening a `Popover` on click. */
 export const WithInfo: Story = {
   args: {
     label: "Tax documents",
@@ -174,7 +164,6 @@ export const WithInfo: Story = {
   },
 };
 
-/** A `name`d field inside a `<form>`: the file shows up in `FormData` on submit. */
 export const NamedFieldInForm: Story = {
   args: { label: "Resume", helpText: "PDF, DOC or DOCX." },
   render: ({ label, state, required, disabled, helpText }) => {
@@ -208,7 +197,6 @@ export const NamedFieldInForm: Story = {
   },
 };
 
-/** Labelled by reference instead of a visible `label`. */
 export const AriaLabelledBy: Story = {
   args: { label: undefined },
   render: () => {

@@ -143,13 +143,6 @@ export const ButtonAsRouterLink: Story = {
   },
 };
 
-/**
- * Pass `icon` + `aria-label` (and no `children`) for the icon-only, square
- * button-styled link — the anchor mirror of an icon-only `Button`. The
- * `aria-label` is **required**: it's the accessible name, since there's no
- * visible text. This is the honest way to name an icon-only navigation control —
- * no need to smuggle a name in through the `render` element.
- */
 export const ButtonIconOnly: Story = {
   args: {
     appearance: "button",
@@ -244,10 +237,6 @@ export const ChipSizes: Story = {
   ),
 };
 
-/**
- * `shape` matches `Chip`: `square` (default) keeps the component radius, `pill`
- * fully rounds the ends.
- */
 export const ChipShapes: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -261,10 +250,6 @@ export const ChipShapes: Story = {
   ),
 };
 
-/**
- * `width="fill"` stretches the chip-link to its container — useful when chip-links
- * stack in a column and should share one edge. The label truncates.
- */
 export const ChipFill: Story = {
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 220 }}>
@@ -278,11 +263,6 @@ export const ChipFill: Story = {
   ),
 };
 
-/**
- * `icon` / `trailIcon` add **decorative** glyphs on each side of the label (like
- * `Chip`'s), inheriting the chip's colour. A chip-link stays one anchor — for an
- * interactive adornment (a remove "×"), use a `Chip`.
- */
 export const ChipWithIcons: Story = {
   args: {
     appearance: "chip",
@@ -314,11 +294,6 @@ export const ChipAsRouterLink: Story = {
   },
 };
 
-/**
- * Under a `LinkProvider`, an internal `href` routes through the app's router while
- * keeping the chip styling — no per-link `render` needed. (The stand-in router
- * here marks its anchors `data-router-link`.)
- */
 export const ChipWithLinkProvider: Story = {
   render: () => (
     <LinkProvider render={({ href, ...props }) => <a {...props} href={href} data-router-link="" />}>

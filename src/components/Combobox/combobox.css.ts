@@ -15,22 +15,12 @@ const sizes = {
   lg: { minHeight: "3rem", px: vars.space[4], font: vars.text.size.lg.fontSize },
 } as const;
 
-/** Vertical stack: label, control, description/error — mirrors `TextInput`. */
 export const wrapper = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[1],
 });
 
-/**
- * The control box (base-ui's `Combobox.InputGroup`): a bordered, form-coloured
- * container that lays the input out in a row alongside the trigger/clear
- * adornments — and, in `multiple` mode, wraps the selected chips before the
- * input. Reuses the shared `form` tokens (background / border / placeholder /
- * focus) exactly like `formControlRecipe`, so it reads a `state` rather than
- * intent/saliency and publishes the focus-ring colour for the paired
- * `focusRingRecipe` (`type: "within"`).
- */
 export const control = recipe({
   base: {
     boxSizing: "border-box",
@@ -79,11 +69,7 @@ export const control = recipe({
       md: { paddingInline: sizes.md.px, fontSize: sizes.md.font, gap: vars.space[2] },
       lg: { paddingInline: sizes.lg.px, fontSize: sizes.lg.font, gap: vars.space[2] },
     },
-    /**
-     * `single` is a fixed-height row; `multiple` grows to fit wrapped chips
-     * (minimum one row tall) and adds vertical padding so the chips don't touch
-     * the border.
-     */
+
     layout: {
       single: {},
       multiple: { flexWrap: "wrap", alignItems: "center" },
@@ -111,12 +97,6 @@ export const control = recipe({
 
 export type ControlVariants = NonNullable<RecipeVariants<typeof control>>;
 
-/**
- * The text input itself — bare (no border/background of its own); the `control`
- * box provides the chrome. Grows to fill the row and can shrink so wrapped chips
- * keep their space in `multiple` mode. Placeholder colour is read from the
- * `--placeholder` var the `control` recipe sets per state.
- */
 export const input = style({
   flex: "1 1 4rem",
   minWidth: "4rem",
@@ -132,7 +112,6 @@ export const input = style({
   },
 });
 
-/** A trigger/clear adornment button: bare, inherits the icon colour, dims when the control is disabled. */
 export const adornment = style({
   display: "inline-flex",
   alignItems: "center",
@@ -149,12 +128,6 @@ export const adornment = style({
   },
 });
 
-/**
- * The popup surface. Colour/border/padding come from the shared `surfaceRecipe`
- * (applied in the component); this adds elevation, the anchor-matched width, a
- * scroll cap, and a small open/close transition. `--anchor-width` and
- * `--available-height` are published by base-ui's positioner.
- */
 export const popup = style({
   boxSizing: "border-box",
   width: "var(--anchor-width)",
@@ -179,17 +152,11 @@ export const popup = style({
   },
 });
 
-/** The list of items — a simple vertical stack. */
 export const list = style({
   display: "flex",
   flexDirection: "column",
 });
 
-/**
- * A group of related options (base-ui's `Combobox.Group`). Just a vertical stack;
- * the heading is `groupLabel` and the options render beneath it. Consecutive
- * groups get a little space above their heading (the first sits flush).
- */
 export const group = style({
   display: "flex",
   flexDirection: "column",
@@ -198,11 +165,6 @@ export const group = style({
   },
 });
 
-/**
- * The group heading (base-ui's `Combobox.GroupLabel`). A small, muted, semibold
- * eyebrow, inset to line up with the option rows so it reads as a section header
- * rather than a selectable row.
- */
 export const groupLabel = style({
   paddingInline: vars.space[2],
   paddingBlock: vars.space[1],
@@ -216,11 +178,6 @@ export const groupLabel = style({
 const itemHover = createVar();
 const itemActive = createVar();
 
-/**
- * A single option row. Highlighted (`data-highlighted`, keyboard/pointer) and
- * selected (`data-selected`) get washes computed in oklch from the surface
- * background; disabled options dim and go inert (base-ui sets `aria-disabled`).
- */
 export const item = style({
   vars: {
     [itemHover]: hover(vars.surface.color.neutral.low.default.bgc),
@@ -247,14 +204,12 @@ export const item = style({
   },
 });
 
-/** A leading icon in a list row — never shrinks, follows the row's text colour. */
 export const itemIcon = style({
   display: "inline-flex",
   flexShrink: 0,
   vars: { [iconColorVar]: "currentColor" },
 });
 
-/** The label text of an option — takes the remaining width, truncates. */
 export const itemLabel = style({
   flex: 1,
   minWidth: 0,
@@ -263,22 +218,16 @@ export const itemLabel = style({
   whiteSpace: "nowrap",
 });
 
-/** The check indicator column; empty until the option is selected. */
 export const itemIndicator = style({
   display: "inline-flex",
   flexShrink: 0,
   color: iconColorVar,
 });
 
-/** Muted "Add …" prefix for the free-text create affordance. */
 export const createPrefix = style({
   color: vars.text.color.neutral.low,
 });
 
-/**
- * Status / empty rows (loading, error, no-results). Muted, centred-ish text;
- * errors switch to the negative colour. Shared padding matches an item row.
- */
 export const status = style({
   display: "flex",
   alignItems: "center",
@@ -293,32 +242,27 @@ export const statusError = style({
   color: vars.text.color.negative.high,
 });
 
-/** Inline spinner sizing for the loading status row. */
 export const statusSpinner = style({
   fontSize: vars.text.size.md.fontSize,
   color: vars.text.color.neutral.low,
 });
 
-/** The scroll viewport for the virtualized list — a fixed window we window into. */
 export const virtualViewport = style({
   overflowY: "auto",
   overscrollBehavior: "contain",
 });
 
-/** The full-height spacer that gives the scrollbar its true range; rows are absolutely placed inside it. */
 export const virtualSizer = style({
   position: "relative",
   width: "100%",
 });
 
-/** An absolutely-positioned virtualized row (offset by its `top`). */
 export const virtualItem = style({
   position: "absolute",
   insetInline: 0,
   boxSizing: "border-box",
 });
 
-/** In `multiple` mode, the wrapping row of selected chips followed by the input. */
 export const chipsContainer = style({
   display: "flex",
   flexWrap: "wrap",
@@ -328,7 +272,6 @@ export const chipsContainer = style({
   minWidth: 0,
 });
 
-/** A selected-value chip in `multiple` mode. */
 export const chip = style({
   display: "inline-flex",
   alignItems: "center",
@@ -353,7 +296,6 @@ export const chipLabel = style({
   whiteSpace: "nowrap",
 });
 
-/** The little ✕ button inside a chip. */
 export const chipRemove = style({
   display: "inline-flex",
   alignItems: "center",
@@ -373,44 +315,22 @@ export const chipRemove = style({
   },
 });
 
-/**
- * Grid view (`columns`). The column count is a caller-chosen layout value the
- * recipe can't enumerate, so it reaches CSS as one dedicated custom property,
- * set inline via `assignInlineVars` — the same single-hole pattern the colour
- * escape hatches use. Rows read it through `gridTemplateColumns`.
- */
 export const colsVar = createVar();
 
-/**
- * The row container in grid mode — the list of `Row`s, stacked with a little
- * breathing room. Composes `list` so the combined result is deterministic at
- * build time rather than depending on `cx` order at the call site.
- */
 export const gridList = style([list, { gap: vars.space[1] }]);
 
-/**
- * A group's grid body (`role="presentation"`): the stack of `Row`s under a group
- * heading. Mirrors `gridList`'s spacing so grouped and flat grids read the same.
- */
 export const gridSection = style({
   display: "flex",
   flexDirection: "column",
   gap: vars.space[1],
 });
 
-/** A single grid row (base-ui's `Combobox.Row`): an N-column track sized by `--cols`. */
 export const gridRow = style({
   display: "grid",
   gridTemplateColumns: `repeat(${colsVar}, minmax(0, 1fr))`,
   gap: vars.space[1],
 });
 
-/**
- * A grid cell (base-ui's `Combobox.Item`, `role="gridcell"`). A centred, rounded
- * tile that reuses the list item's oklch highlight/select washes; `data-selected`
- * also gets a border ring so selection survives without relying on colour alone
- * (the corner check is the other non-colour cue). Disabled cells dim and go inert.
- */
 export const gridItem = style({
   vars: {
     [itemHover]: hover(vars.surface.color.neutral.low.default.bgc),
@@ -447,7 +367,6 @@ export const gridItem = style({
   },
 });
 
-/** The label text inside a grid cell — centred, single line, truncates. */
 export const gridItemLabel = style({
   minWidth: 0,
   overflow: "hidden",
@@ -455,7 +374,6 @@ export const gridItemLabel = style({
   whiteSpace: "nowrap",
 });
 
-/** The check badge on a selected grid cell, tucked into the top-end corner. */
 export const gridItemIndicator = style({
   position: "absolute",
   top: vars.space[1],
@@ -465,32 +383,20 @@ export const gridItemIndicator = style({
   color: iconColorVar,
 });
 
-/** The free-text "Add …" cell spans the full row so it never crowds a partial row of options. */
 export const gridItemSpan = style({
   gridColumn: "1 / -1",
 });
 
-/**
- * A grid cell that carries an icon — stacks the icon above the label caption
- * (the base cell centres a single line; here the two pieces column-stack). No
- * property overlaps the base recipe, so it layers cleanly.
- */
 export const gridItemWithIcon = style({
   flexDirection: "column",
   gap: vars.space[1],
 });
 
-/**
- * The icon shown in a grid cell (above the caption). `--iconColor: currentColor`
- * makes a passed `<Icon>` (or raw `<svg>`) follow the cell's text colour, so it
- * keeps contrast against the highlight / select wash.
- */
 export const gridItemIcon = style({
   display: "inline-flex",
   vars: { [iconColorVar]: "currentColor" },
 });
 
-/** The label under a grid-cell icon — the truncating label, shrunk to a quiet caption. */
 export const gridItemCaption = style([
   gridItemLabel,
   {

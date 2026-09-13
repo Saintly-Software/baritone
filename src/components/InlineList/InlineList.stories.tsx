@@ -28,10 +28,6 @@ export const Playground: Story = {
   ),
 };
 
-/**
- * The everyday use: a muted metadata line. Style the items (`size` / `saliency`)
- * and pass a matching `separator` so the dot tracks the same treatment.
- */
 export const MutedMetadata: Story = {
   render: () => (
     <InlineList
@@ -54,7 +50,6 @@ export const MutedMetadata: Story = {
   ),
 };
 
-/** Any node works as the delimiter — here a slash instead of the default dot. */
 export const CustomSeparator: Story = {
   render: () => (
     <InlineList separator="/">
@@ -65,7 +60,6 @@ export const CustomSeparator: Story = {
   ),
 };
 
-/** Pass `separator={null}` to fall back to gap-only spacing (no delimiter). */
 export const NoSeparator: Story = {
   render: () => (
     <InlineList separator={null} gap="4">
@@ -76,7 +70,6 @@ export const NoSeparator: Story = {
   ),
 };
 
-/** When the row can't fit on one line it wraps; the dots stay between items. */
 export const Wrapping: Story = {
   render: () => (
     <div
@@ -111,10 +104,6 @@ export const Wrapping: Story = {
   ),
 };
 
-/**
- * Conditional items just work: a falsy child is dropped, so it never leaves a
- * dangling separator. Only the two truthy items below render (with one dot).
- */
 export const ConditionalItems: Story = {
   render: () => {
     const isLyrics = true;

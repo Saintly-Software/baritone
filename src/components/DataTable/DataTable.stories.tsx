@@ -59,7 +59,6 @@ export default meta;
 
 type Story = StoryObj<typeof DataTable<Person>>;
 
-/** The columns and rows you pass, rendered as a semantic, named `<table>`. */
 export const Basic: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -68,7 +67,6 @@ export const Basic: Story = {
   ),
 };
 
-/** Name the table without a visible caption via `aria-label`. */
 export const AriaLabelled: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -77,7 +75,6 @@ export const AriaLabelled: Story = {
   ),
 };
 
-/** With no rows, the `empty` slot spans every column. */
 export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -92,12 +89,6 @@ export const Empty: Story = {
   ),
 };
 
-/**
- * Group rows by a column with `grouping`. Each distinct value gets a collapsible
- * header row showing the group's label, its row count, and the balance column's
- * per-group total (from its `aggregationFn`). Groups start expanded; click a
- * chevron to collapse one.
- */
 export const Grouped: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -112,7 +103,6 @@ export const Grouped: Story = {
   ),
 };
 
-/** The same grouping, but every group starts collapsed via `defaultExpanded={false}`. */
 export const GroupedCollapsed: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -158,12 +148,6 @@ const expenseColumns = expenseCol.columns([
   }),
 ]);
 
-/**
- * `groupDisplay="merge"` renders the grouping as one indented outline column: the
- * grouped `category` isn't a column of its own — its value, toggle, and count sit
- * in the first visible column, and each `subcategory` leaf renders in that same
- * column one level in. The summed `amount` still rolls up per group.
- */
 export const GroupedMerged: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -179,12 +163,6 @@ export const GroupedMerged: Story = {
   ),
 };
 
-/**
- * Give each row an expandable detail panel with `renderDetailPanel`. A leading
- * chevron opens a full-width panel beneath the row, rendered from that row's
- * datum (here a small profile). Panels start collapsed and toggle independently;
- * the function runs only for open rows.
- */
 export const WithDetailPanel: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -217,11 +195,6 @@ export const WithDetailPanel: Story = {
   ),
 };
 
-/**
- * Gate which rows can expand with `enableRowExpansion` — a predicate mirroring
- * `enableRowSelection`. Here only rows with a balance over $1,000 are expandable;
- * the rest (Katherine, at $320) show no chevron at all.
- */
 export const WithDetailPanelSome: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -253,12 +226,6 @@ export const WithDetailPanelSome: Story = {
   ),
 };
 
-/**
- * Row selection, controlled by id. `enableRowSelection` adds the leading checkbox
- * column; `selectedRowIds` + `onSelectionChange` own the state. The header box
- * selects all / clears all and goes indeterminate on a partial selection.
- * Shift-click a second row to select the range between it and the last one.
- */
 export const Selectable: Story = {
   render: () => {
     const [selected, setSelected] = React.useState<string[]>(["2"]);
@@ -281,11 +248,6 @@ export const Selectable: Story = {
   },
 };
 
-/**
- * Uncontrolled selection: seed it with `defaultSelectedRowIds` and let the table
- * own the state, observing changes through `onSelectionChange` (which still hands
- * back the selected ids and their rows).
- */
 export const SelectableUncontrolled: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -302,11 +264,6 @@ export const SelectableUncontrolled: Story = {
   ),
 };
 
-/**
- * A predicate gates which rows are selectable — here, only rows with a balance
- * over $1,000. Non-selectable rows (Katherine, at $320) show a locked (dimmed,
- * `aria-disabled`) box that stays focusable, and "select all" skips them.
- */
 export const SelectableSome: Story = {
   render: () => {
     const [selected, setSelected] = React.useState<string[]>([]);
@@ -326,11 +283,6 @@ export const SelectableSome: Story = {
   },
 };
 
-/**
- * Selection composes with grouping: each group header carries a tri-state box that
- * selects or clears all of its rows at once, and reflects whether all, some, or
- * none of them are selected.
- */
 export const GroupedSelectable: Story = {
   render: () => {
     const [selected, setSelected] = React.useState<string[]>([]);

@@ -92,7 +92,6 @@ const cellStyle: CSSProperties = {
   verticalAlign: "top",
 };
 
-/** Every validation state (rows) against the rendered group (right column). */
 export const States: Story = {
   render: () => (
     <table style={{ borderCollapse: "collapse" }}>

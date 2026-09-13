@@ -172,7 +172,6 @@ describe("CheckboxGroup", () => {
   });
 
   describe("aria-describedby", () => {
-    /** Resolve the group's `aria-describedby` to the text it announces. */
     const describedByText = (el: HTMLElement) =>
       (el.getAttribute("aria-describedby") ?? "")
         .split(/\s+/)

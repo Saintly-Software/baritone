@@ -2,18 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { InternalButton, type InternalButtonHtmlAttrs } from "./index";
 
-/**
- * `InternalButton` is not part of the public API — it's the engine behind the
- * public `Button`, which is a thin wrapper that just forwards its props as
- * `consumerProps`. The look and the full set of consumer controls are documented
- * under `Components/Button`; these stories focus on the extra `htmlAttrs` seam.
- *
- * `htmlAttrs` is how the overlay components (`Drawer`, `Modal`, `Popover`) reuse
- * a real button as their trigger/close: each base-ui `Trigger`/`Close` passes the
- * props it computed (`onClick`, `aria-haspopup`, `data-*`, `ref`, …) straight in
- * via its `render` callback, and they're merged onto the button — handlers
- * chained, classes/refs joined, with the consumer's own props winning.
- */
 const meta: Meta<typeof InternalButton> = {
   title: "Internal/InternalButton",
   component: InternalButton,
@@ -30,18 +18,12 @@ export default meta;
 
 type Story = StoryObj<typeof InternalButton>;
 
-/** The pass-through path: just `consumerProps`, exactly as `Button` calls it. */
 export const Playground: Story = {
   args: {
     consumerProps: { children: "Button", intent: "primary", saliency: "high" },
   },
 };
 
-/**
- * The `htmlAttrs` seam in action. A mock "host" supplies a toggle `onClick`
- * plus the `data-state` / `aria-expanded` attributes a base-ui trigger would —
- * they merge onto the same button that carries the consumer's intent and label.
- */
 export const WithHostAttributes: Story = {
   render: () => {
     const [open, setOpen] = React.useState(false);

@@ -23,11 +23,6 @@ const s = (): string => "";
 const colorTriplet = () => ({ bgc: s(), text: s(), border: s() });
 const stateBlock = () => ({ default: colorTriplet(), disabled: colorTriplet() });
 
-/**
- * The canonical token shape. This is the single source of truth for both the
- * CSS-variable contract (`vars`) and the value type a theme author supplies
- * (`DesignTokens`).
- */
 export const tokenShape = {
   surface: {
     color: record(INTENTS, () => record(SURFACE_SALIENCIES, () => stateBlock())),
@@ -71,17 +66,8 @@ export const tokenShape = {
   oklchOperator: s(),
 };
 
-/**
- * The CSS-variable contract. Every leaf is a `var(--…)` reference with no
- * value; a theme (via `createDesignSystemTheme`) supplies the values.
- */
 export const vars = createThemeContract(tokenShape);
 
-/** Full set of token *values* a theme author supplies. */
 export type DesignTokens = typeof tokenShape;
 
-/**
- * Token values supplied to the theme factory. `oklchOperator` is derived from
- * the `scheme` option, so authors don't provide it.
- */
 export type ThemeTokensInput = Omit<DesignTokens, "oklchOperator">;

@@ -38,10 +38,6 @@ export const Basic: Story = {
   },
 };
 
-/**
- * Every `intent` (rows) at each `saliency` (columns). The fill stays a solid,
- * visible ink at every level.
- */
 export const IntentsAndSaliencies: Story = {
   parameters: { wide: true },
   render: () => (
@@ -60,7 +56,6 @@ export const IntentsAndSaliencies: Story = {
   ),
 };
 
-/** A non-default range: `min` / `max` drive the fill percentage and the ARIA wiring. */
 export const CustomRange: Story = {
   tags: ["!dev"],
   args: {
@@ -72,11 +67,6 @@ export const CustomRange: Story = {
   },
 };
 
-/**
- * `aria-valuetext` as a function: base-ui hands it the formatted value (the
- * percentage by default) plus the raw value, and the string it returns is what
- * screen readers announce.
- */
 export const CustomValueText: Story = {
   tags: ["!dev"],
   args: {
@@ -87,11 +77,6 @@ export const CustomValueText: Story = {
   },
 };
 
-/**
- * `showValue` renders the value at the end of the header row. `format` (an
- * `Intl.NumberFormat` options bag) drives how it reads — here as a unit — and
- * feeds the default `aria-valuetext` too.
- */
 export const CustomValueFormat: Story = {
   tags: ["!dev"],
   args: {
@@ -106,10 +91,6 @@ export const CustomValueFormat: Story = {
   },
 };
 
-/**
- * `formatValue` takes full control of the displayed node — here composing the
- * raw value against the max — while `slotProps` re-tunes each `Text` slot.
- */
 export const CustomValueNode: Story = {
   tags: ["!dev"],
   args: {
@@ -127,11 +108,6 @@ export const CustomValueNode: Story = {
   },
 };
 
-/**
- * `slotProps.bar.color` is the escape hatch: paint the indicator any CSS colour,
- * overriding `intent` × `saliency`. Reach for it only when you need a colour
- * outside the system palette.
- */
 export const CustomColor: Story = {
   args: {
     label: "Brand health",
@@ -141,7 +117,6 @@ export const CustomColor: Story = {
   },
 };
 
-/** No visible label — named for assistive tech via `aria-label`. */
 export const AriaLabelOnly: Story = {
   tags: ["!dev"],
   args: {

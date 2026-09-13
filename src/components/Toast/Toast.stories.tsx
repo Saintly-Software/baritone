@@ -11,12 +11,6 @@ const CheckGlyph = () => (
   </svg>
 );
 
-/**
- * Toasts aren't rendered inline — they're fired imperatively with `useToast()`
- * and shown by the viewport that `BaritoneProvider` mounts for you. Every story
- * here is wrapped in a `BaritoneProvider` (as your app root would be) and drives
- * the toasts from a button.
- */
 const meta: Meta = {
   title: "Components/Toast",
   decorators: [
@@ -34,7 +28,6 @@ export default meta;
 
 type Story = StoryObj;
 
-/** One button per intent — each fires a toast in that colour. */
 export const Intents: Story = {
   render: () => {
     function Demo() {
@@ -91,7 +84,6 @@ export const Intents: Story = {
   },
 };
 
-/** A toast with a title, a supporting description, and a dismiss button. */
 export const WithDescription: Story = {
   render: () => {
     function Demo() {
@@ -116,10 +108,6 @@ export const WithDescription: Story = {
   },
 };
 
-/**
- * Toasts can carry `<Notice.Action>`s. Here an "Undo" action dismisses the toast
- * it belongs to — capture the returned id and `close(id)` from the handler.
- */
 export const WithActions: Story = {
   render: () => {
     function Demo() {
@@ -151,7 +139,6 @@ export const WithActions: Story = {
   },
 };
 
-/** Fire several quickly to see them stack (newest at the bottom). Hovering the stack pauses the timers. */
 export const Stacking: Story = {
   render: () => {
     function Demo() {
@@ -178,10 +165,6 @@ export const Stacking: Story = {
   },
 };
 
-/**
- * `promise` drives a single toast through loading → success/error as an async
- * task settles.
- */
 export const Promise: Story = {
   render: () => {
     function Demo() {

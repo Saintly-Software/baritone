@@ -34,7 +34,6 @@ type Story = StoryObj<typeof LoadingIndicator>;
 
 export const Playground: Story = {};
 
-/** The three sizes track `Icon`'s ramp; `lg` also thickens the ring stroke. */
 export const Sizes: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
@@ -48,7 +47,6 @@ export const Sizes: Story = {
   ),
 };
 
-/** Standalone colour comes from the `component` token for each intent/saliency. */
 export const IntentsAndSaliencies: Story = {
   render: () => (
     <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
@@ -63,16 +61,10 @@ export const IntentsAndSaliencies: Story = {
   ),
 };
 
-/** A custom label rewords the screen-reader announcement. */
 export const CustomLabel: Story = {
   args: { label: "Fetching results…" },
 };
 
-/**
- * Decorative: `aria-hidden` drops the `role="status"` live region and the
- * SR-only label, leaving a purely visual ring for contexts that announce the
- * busy state some other way (e.g. a host with `aria-busy`).
- */
 export const Decorative: Story = {
   args: { "aria-hidden": true },
 };

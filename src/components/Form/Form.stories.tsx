@@ -5,14 +5,6 @@ import { FormTextInput } from "./adapters";
 import { Form } from "./Form";
 import { useAppForm } from "./formHook";
 
-/**
- * The TanStack Form integration (`@saintly-software/baritone/form`). The blessed
- * surface is the composition API: `useAppForm` gives you pre-bound field
- * components (`field.TextInput`, `field.Select`, …) and a form-aware
- * `SubmitButton`, so validation errors map to `state="invalid"` + `helpText`
- * automatically. The render-prop adapters (`FormTextInput`, …) are the primitive
- * underneath, for use with the plain `form.Field` API.
- */
 const meta: Meta = {
   title: "Components/Form",
 };
@@ -91,21 +83,10 @@ function SignupForm() {
   );
 }
 
-/**
- * The composition API end to end — `useAppForm` with pre-bound `field.*`
- * components. Each field validates on change; the error replaces its `helpText`
- * and the control turns invalid once the field is touched. `SubmitButton` stays
- * disabled while the form can't submit.
- */
 export const AppForm: Story = {
   render: () => <SignupForm />,
 };
 
-/**
- * The primitive underneath: a `FormTextInput` adapter bound to a plain
- * `form.Field` (from `useForm`), for consumers who don't want the `createFormHook`
- * composition layer. Same automatic error → `helpText` mapping.
- */
 export const RenderPropAdapter: Story = {
   render: () => {
     // eslint-disable-next-line react-hooks/rules-of-hooks -- render is a component body

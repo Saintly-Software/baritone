@@ -27,7 +27,6 @@ export default meta;
 
 type Story = StoryObj<typeof List>;
 
-/** A captioned example, stacked label-over-content. */
 const Section = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
     <Text size="sm" saliency="low">
@@ -37,14 +36,12 @@ const Section = ({ label, children }: { label: string; children: React.ReactNode
   </div>
 );
 
-/** A padded cell so the flex/grid layout is easy to see. */
 const Cell = ({ children }: { children: React.ReactNode }) => (
   <Card>
     <Text size="sm">{children}</Text>
   </Card>
 );
 
-/** Fully wired to the controls — flip `layout` / `direction` / `gap` in the panel. */
 export const Playground: Story = {
   render: (args) => (
     <List
@@ -64,7 +61,6 @@ export const Playground: Story = {
   ),
 };
 
-/** The default `flex` layout, as a vertical stack (`direction="column"`). */
 export const FlexColumn: Story = {
   render: () => (
     <Section label='layout="flex" · direction="column" · gap="2"'>
@@ -87,7 +83,6 @@ export const FlexColumn: Story = {
   ),
 };
 
-/** A horizontal `flex` row, centre-aligned. */
 export const FlexRow: Story = {
   render: () => (
     <Section label='layout="flex" · direction="row" · align="center" · gap="4"'>
@@ -111,7 +106,6 @@ export const FlexRow: Story = {
   ),
 };
 
-/** A wrapping `flex` row with `justify="between"` — items flow onto new lines. */
 export const FlexWrap: Story = {
   render: () => (
     <Section label='layout="flex" · direction="row" · wrap · justify="between" · gap="2"'>
@@ -132,7 +126,6 @@ export const FlexWrap: Story = {
   ),
 };
 
-/** A `grid` layout: three equal columns, two equal rows. */
 export const GridColumns: Story = {
   render: () => (
     <Section label='layout="grid" · columns={3} · rows={2} · gap="4"'>
@@ -151,7 +144,6 @@ export const GridColumns: Story = {
   ),
 };
 
-/** A `grid` layout with named areas — items are placed via `List.Item`'s `area`. */
 export const GridAreas: Story = {
   render: () => (
     <Section label='layout="grid" · areas · columns="120px 1fr"'>
@@ -183,7 +175,6 @@ export const GridAreas: Story = {
   ),
 };
 
-/** `ordered` renders an `<ol>` (semantic sequence) — the marker is still stripped. */
 export const Ordered: Story = {
   render: () => (
     <Section label="ordered · renders <ol>">
@@ -207,7 +198,6 @@ export const Ordered: Story = {
   ),
 };
 
-/** Data-driven: map a data array to `List.Item` elements, keyed by a stable id. */
 export const FromDataArray: Story = {
   render: () => {
     const people = [

@@ -26,83 +26,45 @@ import {
 type RootProps = React.ComponentProps<typeof BaseDialog.Root>;
 type PopupProps = React.ComponentProps<typeof BaseDialog.Popup>;
 
-/** Max width of the modal surface. Default `md`. */
 export type ModalSize = "sm" | "md" | "lg";
 
-/** Internal padding from the spacing scale (mirrors `Drawer`'s `padding`). */
 export type ModalPadding = "none" | "sm" | "md" | "lg";
 
 export interface ModalProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  /**
-   * The element that opens the modal — typically a `<Modal.Trigger>`, which
-   * renders a `Button`. Rendered in place, not inside the panel.
-   */
   trigger?: React.ReactNode;
-  /** Rendered above the body — typically a `<Modal.Header />`. */
+
   header?: React.ReactNode;
-  /** Rendered below the body — typically a `<Modal.Footer />`. */
+
   footer?: React.ReactNode;
-  /** Internal padding from the spacing scale. Default `md`. */
+
   padding?: ModalPadding;
-  /** Max width of the panel: `sm`, `md` (default), or `lg`. */
+
   size?: ModalSize;
-  /**
-   * Loading state: overlays a spinner on the body content (the header and footer
-   * stay visible and interactive, so the modal can still be closed) and marks
-   * the panel `aria-busy`. Purely visual — it does not, on its own, prevent
-   * closing; pair with `disabled` for that.
-   */
+
   loading?: boolean;
-  /**
-   * When `true`, the modal cannot be closed by any means — Escape and the close
-   * button are both vetoed (outside-press is always prevented). Use it to keep
-   * the user in the panel while a blocking action is in flight.
-   */
+
   disabled?: boolean;
-  /** Controlled open state. */
+
   open?: RootProps["open"];
-  /** Uncontrolled initial open state. */
+
   defaultOpen?: RootProps["defaultOpen"];
-  /** Called when the open state changes (base-ui signature). */
+
   onOpenChange?: RootProps["onOpenChange"];
-  /**
-   * Imperative handle from `useOverlayHandle(Modal)`. Lets you close the modal
-   * from code — e.g. after an async action — without lifting `open` into
-   * component state. `handle.close()` is still vetoed while `disabled`, and the
-   * declarative `.Close` part / controlled `open` keep working alongside it.
-   */
+
   handle?: RootProps["handle"];
-  /**
-   * Modal behaviour. Default (base-ui) `true`: focus is trapped, page scroll is
-   * locked, and the page behind is inert. `'trap-focus'` traps focus but leaves
-   * the page scrollable/interactive; `false` is non-modal.
-   */
+
   modal?: RootProps["modal"];
-  /** Element to focus when the modal opens (base-ui default: first tabbable). */
+
   initialFocus?: PopupProps["initialFocus"];
-  /** Element to focus when the modal closes (base-ui default: the trigger). */
+
   finalFocus?: PopupProps["finalFocus"];
-  /** Extra className merged onto the popup surface. */
+
   className?: string;
-  /** Ref to the popup surface element. */
+
   ref?: React.Ref<HTMLDivElement>;
   children?: React.ReactNode;
 }
 
-/**
- * Modal — a "surface" element type shown in a panel centred over the page. Its
- * API mirrors `Drawer`: it composes `header` / `footer` props (or
- * `<Modal.Header>` / `<Modal.Footer>` children) around its content, with
- * `padding` controlling internal spacing. The surface itself is always the
- * default neutral, low-saliency shade.
- *
- * Built on base-ui's `Dialog`, so the ARIA wiring and focus management are
- * handled for you. It opens from a `<Modal.Trigger>` (a `Button`) passed via
- * `trigger`, comes in three widths (`sm` / `md` / `lg`), and is modal: the
- * backdrop is always rendered (even for nested modals). Clicking outside never
- * closes it; pass `disabled` to additionally veto Escape and the close button
- * while a blocking action is in flight.
- */
 function ModalRoot({
   trigger,
   header,
@@ -174,13 +136,6 @@ function ModalRoot({
   );
 }
 
-/**
- * The trigger that opens the modal. Renders a `Button` (so all of Button's
- * intents / saliencies / sizes / icons are available), wired up by base-ui so it
- * carries the right `aria-haspopup` / `aria-expanded` and toggles the modal.
- * Must be passed to `<Modal trigger={...} />` so it sits inside the modal's
- * context.
- */
 export type ModalTriggerProps = ButtonProps;
 
 function ModalTrigger(props: ModalTriggerProps) {
@@ -191,12 +146,6 @@ function ModalTrigger(props: ModalTriggerProps) {
   );
 }
 
-/**
- * A control that closes the modal, for use inside a `<Modal.Footer>` (or the
- * body). Renders a `Button`; base-ui wires the dismissal. Defaults to a neutral,
- * low-saliency button — override via the usual `Button` props. Vetoed while the
- * modal is `disabled`.
- */
 export type ModalCloseProps = ButtonProps;
 
 function ModalClose({ intent = "neutral", saliency = "low", ...rest }: ModalCloseProps) {
@@ -210,17 +159,10 @@ function ModalClose({ intent = "neutral", saliency = "low", ...rest }: ModalClos
 }
 
 export interface ModalHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  /**
-   * Title text/content. Rendered as a `Heading` through base-ui's `Dialog.Title`,
-   * so it also becomes the modal's accessible name.
-   */
   title?: React.ReactNode;
-  /**
-   * Supporting text. Rendered as a `Text` through base-ui's `Dialog.Description`,
-   * so it also becomes the modal's accessible description.
-   */
+
   subtitle?: React.ReactNode;
-  /** Document-outline level for the rendered title heading. Default `3`. */
+
   level?: HeadingLevel;
   ref?: React.Ref<HTMLDivElement>;
 }
@@ -268,17 +210,9 @@ function ModalFooter({ className, children, ref, ...rest }: ModalFooterProps) {
 }
 
 export interface UseControlledModalReturn extends ControlledOverlay {
-  /** Spread onto `<Modal>` to bind its controlled open state. */
   modalProps: Pick<ModalProps, "open" | "onOpenChange">;
 }
 
-/**
- * Manages a `Modal`'s open state from the parent. Returns open/close/toggle
- * controls plus a `modalProps` bundle to spread onto `<Modal>`. Use it when the
- * modal must be driven from outside its trigger — opened from a menu item, or
- * closed after an async action. To only close without owning the open state,
- * prefer `useOverlayHandle(Modal)`.
- */
 export function useControlledModal(defaultOpen = false): UseControlledModalReturn {
   const overlay = useControlledOverlay(defaultOpen);
   return {
@@ -293,16 +227,11 @@ ModalClose.displayName = "Modal.Close";
 ModalHeader.displayName = "Modal.Header";
 ModalFooter.displayName = "Modal.Footer";
 
-/** Modal with its compound parts attached. */
 export const Modal = Object.assign(ModalRoot, {
   Trigger: ModalTrigger,
   Close: ModalClose,
   Header: ModalHeader,
   Footer: ModalFooter,
-  /**
-   * Creates a detached imperative handle (base-ui's `createHandle`). Prefer
-   * `useOverlayHandle(Modal)` inside components; reach for this only when the
-   * handle must live outside React (module scope, detached triggers).
-   */
+
   createHandle: BaseDialog.createHandle,
 });

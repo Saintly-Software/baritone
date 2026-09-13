@@ -88,10 +88,6 @@ export const ResponsiveAutoFill: Story = {
   ),
 };
 
-/**
- * `areas` takes the friendly array/multi-line form — you write the cell names,
- * Grid handles the per-row quoting that `grid-template-areas` requires.
- */
 export const TemplateAreas: Story = {
   render: () => (
     <Grid

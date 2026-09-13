@@ -35,7 +35,6 @@ export default meta;
 
 type Story = StoryObj<typeof Divider>;
 
-/** The default: a quiet `neutral` / `low` hairline between two blocks of content. */
 export const Basic: Story = {
   render: (args) => (
     <>
@@ -46,11 +45,6 @@ export const Basic: Story = {
   ),
 };
 
-/**
- * `children` breaks the rule around a label — and, when it's a string, doubles as
- * the divider's accessible name (a `separator`'s children are presentational, so
- * the visible text alone would never be announced).
- */
 export const Labelled: Story = {
   args: { children: "or" },
   render: (args) => (
@@ -62,7 +56,6 @@ export const Labelled: Story = {
   ),
 };
 
-/** `labelPosition` slides the label along the rule. */
 export const LabelPositions: Story = {
   render: (args) => (
     <>
@@ -79,10 +72,6 @@ export const LabelPositions: Story = {
   ),
 };
 
-/**
- * A `vertical` divider stretches to its flex row's height — no explicit height
- * needed — so it can split a row of controls or metadata.
- */
 export const Vertical: Story = {
   args: { orientation: "vertical" },
   render: (args) => (
@@ -96,7 +85,6 @@ export const Vertical: Story = {
   ),
 };
 
-/** A labelled `vertical` divider stacks the label between two rules. */
 export const VerticalLabelled: Story = {
   tags: ["!dev"],
   args: { orientation: "vertical", children: "or" },
@@ -109,11 +97,6 @@ export const VerticalLabelled: Story = {
   ),
 };
 
-/**
- * Every `intent` (rows) at each `saliency` (columns). The rule reads the border
- * ramp, so it stays a hairline against the surface at every level — reach past
- * the default `neutral` / `low` only when the split itself carries meaning.
- */
 export const IntentsAndSaliencies: Story = {
   parameters: { wide: true },
   render: () => (
@@ -127,7 +110,6 @@ export const IntentsAndSaliencies: Story = {
   ),
 };
 
-/** `thickness` picks a `borderWidth` — here the built-in `thin` / `thick` steps. */
 export const Thickness: Story = {
   render: (args) => (
     <>
@@ -140,17 +122,6 @@ export const Thickness: Story = {
   ),
 };
 
-/**
- * The `thickness` vocabulary is defined by the *consumer*, not Baritone — exactly
- * like `Text`'s `size` / `font`. An app publishes widths as `--borderWidth-<name>`
- * custom properties (via the theme's `borderWidths` option) and, for autocompletion
- * + type-safety, declares those names by augmenting the `BorderWidthRegistry`
- * interface. The built-in `thin` / `thick` steps are always available.
- *
- * This story fakes a consumer by declaring a couple of `--borderWidth-*` vars on the
- * wrapper, so `thickness="hair"` / `"heavy"` resolve — exactly what a real theme
- * would emit — while `thickness="thick"` uses the built-in.
- */
 export const CustomThickness: Story = {
   render: (args) => (
     <div
@@ -174,10 +145,6 @@ export const CustomThickness: Story = {
   ),
 };
 
-/**
- * The margin props (`my` / `mx` / …) space the rule from its neighbours, and
- * `slotProps.label` re-tunes the label `Text`.
- */
 export const SpacingAndLabelSlot: Story = {
   tags: ["!dev"],
   args: {

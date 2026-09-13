@@ -4,7 +4,6 @@ import { FORM_STATES, type FormState, SIZES } from "../../theme/constants";
 import { Icon } from "../Icon";
 import { Combobox, type ComboboxOption, type ComboboxOptionGroup } from "./index";
 
-/** A 24×24 line/solid glyph, sized by the wrapping `<Icon>` and coloured by the cell. */
 function Glyph({ d, solid }: { d: string; solid?: boolean }) {
   return (
     <svg
@@ -211,7 +210,6 @@ export default meta;
 
 type Story = StoryObj<typeof Combobox>;
 
-/** Synchronous options with built-in typeahead filtering. */
 export const Playground: Story = {};
 
 export const Sizes: Story = {
@@ -261,7 +259,6 @@ const stateRows: StateRow[] = [
   },
 ];
 
-/** Every state (rows) against the rendered control (right column). */
 export const States: Story = {
   render: () => (
     <table style={{ borderCollapse: "collapse" }}>
@@ -296,7 +293,6 @@ export const States: Story = {
   ),
 };
 
-/** `freeText` lets the user commit a value that isn't in the list via an "Add …" row. */
 export const FreeText: Story = {
   args: {
     label: "Tag",
@@ -306,7 +302,6 @@ export const FreeText: Story = {
   },
 };
 
-/** Options organised into titled groups; typeahead filters within each group and hides empty ones. */
 export const Grouped: Story = {
   args: {
     label: "Fruit",
@@ -315,7 +310,6 @@ export const Grouped: Story = {
   },
 };
 
-/** Grouped options with `multiple` — selections still surface as chips in the control. */
 export const GroupedMultiple: Story = {
   args: {
     label: "Fruits",
@@ -326,11 +320,6 @@ export const GroupedMultiple: Story = {
   },
 };
 
-/**
- * `columns` lays the options out as a grid instead of a single column — arrow keys
- * then move in two dimensions. Best for short, tile-like options (colours, icons,
- * emoji). Typing still filters, re-tiling the rows as the list narrows.
- */
 export const Grid: Story = {
   args: {
     label: "Colour",
@@ -340,7 +329,6 @@ export const Grid: Story = {
   },
 };
 
-/** A grid that keeps its group headings — each group tiles under its own label. */
 export const GridGrouped: Story = {
   args: {
     label: "Colour",
@@ -350,7 +338,6 @@ export const GridGrouped: Story = {
   },
 };
 
-/** A grid with `multiple` — chosen tiles show a check and surface as chips in the control. */
 export const GridMultiple: Story = {
   args: {
     label: "Colours",
@@ -362,11 +349,6 @@ export const GridMultiple: Story = {
   },
 };
 
-/**
- * Options can carry an `icon` (typically an `<Icon>`). In the grid it sits above
- * the label caption; the `label` stays the accessible name, so typeahead still
- * filters by name (try "b" for Bell / Bookmark / Bolt).
- */
 export const GridIcons: Story = {
   args: {
     label: "Icon",
@@ -376,7 +358,6 @@ export const GridIcons: Story = {
   },
 };
 
-/** `multiple` renders each selection as a removable chip inside the control. */
 export const Multiple: Story = {
   args: {
     label: "Fruits",
@@ -386,12 +367,10 @@ export const Multiple: Story = {
   },
 };
 
-/** A mocked async search: `onSearch` debounces, the popup shows spinner / error / empty / results. */
 export const AsyncSearch: Story = {
   render: () => <AsyncExample />,
 };
 
-/** `virtualized` windows a very long list so only the visible rows are mounted. */
 export const Virtualized: Story = {
   render: () => {
     const many: ComboboxOption[] = React.useMemo(
@@ -429,11 +408,6 @@ const CITIES = [
   "Tokyo",
 ];
 
-/**
- * Simulates a debounced, abortable remote search. The `onSearch` handler cancels
- * any in-flight timer before starting the next one — the same shape you'd use to
- * `abortController.abort()` a real request.
- */
 function AsyncExample() {
   const [results, setResults] = React.useState<ComboboxOption[]>([]);
   const [loading, setLoading] = React.useState(false);

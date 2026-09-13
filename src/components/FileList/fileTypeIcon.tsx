@@ -1,10 +1,5 @@
 import * as React from "react";
 
-/**
- * Coarse file categories the list shows an icon for. Deliberately small and
- * monochrome — enough to tell an image from a zip at a glance, not a full
- * mimetype atlas. Text-ish files (txt, md, json, …) fold into `document`.
- */
 export type FileKind =
   | "image"
   | "audio"
@@ -15,7 +10,6 @@ export type FileKind =
   | "document"
   | "file";
 
-/** Extension → kind, the fallback when the `File` has no (or a vague) MIME type. */
 const EXT_KIND: Record<string, FileKind> = {
   png: "image",
   jpg: "image",
@@ -66,12 +60,6 @@ const EXT_KIND: Record<string, FileKind> = {
   log: "document",
 };
 
-/**
- * Classify a `File`. MIME type wins for the broad media buckets (it's the most
- * reliable signal when present); otherwise the filename extension decides, with
- * a generic `file` as the last resort. Many `File`s — drag-and-drop, some OSes —
- * carry an empty `type`, hence the extension fallback.
- */
 export function fileKind(file: File): FileKind {
   const type = file.type;
   if (type.startsWith("image/")) return "image";
@@ -88,7 +76,6 @@ export function fileKind(file: File): FileKind {
   return "file";
 }
 
-/** Shared base for the "page" glyphs (file / document / spreadsheet / pdf). */
 const page = (
   <>
     <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
@@ -146,17 +133,10 @@ const GLYPHS: Record<FileKind, React.ReactNode> = {
 };
 
 export interface FileTypeIconProps {
-  /** The file to classify and draw an icon for. */
   file: File;
   className?: string;
 }
 
-/**
- * A small, decorative glyph for a file's type. Sized at `1em` and drawn with
- * `currentColor`, so it scales with — and tints to — whatever chip it sits in
- * (including the dimmed `aria-disabled` foreground). `aria-hidden`: the chip's
- * filename already names the entry.
- */
 export function FileTypeIcon({ file, className }: FileTypeIconProps) {
   return (
     <svg

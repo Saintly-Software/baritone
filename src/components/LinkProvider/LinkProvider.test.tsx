@@ -4,12 +4,6 @@ import { describe, expect, it } from "vitest";
 import { Link } from "../Link";
 import { isInternalHref, LinkProvider, type LinkRenderProps } from "./index";
 
-/**
- * A stand-in for a framework's link (Next.js / React Router / TanStack). It marks
- * the anchors it renders (`data-router-link`) so tests can tell a routed link from
- * a plain one, records the destinations it's asked to navigate to, and prevents
- * the default full-page navigation so a click is observable without leaving jsdom.
- */
 function makeRouter() {
   const navigations: string[] = [];
   const render = ({ href, children, ...props }: LinkRenderProps) => (

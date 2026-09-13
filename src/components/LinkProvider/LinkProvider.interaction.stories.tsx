@@ -4,12 +4,6 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Link } from "../Link";
 import { LinkProvider, type LinkRenderProps } from "./index";
 
-/**
- * Interaction coverage for `LinkProvider` in a real browser: an internal `Link`
- * with no `render` of its own routes through the provider's mock router (clicking
- * it updates the client route without a full-page load), while an external link
- * stays an ordinary anchor.
- */
 const meta: Meta<typeof LinkProvider> = {
   title: "Interaction Tests/LinkProvider",
   component: LinkProvider,

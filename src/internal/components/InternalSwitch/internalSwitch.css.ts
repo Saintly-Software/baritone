@@ -13,18 +13,6 @@ const trackW = createVar();
 const thumb = createVar();
 const pad = createVar();
 
-/**
- * The switch "track" — a pill-shaped presentational control. Not an `<input>`:
- * it reflects `data-checked` / `data-unchecked` (and `data-disabled`) that the
- * component sets from props. It shares the *outline* visual language of
- * `checkboxControl` (form surface background + neutral border, accent on select)
- * so a switch and a checkbox read identically across themes — the difference is
- * the shape (full radius pill) and the sliding accent `switchThumb` inside.
- *
- * It is intentionally not focusable; the focus ring is drawn by the shared
- * `focusRingRecipe({ type: "within" })`, so a focusable element the consumer
- * slots inside (e.g. a visually-hidden `<input>`) lights the ring when tabbed to.
- */
 export const switchTrack = recipe({
   base: {
     boxSizing: "border-box",
@@ -94,12 +82,6 @@ export const switchTrack = recipe({
   defaultVariants: { state: "neutral", size: "md" },
 });
 
-/**
- * The sliding thumb. Sized from the `--thumb` var the track publishes and filled
- * with `currentColor` (the track's `bdNow` — neutral when unchecked, accent when
- * checked). It rests at the left padding and translates to the right edge as
- * `data-checked` toggles, matching the radio/checkbox indicator timing.
- */
 export const switchThumb = style({
   position: "absolute",
   left: pad,
@@ -125,14 +107,6 @@ export const switchThumb = style({
   },
 });
 
-/**
- * A glyph riding inside the thumb (e.g. a check / cross that swaps with state).
- * Sized to a fraction of the thumb so it keeps breathing room from the edge, and
- * coloured with the track's *background* so it reads as a cut-out against the
- * solid thumb fill (accent when checked, neutral when off). `--iconColor` is set
- * to the same value so a slotted `<Icon>` inherits the contrast colour too, and
- * a bare `currentColor` `<svg>` picks it up via `color`.
- */
 export const switchThumbIcon = style({
   display: "flex",
   alignItems: "center",

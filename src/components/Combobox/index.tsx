@@ -52,47 +52,34 @@ import {
   virtualViewport,
 } from "./combobox.css";
 
-/** The row state a `ComboboxOption` icon render function can branch on. */
 export interface ComboboxOptionIconState {
   disabled: boolean;
 }
 
-/** A single choice. `value` is what the form submits and `onValueChange` reports; `label` is what's shown. */
 export interface ComboboxOption {
   value: string;
   label: string;
-  /**
-   * Optional glyph shown before the label in the list and above it (with the
-   * label as a caption) in the grid. Pass a bare glyph (`icon={<Tag />}`,
-   * auto-wrapped in `Icon`), an explicit `<Icon>` for a custom size/label, or a
-   * `(props, state) => …` render function for full control. Decorative: `label`
-   * stays the accessible name and the typeahead text, so search still works.
-   */
+
   icon?: IconSlot<ComboboxOptionIconState>;
-  /** Renders the option but blocks selection (kept visible, `aria-disabled`). */
+
   disabled?: boolean;
 }
 
-/** A titled group of options, rendered under a heading in the popup. */
 export interface ComboboxOptionGroup {
-  /** The group heading, shown above the options and associated as their label. */
   label: string;
-  /** The options within this group. */
+
   options: ComboboxOption[];
 }
 
-/** Internal shape — the free-text "Add …" affordance is a synthetic option flagged with `create`. */
 interface InternalOption extends ComboboxOption {
   create?: boolean;
 }
 
-/** base-ui's group shape (`items`, not `options`); `label` drives the heading. */
 interface InternalGroup {
   label?: string;
   items: InternalOption[];
 }
 
-/** `options` / `search.results` accept a flat list or an array of groups; this narrows which. */
 function isGrouped(
   items: readonly ComboboxOption[] | readonly ComboboxOptionGroup[],
 ): items is readonly ComboboxOptionGroup[] {
@@ -100,7 +87,6 @@ function isGrouped(
   return first != null && "options" in first;
 }
 
-/** Flatten a (possibly grouped, possibly absent) source into a single option list. */
 function flattenOptions(
   src: readonly ComboboxOption[] | readonly ComboboxOptionGroup[] | undefined,
 ): ComboboxOption[] {
@@ -108,33 +94,23 @@ function flattenOptions(
   return isGrouped(src) ? src.flatMap((g) => g.options) : (src as ComboboxOption[]);
 }
 
-/** Copy for the async popup states. Each falls back to a sensible default. */
 export interface ComboboxSearchCopy {
-  /** Shown beside the spinner while `loading`. Default `"Searching…"`. */
   loading?: React.ReactNode;
-  /** Shown when the (filtered) list is empty. Default `"No results found."`. */
+
   empty?: React.ReactNode;
-  /** Shown when `error` is set. Defaults to the `error` string itself. */
+
   error?: React.ReactNode;
 }
 
-/**
- * Async search configuration. Presence of this object switches the Combobox into
- * async mode: internal filtering is disabled, `results` drive the list, and the
- * popup shows a spinner / error / empty state. `onSearch` is called with the
- * current query on every input change — debounce and wire up an `AbortController`
- * in your handler.
- */
 export interface ComboboxSearch {
-  /** Show the loading (spinner) state in the popup. */
   loading?: boolean;
-  /** An error message to show in the popup. */
+
   error?: string;
-  /** Override the default loading / empty / error copy. */
+
   copy?: ComboboxSearchCopy;
-  /** The current async results to render. Pass groups to render them under headings. */
+
   results?: ComboboxOption[] | ComboboxOptionGroup[];
-  /** Called with the query on each input change. Debounce / abort in here. */
+
   onSearch?: (query: string) => void;
 }
 
@@ -149,46 +125,36 @@ interface ComboboxBaseProps extends Omit<
   | "aria-label"
   | "aria-labelledby"
 > {
-  /**
-   * The choices (sync mode). In async mode, provide `search.results` instead.
-   * Pass an array of `{ label, options }` groups to render options under headings
-   * (ignored — flattened — when `virtualized`).
-   */
   options?: ComboboxOption[] | ComboboxOptionGroup[];
-  /** Inline help under the control, wired to its `aria-describedby`. */
+
   helpText?: React.ReactNode;
-  /** Validation state. `invalid` maps to negative, `valid` to positive. */
+
   state?: FormState;
-  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+
   labelPosition?: LabelPosition;
-  /** Per-slot overrides for the label / help-text pieces. */
+
   slotProps?: FieldSlotProps;
-  /** Control size. Default `md`. */
+
   size?: Size;
   placeholder?: string;
-  /** Uses `aria-disabled` + `readOnly` (keeps the field keyboard-focusable). */
+
   disabled?: boolean;
   required?: boolean;
-  /** Form field name — submits the option `value`(s). */
+
   name?: string;
-  /** Hide the inline clear (✕) button. */
+
   hideClearButton?: boolean;
-  /** Allow committing values that aren't in the list (an "Add …" row appears). */
+
   freeText?: boolean;
-  /**
-   * Lay the options out as a grid of this many columns instead of a single
-   * column. Arrow keys then navigate in two dimensions. Best for short, tile-like
-   * options (icons, swatches, emoji). Ignored (falls back to a list) when `< 2`,
-   * and takes precedence over `virtualized`.
-   */
+
   columns?: number;
-  /** Window long lists (only the visible rows are mounted). */
+
   virtualized?: boolean;
-  /** Async search config — see {@link ComboboxSearch}. */
+
   search?: ComboboxSearch;
-  /** Accessible label for the clear button. Default `"Clear"`. */
+
   clearLabel?: string;
-  /** Accessible label for the open/close trigger. Default `"Show options"`. */
+
   triggerLabel?: string;
   className?: string;
   ref?: React.Ref<HTMLInputElement>;
@@ -198,10 +164,7 @@ interface ComboboxSingleProps {
   multiple?: false;
   value?: string | null;
   defaultValue?: string | null;
-  /**
-   * Called with the newly selected value first and the raw DOM event that drove
-   * the change second (base-ui's native `event`).
-   */
+
   onValueChange?: (value: string | null, event: Event) => void;
 }
 
@@ -209,17 +172,10 @@ interface ComboboxMultipleProps {
   multiple: true;
   value?: string[];
   defaultValue?: string[];
-  /**
-   * Called with the next selected-values array first and the raw DOM event that
-   * drove the change second (base-ui's native `event`).
-   */
+
   onValueChange?: (value: string[], event: Event) => void;
 }
 
-/**
- * Named by exactly one of `label` / `aria-label` / `aria-labelledby` — they're
- * mutually exclusive (see `FieldLabellingProps`).
- */
 export type ComboboxProps = ComboboxBaseProps &
   (ComboboxSingleProps | ComboboxMultipleProps) &
   FieldLabellingProps;
@@ -270,17 +226,6 @@ function CheckIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-/**
- * Combobox — a typeahead / autocomplete "form control" built on base-ui's
- * `Combobox`. Single or multiple selection (discriminated on `multiple`), with a
- * string `value` / `onValueChange` shape. Supports synchronous options,
- * async search (spinner / empty / error states in the popup), free-text entry,
- * a multi-column grid view (`columns`), and windowed virtualization for long lists.
- *
- * Like the other form controls it takes a `state` (not intent/saliency), composes
- * `Field` for its label / help / error layout and ARIA wiring, and models disabled
- * with `aria-disabled` + `readOnly` so it stays keyboard-focusable.
- */
 export function Combobox(props: ComboboxProps) {
   const {
     options,
@@ -666,13 +611,6 @@ interface VirtualListProps {
   renderOption: (option: InternalOption, index: number) => React.ReactNode;
 }
 
-/**
- * The windowed list body for `virtualized`. Reads the currently filtered items
- * from base-ui and renders only the rows in (and just around) the scroll
- * viewport, each absolutely positioned by its index — so a list of thousands
- * mounts a handful of nodes. Keyboard highlight scrolling is handled by the
- * parent via `scrollRef` + `onItemHighlighted`.
- */
 function VirtualList({ scrollRef, renderOption }: VirtualListProps) {
   const filtered = BaseCombobox.useFilteredItems<InternalOption>();
   const [scrollTop, setScrollTop] = React.useState(0);
@@ -704,12 +642,6 @@ function VirtualList({ scrollRef, renderOption }: VirtualListProps) {
   );
 }
 
-/**
- * Tile a filtered option list into `Combobox.Row`s of `cols` cells. The free-text
- * "Add …" option (if present) is peeled onto its own trailing full-width row so it
- * never lands mid-way through a partial row of real options. base-ui reads the
- * resulting DOM rows to drive 2-D arrow-key navigation.
- */
 function gridRowsFrom(
   items: readonly InternalOption[],
   cols: number,
@@ -740,10 +672,6 @@ interface GridListProps {
   renderItem: (option: InternalOption) => React.ReactNode;
 }
 
-/**
- * The grid body for a flat (ungrouped) source. Reads the currently filtered items
- * from base-ui and tiles them into rows, re-chunking as the query narrows the list.
- */
 function GridList({ cols, renderItem }: GridListProps) {
   const filtered = BaseCombobox.useFilteredItems<InternalOption>();
   return <>{gridRowsFrom(filtered, cols, renderItem)}</>;

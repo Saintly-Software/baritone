@@ -43,5 +43,4 @@ export default meta;
 
 type Story = StoryObj<typeof InfoButton>;
 
-/** The default "i" glyph. Click to reveal the note; Escape or outside-click closes it. */
 export const Basic: Story = {};

@@ -308,7 +308,6 @@ const stateRows: StateRow[] = [
   { label: "invalid", state: "invalid", helpText: "Pick a default view to continue." },
 ];
 
-/** Every state (rows) against the rendered control (right column). */
 export const States: Story = {
   render: () => (
     <table style={{ borderCollapse: "collapse" }}>

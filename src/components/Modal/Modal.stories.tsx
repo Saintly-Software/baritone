@@ -34,12 +34,6 @@ export default meta;
 
 type Story = StoryObj<typeof Modal>;
 
-/**
- * Every region at once — a header carrying a title and subtitle, a scrolling
- * body, and a footer with cancel / save actions — all driven by the toolbar
- * controls (`size`, `padding`, `loading`, `disabled`). Opens by default so the
- * panel is visible on load.
- */
 export const KitchenSink: Story = {
   args: { defaultOpen: true },
   render: (args) => (
@@ -64,10 +58,6 @@ export const KitchenSink: Story = {
   ),
 };
 
-/**
- * Renders a single modal at a given `size`, opened from a trigger. Shared by the
- * per-size stories below so each one only differs in its `size` arg.
- */
 function sizedModal(size: ModalSize) {
   return (args: ModalProps) => (
     <Modal
@@ -85,19 +75,16 @@ function sizedModal(size: ModalSize) {
   );
 }
 
-/** The `sm` (narrowest) width. Opens by default so the panel is visible on load. */
 export const Small: Story = {
   args: { size: "sm", defaultOpen: true },
   render: sizedModal("sm"),
 };
 
-/** The `md` (default) width. Opens by default so the panel is visible on load. */
 export const Medium: Story = {
   args: { size: "md", defaultOpen: true },
   render: sizedModal("md"),
 };
 
-/** The `lg` (widest) width. Opens by default so the panel is visible on load. */
 export const Large: Story = {
   args: { size: "lg", defaultOpen: true },
   render: sizedModal("lg"),
@@ -166,10 +153,6 @@ export const ImperativeClose: Story = {
   },
 };
 
-/**
- * A Modal opened from inside a Drawer — the surfaces stack, each rendering its own
- * backdrop. Both open by default so the full stack is visible on load.
- */
 export const Nested: Story = {
   name: "Nested in a Drawer",
   render: (args) => (

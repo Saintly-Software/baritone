@@ -22,7 +22,6 @@ export default meta;
 
 type Story = StoryObj<typeof Card>;
 
-/** A small decorative glyph for the icon/chip demos. */
 function FolderGlyph() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -31,12 +30,6 @@ function FolderGlyph() {
   );
 }
 
-/**
- * Kitchen sink — one card exercising the full surface in a single composition:
- * a header with a leading `icon` and trailing status `chip`, a collapsible
- * disclosure, full-bleed media (`Card.Bleed`), a `Card.Divider`, a key/value
- * `Card.Rows` group (including a rich title/action row), and footer actions.
- */
 export const KitchenSink: Story = {
   render: (args) => (
     <Card
@@ -119,12 +112,6 @@ export const KitchenSink: Story = {
   ),
 };
 
-/**
- * Clickable: the whole surface activates, but only the header title is the real
- * `<button>` (stretched over the card with an `::after` overlay) — so the
- * accessible name is just the title, not the whole card. Following
- * https://inclusive-components.design/cards/.
- */
 export const Clickable: Story = {
   render: (args) => {
     function ClickableCard() {
@@ -147,11 +134,6 @@ export const Clickable: Story = {
   },
 };
 
-/**
- * Linkable: the header title is the one real `<a>`, stretched over the whole
- * surface — so the entire card navigates on click while only the title names the
- * link.
- */
 export const Linkable: Story = {
   render: (args) => (
     <Card
@@ -168,13 +150,6 @@ export const Linkable: Story = {
   ),
 };
 
-/**
- * `selected` — the accented "chosen" state. The intended pattern is a real
- * control inside the card (here a `Checkbox`) that owns the state for assistive
- * tech; `selected` accents the surface edge to reinforce it for sighted users, so
- * selection is never conveyed by colour alone. Toggle a box to see the accent
- * follow it.
- */
 export const Selected: Story = {
   render: (args) => {
     function SelectableCards() {
@@ -208,7 +183,6 @@ export const Selected: Story = {
   },
 };
 
-/** Every `intent` (rows) against every surface `saliency` (columns). */
 export const IntentsAndSaliencies: Story = {
   render: () => (
     <IntentSaliencyMatrix intents={INTENTS} saliencies={SURFACE_SALIENCIES}>

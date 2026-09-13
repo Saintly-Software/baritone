@@ -33,12 +33,6 @@ export default meta;
 
 type Story = StoryObj<typeof Notice>;
 
-/**
- * Kitchen sink — one notice exercising the full surface in a single composition:
- * a leading `icon`, a status `chip` on the title line, a `description`, a
- * dismiss `close`, and a row of `actions` (a primary button, a link, and an
- * icon-only control). The `intent`, `saliency`, and `shape` controls drive it.
- */
 export const KitchenSink: Story = {
   render: (args) => (
     <Notice
@@ -73,7 +67,6 @@ export const KitchenSink: Story = {
   ),
 };
 
-/** Every intent, at both saliencies (`high` = washed fill, `low` = subtle). */
 export const IntentsAndSaliencies: Story = {
   render: () => (
     <IntentSaliencyMatrix intents={INTENTS} saliencies={SURFACE_SALIENCIES}>
@@ -86,7 +79,6 @@ export const IntentsAndSaliencies: Story = {
   ),
 };
 
-/** Title only, then title + description, then + actions. */
 export const Anatomy: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 12, maxWidth: 520 }}>
@@ -119,7 +111,6 @@ export const Anatomy: Story = {
   ),
 };
 
-/** `pill` fully rounds the ends, like a `Chip`. */
 export const Shapes: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 12, maxWidth: 520 }}>
@@ -133,10 +124,6 @@ export const Shapes: Story = {
   ),
 };
 
-/**
- * `Notice.Icon` tints the icon a different intent than the notice — here a
- * neutral notice with a warning-coloured icon.
- */
 export const RecolouredIcon: Story = {
   tags: ["!dev"],
   render: () => (
@@ -154,7 +141,6 @@ export const RecolouredIcon: Story = {
   ),
 };
 
-/** `inline` shrinks the notice to its content instead of filling the width. */
 export const Inline: Story = {
   render: () => (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
@@ -168,10 +154,6 @@ export const Inline: Story = {
   ),
 };
 
-/**
- * `disabled` dims the whole notice and makes its actions/close inert (they stay
- * focusable — `aria-disabled`, never the native attribute).
- */
 export const Disabled: Story = {
   render: () => (
     <Notice

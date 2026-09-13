@@ -47,7 +47,6 @@ type Story = StoryObj<typeof Icon>;
 
 export const Basic: Story = {};
 
-/** Every `intent` (rows) at each `saliency` (columns), driven by the `component` token. */
 export const IntentsAndSaliencies: Story = {
   render: () => (
     <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
@@ -60,12 +59,6 @@ export const IntentsAndSaliencies: Story = {
   ),
 };
 
-/**
- * Flowing inline inside `Text`, an `Icon` picks up an optical vertical alignment
- * automatically (via `--iconAlign`), so a glyph mid-sentence or at a line's end sits
- * centred against the copy instead of low on the baseline — no per-usage
- * `verticalAlign`. Shown across sizes; horizontal spacing is still the caller's.
- */
 export const InlineInText: Story = {
   name: "Aligns inline within text",
   render: () => (

@@ -38,7 +38,6 @@ type Story = StoryObj<typeof HelpText>;
 
 export const Playground: Story = {};
 
-/** Every intent at each saliency. Attention intents auto-show a warning glyph. */
 export const IntentsAndSaliencies: Story = {
   render: () => (
     <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>
@@ -51,7 +50,6 @@ export const IntentsAndSaliencies: Story = {
   ),
 };
 
-/** The four type sizes, largest to smallest — the icon scales with the text. */
 export const Variants: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 8, maxWidth: 420 }}>
@@ -97,7 +95,6 @@ const stateRows: StateRow[] = [
   },
 ];
 
-/** Every state (rows) against the rendered help text (right column). */
 export const States: Story = {
   render: () => (
     <table style={{ borderCollapse: "collapse" }}>
@@ -125,7 +122,6 @@ export const States: Story = {
   ),
 };
 
-/** A custom `icon`, and `hideIcon` to drop the glyph even on an attention intent. */
 export const Icons: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 8, maxWidth: 420 }}>

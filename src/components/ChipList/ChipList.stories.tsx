@@ -55,10 +55,6 @@ export const Vertical: Story = {
   args: { orientation: "vertical", intent: "primary", saliency: "mid" },
 };
 
-/**
- * `size` sizes every chip (it can't be overridden per item) and also tunes the
- * gap between them — a list of `sm` chips packs tighter than a list of `lg` ones.
- */
 export const Sizes: Story = {
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -75,11 +71,6 @@ export const Sizes: Story = {
   ),
 };
 
-/**
- * List-level `intent` / `saliency` apply to every chip, but any item can
- * override them — here two chips opt into their own intent while the rest inherit
- * the list's `neutral`.
- */
 export const PerItemOverrides: Story = {
   args: {
     intent: "neutral",
@@ -100,10 +91,6 @@ export const PerItemOverrides: Story = {
   },
 };
 
-/**
- * Chips carry their full `Chip` API — adornments, a clickable label, a built-in
- * remove "×" — since each item is just a `Chip`'s props.
- */
 export const RichChips: Story = {
   args: {
     intent: "primary",
@@ -125,15 +112,10 @@ export const RichChips: Story = {
   },
 };
 
-/**
- * With `max`, only the first `max` chips show inline; the rest collapse behind a
- * trailing "See more" chip whose `Popover` lists the remainder.
- */
 export const WithMax: Story = {
   args: { intent: "primary", saliency: "mid", max: 3 },
 };
 
-/** Pass a function to `seeMoreLabel` to show the hidden count instead. */
 export const CustomSeeMoreLabel: Story = {
   args: {
     intent: "neutral",

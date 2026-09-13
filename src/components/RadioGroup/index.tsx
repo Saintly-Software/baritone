@@ -23,14 +23,8 @@ import {
   radioItemDisabled,
 } from "./radioGroup.css";
 
-/** Layout direction of the option list. */
 export type RadioGroupOrientation = "vertical" | "horizontal";
 
-/**
- * Shared knobs the group hands down to every `RadioGroupItem` via context, so an
- * item never has to repeat the group's `size` / `state`. (The render-prop only
- * carries the *type* `T`; the runtime config flows through here.)
- */
 interface RadioGroupItemContextValue {
   size: Size;
   state: FormState;
@@ -42,35 +36,19 @@ const RadioGroupItemContext = React.createContext<RadioGroupItemContextValue>({
 });
 
 export interface RadioGroupItemProps<T> {
-  /**
-   * The value this option selects. Constrained to the group's `T`, so a typo or
-   * a value outside the union/enum is a compile error.
-   */
   value: T;
-  /**
-   * The visible label. Defaults to the stringified `value` (handy for string
-   * enums); pass children for anything richer or for non-string values.
-   */
+
   children?: React.ReactNode;
-  /**
-   * Disable just this option (the group can also be disabled as a whole).
-   * Modelled with `aria-disabled` + `readOnly` so the radio stays focusable.
-   */
+
   disabled?: boolean;
-  /** Extra className merged onto the item's `<label>`. */
+
   className?: string;
 }
 
-/** Best-effort default label so `<RadioGroupItem value="dark" />` renders "dark". */
 function defaultLabel(value: unknown): React.ReactNode {
   return typeof value === "string" || typeof value === "number" ? String(value) : null;
 }
 
-/**
- * One radio option. Stable module-level component (not re-created per render) so
- * React reconciles it normally; type-narrowing to `T` happens purely at the type
- * level where the group hands it to the render-prop.
- */
 function RadioGroupItem<T>({
   value,
   children,
@@ -97,75 +75,39 @@ function RadioGroupItem<T>({
 }
 
 interface RadioGroupBaseProps<T> {
-  /** The currently selected value (controlled). */
   value: T;
-  /**
-   * Called with the newly selected value first and the raw DOM event that drove
-   * the selection second (base-ui's native `event`).
-   */
+
   onChange: (value: T, event: Event) => void;
-  /**
-   * Render-prop children. Receives a `RadioGroupItem` already bound to this
-   * group's `T`, so every `<RadioGroupItem value={...} />` is type-checked
-   * against the same union/enum the group's `value` came from.
-   */
+
   children: (props: {
     RadioGroupItem: (props: RadioGroupItemProps<T>) => React.ReactNode;
   }) => React.ReactNode;
-  /** Validation state. `invalid` maps to negative, `valid` to positive. */
+
   state?: FormState;
-  /** Control size. Default `md`. */
+
   size?: Size;
-  /** Lay the options out in a column (default) or a row. */
+
   orientation?: RadioGroupOrientation;
-  /** Inline help under the options, wired to the group's `aria-describedby`. */
+
   helpText?: React.ReactNode;
-  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+
   labelPosition?: LabelPosition;
-  /** Per-slot overrides for the label / help-text pieces. */
+
   slotProps?: FieldSlotProps;
-  /** Mark the group required — marks the label and sets the group `aria-required`. */
+
   required?: boolean;
-  /** Disable the whole group. */
+
   disabled?: boolean;
-  /** Identifies the field when submitted as part of a form. */
+
   name?: string;
-  /** Points the group at extra descriptive text; combines with `helpText`. */
+
   "aria-describedby"?: string;
-  /** Extra className merged onto the radiogroup element. */
+
   className?: string;
 }
 
-/**
- * Named by exactly one of `label` / `aria-label` / `aria-labelledby` — they're
- * mutually exclusive (see `FieldLabellingProps`).
- */
 export type RadioGroupProps<T> = RadioGroupBaseProps<T> & FieldLabellingProps;
 
-/**
- * RadioGroup — a "form control" element type for picking one value from a small
- * set. Built on base-ui's `RadioGroup` (roving focus, arrow-key navigation, ARIA
- * `radiogroup` wiring) and composing `Field` for the label / help / error layout
- * and ARIA wiring, like `TextInput`.
- *
- * It's a **type-safe compound component**: the group is generic over the value
- * type `T` (inferred from `value`), and hands the render-prop a `RadioGroupItem`
- * bound to that `T`. So the options can only ever be values from the same
- * union/enum — works for any enum, not just one. See
- * https://tkdodo.eu/blog/building-type-safe-compound-components
- *
- * @example
- * type ThemeValue = "system" | "light" | "dark";
- * <RadioGroup value={value} onChange={onChange}>
- *   {({ RadioGroupItem }) => (
- *     <>
- *       <RadioGroupItem value="dark" />
- *       <RadioGroupItem value="light" />
- *       <RadioGroupItem value="system" />
- *     </>
- *   )}
- * </RadioGroup>
- */
 export function RadioGroup<T>(props: RadioGroupProps<T>) {
   const {
     value,

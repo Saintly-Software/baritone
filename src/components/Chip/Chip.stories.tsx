@@ -81,11 +81,6 @@ export const Sizes: Story = {
   ),
 };
 
-/**
- * `shape` switches the chip's silhouette: `square` (default) keeps the shared
- * component radius — softly rounded corners — while `pill` fully rounds the ends
- * into a Bootstrap-style pill/badge.
- */
 export const Shapes: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -114,16 +109,10 @@ export const Disabled: Story = {
   args: { disabled: true, intent: "primary", saliency: "high", children: "Disabled" },
 };
 
-/**
- * `loading` replaces the chip's entire content — adornments and label — with a
- * centred spinner, and marks the chip `aria-busy` + inert. The chip keeps its
- * height; its width collapses to the spinner.
- */
 export const Loading: Story = {
   args: { loading: true, intent: "primary", saliency: "high", children: "Saving…" },
 };
 
-/** The spinner is sized in `em`, so it tracks each chip size. */
 export const LoadingSizes: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
@@ -145,12 +134,6 @@ export const AsLink: Story = {
   },
 };
 
-/**
- * Pass `onClick` to make the chip's text label itself clickable — it renders as
- * a real `<button>` (keyboard-focusable, Enter/Space-activated). Adornments keep
- * their own actions, so the label and a trailing "×" are separate hit targets. A
- * disabled chip's label goes inert but stays focusable (`aria-disabled`).
- */
 export const ClickableLabel: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -176,13 +159,6 @@ export const ClickableLabel: Story = {
   ),
 };
 
-/**
- * Pass a configured `<Popover>` to `popover` to open it from the chip's text
- * label. The label renders as a real `<button>` that base-ui wires as the
- * popover's trigger (`aria-haspopup` / `aria-expanded` / `aria-controls`), so it's
- * keyboard-operable. Adornments keep their own actions, and a disabled chip's
- * label stays focusable but won't open the popover.
- */
 export const WithPopover: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -229,11 +205,6 @@ export const WithPopover: Story = {
   ),
 };
 
-/**
- * Adornments are `Chip.Adornment`s passed to `leadAdornments` / `trailAdornments`.
- * Each is one of three kinds: a regular icon, a clickable `<button>` (`onClick`),
- * or a link `<a>` (`href`). They inherit the chip's colour.
- */
 export const Adornments: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -279,10 +250,6 @@ export const Adornments: Story = {
   ),
 };
 
-/**
- * `icon` is a shorthand for a single leading `Chip.Adornment`: it always renders
- * as the *first* lead adornment, ahead of anything in `leadAdornments`.
- */
 export const IconShorthand: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -303,12 +270,6 @@ export const IconShorthand: Story = {
   ),
 };
 
-/**
- * `handleRemove` is a shortcut for the common "removable chip": supply it and the
- * chip appends a built-in clickable remove "×" as the *last* trailing adornment —
- * after any `trailAdornments` you pass — so you don't have to wire up the close
- * button yourself.
- */
 export const Removable: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -335,10 +296,6 @@ export const Removable: Story = {
   ),
 };
 
-/**
- * An adornment inherits the chip's intent by default; set its own `intent` to
- * tint just that adornment (it keeps the chip's saliency).
- */
 export const AdornmentIntentOverride: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -367,11 +324,6 @@ export const AdornmentIntentOverride: Story = {
   ),
 };
 
-/**
- * `trailIcon` mirrors the lead `icon` shorthand at the other end: a decorative
- * trailing `Chip.Adornment` after any `trailAdornments`, before the built-in
- * copy / remove buttons.
- */
 export const TrailingIcon: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -391,11 +343,6 @@ export const TrailingIcon: Story = {
   ),
 };
 
-/**
- * `contentToCopy` appends a built-in copy-to-clipboard adornment: a labelled
- * ("Copy") clickable `Chip.Adornment` that writes the string to the clipboard and
- * briefly shows a checkmark + "Copied" as success feedback.
- */
 export const CopyToClipboard: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
@@ -410,11 +357,6 @@ export const CopyToClipboard: Story = {
   ),
 };
 
-/**
- * `width` controls the chip's box: `fit` (default) hugs the content, `fill`
- * stretches to the container. In a fixed-width column the `fill` chips share one
- * edge and their labels truncate.
- */
 export const Width: Story = {
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 12, width: 240 }}>
@@ -428,10 +370,6 @@ export const Width: Story = {
   ),
 };
 
-/**
- * A disabled chip drags its clickable adornments along: they go inert but stay
- * keyboard-focusable (`aria-disabled`, per the system convention).
- */
 export const DisabledWithAdornments: Story = {
   args: {
     disabled: true,

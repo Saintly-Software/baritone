@@ -30,11 +30,6 @@ type Story = StoryObj<typeof Badge>;
 
 export const Playground: Story = {};
 
-/**
- * A badge takes one of four content kinds — a count, text, an icon, or a bare
- * blank indicator — and each is independently `round` (default) or `square`.
- * That gives a 4 × 2 grid.
- */
 export const Kinds: Story = {
   render: () => {
     const kinds = [
@@ -127,10 +122,6 @@ export const Sizes: Story = {
   ),
 };
 
-/**
- * `max` caps a `count`: when the count exceeds it, the badge renders `{max}+`.
- * It only applies to the count shape.
- */
 export const CountWithMax: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
@@ -142,10 +133,6 @@ export const CountWithMax: Story = {
   ),
 };
 
-/**
- * A blank badge has no content — a bare indicator for "something's here" without
- * a value. Round renders as a dot; square as a small rounded square.
- */
 export const Blank: Story = {
   render: () => (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -160,10 +147,6 @@ export const Blank: Story = {
   ),
 };
 
-/**
- * The `square` shape is orthogonal to the content kind: any badge can be square,
- * swapping the fully-rounded silhouette for softly-rounded corners.
- */
 export const Square: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
@@ -176,16 +159,6 @@ export const Square: Story = {
   ),
 };
 
-/**
- * The `color` escape hatch, for a badge whose fill is *data* rather than a
- * design decision — a per-tag colour, a customer-chosen label colour, a
- * language swatch. These are values the palette can't enumerate, because they
- * aren't the system's to choose.
- *
- * Prefer `intent`/`saliency` for everything the palette *can* express: those
- * badges re-theme with the rest of the system, these are frozen at whatever you
- * pass. `color` is mutually exclusive with `intent`/`saliency`.
- */
 export const CustomColor: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
@@ -198,13 +171,6 @@ export const CustomColor: Story = {
   ),
 };
 
-/**
- * The foreground is derived from the fill, not asked for: a caller supplying a
- * brand colour shouldn't also have to work out whether black or white text
- * survives on it. Relative-colour syntax reads the fill's oklch lightness and
- * snaps the text to whichever end stays legible — so these fills, running dark
- * to light, flip from white text to black on their own.
- */
 export const CustomColorContrast: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>

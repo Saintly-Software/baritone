@@ -19,11 +19,11 @@ const cellStyle: CSSProperties = {
 interface Props<I extends string, S extends string> {
   intents: readonly I[];
   saliencies: readonly S[];
-  /** Renders the cell content for one intent/saliency pair. */
+
   children: (intent: I, saliency: S) => ReactNode;
-  /** Optional extra header cell rendered on each row, before the saliency columns. */
+
   rowLead?: (intent: I) => ReactNode;
-  /** Header label for the {@link rowLead} column. */
+
   rowLeadLabel?: string;
 }
 

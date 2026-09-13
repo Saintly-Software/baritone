@@ -3,12 +3,6 @@ import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Menu, type MenuProps } from "./index";
 
-/**
- * Interaction coverage for `Menu`. The `play` functions open the menu and assert
- * behaviour that only surfaces once it's mounted: the highlight follows the
- * pointer, a `keepOpen` row leaves the menu up, and each `side` places the popup
- * where it was asked to.
- */
 const meta: Meta<typeof Menu> = {
   title: "Surfaces/Menu",
   component: Menu,
@@ -18,7 +12,6 @@ export default meta;
 
 type Story = StoryObj<typeof Menu>;
 
-/** Opens the menu and moves the highlight onto a hovered item. */
 export const OpensAndHighlightsItem: Story = {
   render: () => (
     <Menu
@@ -50,7 +43,6 @@ export const OpensAndHighlightsItem: Story = {
   },
 };
 
-/** A `keepOpen` item stays put after firing: the menu remains open and the label updates. */
 export const KeepOpenStaysOpen: Story = {
   render: function KeepOpenStory() {
     const [count, setCount] = React.useState(0);
@@ -82,13 +74,6 @@ export const KeepOpenStaysOpen: Story = {
   },
 };
 
-/**
- * Builds a story that opens on the given `side` and asserts the popup landed
- * there. The trigger is centred in a roomy box so there's space on every side —
- * otherwise base-ui's collision avoidance would flip the popup and change where
- * it resolves. base-ui records the resolved placement as `data-side` on the
- * positioner (the element that wraps the `menu` popup).
- */
 function sideStory(side: NonNullable<MenuProps["side"]>): Story {
   return {
     render: () => (
@@ -127,14 +112,10 @@ function sideStory(side: NonNullable<MenuProps["side"]>): Story {
   };
 }
 
-/** Opens above the trigger. */
 export const SideTop = sideStory("top");
 
-/** Opens below the trigger (base-ui's default). */
 export const SideBottom = sideStory("bottom");
 
-/** Opens to the left of the trigger. */
 export const SideLeft = sideStory("left");
 
-/** Opens to the right of the trigger. */
 export const SideRight = sideStory("right");

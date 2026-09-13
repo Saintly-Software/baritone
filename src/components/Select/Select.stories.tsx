@@ -54,7 +54,6 @@ export default meta;
 
 type Story = StoryObj<typeof Select>;
 
-/** Single-select, controlled. */
 export const Single: Story = {
   render: () => {
     const [value, setValue] = React.useState<string | null>(null);
@@ -71,7 +70,6 @@ export const Single: Story = {
   },
 };
 
-/** Multi-select: options render a composed checkbox; a clear button appears. */
 export const Multiple: Story = {
   render: () => {
     const [value, setValue] = React.useState<string[]>(["apple", "cherry"]);
@@ -89,7 +87,6 @@ export const Multiple: Story = {
   },
 };
 
-/** Options organised into titled groups, each rendered under a heading. */
 export const Grouped: Story = {
   render: () => {
     const [value, setValue] = React.useState<string | null>(null);
@@ -160,7 +157,6 @@ function StateSelect(row: StateRow) {
   );
 }
 
-/** Every state (rows) against the rendered control (right column). */
 export const States: Story = {
   render: () => (
     <table style={{ borderCollapse: "collapse" }}>
@@ -188,7 +184,6 @@ export const States: Story = {
   ),
 };
 
-/** Control sizes. */
 export const Sizes: Story = {
   render: () => {
     const [value, setValue] = React.useState<string | null>("banana");

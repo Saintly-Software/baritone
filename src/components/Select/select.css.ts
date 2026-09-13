@@ -5,12 +5,6 @@ import { vars } from "../../theme/contract.css";
 const chevronZone = "1.25rem";
 const clearZone = "1.5rem";
 
-/**
- * Layout layer over the shared `formControlRecipe`: the trigger is a `<button>`,
- * so it needs the flex row (value on the start, chevron on the end) and the
- * start-aligned text that the base input recipe doesn't provide. Colour, sizing,
- * border, and the `aria-disabled` dimming all come from `formControlRecipe`.
- */
 export const selectTrigger = style({
   display: "flex",
   alignItems: "center",
@@ -23,12 +17,10 @@ export const selectTrigger = style({
   },
 });
 
-/** Positions the absolutely-placed clear button relative to the trigger. */
 export const selectTriggerRow = style({
   position: "relative",
 });
 
-/** The selected label (or placeholder), truncated with an ellipsis. */
 export const selectValue = style({
   flex: 1,
   minWidth: 0,
@@ -41,7 +33,6 @@ export const selectValue = style({
   },
 });
 
-/** Trailing group: the reserved clear slot (if any) then the chevron/spinner. */
 export const selectEndAdornments = style({
   display: "inline-flex",
   alignItems: "center",
@@ -49,19 +40,12 @@ export const selectEndAdornments = style({
   flexShrink: 0,
 });
 
-/**
- * An empty, in-flow spacer the size of the clear button. Keeping the reservation
- * in normal flow means the chevron stays pinned to the trigger's end and the
- * value text truncates before the (absolutely-positioned) clear button — no
- * per-size padding maths on the value itself.
- */
 export const selectClearSlot = style({
   width: clearZone,
   height: clearZone,
   flexShrink: 0,
 });
 
-/** Disclosure chevron. Rotates when the popup is open (base-ui sets the attr). */
 export const selectIcon = style({
   display: "inline-flex",
   flexShrink: 0,
@@ -77,17 +61,11 @@ export const selectIcon = style({
   },
 });
 
-/** The busy spinner shown in the chevron's place while `loading`. */
 export const selectSpinner = style({
   flexShrink: 0,
   fontSize: chevronZone,
 });
 
-/**
- * The clear button, floated over the reserved slot just inside the chevron. Sits
- * outside the trigger `<button>` (a button can't nest a button) as a sibling in
- * `selectTriggerRow`; the `right` inset per size lands it left of the chevron.
- */
 export const selectClearButton = recipe({
   base: {
     position: "absolute",
@@ -129,12 +107,6 @@ export const selectClearButton = recipe({
 
 export type SelectClearButtonVariants = NonNullable<RecipeVariants<typeof selectClearButton>>;
 
-/**
- * The popup surface. Colour/border/radius come from the shared `surfaceRecipe`
- * (neutral, low, padding `none`); this adds the elevation shadow, the
- * anchor-driven sizing, the scroll region, and the open/close transition. Inner
- * padding lives on `selectList` so it never fights the surface's own padding.
- */
 export const selectPopup = style({
   boxSizing: "border-box",
   minWidth: "var(--anchor-width)",
@@ -156,7 +128,6 @@ export const selectPopup = style({
   },
 });
 
-/** The option list. Owns the popup's inner padding and the row gap. */
 export const selectList = style({
   display: "flex",
   flexDirection: "column",
@@ -164,12 +135,6 @@ export const selectList = style({
   padding: vars.space[1],
 });
 
-/**
- * A group of related options (base-ui's `Select.Group`). Purely a layout
- * wrapper; the visible heading is `selectGroupLabel` and the options render as
- * usual inside it. Consecutive groups get a little breathing room above their
- * heading (the first one sits flush with the popup's own padding).
- */
 export const selectGroup = style({
   display: "flex",
   flexDirection: "column",
@@ -179,11 +144,6 @@ export const selectGroup = style({
   },
 });
 
-/**
- * The group heading (base-ui's `Select.GroupLabel`). A small, muted, semibold
- * eyebrow above the group's options; aligned to the same inline padding as an
- * option row so it reads as a section header rather than a selectable row.
- */
 export const selectGroupLabel = style({
   paddingInline: vars.space[3],
   paddingBlock: vars.space[1],
@@ -194,11 +154,6 @@ export const selectGroupLabel = style({
   color: vars.text.color.neutral.low,
 });
 
-/**
- * One option row. Highlighted (keyboard/pointer) and selected rows take the
- * washed neutral surface; disabled rows dim and go inert. `size` scales the
- * font and padding in step with the trigger.
- */
 export const selectItem = recipe({
   base: {
     display: "flex",
@@ -244,7 +199,6 @@ export const selectItem = recipe({
 
 export type SelectItemVariants = NonNullable<RecipeVariants<typeof selectItem>>;
 
-/** The option label; truncates so long labels don't blow out the popup width. */
 export const selectItemText = style({
   flex: 1,
   minWidth: 0,
@@ -253,7 +207,6 @@ export const selectItemText = style({
   textOverflow: "ellipsis",
 });
 
-/** Trailing check on the selected option (single-select only). */
 export const selectItemIndicator = style({
   display: "inline-flex",
   flexShrink: 0,

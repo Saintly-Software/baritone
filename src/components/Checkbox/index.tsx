@@ -17,78 +17,35 @@ import { useIsFieldDisabled } from "../Fieldset";
 import { checkboxLabelDisabled, checkboxRow, checkboxRowDisabled } from "./checkbox.css";
 
 interface CheckboxBaseProps {
-  /**
-   * Whether the box is ticked (controlled). Ignored for the accessible state
-   * while `indeterminate` is set — a mixed box reports `aria-checked="mixed"`.
-   */
   value: boolean;
-  /**
-   * Called when the user toggles the box, with the next checked state first and
-   * the raw DOM event that drove it second (base-ui's native `event`).
-   */
+
   onChange: (value: boolean, event: Event) => void;
-  /**
-   * Show the tri-state "mixed" look (a dash) and report `aria-checked="mixed"`.
-   * Typically a parent box summarising a set of children that are only partly
-   * selected. Toggling still fires `onChange` with the resolved boolean.
-   */
+
   indeterminate?: boolean;
-  /** Where the label sits relative to the box. Default `end`. */
+
   labelPosition?: LabelPosition;
-  /** Per-slot overrides for the help-text piece. */
+
   slotProps?: FieldSlotProps;
-  /** Points the box at extra descriptive text; combines with `helpText`. */
+
   "aria-describedby"?: string;
-  /**
-   * Dim + lock the control. Modelled with `aria-disabled` + `readOnly` (not the
-   * `disabled` attribute), so the box stays keyboard-focusable — e.g. it can
-   * still be tabbed to and explain itself — while toggling is vetoed.
-   */
+
   disabled?: boolean;
-  /** Mark the field as required (sets `aria-required`). */
+
   required?: boolean;
-  /** Validation state, drives the accent + focus-ring colour. Default `neutral`. */
+
   state?: FormState;
-  /** Inline help beneath the box (wired as the control's `aria-describedby`). */
+
   helpText?: React.ReactNode;
-  /** Box + label size. Default `md`. */
+
   size?: Size;
-  /** Identifies the field when submitted as part of a form. */
+
   name?: string;
-  /** Extra className merged onto the box. */
+
   className?: string;
 }
 
-/**
- * The visible `label` sits beside the box (and is part of the click target).
- * Name the box with exactly one of `label` / `aria-label` / `aria-labelledby` —
- * they're mutually exclusive (see `FieldLabellingProps`).
- */
 export type CheckboxProps = CheckboxBaseProps & FieldLabellingProps;
 
-/**
- * Checkbox — a single boolean "form control", built on base-ui's `Checkbox` for
- * behaviour (role, keyboard, form wiring) and wrapped in a `Field` for ARIA, the
- * same way `TextInput` and `RadioGroup` are.
- *
- * The visual is the presentational `InternalCheckbox`, slotted in via base-ui's
- * `render` prop: base-ui makes the box the focusable `role="checkbox"` element
- * and feeds it `data-checked` / `data-disabled` / `data-invalid`, while
- * `InternalCheckbox` owns the look (box, glyph, focus ring). Because base-ui's
- * hidden `<input>` is `aria-hidden`, a wrapping `<label>` would only name *it*,
- * not the box — so, exactly like `RadioGroup`, the box is named explicitly with
- * `aria-labelledby` pointing at the visible label. Without a visible `label`,
- * name the box with `aria-label` / `aria-labelledby` instead.
- *
- * `value` stays a single `boolean` (the checked state); `indeterminate` layers a
- * "mixed" presentation on top for a parent-of-a-set summary. Validation follows
- * the shared `state` model, with an optional `helpText` line beneath the box
- * (reddened when invalid) — matching `TextInput`, `RadioGroup`, `CheckboxGroup`.
- *
- * @example
- * const [agreed, setAgreed] = React.useState(false);
- * <Checkbox label="I agree to the terms" value={agreed} onChange={setAgreed} required />
- */
 export function Checkbox(props: CheckboxProps) {
   const {
     value,

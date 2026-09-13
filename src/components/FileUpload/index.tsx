@@ -32,121 +32,57 @@ const hintClass = cx(
   textSizeRecipe({ size: "xs" }),
 );
 
-/** Per-slot overrides for the label / help-text / info pieces. */
 export type FileUploadSlotProps = FieldSlotProps;
 
-/**
- * The raw React event that drove a `FileUpload` change: a file-input `change`
- * (picker) or a drag-and-drop on the zone. It's absent (`undefined`) when the
- * change came from removing a staged file, since that path carries no event.
- */
 export type FileUploadChangeEvent =
   | React.ChangeEvent<HTMLInputElement>
   | React.DragEvent<HTMLDivElement>;
 
-/**
- * Props every `FileUpload` takes, regardless of `multiple`. The `value` /
- * `onChange` / `multiple` triad is *not* here — it's split across the
- * discriminated union below so the shapes can't drift (a single upload's `value`
- * is one `FileInfo | null`, a multiple's is a `FileInfo[]`).
- */
 interface FileUploadBaseProps {
-  /**
-   * Validation state, driving the dropzone's border/background accent. `invalid`
-   * also sets `aria-invalid` on the input and reddens the `helpText`.
-   */
   state?: FormState;
-  /** Mark the field required — marks the label and the file `<input>`. */
+
   required?: boolean;
-  /**
-   * Allowed file types, in the HTML `accept` grammar — extensions (`.pdf`),
-   * wildcard MIME (`image/*`), or exact MIME (`application/pdf`). Fed to the
-   * picker's `accept` *and* enforced on the drag-and-drop path (where `accept`
-   * has no effect). Omit / empty to accept anything.
-   */
+
   acceptedFileTypes?: string[];
-  /**
-   * Dim + lock the dropzone. Modelled with `aria-disabled` (not the native
-   * `disabled` attribute) so the input stays keyboard-focusable — e.g. it can
-   * still be tabbed to and explain itself — while clicks, keyboard activation and
-   * drops are vetoed (`readOnly` is a no-op on file inputs, so the picker is
-   * blocked by cancelling the click instead). Staged files dim too but their
-   * remove buttons stay focusable.
-   */
+
   disabled?: boolean;
-  /**
-   * Extra explanation surfaced in an `InfoButton` next to the `label` (the "i"
-   * affordance). Rendered only when there's a visible `label`. Give the button an
-   * accessible name via `slotProps.info["aria-label"]` (defaults to "More
-   * information").
-   */
+
   info?: React.ReactNode;
-  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+
   labelPosition?: LabelPosition;
-  /**
-   * Native form field `name` for the underlying file `<input>`, so the control
-   * participates in `<form>` submission / `FormData`.
-   */
+
   name?: string;
-  /**
-   * Supplementary guidance shown beneath the dropzone and wired to the input as
-   * its accessible description (`aria-describedby`).
-   */
+
   helpText?: React.ReactNode;
-  /** Per-slot overrides for the label / help-text / info pieces. */
+
   slotProps?: FileUploadSlotProps;
-  /** Points the input at extra descriptive text; combines with `helpText`. */
+
   "aria-describedby"?: string;
-  /** Extra className merged onto the dropzone. */
+
   className?: string;
-  /** Ref to the underlying file `<input>`. */
+
   ref?: React.Ref<HTMLInputElement>;
 }
 
-/** Single-file variant: `value` is one `FileInfo` (or `null`). */
 export interface SingleFileUploadProps extends FileUploadBaseProps {
   multiple?: false;
-  /** The staged file, or `null` when empty (controlled). */
+
   value: FileInfo | null;
-  /**
-   * Called with the next staged file (or `null` when it's removed/cleared)
-   * first and, second, the raw React event that drove it — a picker `change` or
-   * a drop — or `undefined` when a file was removed (that path has no event).
-   */
+
   onChange: (value: FileInfo | null, event?: FileUploadChangeEvent) => void;
 }
 
-/** Multi-file variant: `value` is a `FileInfo[]`. */
 export interface MultipleFileUploadProps extends FileUploadBaseProps {
   multiple: true;
-  /** The staged files (controlled). New selections/drops append to this. */
+
   value: FileInfo[];
-  /**
-   * Called with the next staged-files array (after an add or a remove) first
-   * and, second, the raw React event that drove it — a picker `change` or a
-   * drop — or `undefined` when a file was removed (that path has no event).
-   */
+
   onChange: (value: FileInfo[], event?: FileUploadChangeEvent) => void;
 }
 
-/**
- * Discriminated on `multiple`, so `value` and `onChange` are always in lockstep:
- * `multiple` ⇒ arrays, otherwise a lone `FileInfo | null`. TypeScript narrows
- * both from the single `multiple` flag, so a mismatched pair is a compile error.
- * Intersected with `FieldLabellingProps`, so exactly one of `label` /
- * `aria-label` / `aria-labelledby` may name the input — they're mutually
- * exclusive.
- */
 export type FileUploadProps = (SingleFileUploadProps | MultipleFileUploadProps) &
   FieldLabellingProps;
 
-/**
- * Whether a dropped/selected `File` satisfies `acceptedFileTypes`, using the same
- * grammar as the HTML `accept` attribute: a leading-dot extension (`.pdf`), a
- * wildcard MIME (`image/*`), or an exact MIME (`application/pdf`). Case-insensitive;
- * an empty / absent list accepts everything. The native `accept` only filters the
- * picker, so the drop path has to re-check it here.
- */
 export function matchesAccept(file: File, acceptedFileTypes?: string[]): boolean {
   if (acceptedFileTypes == null || acceptedFileTypes.length === 0) return true;
   const name = file.name.toLowerCase();
@@ -166,7 +102,6 @@ function createFileInfo(file: File): FileInfo {
   return { id: `file-upload-${fileInfoCounter}`, file };
 }
 
-/** Decorative upload glyph (cloud + up arrow); the input carries the a11y name. */
 function UploadGlyph({ className }: { className?: string }) {
   return (
     <svg
@@ -188,51 +123,6 @@ function UploadGlyph({ className }: { className?: string }) {
   );
 }
 
-/**
- * FileUpload — a "form control" element type for staging file(s) for upload. The
- * dropzone is a labelled file `<input>` styled as a dashed drop target: clicking
- * it (anywhere) opens the system file picker, dragging files over it highlights
- * it, and dropping them stages them. Staged files render below as a `FileList`,
- * each removable.
- *
- * The `value` / `onChange` / `multiple` triad is a **discriminated union** on
- * `multiple`: single uploads stage one `FileInfo | null`, multiple uploads a
- * `FileInfo[]` (new selections/drops append). The whole thing is controlled — you
- * own `value` and the ids in it.
- *
- * Drag-and-drop is the native HTML5 API (no extra dependency): the input overlays
- * the zone transparently to own clicks + keyboard, while drops are intercepted on
- * the zone so they can be filtered against `acceptedFileTypes` (the native
- * `accept` only constrains the picker). It composes `Field` for the label / help /
- * error layout and ARIA wiring, and takes the shared `state`, like `TextInput`.
- *
- * @example
- * // Multiple
- * const [files, setFiles] = React.useState<FileInfo[]>([]);
- * <FileUpload
- *   label="Attachments"
- *   multiple
- *   value={files}
- *   onChange={setFiles}
- *   acceptedFileTypes={["image/*", ".pdf"]}
- * />
- *
- * @example
- * // Single
- * const [file, setFile] = React.useState<FileInfo | null>(null);
- * <FileUpload label="Avatar" value={file} onChange={setFile} acceptedFileTypes={["image/*"]} />
- *
- * @example
- * // Named form field with a label InfoButton
- * <FileUpload
- *   label="Resume"
- *   name="resume"
- *   info="PDF preferred; we parse it for your work history."
- *   slotProps={{ info: { "aria-label": "About the resume upload" } }}
- *   value={file}
- *   onChange={setFile}
- * />
- */
 export function FileUpload(props: FileUploadProps) {
   const {
     state = "neutral",

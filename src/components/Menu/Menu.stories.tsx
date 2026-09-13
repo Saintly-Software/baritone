@@ -30,11 +30,6 @@ export default meta;
 
 type Story = StoryObj<typeof Menu>;
 
-/**
- * Every row shape at once: a plain button row, one per supported `intent`, an
- * icon row, an external `href` link, and disabled variants of both a button and
- * a link row.
- */
 export const KitchenSink: Story = {
   render: () => (
     <Menu
@@ -78,10 +73,6 @@ export const KitchenSink: Story = {
   ),
 };
 
-/**
- * A fully custom, non-Button trigger via base-ui's `render` seam — here a plain
- * styled element that still gets the popup wiring (`aria-haspopup`/`-expanded`).
- */
 export const CustomTrigger: Story = {
   render: () => (
     <Menu

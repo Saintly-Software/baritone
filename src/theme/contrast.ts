@@ -6,7 +6,6 @@ export const AA_BODY = 4.5;
 export const AA_LARGE_OR_UI = 3.0;
 
 export interface ContrastIssue {
-  /** Human-readable token path of the pairing that failed. */
   path: string;
   foreground: string;
   background: string;
@@ -34,15 +33,6 @@ function check(
   }
 }
 
-/**
- * Build-time WCAG AA check over a theme's dev-supplied tokens. Returns the list
- * of foreground/background pairings that fail. Because tokens are dev-supplied,
- * the system warns rather than silently shipping low contrast.
- *
- * Low-saliency (transparent) component backgrounds and low-saliency text are
- * checked against the neutral low surface (the page background) as a best-effort
- * backing colour, and held to the 3:1 UI/large-text floor.
- */
 export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
   const issues: ContrastIssue[] = [];
   const pageBg = tokens.surface.color.neutral.low.default.bgc;
@@ -79,10 +69,6 @@ export function findContrastIssues(tokens: ThemeTokensInput): ContrastIssue[] {
   return issues;
 }
 
-/**
- * Run the contrast check and `console.warn` any failures found. Returns the
- * issues too, for programmatic use.
- */
 export function warnOnContrastIssues(tokens: ThemeTokensInput, label = "theme"): ContrastIssue[] {
   const issues = findContrastIssues(tokens);
   if (issues.length > 0 && typeof console !== "undefined") {
