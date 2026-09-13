@@ -1,12 +1,6 @@
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
-/**
- * Chip-specific box override, layered on top of `componentTypographyRecipe` for a
- * denser control. Heights are fixed rems (control metrics, not spacing), each
- * clearing the label's line box + border, and sized a step shorter than Button and
- * taller than Badge — the intended order badge < chip < button.
- */
 export const chipSizeRecipe = recipe({
   variants: {
     size: {
@@ -22,12 +16,6 @@ export const chipSizeRecipe = recipe({
 
 export type ChipSizeRecipeVariants = NonNullable<RecipeVariants<typeof chipSizeRecipe>>;
 
-/**
- * Chip shape override. The shared `componentTypographyRecipe` gives every chip
- * the component radius (`square`, the default — softly rounded corners). `pill`
- * layers on top to fully round the ends into a Bootstrap-style pill/badge.
- * Applied after `componentTypographyRecipe`.
- */
 export const chipShapeRecipe = recipe({
   variants: {
     shape: {
@@ -42,10 +30,6 @@ export const chipShapeRecipe = recipe({
 
 export type ChipShapeRecipeVariants = NonNullable<RecipeVariants<typeof chipShapeRecipe>>;
 
-/**
- * Chip width override. Default `fit` hugs its content (`inline-flex`); `fill`
- * stretches to the container's width (block `flex`). The label truncates either way.
- */
 export const chipWidthRecipe = recipe({
   variants: {
     width: {
@@ -60,13 +44,6 @@ export const chipWidthRecipe = recipe({
 
 export type ChipWidthRecipeVariants = NonNullable<RecipeVariants<typeof chipWidthRecipe>>;
 
-/**
- * The chip's text label — the flex item wrapping the children between the
- * adornment lists. `min-width: 0` + the overflow trio ellipsize a long label when
- * width-constrained. The `interactive` variant (for an `onClick` chip, where the
- * label is a real `<button>`) strips the native button chrome and adds the
- * clickable affordances plus the inert `aria-disabled` look; colour stays `inherit`.
- */
 export const chipLabelRecipe = recipe({
   base: {
     minWidth: 0,

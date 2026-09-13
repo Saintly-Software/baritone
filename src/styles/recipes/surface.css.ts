@@ -14,20 +14,6 @@ const bgcDisabled = createVar();
 const fgDisabled = createVar();
 const bdDisabled = createVar();
 
-/**
- * Shared recipe for the "surface" element type (Card, Page, Accordion, Popover,
- * Notice, ...). Two saliency levels only: `low` (default neutral background +
- * border) and `high` (a washed shade). Most surfaces use the neutral intent;
- * colourful intents exist mainly for Notice/Toast. Surfaces are static (no
- * hover); pair with the shared `focusRingRecipe` (the `intent` variant publishes
- * the ring colour) for when they're made interactive — or set the `interactive`
- * variant to add hover/active washes (computed in oklch from the `default`
- * background, like the component recipe) for a surface that *is* the control,
- * e.g. a clickable/linkable `Card`. The resolved foreground is
- * published as `--textColor` so a nested `Text` matches the surface without
- * knowing its intent, and the applied `padding` is exposed via `--surfacePadding`
- * so descendants (e.g. `Card.Bleed`) can negate it.
- */
 export const surfaceRecipe = recipe({
   base: {
     boxSizing: "border-box",

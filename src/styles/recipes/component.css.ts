@@ -20,13 +20,6 @@ const sizes = {
   lg: { height: "2.5rem", px: vars.space[4], font: vars.text.size.md },
 } as const;
 
-/**
- * "Component intent" recipe — the colour scheme shared by the "component" element
- * type (Chip, Button, Badge, Icon). Sets border/background/text and publishes the
- * foreground via `--iconColor` / `--textColor`, so nested icons/text match without
- * knowing the intent. Hover/active are computed from `default` via oklch math; also
- * publishes the focus-ring colour for `focusRingRecipe`.
- */
 export const componentIntentRecipe = recipe({
   base: {
     borderStyle: "solid",
@@ -46,10 +39,6 @@ export const componentIntentRecipe = recipe({
     },
   },
   variants: {
-    /**
-     * Who gets the hover/active background — see `componentTypographyRecipe`'s
-     * matching variant, which owns the cursor half of the same question.
-     */
     interactive: {
       control: {
         selectors: {
@@ -106,13 +95,6 @@ export const componentIntentRecipe = recipe({
 
 export type ComponentIntentVariants = NonNullable<RecipeVariants<typeof componentIntentRecipe>>;
 
-/**
- * "Component typography" recipe — the non-colour half of the component scheme:
- * the shared box/layout (inline-flex, gap, radius), the type variables
- * (font-family/weight/line-height), interaction transitions, and the `size`
- * knob (control height / inline padding / font-size). Pair with
- * `componentIntentRecipe` for colour and `focusRingRecipe` for the ring.
- */
 export const componentTypographyRecipe = recipe({
   base: {
     display: "inline-flex",
@@ -135,13 +117,6 @@ export const componentTypographyRecipe = recipe({
     },
   },
   variants: {
-    /**
-     * Who gets the control affordances (pointer cursor + unselectable label).
-     *   - `control` (default) — always, for components that *are* a control.
-     *   - `auto` — leave both to the element, for a polymorphic root usually inert
-     *     (a Chip is a static tag until `render` makes it a link), so a `<span>`
-     *     keeps the arrow while an `<a href>` gets its pointer from the UA.
-     */
     interactive: {
       control: { cursor: "pointer", userSelect: "none" },
       auto: {},

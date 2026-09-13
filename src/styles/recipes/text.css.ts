@@ -17,13 +17,6 @@ const override = createVar();
 
 const resolved = fallbackVar(override, fallbackVar(textColorVar, vars.text.color.neutral.mid));
 
-/**
- * "text intent" recipe — resolves the text colour and mirrors it to `--iconColor`
- * so a nested `Icon` matches. Reads the ambient `--textColor` by default (falling
- * back to neutral/mid), overridden by `intent`/`saliency`. Also publishes
- * `--iconAlign`, the optical vertical alignment an inline `Icon` takes inside text
- * (scoped to text flow, since `vertical-align` is a no-op in flex contexts).
- */
 export const textIntentRecipe = recipe({
   base: {
     color: resolved,
@@ -50,13 +43,6 @@ export const textIntentRecipe = recipe({
 
 export type TextIntentVariants = NonNullable<RecipeVariants<typeof textIntentRecipe>>;
 
-/**
- * "text size" recipe — the shared typography base plus a built-in `size` variant.
- * Every dimension resolves through a `--text…` var the base reads (`--textFont` /
- * `--textLetterSpacing` / `--textSize` / `--textLineHeight` / `--textWeight`),
- * each an open vocabulary `Text`/`Heading` set per instance. The `size` variant is
- * for module-scope callers applying a built-in size as a class. Colour-agnostic.
- */
 export const textSizeRecipe = recipe({
   base: {
     fontFamily: fallbackVar(textFontVar, vars.font.sans),
@@ -83,11 +69,6 @@ export const textSizeRecipe = recipe({
 
 export type TextSizeVariants = NonNullable<RecipeVariants<typeof textSizeRecipe>>;
 
-/**
- * "typography weight" recipe — the built-in `weight` knob for module-scope callers
- * applying a weight as a class. Sets the `--textWeight` var the `textSizeRecipe`
- * base reads, so compose it alongside that base.
- */
 export const typographyWeight = recipe({
   variants: {
     weight: Object.fromEntries(
@@ -101,7 +82,6 @@ export const typographyWeight = recipe({
 
 export type TypographyWeightVariants = NonNullable<RecipeVariants<typeof typographyWeight>>;
 
-/** "typography decoration" recipe — italics (and future decorative styles). */
 export const typographyDecoration = recipe({
   variants: {
     italic: {

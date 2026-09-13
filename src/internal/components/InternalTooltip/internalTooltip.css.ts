@@ -1,20 +1,6 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "../../../theme/contract.css";
 
-/**
- * Styles for the internal tooltip popup. Kept here (rather than inline in a
- * consumer like `Button`) so every internal use of `InternalTooltip` shares one
- * surface definition.
- */
-
-/**
- * A small neutral surface. Reuses the surface tokens so it themes with
- * everything else, and fades/scales out of the trigger on open and close.
- *
- * `--transform-origin` is published by base-ui's positioner (it points back at
- * the trigger), so the scale animation grows out of the anchor. `position:
- * relative` anchors the absolutely-positioned arrow to this surface.
- */
 export const tooltipPopup = style({
   position: "relative",
   maxWidth: "16rem",
@@ -47,17 +33,9 @@ export const tooltipPopup = style({
   },
 });
 
-/** Arrow side, in px. base-ui centres it along the edge; we push it out. */
 const ARROW_SIZE = 8;
 const arrowBorder = `${vars.borderWidth.thin} solid ${vars.surface.color.neutral.high.default.border}`;
 
-/**
- * A rotated square that points the tooltip at its trigger. base-ui positions it
- * along the edge (`position: absolute`, plus the cross-axis offset) and tags it
- * with `data-side`; per side we push it past the edge and expose the two
- * outward-facing borders so it reads as a bordered triangle continuous with the
- * surface. The matching `background` covers the surface border where they meet.
- */
 export const tooltipArrow = style({
   width: ARROW_SIZE,
   height: ARROW_SIZE,

@@ -13,11 +13,6 @@ const BAR = "10px";
 
 const REVEAL_DELAY = "400ms";
 
-/**
- * Per-edge gradient masks driven by base-ui's `--scroll-area-overflow-*` metrics
- * (pixels hidden past each edge, 0 when flush), so a fade appears only on a side
- * that can scroll further. `0px` fallbacks keep content sharp before measurement.
- */
 const xFade = `linear-gradient(
   to right,
   transparent 0,
@@ -34,12 +29,6 @@ const yFade = `linear-gradient(
   transparent 100%
 )`;
 
-/**
- * Groups the viewport, scrollbar, and floating nav buttons. A flex column so a
- * `height` or `max-height` on the root bounds the viewport — which lets a vertical
- * `Overflow` grow to a cap and then scroll (a `height: 100%` viewport can't
- * resolve against a `max-height`-only parent). Horizontal needs only a bounded width.
- */
 export const root = style({
   position: "relative",
   boxSizing: "border-box",
@@ -48,11 +37,6 @@ export const root = style({
   maxWidth: "100%",
 });
 
-/**
- * The scroll container. base-ui already sets `overflow: scroll` and hides the
- * native scrollbars; this fills the root (as a flex child) and carries the
- * gradient fade mask (added per-orientation below).
- */
 export const viewport = style({
   flex: "1 1 auto",
   minWidth: 0,
@@ -60,23 +44,16 @@ export const viewport = style({
   overscrollBehavior: "contain",
 });
 
-/** Fade the inline start/end edges (horizontal orientation). */
 export const viewportFadeHorizontal = style({
   maskImage: xFade,
   maskRepeat: "no-repeat",
 });
 
-/** Fade the block start/end edges (vertical orientation). */
 export const viewportFadeVertical = style({
   maskImage: yFade,
   maskRepeat: "no-repeat",
 });
 
-/**
- * The layout track holding the controls — a single non-wrapping row (or column).
- * `width: max-content` keeps every control at its intrinsic size so they overflow
- * rather than squash. The `gap` variant is the space between them.
- */
 export const track = recipe({
   base: {
     display: "flex",
@@ -109,12 +86,6 @@ export const track = recipe({
 
 export type TrackVariants = NonNullable<RecipeVariants<typeof track>>;
 
-/**
- * A scrollbar rail. The rail is invisible — only the thumb shows — and the whole
- * thing stays hidden until you hover the area or scroll (base-ui flags those
- * with `data-hovering` / `data-scrolling`). Reveal is quick; the fade-out waits
- * out `REVEAL_DELAY` so a resting bar lingers a beat. Mirrors `ScrollArea`.
- */
 export const scrollbar = style({
   display: "flex",
   touchAction: "none",
@@ -145,7 +116,6 @@ export const scrollbar = style({
   },
 });
 
-/** The draggable thumb — a neutral pill that deepens on hover / while dragging. */
 export const thumb = style({
   width: "100%",
   height: "100%",
@@ -164,14 +134,6 @@ export const thumb = style({
   },
 });
 
-/**
- * A floating scroll button — a pointer convenience kept out of the tab order
- * (`tabIndex={-1}`), since the accessible path is Tab. Hidden by default and
- * revealed only when the matching edge overflows (via base-ui's `data-overflow-*`).
- * Show/hide flips `visibility` + `opacity` instantly: we deliberately don't fade
- * it in, since Chrome pins an opacity transition that starts from `visibility:
- * hidden` at 0. Only the hover wash transitions.
- */
 export const navButton = style({
   position: "absolute",
   zIndex: 1,
@@ -214,7 +176,6 @@ export const navButton = style({
   },
 });
 
-/** The chevron glyph inside a nav button; rotated per orientation/side below. */
 export const navChevron = style({
   width: "1em",
   height: "1em",

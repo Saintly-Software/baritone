@@ -8,18 +8,8 @@ const bgc = createVar();
 const fg = createVar();
 const bd = createVar();
 
-/**
- * A Notice's saliency maps onto the `component` saliency it borrows: `high` →
- * `mid` (washed fill), `low` → `low`. A Notice never uses the loud `high` fill.
- */
 const COMPONENT_SALIENCY = { high: "mid", low: "low" } as const;
 
-/**
- * Notice root recipe — a block-level callout borrowing the `component` colour
- * scheme (see {@link COMPONENT_SALIENCY}), static (no hover/active) since a Notice
- * is a container. Publishes the foreground as `--iconColor`/`--textColor`. `shape`
- * mirrors `Chip` (`square` default, `pill`).
- */
 export const noticeRecipe = recipe({
   base: {
     display: "flex",
@@ -85,7 +75,6 @@ export const noticeRecipe = recipe({
 
 export type NoticeRecipeVariants = NonNullable<RecipeVariants<typeof noticeRecipe>>;
 
-/** The text column — the title, the description, and the actions row stacked. */
 export const noticeBody = style({
   display: "flex",
   flexDirection: "column",
@@ -94,12 +83,10 @@ export const noticeBody = style({
   flex: 1,
 });
 
-/** The title line — the notice's `children`, set a touch heavier than body copy. */
 export const noticeTitle = style({
   fontWeight: "600",
 });
 
-/** The title row — the title and an optional status `chip`, on one line. */
 export const noticeHeader = style({
   display: "flex",
   alignItems: "center",
@@ -108,7 +95,6 @@ export const noticeHeader = style({
   minWidth: 0,
 });
 
-/** The actions row — buttons wrapped beneath the text, with a little top gap. */
 export const noticeActions = style({
   display: "flex",
   flexWrap: "wrap",
@@ -116,10 +102,6 @@ export const noticeActions = style({
   marginTop: vars.space[2],
 });
 
-/**
- * `Notice.Icon` colour override — republishes `--iconColor` on the icon at the
- * given `component` `intent`×`saliency` token. Mirrors `chipAdornmentRecipe`.
- */
 export const noticeIconRecipe = recipe({
   variants: {
     intent: Object.fromEntries(INTENTS.map((intent) => [intent, {}])) as Record<
@@ -143,10 +125,6 @@ export const noticeIconRecipe = recipe({
 
 export type NoticeIconRecipeVariants = NonNullable<RecipeVariants<typeof noticeIconRecipe>>;
 
-/**
- * `Notice.Action` layout tweak on top of the shared component scheme (which makes
- * it look like a small `Button`) — only squares the box for the icon-only form.
- */
 export const noticeActionRecipe = recipe({
   base: {},
   variants: {
@@ -160,11 +138,6 @@ export const noticeActionRecipe = recipe({
 
 export type NoticeActionRecipeVariants = NonNullable<RecipeVariants<typeof noticeActionRecipe>>;
 
-/**
- * `Notice.Close` — the chromeless "×" dismiss button, inheriting the notice's
- * foreground and dimming at rest / brightening on hover. Inert (`aria-disabled`,
- * `not-allowed`) when a disabled Notice makes it so.
- */
 export const noticeClose = style({
   display: "inline-flex",
   alignItems: "center",

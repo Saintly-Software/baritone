@@ -9,7 +9,6 @@ const bd = createVar();
 const accent = createVar();
 const dot = createVar();
 
-/** The group container — a stack of items, vertical or horizontal. */
 export const radioGroupRoot = recipe({
   base: {
     display: "flex",
@@ -23,12 +22,10 @@ export const radioGroupRoot = recipe({
   defaultVariants: { orientation: "vertical" },
 });
 
-/** Dim the whole group when it's disabled at the group level. */
 export const radioGroupDisabled = style({
   opacity: 0.55,
 });
 
-/** One option row: the control followed by its label, as a clickable `<label>`. */
 export const radioItem = recipe({
   base: {
     display: "inline-flex",
@@ -49,19 +46,11 @@ export const radioItem = recipe({
   defaultVariants: { size: "md" },
 });
 
-/** Dim + lock a single disabled item (covers both its control and its label). */
 export const radioItemDisabled = style({
   opacity: 0.55,
   cursor: "not-allowed",
 });
 
-/**
- * The radio "dot" — a circular control built on base-ui's `Radio.Root`. Mirrors
- * `formControlRecipe`: it takes a form `state` (which drives the accent + focus
- * colour) and a `size`. base-ui flags selection with `data-checked` /
- * `data-unchecked`, so the border swaps from the neutral form border to the
- * accent when selected.
- */
 export const radioControl = recipe({
   base: {
     boxSizing: "border-box",
@@ -110,11 +99,6 @@ export const radioControl = recipe({
   defaultVariants: { state: "neutral", size: "md" },
 });
 
-/**
- * The inner dot. Kept mounted (base-ui's `keepMounted`) so it can scale in *and*
- * out as `data-checked` toggles; its size comes from the `--dot` var the control
- * publishes, its colour from `--accent`.
- */
 export const radioIndicator = style({
   width: dot,
   height: dot,

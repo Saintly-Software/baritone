@@ -3,14 +3,6 @@ import { vars } from "../../theme/contract.css";
 import { active, hover } from "../../theme/oklch";
 import { focusRingColorVar, iconColorVar } from "../../styles/vars.css";
 
-/**
- * Link styling. Unlike the "component"/"text" element types, a Link has no
- * intent/saliency knob — its colour is locked to the `primary` text token so
- * links read as one consistent, predictable colour across the app. Hover/active
- * are derived from that token via the same oklch relative-colour math the
- * component scheme uses. Pair with `focusRingRecipe` for the ring.
- */
-
 const linkColor = vars.text.color.primary.mid;
 
 export const linkBase = style({

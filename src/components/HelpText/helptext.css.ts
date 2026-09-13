@@ -1,14 +1,6 @@
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
-/**
- * HelpText root — a single inline help / validation line: a leading icon sits
- * next to the message. Laid out as a flex row aligned to the top so a message
- * that wraps onto a second line keeps the icon pinned to the first line (mirrors
- * `Notice`). Colour and typography are owned by the composed `Text`/`Icon`
- * primitives, so this recipe only carries layout — the `variant` knob just
- * scales the gap between the glyph and the text with the type size.
- */
 export const helpTextRecipe = recipe({
   base: {
     display: "flex",

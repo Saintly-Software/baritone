@@ -13,13 +13,6 @@ const trackW = createVar();
 const thumb = createVar();
 const pad = createVar();
 
-/**
- * The switch "track" — a pill-shaped presentational control reflecting
- * `data-checked` / `data-disabled` set from props. Shares `checkboxControl`'s
- * outline language so a switch and checkbox read identically, differing in shape
- * and the sliding `switchThumb`. Not focusable; the ring is drawn by
- * `focusRingRecipe({ type: "within" })` off a slotted focusable element.
- */
 export const switchTrack = recipe({
   base: {
     boxSizing: "border-box",
@@ -89,12 +82,6 @@ export const switchTrack = recipe({
   defaultVariants: { state: "neutral", size: "md" },
 });
 
-/**
- * The sliding thumb. Sized from the `--thumb` var the track publishes and filled
- * with `currentColor` (the track's `bdNow` — neutral when unchecked, accent when
- * checked). It rests at the left padding and translates to the right edge as
- * `data-checked` toggles, matching the radio/checkbox indicator timing.
- */
 export const switchThumb = style({
   position: "absolute",
   left: pad,
@@ -120,14 +107,6 @@ export const switchThumb = style({
   },
 });
 
-/**
- * A glyph riding inside the thumb (e.g. a check / cross that swaps with state).
- * Sized to a fraction of the thumb so it keeps breathing room from the edge, and
- * coloured with the track's *background* so it reads as a cut-out against the
- * solid thumb fill (accent when checked, neutral when off). `--iconColor` is set
- * to the same value so a slotted `<Icon>` inherits the contrast colour too, and
- * a bare `currentColor` `<svg>` picks it up via `color`.
- */
 export const switchThumbIcon = style({
   display: "flex",
   alignItems: "center",

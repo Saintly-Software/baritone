@@ -11,17 +11,6 @@ const accent = createVar();
 const bdNow = createVar();
 const glyph = createVar();
 
-/**
- * The checkbox "box" — a square presentational control. Not an `<input>`: it
- * reflects `data-checked` / `data-unchecked` / `data-indeterminate` (and
- * `data-disabled`) that the component sets from props. It mirrors the visual
- * language of `radioControl` (form tokens + accent), but with a small `radius.sm`
- * square instead of a full circle, and an accent glyph instead of a dot.
- *
- * It is intentionally not focusable; the focus ring is drawn by the shared
- * `focusRingRecipe({ type: "within" })`, so a focusable element the consumer
- * slots inside (e.g. a visually-hidden `<input>`) lights the ring when tabbed to.
- */
 export const checkboxControl = recipe({
   base: {
     boxSizing: "border-box",
@@ -86,11 +75,6 @@ export const checkboxControl = recipe({
   defaultVariants: { state: "neutral", size: "md" },
 });
 
-/**
- * The check / dash glyph. Sized from the `--glyph` var the control publishes and
- * coloured by `currentColor` (the control's `accent`). Scales + fades in/out as
- * `data-checked` / `data-indeterminate` toggle, matching the radio indicator.
- */
 export const checkboxIndicator = style({
   display: "inline-flex",
   alignItems: "center",

@@ -4,16 +4,10 @@ import { focusRingColorVar, surfacePaddingVar } from "../../styles/vars.css";
 import { breakpoints } from "../../theme/breakpoints";
 import { vars } from "../../theme/contract.css";
 
-/** Bumps the card's internal padding a step up from the `md` breakpoint. */
 const cardPaddingBreakpoint = `screen and (min-width: ${breakpoints.md})`;
 
 const bleedInline = `calc(${surfacePaddingVar} * -1)`;
 
-/**
- * Card root layout — a vertical stack laying out header, content, and footer
- * top-to-bottom. `gap` is block-direction only, so it doesn't fight the inline
- * negative margins used by `Card.Bleed` / `Card.Divider`.
- */
 export const cardRoot = style({
   display: "flex",
   flexDirection: "column",
@@ -22,32 +16,16 @@ export const cardRoot = style({
   minHeight: 0,
 });
 
-/**
- * The card's responsive internal padding — bumps `--surfacePadding` up a step
- * from the `md` breakpoint. Driving it through the same `--surfacePadding` the
- * surface reads keeps `Card.Bleed` / `Card.Divider` in sync at every width.
- */
 export const cardResponsivePadding = style({
   "@media": {
     [cardPaddingBreakpoint]: { vars: { [surfacePaddingVar]: vars.space[6] } },
   },
 });
 
-/**
- * An interactive (clickable / linkable) card — the positioning context for the
- * header title's stretched `::after` overlay
- * (https://inclusive-components.design/cards/).
- */
 export const cardInteractive = style({
   position: "relative",
 });
 
-/**
- * The card's single primary control: the header title as the one real link/button,
- * styled like the heading text but with an `::after` that stretches across the
- * whole card so the entire surface is one click target. Secondary controls escape
- * the overlay via `position: relative`; the focus ring is drawn on the pseudo.
- */
 export const cardOverlayLink = style({
   display: "inline",
   margin: 0,
@@ -75,11 +53,6 @@ export const cardOverlayLink = style({
   },
 });
 
-/**
- * The `selected` state — accents the surface edge (recoloured border + inset ring
- * to a ~2px outline). Sighted reinforcement only; a real selected control inside
- * the card is what assistive tech relies on. See `Card`'s `selected`.
- */
 export const cardSelectedRecipe = recipe({
   variants: {
     selected: {
@@ -102,10 +75,6 @@ export const cardSelectedRecipe = recipe({
 
 export type CardSelectedVariants = NonNullable<RecipeVariants<typeof cardSelectedRecipe>>;
 
-/**
- * Header row: a leading group (`icon` + title/subtitle stack) on the start and a
- * trailing group (`chip` + any `children` actions) on the end.
- */
 export const cardHeader = style({
   display: "flex",
   alignItems: "flex-start",
@@ -113,7 +82,6 @@ export const cardHeader = style({
   gap: vars.space[3],
 });
 
-/** Leading group — the optional `icon` next to the title/subtitle stack. */
 export const cardHeaderLeading = style({
   display: "flex",
   alignItems: "flex-start",
@@ -122,7 +90,6 @@ export const cardHeaderLeading = style({
   flex: "1 1 auto",
 });
 
-/** The optional leading icon; never shrinks, sits beside the title. */
 export const cardHeaderIcon = style({
   display: "inline-flex",
   flexShrink: 0,
@@ -135,11 +102,6 @@ export const cardHeaderText = style({
   minWidth: 0,
 });
 
-/**
- * Trailing group — the optional `chip`, any header `children` (actions), and (in
- * a collapsible card) the disclosure trigger. `position: relative` lifts these
- * above an interactive card's stretched overlay link so they stay clickable.
- */
 export const cardHeaderTrailing = style({
   display: "flex",
   alignItems: "center",
@@ -148,11 +110,6 @@ export const cardHeaderTrailing = style({
   position: "relative",
 });
 
-/**
- * Footer row: actions, end-aligned by default. `position: relative` lifts the
- * footer (and its buttons) above an interactive card's stretched overlay link so
- * they keep their own, independent click targets.
- */
 export const cardFooter = style({
   display: "flex",
   alignItems: "center",
@@ -161,15 +118,10 @@ export const cardFooter = style({
   position: "relative",
 });
 
-/**
- * Full-bleed content — negates the card's inline padding so the child touches
- * the left/right edges (e.g. a cover image or full-width list).
- */
 export const cardBleed = style({
   marginInline: bleedInline,
 });
 
-/** Edge-to-edge divider; spans the full card width by negating inline padding. */
 export const cardDivider = style({
   flexShrink: 0,
   border: 0,
@@ -179,11 +131,6 @@ export const cardDivider = style({
   backgroundColor: vars.surface.color.neutral.low.default.border,
 });
 
-/**
- * `Card.Actions` — a row of buttons anchored to one side. `width: 100%` so it
- * fills its container (a `Card.Footer`, a `Card.Row`), and the `side` variant
- * just flips `justify-content`.
- */
 export const cardActionsRecipe = recipe({
   base: {
     display: "flex",
@@ -204,7 +151,6 @@ export const cardActionsRecipe = recipe({
 
 export type CardActionsVariants = NonNullable<RecipeVariants<typeof cardActionsRecipe>>;
 
-/** `Card.Rows` — the `<dl>` wrapper; a vertical stack of `Card.Row`s. */
 export const cardRows = style({
   display: "flex",
   flexDirection: "column",
@@ -213,12 +159,6 @@ export const cardRows = style({
   padding: 0,
 });
 
-/**
- * One row: term/title on the start, description/actions on the end. The inline
- * negative margin + matching padding let a `hoverable` row's highlight extend
- * past the text without shifting content. A row with its own action stays
- * `hoverable: false`, since a whole-row wash behind it would be noise.
- */
 export const cardRowRecipe = recipe({
   base: {
     display: "flex",
@@ -254,12 +194,6 @@ export const cardRowRecipe = recipe({
 
 export type CardRowVariants = NonNullable<RecipeVariants<typeof cardRowRecipe>>;
 
-/**
- * `Card.Layout` — a split content row: a leading title/subtitle text stack on the
- * start and a trailing action on the end, vertically centred. It's the standalone
- * body-content sibling of a rich `Card.Row` (same split), but a plain `<div>` with
- * no `<dl>` / landmark / overlay-link machinery — so a card can simply *be* one.
- */
 export const cardLayout = style({
   display: "flex",
   alignItems: "center",
@@ -267,7 +201,6 @@ export const cardLayout = style({
   gap: vars.space[4],
 });
 
-/** The leading title/subtitle stack of a `Card.Layout`. */
 export const cardLayoutText = style({
   display: "flex",
   flexDirection: "column",
@@ -275,11 +208,6 @@ export const cardLayoutText = style({
   minWidth: 0,
 });
 
-/**
- * The trailing action of a `Card.Layout`; never shrinks. `position: relative`
- * lifts it above an interactive card's stretched overlay link so it stays
- * independently clickable.
- */
 export const cardLayoutAction = style({
   display: "flex",
   alignItems: "center",
@@ -288,13 +216,11 @@ export const cardLayoutAction = style({
   position: "relative",
 });
 
-/** The `<dt>` of a term/description row. */
 export const cardRowTerm = style({
   margin: 0,
   minWidth: 0,
 });
 
-/** The `<dt>` of a rich row — a title/subtitle stack. */
 export const cardRowText = style({
   display: "flex",
   flexDirection: "column",
@@ -303,39 +229,22 @@ export const cardRowText = style({
   minWidth: 0,
 });
 
-/** The `<dd>` of a term/description row — the value, end-aligned. */
 export const cardRowDesc = style({
   margin: 0,
   minWidth: 0,
   textAlign: "end",
 });
 
-/**
- * The `<dd>` of a rich row — the trailing actions; never shrinks. `position:
- * relative` lifts the actions above an interactive card's overlay link.
- */
 export const cardRowActions = style({
   margin: 0,
   flexShrink: 0,
   position: "relative",
 });
 
-/**
- * Collapsible root — the surface is applied with `padding: none` (the trigger
- * and panel own their padding, like an `Accordion` item), so `overflow: hidden`
- * here clips the collapsing panel to the card's rounded corners.
- */
 export const cardCollapsibleRoot = style({
   overflow: "hidden",
 });
 
-/**
- * Republishes `--surfacePadding` on the trigger and panel content so they pad
- * themselves (the surface root itself is `padding: none`). Responsive like the
- * flat card — `space[4]` up to the `md` breakpoint, `space[6]` beyond. Setting the
- * var on these elements — rather than the root — also keeps `Card.Bleed` /
- * `Card.Divider` working inside the collapsing body.
- */
 export const cardCollapsibleResponsivePadding = style({
   vars: { [surfacePaddingVar]: vars.space[4] },
   "@media": {
@@ -343,20 +252,10 @@ export const cardCollapsibleResponsivePadding = style({
   },
 });
 
-/**
- * The collapsible card's header band, holding the `Card.Header` and its disclosure
- * trigger. Only the trigger button toggles, so the rest of the header can carry
- * its own interactive elements.
- */
 export const cardCollapsibleHeader = style({
   padding: surfacePaddingVar,
 });
 
-/**
- * The disclosure trigger — a compact chevron icon button at the header's end,
- * with a neutral hover wash like `Accordion`'s trigger. `aria-disabled` keeps it
- * tabbable while the root vetoes the toggle.
- */
 export const cardCollapsibleTriggerButton = style({
   display: "inline-flex",
   alignItems: "center",
@@ -385,10 +284,6 @@ export const cardCollapsibleTriggerButton = style({
   },
 });
 
-/**
- * The disclosure chevron. Muted, decorative, rotated 180° when the panel is
- * open — base-ui flags the open trigger with `data-panel-open`.
- */
 export const cardChevron = style({
   flexShrink: 0,
   width: "1.25em",
@@ -405,13 +300,6 @@ export const cardChevron = style({
   },
 });
 
-/**
- * The collapsing panel. base-ui publishes the measured content height as
- * `--collapsible-panel-height`; animating `height` to/from `0` (the
- * `data-starting-style` / `data-ending-style` frames) gives the open/close
- * slide. `overflow: hidden` clips the content mid-transition. Padding lives on
- * the inner content wrapper so it can't perturb the animated height.
- */
 export const cardCollapsiblePanel = style({
   overflow: "hidden",
   height: "var(--collapsible-panel-height)",
@@ -426,11 +314,6 @@ export const cardCollapsiblePanel = style({
   },
 });
 
-/**
- * Padded content region inside the panel — a vertical stack (the content, then
- * the optional footer). The top gap to the header comes from the trigger's own
- * bottom padding, so this only pads the inline + bottom edges.
- */
 export const cardCollapsiblePanelContent = style({
   display: "flex",
   flexDirection: "column",

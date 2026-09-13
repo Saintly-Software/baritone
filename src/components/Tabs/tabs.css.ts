@@ -8,7 +8,6 @@ const activeBg = createVar();
 const activeFg = createVar();
 const activeBd = createVar();
 
-/** The tablist container — a wrapping horizontal row of tabs. */
 export const tabsList = style({
   display: "inline-flex",
   alignItems: "center",
@@ -16,21 +15,10 @@ export const tabsList = style({
   gap: vars.space[1],
 });
 
-/** Dim the whole row when every tab is disabled at the group level. */
 export const tabsListDisabled = style({
   opacity: 0.55,
 });
 
-/**
- * One tab button. Pairs with `componentTypographyRecipe` for the box/size (so a
- * tab matches the height/radius/font of a `Chip`/`Button`) and only owns the
- * *colour*, which toggles on base-ui's selected marker. base-ui sets
- * `aria-selected="true"` (and `data-active`) on the active tab, so the fill is
- * the selection indicator: an inactive tab is transparent with muted text, the
- * active one takes the `intent` x `saliency` colour block (high = filled, mid =
- * washed, low = transparent + border), exactly like the rest of the "component"
- * family.
- */
 export const tabsTab = recipe({
   base: {
     borderStyle: "solid",
@@ -91,18 +79,10 @@ export const tabsTab = recipe({
   },
 });
 
-/** Dim a single disabled tab (only when the group as a whole isn't disabled). */
 export const tabsTabDisabled = style({
   opacity: 0.55,
 });
 
-/**
- * A tab's panel — the content shown when its tab is active. base-ui makes the
- * active panel focusable (`tabIndex={0}`) so keyboard users can reach content
- * that has no other focusable child, so it carries the shared focus ring; the
- * colour comes from the neutral text token (panels are body content, not a
- * coloured surface, so they don't take `intent`/`saliency`).
- */
 export const tabsPanel = style({
   paddingBlock: vars.space[2],
   color: vars.text.color.neutral.high,

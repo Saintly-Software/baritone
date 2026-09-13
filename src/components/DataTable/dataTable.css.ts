@@ -2,11 +2,6 @@ import { createVar, style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
 import { vars } from "../../theme/contract.css";
 
-/**
- * The `<table>` itself. Collapsed borders so the shared cell rules read as one
- * grid, full width, and the neutral/mid body text + base body typography as the
- * default for every cell (a cell can still override via its own `Text`/`Link`).
- */
 export const dataTableRoot = style({
   width: "100%",
   borderCollapse: "collapse",
@@ -17,11 +12,6 @@ export const dataTableRoot = style({
   textAlign: "start",
 });
 
-/**
- * The `<caption>` — the table's visible title and its accessible name. Sits
- * above the grid (`caption-side: top`), start-aligned, slightly emphasised
- * (neutral/high + semibold) at the small body size.
- */
 export const dataTableCaption = style({
   captionSide: "top",
   textAlign: "start",
@@ -32,11 +22,6 @@ export const dataTableCaption = style({
   fontWeight: vars.text.weight.semibold,
 });
 
-/**
- * One header (`<th>`) or body (`<td>`) cell. `align` maps to `text-align` (a
- * recipe variant, not an inline style); `header` switches between the stronger
- * header treatment and the neutral/mid body cell.
- */
 export const cell = recipe({
   base: {
     paddingBlock: vars.space[3],
@@ -73,29 +58,14 @@ export const cell = recipe({
 
 export type CellVariants = NonNullable<RecipeVariants<typeof cell>>;
 
-/**
- * Nesting depth of a grouped cell, published as a CSS variable so the group
- * label can indent by `depth × space[4]`. Set per row via `assignInlineVars`
- * (the depth is data, not an enumerable variant) and read by {@link groupLabel}.
- */
 export const groupDepthVar = createVar();
 
-/**
- * A group-header row — one per distinct value of a grouped column, reading a
- * touch heavier than a body row (neutral fill + semibold text). The fill sits on
- * the `<tr>` so it shows through the transparent cells' padding and dividers.
- */
 export const groupRow = style({
   backgroundColor: vars.surface.color.neutral.low.default.bgc,
   color: vars.text.color.neutral.high,
   fontWeight: vars.text.weight.semibold,
 });
 
-/**
- * The label cluster inside a grouped cell — the toggle, the group value, and
- * the count, laid out inline. Indents by nesting depth (via {@link groupDepthVar})
- * so a group nested inside another sits further in than its parent.
- */
 export const groupLabel = style({
   display: "inline-flex",
   alignItems: "center",
@@ -103,12 +73,6 @@ export const groupLabel = style({
   paddingInlineStart: `calc(${groupDepthVar} * ${vars.space[4]})`,
 });
 
-/**
- * The disclosure toggle — a bare, focusable `<button>` (no button chrome)
- * wrapping the disclosure chevron. Shared by the group-header toggle and the row
- * detail-panel toggle (see `DisclosureToggle`). Sized to a comfortable target;
- * pair it with the shared `focusRingRecipe` in the component for the visible ring.
- */
 export const disclosureToggle = style({
   display: "inline-flex",
   alignItems: "center",
@@ -125,11 +89,6 @@ export const disclosureToggle = style({
   borderRadius: vars.radius.sm,
 });
 
-/**
- * The disclosure chevron. Points down when the group is expanded and rotates a
- * quarter-turn to point right when collapsed — mirroring `Accordion`'s chevron,
- * and honouring reduced-motion.
- */
 export const groupChevron = style({
   width: "1em",
   height: "1em",
@@ -146,37 +105,20 @@ export const groupChevron = style({
   },
 });
 
-/** The parenthesised row count trailing a group's label — lighter, so the label leads. */
 export const groupCount = style({
   color: vars.text.color.neutral.mid,
   fontWeight: vars.text.weight.default,
 });
 
-/**
- * A leaf cell's value in the merged label column (`groupDisplay="merge"`),
- * indented by nesting depth (via {@link groupDepthVar}) to line up one level in
- * from its group header. Inline padding only, so text alignment is untouched.
- */
 export const mergeLeafLabel = style({
   paddingInlineStart: `calc(${groupDepthVar} * ${vars.space[4]})`,
 });
 
-/**
- * A leading utility column's cell, shared by the selection and expander columns.
- * `width: 1%` + `nowrap` shrinks the column to its control; the {@link cell}
- * recipe supplies padding, divider, and alignment.
- */
 export const utilityCell = style({
   width: "1%",
   whiteSpace: "nowrap",
 });
 
-/**
- * The real `<input type="checkbox">` for each selection box, laid transparently
- * over the presentational `InternalCheckbox` so clicks land on the input. Hidden
- * via `opacity` (not `display`) so it stays focusable, and floored at the WCAG 2.2
- * 24px tap target so it can extend into the cell's padding.
- */
 export const selectionInput = style({
   position: "absolute",
   top: "50%",
@@ -189,11 +131,6 @@ export const selectionInput = style({
   opacity: 0,
 });
 
-/**
- * A row's expanded detail panel — the full-width `<td>` (spanning every column via
- * `colSpan`) on the extra `<tr>` beneath an expanded row. A neutral fill and
- * bottom divider set it off as a nested block.
- */
 export const detailCell = style({
   padding: vars.space[4],
   backgroundColor: vars.surface.color.neutral.low.default.bgc,
