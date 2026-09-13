@@ -33,13 +33,8 @@ export default meta;
 
 type Story = StoryObj<typeof SegmentedBar>;
 
-/**
- * The default: shares are computed from the values, and segments that don't name
- * a colour take the default intent sequence.
- */
 export const Basic: Story = {};
 
-/** Every track thickness. The legend and its swatches stay put. */
 export const Sizes: Story = {
   parameters: { controls: { disable: true } },
   render: (args) => (
@@ -51,10 +46,6 @@ export const Sizes: Story = {
   ),
 };
 
-/**
- * Explicit `intent`s — for a breakdown where the parts *mean* something
- * (healthy / at-risk / failed), rather than being arbitrary categories.
- */
 export const Intents: Story = {
   args: {
     label: "Build results",
@@ -68,10 +59,6 @@ export const Intents: Story = {
   },
 };
 
-/**
- * `total` sets the denominator. Here the segments account for 62 of a 100-unit
- * quota, so the remaining 38% stays unfilled track.
- */
 export const WithTotal: Story = {
   args: {
     label: "Storage",
@@ -86,10 +73,6 @@ export const WithTotal: Story = {
   },
 };
 
-/**
- * The per-segment `color` escape hatch: for fills that are *data* — colours a
- * user picked for their own categories — which the palette can't enumerate.
- */
 export const CustomColors: Story = {
   args: {
     label: "This week by area",
@@ -102,7 +85,6 @@ export const CustomColors: Story = {
   },
 };
 
-/** Just the bar: `showLegend={false}` hides the legend visually, never from assistive tech. */
 export const WithoutLegend: Story = {
   args: {
     label: "Capacity",
@@ -111,7 +93,6 @@ export const WithoutLegend: Story = {
   },
 };
 
-/** `showPercent` / `showValue` trim the legend down to the columns you want. */
 export const LegendColumns: Story = {
   tags: ["!dev"],
   args: {
@@ -120,7 +101,6 @@ export const LegendColumns: Story = {
   },
 };
 
-/** No visible label — the legend list is named for assistive tech via `aria-label`. */
 export const AriaLabelOnly: Story = {
   tags: ["!dev"],
   args: {
@@ -129,7 +109,6 @@ export const AriaLabelOnly: Story = {
   },
 };
 
-/** A single segment fills the whole track, keeping both pill ends. */
 export const SingleSegment: Story = {
   tags: ["!dev"],
   args: {
@@ -138,10 +117,6 @@ export const SingleSegment: Story = {
   },
 };
 
-/**
- * A long tail: a sliver keeps a minimum width so it stays visible, and a
- * zero-value segment drops out of the track but keeps its legend row at 0%.
- */
 export const SliversAndZeroes: Story = {
   args: {
     label: "Traffic by source",

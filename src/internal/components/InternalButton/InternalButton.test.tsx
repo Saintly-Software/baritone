@@ -3,12 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { InternalButton, type InternalButtonHtmlAttrs } from "./index";
 
-/**
- * The public-API surface (intents, loading, disabled tooltip, the `render` prop,
- * the rejected `aria-label`, …) is covered through `Button.test.tsx`, since
- * `Button` is a thin pass-through. These tests focus on what's unique to
- * `InternalButton`: the `htmlAttrs` seam used by the overlay triggers/closes.
- */
 describe("InternalButton", () => {
   it("renders consumerProps into a <button> (the Button pass-through)", () => {
     render(<InternalButton consumerProps={{ children: "Save" }} />);

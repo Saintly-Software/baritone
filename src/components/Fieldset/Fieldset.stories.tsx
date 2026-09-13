@@ -42,7 +42,6 @@ function ContactFields() {
   );
 }
 
-/** Toggle `disabled` in the controls panel to disable the whole group at once. */
 export const Playground: Story = {
   render: (args) => (
     <Fieldset {...args}>
@@ -52,7 +51,6 @@ export const Playground: Story = {
   ),
 };
 
-/** Enabled and disabled side by side — every nested control follows the group. */
 export const DisabledPropagation: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 32 }}>
@@ -70,11 +68,6 @@ export const DisabledPropagation: Story = {
   ),
 };
 
-/**
- * Nesting composes: the outer fieldset is disabled, so its controls stay
- * disabled even though the inner fieldset isn't itself disabled. An inner
- * fieldset can add to, but never undo, an outer's disabled state.
- */
 export const Nested: Story = {
   render: () => (
     <Fieldset disabled>
@@ -88,10 +81,6 @@ export const Nested: Story = {
   ),
 };
 
-/**
- * Label the group with an existing element via `aria-labelledby` instead of a
- * `FieldsetLegend`.
- */
 export const ExternalLabel: Story = {
   render: () => (
     <>

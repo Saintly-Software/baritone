@@ -2,10 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { InaccessibleTooltip } from "./index";
 
-/**
- * Interaction coverage for `InaccessibleTooltip`. The `play` hovers the trigger,
- * waits past the open delay, and asserts the portaled hint appears in the body.
- */
 const meta: Meta<typeof InaccessibleTooltip> = {
   title: "Interaction Tests/InaccessibleTooltip",
   component: InaccessibleTooltip,
@@ -14,7 +10,6 @@ export default meta;
 
 type Story = StoryObj<typeof InaccessibleTooltip>;
 
-/** Hovering the trigger reveals the (portaled) supplemental hint. */
 export const OpensOnHover: Story = {
   render: () => (
     <div style={{ padding: 64 }}>

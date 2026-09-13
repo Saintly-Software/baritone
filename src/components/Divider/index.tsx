@@ -12,11 +12,6 @@ import { composeRefs } from "../../utils/render";
 import { Text, type TextProps } from "../Text";
 import { dividerRoot, dividerWeightVar } from "./divider.css";
 
-/**
- * Dev-only guard: warn when `thickness` names a `--borderWidth-<name>` the active
- * theme never published, so the rule silently falls back to the `thin` width. Mirrors
- * the typographic guards in `InternalText`.
- */
 function warnIfBorderWidthUnset(el: HTMLElement | null, name: string): void {
   warnIfVarUnset(
     el,
@@ -30,65 +25,32 @@ function warnIfBorderWidthUnset(el: HTMLElement | null, name: string): void {
   );
 }
 
-/** Which way the rule runs. */
 export type DividerOrientation = "horizontal" | "vertical";
 
-/**
- * Where the label sits along the divider. Inline-logical (RTL-safe) for a
- * horizontal divider; `start` is the top of a vertical one.
- */
 export type DividerLabelPosition = "start" | "center" | "end";
 
-/** Overrides for the divider's inner pieces. */
 export interface DividerSlotProps {
-  /**
-   * Props for the label `Text`. Partial — you're layering onto the slot's own
-   * defaults, so `slotProps={{ label: { size: "md" } }}` re-tunes just the
-   * size and leaves the rest alone.
-   */
   label?: Partial<TextProps>;
 }
 
 export interface DividerProps
   extends Omit<React.HTMLAttributes<HTMLElement>, "color">, MarginProps {
-  /** Which way the rule runs. Default `horizontal`. */
   orientation?: DividerOrientation;
-  /** Colour intent of the rule. Default `neutral`. */
+
   intent?: Intent;
-  /** Prominence of the rule within its intent. Default `low`. */
+
   saliency?: Saliency;
-  /**
-   * Rule thickness, by name. Built-ins `thin` (default) and `thick` are always
-   * available; other names are consumer-defined via the theme's `borderWidths`
-   * option + `BorderWidthRegistry`. Resolves to `var(--borderWidth-<name>)`.
-   */
+
   thickness?: BorderWidthName;
-  /**
-   * Label sat in a gap in the rule ("OR", "Today"). A string renders as a `Text`
-   * *and* becomes the divider's accessible name; pass `aria-label` alongside any
-   * other node to name it (a `separator`'s children are presentational, so its
-   * name can only come from `aria-label` / `aria-labelledby`).
-   */
+
   children?: React.ReactNode;
-  /** Where the label sits along the divider. Default `center`. */
+
   labelPosition?: DividerLabelPosition;
-  /** Overrides for the label `Text`. */
+
   slotProps?: DividerSlotProps;
   ref?: React.Ref<HTMLDivElement>;
 }
 
-/**
- * A rule that separates content, built on base-ui's `Separator`
- * (`role="separator"` + `aria-orientation`). Coloured by `intent` × `saliency`
- * (default `neutral`/`low`, the quiet hairline); `thickness` picks a `borderWidth`
- * and the margin props space it. Pass `children` to label it (positioned by
- * `labelPosition`); a `vertical` divider stretches to a flex row's height.
- *
- * @example
- * <Divider my="4" />
- * <Divider>or</Divider>
- * <Divider orientation="vertical" mx="2" />
- */
 export function Divider({
   orientation = "horizontal",
   intent = "neutral",

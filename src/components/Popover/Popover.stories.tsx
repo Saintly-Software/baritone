@@ -31,12 +31,6 @@ export default meta;
 
 type Story = StoryObj<typeof Popover>;
 
-/**
- * Every region at once — a `Popover.Header` (title + subtitle), a body, and a
- * `Popover.Footer` whose `.Close` buttons dismiss the surface — all driven by
- * the toolbar controls (`padding`, `side`, `align`). Opens by default so the
- * surface is visible on load.
- */
 export const KitchenSink: Story = {
   args: { defaultOpen: true },
   render: (args) => (

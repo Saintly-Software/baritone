@@ -1,60 +1,28 @@
 import * as React from "react";
 import type { FormState } from "../../theme/constants";
 
-/**
- * The slice of a TanStack Form field the adapters read — a structural type, not
- * the 23-generic `FieldApi`. A real `field` is assignable to it, and `TValue`
- * flows through so a value-type mismatch is a compile error. Also keeps the
- * components testable with a hand-rolled stub.
- */
 export interface FieldLike<TValue> {
-  /** The field's name/path — forwarded to the control's `name` for form submission. */
   readonly name: string;
-  /** Commit a new value (TanStack's `field.handleChange`). */
+
   handleChange: (value: TValue) => void;
-  /** Mark the field blurred/touched (TanStack's `field.handleBlur`). */
+
   handleBlur: () => void;
   readonly state: {
-    /** The current value. */
     readonly value: TValue;
     readonly meta: {
-      /**
-       * The field's validation errors, as produced by whatever validators the
-       * consumer configured — strings, or Standard-Schema `{ message }` issues,
-       * or React nodes. {@link firstFieldErrorMessage} extracts a display string.
-       */
       readonly errors: readonly unknown[];
-      /**
-       * Whether the field has been interacted with. TanStack sets this on any
-       * change (via `setFieldValue`) *and* on blur (`handleBlur`), so it reads as
-       * "the user has engaged this field" — the default gate for showing errors.
-       */
+
       readonly isTouched: boolean;
     };
   };
 }
 
-/** When a field's errors become visible. See {@link resolveFieldDisplay}. */
 export type ShowErrorsWhen = "touched" | "always";
 
-/** The extra, field-binding-only props every `Form*` adapter adds to its control. */
 export interface FormFieldExtras {
-  /**
-   * When to surface validation errors as the control's `state="invalid"` +
-   * `helpText`. `"touched"` (default) waits until the user has interacted with the
-   * field — TanStack marks it touched on the first change or on blur — matching
-   * its idiomatic UX; `"always"` shows them immediately, even before any input.
-   */
   showErrorsWhen?: ShowErrorsWhen;
 }
 
-/**
- * Reduce a field's error list to the first message worth showing. Handles the
- * shapes validators actually emit: bare strings, `{ message }` issues (Standard
- * Schema, Zod, Valibot, …), numbers/booleans, and React nodes. Empty strings and
- * `null`/`undefined` entries are skipped, so a "no error" slot never renders a
- * blank help line.
- */
 export function firstFieldErrorMessage(
   errors: readonly unknown[] | undefined,
 ): React.ReactNode | undefined {
@@ -66,12 +34,6 @@ export function firstFieldErrorMessage(
   return undefined;
 }
 
-/**
- * Whether a field's error list holds a *real* error — any entry that isn't a
- * "no error" placeholder (`null` / `undefined` / `false` / `""`), which TanStack
- * leaves in `meta.errors` for validators that passed. Flips a control to `invalid`
- * even when {@link firstFieldErrorMessage} can't extract a display string.
- */
 export function hasFieldError(errors: readonly unknown[] | undefined): boolean {
   if (errors == null) return false;
   return errors.some((error) => error != null && error !== false && error !== "");
@@ -90,29 +52,15 @@ function errorToNode(error: unknown): React.ReactNode | undefined {
   return undefined;
 }
 
-/** The control props {@link resolveFieldDisplay} derives from a field's state. */
 export interface FieldDisplay {
   state: FormState;
   helpText: React.ReactNode;
 }
 
-/**
- * The read-only slice {@link resolveFieldDisplay} needs — just the error list and
- * touched flag. Taking this instead of `FieldLike<unknown>` sidesteps the latter's
- * invariance (its `handleChange` makes `FieldLike<string>` unassignable to
- * `FieldLike<unknown>`), so a field of *any* value type flows in.
- */
 export interface FieldErrorSource {
   state: { meta: { errors: readonly unknown[]; isTouched: boolean } };
 }
 
-/**
- * Translate a field's validation state into the `{ state, helpText }` a Baritone
- * form control renders. On a visible error (gated by `showErrorsWhen`) the control
- * goes `invalid` and the message replaces `helpText`; otherwise the caller's own
- * `helpText` / `state` pass through. Invalidity is decided by {@link hasFieldError},
- * so a non-standard error object still flips to `invalid`, just without help text.
- */
 export function resolveFieldDisplay(
   field: FieldErrorSource,
   options: FormFieldExtras & { helpText?: React.ReactNode; state?: FormState },

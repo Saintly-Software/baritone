@@ -48,11 +48,6 @@ export default meta;
 
 type Story = StoryObj<typeof Overflow>;
 
-/**
- * A toolbar of actions in a deliberately narrow box, so the row overflows: a
- * scrollbar, edge fades, and floating nav buttons appear. Drive `orientation`,
- * `scrollBy`, and `gap` from the toolbar.
- */
 export const Playground: Story = {
   render: (args) => (
     <Overflow
@@ -69,7 +64,6 @@ export const Playground: Story = {
   ),
 };
 
-/** The headline case: a horizontal row of controls that scrolls instead of wrapping. */
 export const Horizontal: Story = {
   render: () => (
     <Overflow aria-label="Formatting toolbar" style={{ maxWidth: 420 }}>
@@ -82,7 +76,6 @@ export const Horizontal: Story = {
   ),
 };
 
-/** Page mode: each nav-button click jumps by one whole viewport. */
 export const PageMode: Story = {
   name: "Horizontal (page mode)",
   render: () => (
@@ -94,7 +87,6 @@ export const PageMode: Story = {
   ),
 };
 
-/** Vertical orientation: the controls stack and scroll within a bounded height. */
 export const Vertical: Story = {
   render: () => (
     <Overflow orientation="vertical" aria-label="Filters" style={{ maxHeight: 260, width: 200 }}>
@@ -107,7 +99,6 @@ export const Vertical: Story = {
   ),
 };
 
-/** When everything fits, there's no scrollbar, no fade, and no nav buttons. */
 export const FitsNoOverflow: Story = {
   name: "Fits (no overflow chrome)",
   render: () => (

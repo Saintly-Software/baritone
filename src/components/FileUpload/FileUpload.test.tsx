@@ -4,28 +4,24 @@ import { describe, expect, it, type Mock, vi } from "vitest";
 import { type FileInfo } from "../FileList";
 import { FileUpload, matchesAccept } from "./index";
 
-/** The underlying file `<input>` (it's visually hidden, so query it directly). */
 function getInput(container: HTMLElement): HTMLInputElement {
   const input = container.querySelector('input[type="file"]');
   if (input == null) throw new Error("file input not found");
   return input as HTMLInputElement;
 }
 
-/** The dropzone is the input's parent; drag/drop handlers live on it. */
 function getZone(container: HTMLElement): HTMLElement {
   const zone = getInput(container).parentElement;
   if (zone == null) throw new Error("dropzone not found");
   return zone;
 }
 
-/** The first argument of the most recent call to a mocked `onChange`. */
 function lastArg<T>(mock: Mock): T {
   const last = mock.mock.calls.at(-1);
   if (last == null) throw new Error("onChange was not called");
   return last[0] as T;
 }
 
-/** A minimal DataTransfer-ish payload for fireEvent drag/drop events. */
 function dragData(files: File[]) {
   return {
     dataTransfer: {

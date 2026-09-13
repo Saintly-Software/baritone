@@ -4,12 +4,6 @@ import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { InternalGenericButtonAnchor } from "./index";
 
-/**
- * The primitive's whole job is element-selection + disabled semantics, so the
- * tests are organised by the four things it can render (button, external link,
- * internal/router link, disabled-link div) plus the AGENTS.md focusable-disabled
- * convention.
- */
 describe("InternalGenericButtonAnchor", () => {
   describe("button (no href / no render)", () => {
     it("renders a non-submitting <button> by default", () => {

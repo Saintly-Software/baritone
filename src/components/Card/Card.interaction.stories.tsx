@@ -4,12 +4,6 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Text } from "../Text";
 import { Card } from "./index";
 
-/**
- * Interaction coverage for `Card`'s interactive arms. A clickable card's title is
- * the one real `<button>`; a collapsible card's header hosts a disclosure trigger.
- * The `play` functions drive each and assert the behaviour. (Linkable cards are a
- * pure render assertion, covered by the `linkable` unit tests in `Card.test.tsx`.)
- */
 const meta: Meta<typeof Card> = {
   title: "Interaction Tests/Card",
   component: Card,
@@ -18,7 +12,6 @@ export default meta;
 
 type Story = StoryObj<typeof Card>;
 
-/** A clickable card: activating the title button fires `onClick` (here a counter). */
 export const ClickableActivates: Story = {
   render: () => {
     function ClickableCard() {
@@ -47,7 +40,6 @@ export const ClickableActivates: Story = {
   },
 };
 
-/** A collapsible card: the disclosure trigger (labelled by the title) toggles the panel. */
 export const CollapsibleToggles: Story = {
   render: () => (
     <Card

@@ -34,29 +34,20 @@ import {
   selectValue,
 } from "./select.css";
 
-/** One selectable option. */
 export interface SelectOption {
-  /** Visible text (also the trigger's rendered value when chosen). */
   label: string;
-  /** The value committed to `onChange`. */
+
   value: string;
-  /** Dim + skip this option. Modelled with `aria-disabled` (base-ui), not the
-   * native attribute, so it stays in the listbox's accessibility tree. */
+
   disabled?: boolean;
 }
 
-/** A titled group of options, rendered under a heading in the popup. */
 export interface SelectOptionGroup {
-  /** The group heading, shown above the options and associated as their label. */
   label: string;
-  /** The options within this group. */
+
   options: ReadonlyArray<SelectOption>;
 }
 
-/**
- * `options` accepts either a flat list or an array of `{ label, options }`
- * groups; this narrows which one you passed.
- */
 function isGrouped(
   options: ReadonlyArray<SelectOption> | ReadonlyArray<SelectOptionGroup>,
 ): options is ReadonlyArray<SelectOptionGroup> {
@@ -64,90 +55,57 @@ function isGrouped(
   return first != null && "options" in first;
 }
 
-/**
- * Props common to both the single- and multi-select variants. The
- * `value`/`onChange`/`multiple` triad is intentionally *not* here — it's split
- * across the discriminated union below so the shapes can't drift (single is one
- * `string | null`, multiple is a `string[]`).
- */
 interface SelectBaseProps extends Omit<
   React.HTMLAttributes<HTMLButtonElement>,
   "color" | "defaultValue" | "value" | "onChange" | "aria-label" | "aria-labelledby"
 > {
-  /**
-   * The options to choose from. Pass a flat `SelectOption[]`, or an array of
-   * `{ label, options }` groups to render options under headings.
-   */
   options: ReadonlyArray<SelectOption> | ReadonlyArray<SelectOptionGroup>;
-  /** Supplementary text beneath the control, wired as its accessible description. */
+
   helpText?: React.ReactNode;
-  /** Validation state. `invalid` maps to negative, `valid` to positive. */
+
   state?: FormState;
-  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+
   labelPosition?: LabelPosition;
-  /** Per-slot overrides for the label / help-text pieces. */
+
   slotProps?: FieldSlotProps;
-  /** Control size. Default `md`. */
+
   size?: Size;
-  /** Text shown on the trigger when nothing is selected. */
+
   placeholder?: string;
-  /**
-   * Dim + lock the control. Modelled with `aria-disabled` + base-ui's `readOnly`
-   * (not the native `disabled` attribute), so the trigger stays keyboard-focusable
-   * — e.g. it can still be tabbed to and explain itself — while choosing a
-   * different option is vetoed.
-   */
+
   disabled?: boolean;
-  /** Mark the field as required (sets `aria-required`). */
+
   required?: boolean;
-  /** Identifies the field when submitted as part of a form. */
+
   name?: string;
-  /** Show a busy spinner in place of the chevron and veto interaction. */
+
   loading?: boolean;
-  /** Hide the clear button even when there's a value to clear. */
+
   hideClearButton?: boolean;
-  /** Extra className merged onto the trigger. */
+
   className?: string;
-  /** Ref to the trigger `<button>`. */
+
   ref?: React.Ref<HTMLButtonElement>;
 }
 
-/** Single-select: one `string` value (or `null` when empty). */
 export interface SingleSelectProps extends SelectBaseProps {
   multiple?: false;
-  /** The selected value, or `null` when nothing is selected (controlled). */
+
   value: string | null;
-  /**
-   * Called with the newly selected value (or `null` when cleared) first and the
-   * raw DOM event that drove the change second (base-ui's native `event`, or the
-   * clear button's).
-   */
+
   onChange: (value: string | null, event: Event) => void;
 }
 
-/** Multi-select: an array of values. */
 export interface MultipleSelectProps extends SelectBaseProps {
   multiple: true;
-  /** The selected values (controlled). */
+
   value: string[];
-  /**
-   * Called with the next selected-values array (after a toggle or clear) first
-   * and the raw DOM event that drove the change second (base-ui's native
-   * `event`, or the clear button's).
-   */
+
   onChange: (value: string[], event: Event) => void;
 }
 
-/**
- * Discriminated on `multiple`, so `value` and `onChange` stay in lockstep:
- * `multiple` ⇒ arrays, otherwise a lone `string | null`. TypeScript narrows both
- * from the single `multiple` flag, so a mismatched pair is a compile error.
- * Intersected with `FieldLabellingProps`, so exactly one of `label` /
- * `aria-label` / `aria-labelledby` may name the trigger.
- */
 export type SelectProps = (SingleSelectProps | MultipleSelectProps) & FieldLabellingProps;
 
-/** Decorative disclosure chevron; the trigger carries the a11y semantics. */
 function ChevronGlyph() {
   return (
     <svg
@@ -167,7 +125,6 @@ function ChevronGlyph() {
   );
 }
 
-/** Decorative clear glyph (✕); the clear button carries the a11y label. */
 function ClearGlyph() {
   return (
     <svg
@@ -187,7 +144,6 @@ function ClearGlyph() {
   );
 }
 
-/** Trailing check on the selected option (single-select). */
 function CheckGlyph() {
   return (
     <svg
@@ -207,27 +163,6 @@ function CheckGlyph() {
   );
 }
 
-/**
- * A "form control" element type for picking from a list, built on base-ui's
- * `Select` and composing `Field`. Takes a `state`, not intent/saliency.
- * Discriminated on `multiple`: single commits one `string | null`, multi a
- * `string[]` (each option showing an `InternalCheckbox`). Both offer a clear
- * button (`hideClearButton` to suppress). Disabled uses `aria-disabled` +
- * `readOnly` so the trigger stays focusable.
- *
- * @example
- * const [value, setValue] = React.useState<string | null>(null);
- * <Select
- *   label="Fruit"
- *   placeholder="Pick one"
- *   value={value}
- *   onChange={setValue}
- *   options={[
- *     { label: "Apple", value: "apple" },
- *     { label: "Banana", value: "banana" },
- *   ]}
- * />
- */
 export function Select(props: SelectProps) {
   const {
     multiple = false,

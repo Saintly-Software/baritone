@@ -8,31 +8,16 @@ import { Flex, type FlexAlign, type FlexDirection, type FlexJustify } from "../F
 import { Grid, type GridAreas, type GridJustify, type GridTracks } from "../Grid";
 import { listItem, listReset } from "./list.css";
 
-/**
- * How the list arranges its items: `flex` (default) delegates to `Flex`, `grid`
- * to `Grid`. The discriminant of {@link ListProps} — the layout-specific props
- * only type-check for the matching `layout`.
- */
 export type ListLayout = "flex" | "grid";
 
 export interface ListItemProps extends Omit<React.LiHTMLAttributes<HTMLLIElement>, "color"> {
-  /**
-   * Place this item in a named grid area — sets `grid-area`. Only meaningful when
-   * the parent `List` uses `layout="grid"` with `areas`; ignored otherwise. A
-   * consumer `style.gridArea` wins.
-   */
   area?: string;
-  /** Render as a different element/component (base-ui `render` pattern). Defaults to `<li>`. */
+
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
 }
 
-/**
- * List.Item — one list cell, a semantic `<li>` (with explicit `role="listitem"`,
- * since Safari drops it under `list-style: none`). For grid layouts, `area` places
- * it in a named region; `render` changes the element.
- */
 function ListItem({ area, render, className, style, children, ref, ...rest }: ListItemProps) {
   return useRender({
     render,
@@ -50,95 +35,43 @@ function ListItem({ area, render, className, style, children, ref, ...rest }: Li
 
 ListItem.displayName = "List.Item";
 
-/** Props shared by both layouts. */
 interface ListBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "color" | "children"> {
-  /**
-   * Render an ordered list (`<ol>`) rather than `<ul>`, communicating sequence to
-   * assistive tech. Only changes the semantic element; the marker is stripped
-   * either way. Default `false`.
-   */
   ordered?: boolean;
-  /**
-   * The rows to render, each a `<List.Item>` element. Keyed by each entry's
-   * `key` (falling back to its index — supply `key` for a stable identity).
-   * Falsy entries (`null` / `false` / `undefined`) are skipped, so a row can be
-   * included conditionally inline (`cond && <List.Item …/>`).
-   */
+
   items: Array<React.ReactElement<ListItemProps> | null | false | undefined>;
   ref?: React.Ref<HTMLElement>;
 }
 
-/** `List` with `layout="flex"` (the default) — exposes the `Flex` layout knobs. */
 export interface ListFlexProps extends ListBaseProps {
   layout?: "flex";
-  /** Gap between items, from the spacing scale (responsive-capable). */
+
   gap?: Atoms["gap"];
-  /** Flow direction — `row` or `column`. */
+
   direction?: FlexDirection;
-  /** Cross-axis `align-items`, in friendly terms (`start` / `center` / …). */
+
   align?: FlexAlign;
-  /** Main-axis `justify-content`, in friendly terms (`start` / `between` / …). */
+
   justify?: FlexJustify;
-  /** Allow items to wrap onto multiple lines. */
+
   wrap?: boolean;
 }
 
-/** `List` with `layout="grid"` — exposes the `Grid` layout knobs. */
 export interface ListGridProps extends ListBaseProps {
   layout: "grid";
-  /** Gap between tracks, from the spacing scale (responsive-capable). */
+
   gap?: Atoms["gap"];
-  /** `grid-template-columns`. A number becomes that many equal columns. */
+
   columns?: GridTracks;
-  /** `grid-template-rows`. A number becomes that many equal rows. */
+
   rows?: GridTracks;
-  /**
-   * `grid-template-areas`, minus the footguns. Pass an array of rows or a
-   * multi-line string of cell names; place items with `List.Item`'s `area`.
-   */
+
   areas?: GridAreas;
-  /** Main-axis `justify-content`, in friendly terms (`start` / `between` / …). */
+
   justify?: GridJustify;
 }
 
-/**
- * List props — a discriminated union on `layout`. With `layout="flex"` (the
- * default) the `Flex` knobs (`direction` / `align` / `gap`) are available; with
- * `layout="grid"` the `Grid` knobs (`columns` / `areas` / `gap`) are.
- */
 export type ListProps = ListFlexProps | ListGridProps;
 
-/**
- * A semantic list (`<ul>`, or `<ol>` when `ordered`) laid out with flexbox or CSS
- * grid. `layout="flex"` (default) delegates to `Flex`, `layout="grid"` to `Grid`;
- * a discriminated union on `layout` so only the active layout's knobs type-check.
- * Provide the rows as the `items` array of `<List.Item>`s. The default list
- * margin/padding/marker are reset, and the list keeps a real `role="list"`
- * (Safari strips it under `list-style: none`).
- *
- * @example
- * // Flex: a spaced vertical stack.
- * <List
- *   direction="column"
- *   gap="2"
- *   items={[<List.Item key="1">First</List.Item>, <List.Item key="2">Second</List.Item>]}
- * />
- *
- * @example
- * // Grid: three equal columns from a data array.
- * <List
- *   layout="grid"
- *   columns={3}
- *   gap="4"
- *   items={rows.map((r) => <List.Item key={r.id}>{r.label}</List.Item>)}
- * />
- */
-/**
- * Every layout prop widened into one shape, so a single destructure strips all of
- * them from `...rest` regardless of the active layout — otherwise the inactive
- * layout's props would leak onto the native element. Guards the JS callers the
- * discriminated union can't reach (Storybook retains controls across a `layout` switch).
- */
 type ResolvedListProps = ListBaseProps & {
   layout?: ListLayout;
   gap?: Atoms["gap"];
@@ -212,7 +145,6 @@ function ListRoot(props: ListProps) {
 
 ListRoot.displayName = "List";
 
-/** List with its `Item` part attached. */
 export const List = Object.assign(ListRoot, {
   Item: ListItem,
 });

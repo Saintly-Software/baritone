@@ -536,14 +536,12 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
   });
 });
 
-/** The checkbox inside the body row that renders the given cell text. */
 function rowCheckbox(name: string): HTMLInputElement {
   const row = screen.getByText(name).closest("tr");
   if (!row) throw new Error(`No row for ${name}`);
   return within(row).getByRole("checkbox");
 }
 
-/** A controlled selectable table that surfaces its selection for assertions. */
 function ControlledSelection({ initial = [] }: { initial?: string[] }) {
   const [selected, setSelected] = React.useState<string[]>(initial);
   return (

@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Lockup } from "./index";
 
-/** A simple placeholder mark drawn with `currentColor`. */
 function DiamondGlyph() {
   return (
     <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true">
@@ -73,20 +72,10 @@ export const TintedIcon: Story = {
   },
 };
 
-/**
- * `hideText` collapses the text column visually while leaving it in the
- * accessible tree, so the lockup reads as icon-only but a screen reader still
- * announces "Baritone — Design system".
- */
 export const IconOnly: Story = {
   args: { hideText: true },
 };
 
-/**
- * `slotProps.title.level` switches the title from a `Text` to a semantic
- * `Heading` (here an `<h2>`) for the document outline, without changing how it
- * looks. Compare with the default text title above it.
- */
 export const HeadingTitleVsTextTitle: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 16 }}>
@@ -101,10 +90,6 @@ export const HeadingTitleVsTextTitle: Story = {
   ),
 };
 
-/**
- * `slots` replaces a slot's content entirely with a ReactNode, bypassing the
- * primitive the lockup would otherwise build.
- */
 export const SlotOverrides: Story = {
   args: {
     slots: {

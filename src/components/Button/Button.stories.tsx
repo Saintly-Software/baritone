@@ -104,12 +104,6 @@ export const IconOnly: Story = {
   },
 };
 
-/**
- * `width` stretches or shrinks the button's box within its container. A button
- * is `inline-flex` and hugs its label by default (`fit`-like); `fill` takes the
- * container's full width — the full-width form submit or mobile CTA — keeping
- * the label centred.
- */
 export const Width: Story = {
   render: () => (
     <div

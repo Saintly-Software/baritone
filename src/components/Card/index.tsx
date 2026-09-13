@@ -42,132 +42,76 @@ import {
   cardSelectedRecipe,
 } from "./card.css";
 
-/** Semantic root element for a Card. */
 export type CardElement = "div" | "section" | "main" | "article";
 
-/**
- * How a `Card` tells its `Card.Header` to host a card-level control: the overlay
- * link/button of an interactive card, or the disclosure trigger of a collapsible
- * one.
- */
 type CardHeaderControl =
   | {
       kind: "link";
       href?: string;
       target?: string;
       rel?: string;
-      /** Plain anchor `download` attribute — forwarded when the control is a link. */
+
       download?: boolean | string;
       onClick?: React.MouseEventHandler<HTMLElement>;
       render?: RenderProp;
       disabled?: boolean;
-      /**
-       * Selected state for the overlay control. A clickable card's title button
-       * becomes a toggle (`aria-pressed`); a linkable card's title link marks
-       * itself the current choice (`aria-current`). `undefined` leaves both off.
-       */
+
       selected?: boolean;
     }
   | { kind: "collapsible"; disabled?: boolean };
 
-/** What `Card.Header` renders as, plus the card-level control it should host. */
 interface CardHeaderContextValue {
-  /**
-   * The card-level control the header hosts — the interactive title (link /
-   * button) or the collapsible disclosure trigger — or `null` for a static card.
-   */
   control: CardHeaderControl | null;
-  /**
-   * The element `Card.Header` renders — a real `<header>` only when the card root
-   * is sectioning content (`article` / `section` / `main`); otherwise a `<div>`,
-   * so it isn't promoted to the page's `banner` landmark.
-   */
+
   element: "header" | "div";
 }
 
 const CardHeaderContext = React.createContext<CardHeaderContextValue | null>(null);
 
-/** Card roots that scope a descendant `<header>` to the section rather than the page. */
 const SECTIONING_CARD_ELEMENTS = new Set<CardElement>(["article", "section", "main"]);
 
-/** Props shared by every Card mode (static / clickable / linkable). */
 interface CardBaseProps extends Omit<React.HTMLAttributes<HTMLElement>, "onClick"> {
-  /** Semantic root element. Default `div`. (Ignored for a `collapsible` card.) */
   as?: CardElement;
-  /** Default `neutral` (most surfaces are neutral). */
+
   intent?: Intent;
-  /** `low` (neutral surface) or `high` (washed). Default `high`. */
+
   saliency?: SurfaceSaliency;
-  /**
-   * The card's header. Pass a `<Card.Header />` for full control, or a plain
-   * **string** shorthand (rendered as a `Heading`, gaining the `subheader` /
-   * `action` / `level` props below).
-   */
+
   header?: React.ReactNode;
-  /**
-   * Subtitle beneath a **string** `header`. Ignored when `header` is a
-   * `Card.Header` element (put the subtitle on that instead).
-   */
+
   subheader?: React.ReactNode;
-  /**
-   * A supporting paragraph in the card body, beneath the header and above any
-   * `children`. Body copy, unlike the header caption `subheader`.
-   */
+
   description?: React.ReactNode;
-  /**
-   * A trailing control at the end of a **string** `header`'s row. Ignored when
-   * `header` is a `Card.Header` element.
-   */
+
   action?: React.ReactNode;
-  /** Document-outline level for a **string** `header`'s title. Default `3`. */
+
   level?: HeadingLevel;
-  /** Rendered below the content — typically a `<Card.Footer />`. */
+
   footer?: React.ReactNode;
-  /**
-   * Marks the card as chosen with an accented edge. Visual only on a static card
-   * (the real control inside conveys state); on an interactive card the state is
-   * announced on the overlay control (`aria-pressed` / `aria-current`).
-   */
+
   selected?: boolean;
-  /** Uses `aria-disabled` rather than `disabled`. */
+
   disabled?: boolean;
-  /** Render as a different element/component (base-ui `render` pattern). */
+
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;
   children?: React.ReactNode;
 }
 
-/**
- * A static, non-interactive Card (the default). Pick the semantic element with
- * `as`, or make it a single collapsible disclosure with `collapsible`.
- */
 export interface CardStaticProps extends CardBaseProps {
-  /**
-   * Make the card a single collapsible disclosure: the content + `footer` collapse
-   * away, leaving the `header` (which grows a disclosure button) visible. Built on
-   * base-ui's `Collapsible`.
-   */
   collapsible?: boolean;
-  /** Controlled open state (collapsible only). */
+
   open?: boolean;
-  /** Uncontrolled initial open state (collapsible only). Default closed. */
+
   defaultOpen?: boolean;
-  /** Called when the open state changes (collapsible only). */
+
   onOpenChange?: (open: boolean) => void;
   href?: never;
   onClick?: never;
   download?: never;
 }
 
-/**
- * A clickable Card. The card stays a container; its `Card.Header` *title* becomes
- * the one real `<button>`, stretched across the whole surface via an `::after`
- * overlay (https://inclusive-components.design/cards/), so nested controls stay
- * independently clickable. Give it a `header={<Card.Header title=… />}` for the
- * control's accessible name.
- */
 export interface CardClickableProps extends CardBaseProps {
-  /** Activation handler. Turns the header title into the card's `<button>`. Swallowed while disabled. */
   onClick: React.MouseEventHandler<HTMLElement>;
   href?: never;
   download?: never;
@@ -177,29 +121,13 @@ export interface CardClickableProps extends CardBaseProps {
   onOpenChange?: never;
 }
 
-/**
- * A linkable Card. Its `Card.Header` *title* becomes the one real `<a>`,
- * stretched across the whole surface. For router integration keep `href` (the
- * resolved URL and no-JS fallback) and pass the router's link via `render`.
- *
- * @example
- * <Card
- *   href={buildPath({ to: "/posts/$id", params: { id } })}
- *   render={<RouterLink to="/posts/$id" params={{ id }} />}
- *   header={<Card.Header title="Read the post" />}
- * />
- */
 export interface CardLinkableProps extends CardBaseProps {
-  /** Destination. Turns the header title into the card's `<a>`. */
   href: string;
-  /** Anchor target (e.g. `_blank`). */
+
   target?: string;
-  /** Anchor rel (e.g. `noreferrer`). */
+
   rel?: string;
-  /**
-   * Plain anchor `download` attribute: `true` downloads the resource (using the
-   * server-provided or URL filename), or a string sets the suggested filename.
-   */
+
   download?: boolean | string;
   onClick?: never;
   collapsible?: never;
@@ -208,16 +136,8 @@ export interface CardLinkableProps extends CardBaseProps {
   onOpenChange?: never;
 }
 
-/**
- * Card props — a discriminated union over the three modes:
- *   - **static** (default): a container; pick its element with `as`, or make it
- *     `collapsible`,
- *   - **clickable**: pass `onClick` to render the whole card as a `<button>`,
- *   - **linkable**: pass `href` to render the whole card as an `<a>`.
- */
 export type CardProps = CardStaticProps | CardClickableProps | CardLinkableProps;
 
-/** Internal superset (all modes' props readable) for the root implementation. */
 type InternalCardProps = CardBaseProps & {
   as?: CardElement;
   href?: string;
@@ -231,19 +151,6 @@ type InternalCardProps = CardBaseProps & {
   onOpenChange?: (open: boolean) => void;
 };
 
-/**
- * A "surface" element type with two saliency levels (low/high) and neutral intent
- * by default. Composes `header` / `footer` props (or `<Card.Header>` /
- * `<Card.Footer>` children) around its content, plus `<Card.Bleed>`,
- * `<Card.Divider>`, and `<Card.Rows>`; pick the semantic element with `as`.
- *
- * For a simple "title + supporting text + action" card, pass a **string**
- * `header` with `subheader`, `description`, and/or `action` — `children` is then
- * optional.
- *
- * Pass `onClick` or `href` to make the card clickable/linkable (the title becomes
- * the overlay control), or `collapsible` for a disclosure card.
- */
 function CardRoot(props: CardProps) {
   const {
     intent,
@@ -364,12 +271,6 @@ function CardRoot(props: CardProps) {
   );
 }
 
-/**
- * The card's single primary control — the header title as the one real
- * link/button, stretched over the whole card via `cardOverlayLink`'s `::after`.
- * Disabled uses `aria-disabled` + swallowed activation (per AGENTS.md); an
- * optional `render` carries a router link.
- */
 function CardPrimaryLink({
   link,
   children,
@@ -412,18 +313,16 @@ function CardPrimaryLink({
   });
 }
 
-/** State a `Card.Header` icon render function can branch on — empty today. */
 export type CardHeaderIconState = Record<string, never>;
 
 export interface CardHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  /** Title text/content, rendered as a `Heading`. */
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** Document-outline level for the rendered title heading. Default `3`. */
+
   level?: HeadingLevel;
-  /** Leading glyph before the title — a bare glyph, an `<Icon>`, or a render function. */
+
   icon?: IconSlot<CardHeaderIconState>;
-  /** Trailing element after the title — typically a status `<Chip>`. */
+
   chip?: React.ReactNode;
   ref?: React.Ref<HTMLDivElement>;
 }
@@ -496,7 +395,6 @@ function CardHeader({
 }
 
 export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** Actions row, typically a `<Card.Actions>`, rendered after any `children`. */
   actions?: React.ReactNode;
   ref?: React.Ref<HTMLDivElement>;
 }
@@ -511,20 +409,14 @@ function CardFooter({ actions, className, children, ref, ...rest }: CardFooterPr
 }
 
 export interface CardActionsProps {
-  /** Which side the actions anchor to. Default `end`. */
   side?: "start" | "end";
-  /** The buttons (or other controls) to render in the row. */
+
   actions: React.ReactNode[];
-  /** Extra className merged onto the row. */
+
   className?: string;
   ref?: React.Ref<HTMLDivElement>;
 }
 
-/**
- * Card.Actions — a row of buttons anchored to one `side` (`start` / `end`). Pass
- * the buttons as the `actions` array. Drop it into a `<Card.Footer actions>` or a
- * rich `<Card.Row>`'s `actions`.
- */
 function CardActions({ side, actions, className, ref }: CardActionsProps) {
   return (
     <div ref={ref} className={cx(cardActionsRecipe({ side }), className)}>
@@ -534,18 +426,12 @@ function CardActions({ side, actions, className, ref }: CardActionsProps) {
 }
 
 export interface CardRowsProps {
-  /** The rows — each a `<Card.Row>`. */
   rows: React.ReactNode[];
-  /** Extra className merged onto the `<dl>`. */
+
   className?: string;
   ref?: React.Ref<HTMLDListElement>;
 }
 
-/**
- * Card.Rows — a description list (`<dl>`) of `<Card.Row>`s, passed as a child of
- * `Card` (unlike the `header` / `footer` props). Each row is a term/value pair or
- * a rich title/subtitle + actions row.
- */
 function CardRows({ rows, className, ref }: CardRowsProps) {
   return (
     <dl ref={ref} className={cx(cardRows, className)}>
@@ -554,35 +440,25 @@ function CardRows({ rows, className, ref }: CardRowsProps) {
   );
 }
 
-/** A plain term/value row: a `<dt>` label and its `<dd>` value. */
 interface CardRowTermProps {
-  /** The label, rendered in the `<dt>`. */
   term: React.ReactNode;
-  /** The value, rendered end-aligned in the `<dd>`. */
+
   description: React.ReactNode;
   title?: never;
   subtitle?: never;
   actions?: never;
 }
 
-/** A rich row: a title (+ optional subtitle) on the start, actions on the end. */
 interface CardRowRichProps {
-  /** The row title, rendered in the `<dt>`. */
   title: React.ReactNode;
-  /** Optional supporting line beneath the title. */
+
   subtitle?: React.ReactNode;
-  /** Trailing actions, rendered in the `<dd>` — typically a `<Card.Actions>`. */
+
   actions: React.ReactNode;
   term?: never;
   description?: never;
 }
 
-/**
- * Card.Row — one row of a `<Card.Rows>`. Two shapes (a discriminated union):
- *   - **term/value** — pass `term` + `description` for a `<dt>`/`<dd>` pair,
- *   - **rich** — pass `title` (+ optional `subtitle`) + `actions` for a row with
- *     a title stack on the start and actions on the end.
- */
 function CardRow(props: CardRowProps) {
   const { term, description, title, subtitle, actions } = props as {
     term?: React.ReactNode;
@@ -623,32 +499,16 @@ function CardRow(props: CardRowProps) {
 export type CardRowProps = CardRowTermProps | CardRowRichProps;
 
 export interface CardLayoutProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  /**
-   * Primary line, rendered as a `Heading` for the document outline. Omit it for a
-   * description-only layout — then the `subtitle` is the row's text.
-   */
   title?: React.ReactNode;
-  /** Document-outline level for the `title` heading. Default `3`. */
+
   level?: HeadingLevel;
-  /**
-   * Supporting line — a subtitle beneath the `title`, or (with no `title`) the
-   * layout's own description text.
-   */
+
   subtitle?: React.ReactNode;
-  /** Trailing control — typically a `<Button>` or a `<Card.Actions>`. */
+
   action?: React.ReactNode;
   ref?: React.Ref<HTMLDivElement>;
 }
 
-/**
- * Card.Layout — a split content row for "some text + a trailing action" shapes,
- * passed as a child of `Card`. The body-content sibling of a rich `Card.Row`,
- * rendered as a plain `<div>`.
- *
- * @deprecated Prefer the string-`header` shorthand on `Card` itself — `header`
- * (string) + `subheader` / `description` / `action` — which covers the same
- * shapes and wires up an interactive card's overlay link.
- */
 function CardLayout({
   title,
   level = 3,
@@ -699,7 +559,6 @@ function CardDivider({ className, ref, ...rest }: CardDividerProps) {
   return <hr ref={ref} className={cx(cardDivider, className)} {...rest} />;
 }
 
-/** Decorative disclosure chevron; the trigger carries the a11y semantics. */
 function ChevronGlyph({ className }: { className?: string }) {
   return (
     <svg
@@ -730,7 +589,6 @@ CardLayout.displayName = "Card.Layout";
 CardBleed.displayName = "Card.Bleed";
 CardDivider.displayName = "Card.Divider";
 
-/** Card with its compound parts attached. */
 export const Card = Object.assign(CardRoot, {
   Header: CardHeader,
   Footer: CardFooter,

@@ -6,12 +6,6 @@ import { Badge } from "./index";
 
 const classesOf = (element: Element) => element.className.split(/\s+/);
 
-/**
- * The classes that mark each `interactive` variant, diffed out of the recipe
- * itself rather than hardcoded — the hashes move whenever the recipe does. The
- * `control` variant hovers/actives unconditionally; `auto` defers to the
- * rendered element.
- */
 const variantMarkers = (variant: "control" | "auto") => {
   const other = variant === "control" ? "auto" : "control";
   const mine = componentIntentRecipe({ interactive: variant }).split(/\s+/);

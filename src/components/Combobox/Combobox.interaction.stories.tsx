@@ -40,11 +40,6 @@ const COLORS: ComboboxOption[] = [
   { value: "pink", label: "Pink" },
 ];
 
-/**
- * Interaction coverage for `Combobox`. The `play` functions open the popup and
- * exercise multi-select highlighting, list virtualization, the free-text "Add"
- * row, and the async error state.
- */
 const meta: Meta<typeof Combobox> = {
   title: "Interaction Tests/Combobox",
   component: Combobox,
@@ -60,10 +55,6 @@ export default meta;
 
 type Story = StoryObj<typeof Combobox>;
 
-/**
- * A pre-seeded multi-select: a chosen option stays `aria-selected` while hovering
- * another only sets `data-highlighted` — highlighting never changes selection.
- */
 export const MultiSelectHighlight: Story = {
   name: "Multi-select highlight",
   render: () => (
@@ -84,10 +75,6 @@ export const MultiSelectHighlight: Story = {
   },
 };
 
-/**
- * The grid view lays options out as a 2-D grid: `ArrowDown` steps a whole row down
- * (not to the next item), and `Enter` selects the highlighted cell.
- */
 export const GridNavigation: Story = {
   name: "Grid navigation",
   render: () => (
@@ -117,10 +104,6 @@ export const GridNavigation: Story = {
   },
 };
 
-/**
- * Grouped options render under labelled headings; typing filters within each
- * group and drops groups with no remaining matches.
- */
 export const GroupedFiltering: Story = {
   name: "Grouped filtering",
   render: () => <Combobox label="Fruit" options={GROUPED} placeholder="Search fruit…" />,
@@ -143,7 +126,6 @@ export const GroupedFiltering: Story = {
   },
 };
 
-/** A 5,000-option list virtualizes: only a small window of rows is mounted. */
 export const VirtualizedWindowing: Story = {
   name: "Virtualized windowing",
   render: () => {
@@ -168,7 +150,6 @@ export const VirtualizedWindowing: Story = {
   },
 };
 
-/** With `freeText`, typing a value not in the list offers an "Add" row to commit it. */
 export const FreeTextAddRow: Story = {
   name: "Free-text add row",
   render: () => (
@@ -184,10 +165,6 @@ export const FreeTextAddRow: Story = {
   },
 };
 
-/**
- * A mocked async search that stays pending: typing kicks off `onSearch`, the popup
- * enters `loading` and holds there so the snapshot captures the in-menu spinner.
- */
 export const AsyncSearchLoading: Story = {
   name: "Async search loading",
   render: () => <PendingSearchExample />,
@@ -201,7 +178,6 @@ export const AsyncSearchLoading: Story = {
   },
 };
 
-/** A mocked async search: querying "xyz" resolves to the error copy, replacing the spinner. */
 export const AsyncSearchError: Story = {
   name: "Async search error",
   render: () => <AsyncExample />,

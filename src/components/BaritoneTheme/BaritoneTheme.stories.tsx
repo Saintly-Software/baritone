@@ -21,10 +21,6 @@ const BRANDS = {
   },
 } satisfies Record<string, BrandSeed>;
 
-/**
- * A little slice of product UI. It knows nothing about the theme — every colour,
- * font, and radius comes from the nearest `BaritoneTheme` above it.
- */
 function DemoPanel() {
   const [notify, setNotify] = React.useState(true);
   return (
@@ -58,11 +54,6 @@ function DemoPanel() {
   );
 }
 
-/**
- * A themed "page" frame: builds tokens from a brand seed and applies them with
- * `BaritoneTheme`. The frame reads its own background/text straight from the
- * contract vars — which now resolve to *this* scope's branded values.
- */
 function BrandFrame({
   name,
   seed,

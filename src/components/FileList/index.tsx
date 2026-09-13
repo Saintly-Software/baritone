@@ -6,32 +6,16 @@ import { Chip, type ChipAdornmentProps } from "../Chip";
 import { fileListChip, fileListItem, fileListRoot } from "./fileList.css";
 import { FileTypeIcon } from "./fileTypeIcon";
 
-/**
- * One entry in a `FileList`: a stable, unique `id` paired with the underlying
- * browser `File`. The `id` (not the `File`) is what `onRemove` / `onDownload`
- * report and what keys the rendered chip, so it must be unique within the list
- * and stable across renders.
- */
 export interface FileInfo {
-  /** Unique within the list. Used as the React key and the `onRemove` argument. */
   id: string;
-  /** The underlying browser `File` (its `name` is shown on the chip). */
+
   file: File;
-  /**
-   * Mark this file as downloadable: when the list has an `onDownload` handler,
-   * the chip gains a download affordance that calls back with this `id`.
-   */
+
   download?: boolean;
 }
 
-/** Layout direction of the chip list. */
 export type FileListOrientation = "vertical" | "horizontal";
 
-/**
- * Group-level state shared with every `FileList.Item` — the chip colour/size,
- * the disabled flag, and the `onRemove` / `onDownload` handlers. An item may
- * override the visual props locally; the handlers always come from the list.
- */
 interface FileListContextValue {
   disabled: boolean;
   intent?: Intent;
@@ -43,7 +27,6 @@ interface FileListContextValue {
 
 const FileListContext = React.createContext<FileListContextValue>({ disabled: false });
 
-/** A small "×" glyph; decorative — the remove adornment carries the accessible name. */
 function CloseGlyph() {
   return (
     <svg
@@ -62,7 +45,6 @@ function CloseGlyph() {
   );
 }
 
-/** A downward arrow into a tray; decorative — the download adornment names itself. */
 function DownloadGlyph() {
   return (
     <svg
@@ -83,35 +65,21 @@ function DownloadGlyph() {
 }
 
 export interface FileListItemProps {
-  /** Unique within the list. Used as the `onRemove` / `onDownload` argument. */
   id: string;
-  /** The underlying browser `File` (its `name` is shown on the chip). */
+
   file: File;
-  /**
-   * Mark this file as downloadable: when the list has an `onDownload` handler,
-   * the chip gains a download affordance that calls back with this `id`.
-   */
+
   download?: boolean;
-  /** Override the list's chip intent for just this item. */
+
   intent?: Intent;
-  /** Override the list's chip saliency for just this item. */
+
   saliency?: Saliency;
-  /** Override the list's chip size for just this item. */
+
   size?: Size;
-  /**
-   * Disable just this item (dim it, make its adornment buttons inert but still
-   * focusable). Defaults to the list's `disabled`.
-   */
+
   disabled?: boolean;
 }
 
-/**
- * FileList.Item — one file row. Rendered automatically for each `FileInfo` when
- * you pass the `items` array, or dropped in as `children` for element-composed
- * lists (`<FileList><FileList.Item … /></FileList>`). It inherits the list's
- * chip colour/size, disabled state, and the `onRemove` / `onDownload` handlers
- * through context; the visual props can be overridden per item.
- */
 function FileListItem({ id, file, download, intent, saliency, size, disabled }: FileListItemProps) {
   const ctx = React.useContext(FileListContext);
   const itemDisabled = disabled ?? ctx.disabled;
@@ -157,63 +125,26 @@ function FileListItem({ id, file, download, intent, saliency, size, disabled }: 
 }
 
 export interface FileListProps extends Omit<React.HTMLAttributes<HTMLUListElement>, "children"> {
-  /**
-   * The files to render, each a `FileInfo` (`id` + `File`, optionally
-   * `download`). Keyed by `id`. Omit and pass `FileList.Item` `children` instead
-   * for element-composed lists.
-   */
   items?: FileInfo[];
-  /**
-   * Element-composed form: `FileList.Item` elements. Ignored when `items` is
-   * provided (the data array wins).
-   */
+
   children?: React.ReactNode;
-  /** Stack the chips in a column (default) or flow them in a wrapping row. */
+
   orientation?: FileListOrientation;
-  /**
-   * When provided, each chip gets a remove "×" button that calls back with the
-   * item's `id`. Omit for a read-only list.
-   */
+
   onRemove?: (id: string) => void;
-  /**
-   * When provided, each item marked `download` gets a download button that calls
-   * back with the item's `id`. Omit (or leave items un-`download`ed) for no
-   * download affordance.
-   */
+
   onDownload?: (id: string) => void;
-  /**
-   * Dim and disable the whole list. Adornment buttons stay keyboard-focusable
-   * but inert (modelled with `aria-disabled`, never the native attribute).
-   */
+
   disabled?: boolean;
-  /** Chip colour intent. Defaults to the `Chip` default (`neutral`). */
+
   intent?: Intent;
-  /** Chip saliency. Defaults to the `Chip` default (`mid`). */
+
   saliency?: Saliency;
-  /** Chip size. Defaults to the `Chip` default (`md`). */
+
   size?: Size;
   ref?: React.Ref<HTMLUListElement>;
 }
 
-/**
- * Renders a set of files as a list of chips, stacked (default) or horizontal.
- * Provide files as the `items` array (each a `FileInfo`), or compose rows with
- * `FileList.Item` children. `onRemove` gives each chip a remove "×" and
- * `onDownload` gives `download` items a download button — both called with the
- * file's `id`. Each row is a `Chip` with a file-type icon and filename in a
- * semantic `<ul>`/`<li>`; `disabled` dims the list (chips stay focusable).
- *
- * @example
- * const [files, setFiles] = React.useState<FileInfo[]>([
- *   { id: "1", file: someFile, download: true },
- * ]);
- * <FileList
- *   items={files}
- *   orientation="horizontal"
- *   onRemove={(id) => setFiles((cur) => cur.filter((f) => f.id !== id))}
- *   onDownload={(id) => downloadFile(files.find((f) => f.id === id))}
- * />
- */
 function FileListRoot({
   items,
   children,
@@ -245,7 +176,6 @@ function FileListRoot({
 FileListRoot.displayName = "FileList";
 FileListItem.displayName = "FileList.Item";
 
-/** FileList with its `Item` part attached. */
 export const FileList = Object.assign(FileListRoot, {
   Item: FileListItem,
 });

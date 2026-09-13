@@ -15,110 +15,60 @@ import {
 
 type RootProps = React.ComponentProps<typeof BaseDialog.Root>;
 
-/**
- * The intents a `ConfirmationModal` (and its confirm button) may take. A
- * confirmation is a deliberate, often destructive, decision — so the palette is
- * limited to the intents that read as "weigh this": `secondary` (a considered
- * choice), `warning` (proceed with care), and `negative` (destructive, the
- * default). `primary`/`positive`/`neutral` are intentionally excluded — a confirm
- * dialog should never look like a happy-path call to action.
- */
 export type ConfirmationIntent = Extract<Intent, "secondary" | "warning" | "negative">;
 
-/**
- * Props for the confirm/cancel buttons. Built on the solid `Button` API, minus a
- * few knobs the dialog owns: `appearance` (always solid), and `children` is
- * optional here (each action has a sensible default label).
- */
 type ActionProps = Omit<SolidButtonProps, "appearance" | "children"> & {
-  /** Visible label. Defaults to `"Confirm"` / `"Cancel"`. */
   children?: React.ReactNode;
 };
 
-/** Confirm-button props — its `intent` is limited to {@link ConfirmationIntent}. */
 export type ConfirmationConfirmProps = Omit<ActionProps, "intent"> & {
   intent?: ConfirmationIntent;
 };
 
-/** Cancel-button props — the full `Button` intent range (defaults to `neutral`). */
 export type ConfirmationCancelProps = ActionProps;
 
-/**
- * The already-resolved presentational state a `ConfirmationModal` icon render
- * function branches on. The dialog tints its icon by intent, so it exposes that
- * one resolved value.
- */
 export interface ConfirmationModalIconState {
-  /** The dialog's resolved intent — the colour the icon is tinted to. */
   intent: ConfirmationIntent;
 }
 
 export interface ConfirmationModalProps {
-  /**
-   * The title, shown beside the icon. Rendered through `Modal.Header` (base-ui's
-   * `Dialog.Title`), so it also becomes the dialog's accessible name.
-   */
   header?: React.ReactNode;
-  /** The body — the question/consequences. Typically a short `Text` paragraph. */
+
   children?: React.ReactNode;
-  /**
-   * A leading glyph, tinted to `intent`. Pass a bare glyph
-   * (`icon={<TriangleAlert />}`, auto-wrapped in `Icon`), an explicit `<Icon>` for
-   * a custom size/label, or a `(props, state) => …` render function for full
-   * control. Its colour is overridden to match the intent; omit for no icon.
-   */
+
   icon?: IconSlot<ConfirmationModalIconState>;
-  /**
-   * Colour of the icon and the confirm button. Default `negative` (the common
-   * destructive-confirmation case). See {@link ConfirmationIntent}.
-   */
+
   intent?: ConfirmationIntent;
-  /**
-   * The confirm action is in flight: the confirm button shows a spinner, and the
-   * dialog locks (Escape, cancel, and the confirm button can't dismiss it) until
-   * it clears. Pair with a controlled `open` so you can close it when the work
-   * resolves.
-   */
+
   loading?: boolean;
-  /**
-   * Locks the dialog: both buttons go inert (`aria-disabled`, still focusable)
-   * and it can't be dismissed by any means. Use for an unmet precondition.
-   */
+
   disabled?: boolean;
-  /**
-   * Confirm-button props (label, `intent`, `disabledReason`, `onClick`, …). Its
-   * `onClick` runs before the dialog closes; call `event.preventDefault()` in it
-   * to keep the dialog open (e.g. to run async work and close it yourself later).
-   */
+
   confirm?: ConfirmationConfirmProps;
-  /** Cancel-button props. Its `onClick` runs as the dialog dismisses. */
+
   cancel?: ConfirmationCancelProps;
-  /** Shorthand for `confirm={{ onClick }}`. Chained after `confirm.onClick`. */
+
   handleConfirm?: React.MouseEventHandler<HTMLButtonElement>;
-  /** Shorthand for `cancel={{ onClick }}`. Chained after `cancel.onClick`. */
+
   handleCancel?: React.MouseEventHandler<HTMLButtonElement>;
-  /**
-   * The element that opens the dialog — typically a `<ConfirmationModal.Trigger>`.
-   * Required in uncontrolled use; optional when driving `open` yourself.
-   */
+
   trigger?: React.ReactNode;
-  /** Controlled open state. */
+
   open?: RootProps["open"];
-  /** Uncontrolled initial open state. */
+
   defaultOpen?: RootProps["defaultOpen"];
-  /** Called when the open state changes (base-ui signature). */
+
   onOpenChange?: RootProps["onOpenChange"];
-  /** Max width of the panel. Default `sm` — confirmations are compact. */
+
   size?: ModalProps["size"];
-  /** Document-outline level for the title heading. Default `3`. */
+
   level?: React.ComponentProps<typeof Modal.Header>["level"];
-  /** Extra className merged onto the popup surface. */
+
   className?: string;
-  /** Ref to the popup surface element. */
+
   ref?: React.Ref<HTMLDivElement>;
 }
 
-/** Chain two optional event handlers, calling `a` before `b`. */
 function chain<E>(
   a: ((event: E) => void) | undefined,
   b: ((event: E) => void) | undefined,
@@ -131,25 +81,6 @@ function chain<E>(
   };
 }
 
-/**
- * A focused confirm/cancel dialog built on {@link Modal}, to gate a deliberate
- * action behind an explicit "are you sure?". A thin preset: the surface, focus,
- * and ARIA come from `Modal`, plus an intent-tinted `icon` + `header`, the body,
- * and a footer with cancel and (intent-coloured) confirm buttons. Give it actions
- * via `confirm`/`cancel` or the `handleConfirm`/`handleCancel` shorthands. Confirm
- * dismisses by default; for an async confirm, `event.preventDefault()` and close
- * it yourself (`loading` locks the dialog meanwhile).
- *
- * @example
- * <ConfirmationModal
- *   trigger={<ConfirmationModal.Trigger intent="negative">Delete</ConfirmationModal.Trigger>}
- *   header="Delete project?"
- *   handleConfirm={() => deleteProject()}
- *   confirm={{ children: "Delete" }}
- * >
- *   <Text render={<p />}>This permanently removes the project and its data.</Text>
- * </ConfirmationModal>
- */
 function ConfirmationModalRoot({
   header,
   children,
@@ -254,21 +185,12 @@ function ConfirmationModalRoot({
 
 ConfirmationModalRoot.displayName = "ConfirmationModal";
 
-/**
- * The trigger that opens the dialog — a `Button` (all of Button's intents /
- * saliencies / sizes / icons). Must be passed via `<ConfirmationModal trigger=…>`
- * so it sits inside the dialog's context. The same part as `Modal.Trigger`.
- */
 export type ConfirmationModalTriggerProps = ButtonProps;
 
 function ConfirmationModalTrigger(props: ConfirmationModalTriggerProps) {
   return <Modal.Trigger {...props} />;
 }
 
-/**
- * A control that dismisses the dialog from the body — e.g. an inline "keep it".
- * The same part as `Modal.Close`.
- */
 export type ConfirmationModalCloseProps = ButtonProps;
 
 function ConfirmationModalClose(props: ConfirmationModalCloseProps) {
@@ -278,7 +200,6 @@ function ConfirmationModalClose(props: ConfirmationModalCloseProps) {
 ConfirmationModalTrigger.displayName = "ConfirmationModal.Trigger";
 ConfirmationModalClose.displayName = "ConfirmationModal.Close";
 
-/** ConfirmationModal with its compound parts attached. */
 export const ConfirmationModal = Object.assign(ConfirmationModalRoot, {
   Trigger: ConfirmationModalTrigger,
   Close: ConfirmationModalClose,

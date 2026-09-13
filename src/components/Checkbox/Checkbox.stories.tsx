@@ -89,7 +89,6 @@ const stateRows: StateRow[] = [
   },
 ];
 
-/** Every state (rows) against the rendered control (right column). */
 export const States: Story = {
   render: () => (
     <table style={{ borderCollapse: "collapse" }}>
@@ -122,7 +121,6 @@ export const States: Story = {
   ),
 };
 
-/** `sm` / `md` / `lg`, each shown checked. */
 export const Sizes: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 16 }}>

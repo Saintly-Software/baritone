@@ -3,19 +3,6 @@ import { expect, userEvent, waitFor } from "storybook/test";
 import { Button } from "../Button";
 import { Overflow } from "./index";
 
-/**
- * Interaction coverage for `Overflow`. These run in a real browser (unlike the
- * jsdom unit tests), so base-ui can measure overflow, toggle its
- * `data-overflow-*` attributes, and the nav buttons can reveal + actually
- * scroll. Each story asserts three things: a nav button shows only when its edge
- * overflows, both edges reveal/hide at the extremes, and clicking a button moves
- * the viewport the right way.
- *
- * To stay deterministic, each story reaches an extreme with an *instant* manual
- * scroll (no animation in flight), asserts the button states there, and only
- * *then* clicks a nav button — so a button-driven smooth scroll is never racing
- * against a manual one.
- */
 const meta: Meta<typeof Overflow> = {
   title: "Interaction Tests/Overflow",
   component: Overflow,
@@ -31,7 +18,6 @@ const Actions = () =>
     </Button>
   ));
 
-/** The scrolling viewport and the two nav buttons for a labelled area. */
 const parts = (canvasElement: HTMLElement, label: string) => {
   const viewport = canvasElement.querySelector<HTMLElement>(`[aria-label="${label}"]`)!;
   const root = viewport.closest<HTMLElement>("[data-orientation]")!;
@@ -44,11 +30,6 @@ const parts = (canvasElement: HTMLElement, label: string) => {
 
 const opacity = (el: HTMLElement) => getComputedStyle(el).opacity;
 
-/**
- * Horizontal, item mode: only the end button shows at the start; jumping to the
- * end flips which button shows; clicking the (now visible) start button scrolls
- * back toward the start.
- */
 export const Horizontal: Story = {
   render: () => (
     <Overflow aria-label="Toolbar" style={{ maxWidth: 360 }}>
@@ -77,7 +58,6 @@ export const Horizontal: Story = {
   },
 };
 
-/** Page mode: one click advances by (about) a whole viewport width. */
 export const HorizontalPage: Story = {
   render: () => (
     <Overflow aria-label="Pager" scrollBy="page" style={{ maxWidth: 360 }}>
@@ -97,11 +77,6 @@ export const HorizontalPage: Story = {
   },
 };
 
-/**
- * Vertical, item mode: only the down button shows at the top; jumping to the
- * bottom flips which button shows; clicking the (now visible) up button scrolls
- * back toward the top.
- */
 export const Vertical: Story = {
   render: () => (
     <Overflow orientation="vertical" aria-label="Filters" style={{ maxHeight: 200, width: 220 }}>

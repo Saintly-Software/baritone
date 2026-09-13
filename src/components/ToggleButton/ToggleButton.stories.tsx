@@ -37,14 +37,8 @@ export default meta;
 
 type Story = StoryObj<typeof ControlledToggle>;
 
-/** Click to toggle. Off renders as a `low`-saliency ghost; on fills in. */
 export const Basic: Story = {};
 
-/**
- * Uncontrolled + state-aware slots: no `value`/`onChange` wiring, and both the
- * glyph and the accessible name flip with the pressed state. `defaultValue` seeds
- * the initial state.
- */
 export const UncontrolledWithCallbackSlots: Story = {
   tags: ["!dev"],
   render: () => (

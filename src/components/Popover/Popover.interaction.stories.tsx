@@ -5,11 +5,6 @@ import { Popover } from "./index";
 
 type SideName = "top" | "right" | "bottom" | "left";
 
-/**
- * Interaction coverage for `Popover`. Each story opens the popover from its
- * trigger and asserts the portaled dialog — the regions it renders, or the side
- * it resolves to (`data-side`), placed with room so it never collision-flips.
- */
 const meta: Meta<typeof Popover> = {
   title: "Interaction Tests/Popover",
   component: Popover,
@@ -18,7 +13,6 @@ export default meta;
 
 type Story = StoryObj<typeof Popover>;
 
-/** Opens the fully featured popover and asserts every region rendered in the portaled dialog. */
 export const KitchenSink: Story = {
   render: () => (
     <Popover
@@ -49,7 +43,6 @@ export const KitchenSink: Story = {
   },
 };
 
-/** A single popover, centred with room, that resolves to the requested `side` with no flip. */
 function makeSideStory(side: SideName): Story {
   return {
     render: () => (

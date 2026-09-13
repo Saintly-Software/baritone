@@ -16,25 +16,15 @@ import { useIsFieldDisabled } from "../Fieldset";
 import { srOnly } from "../SrOnly/srOnly.css";
 import { checkboxGroupRoot } from "./checkboxGroup.css";
 
-/** Layout direction of the option list. */
 export type CheckboxGroupOrientation = "vertical" | "horizontal";
 
-/**
- * Shared config the group hands every `CheckboxGroupItem` via context — its
- * `size` / `state` / `disabled` and the current selection + toggle. The selection
- * is type-erased to `unknown` here; the public `CheckboxGroupItem` is bound to the
- * group's `T` at the type level.
- */
 interface CheckboxGroupItemContextValue {
   size: Size;
   state: FormState;
   disabled: boolean;
-  /** The currently-selected values (membership decides each box's checked state). */
+
   value: readonly unknown[];
-  /**
-   * Add (`checked`) or remove (`!checked`) a value from the selection, carrying
-   * the raw DOM event through to the group's `onChange`.
-   */
+
   toggle: (value: unknown, checked: boolean, event: Event) => void;
 }
 
@@ -47,34 +37,19 @@ const CheckboxGroupItemContext = React.createContext<CheckboxGroupItemContextVal
 });
 
 export interface CheckboxGroupItemProps<T> {
-  /**
-   * The value this option contributes to the selection array. Constrained to the
-   * group's `T`, so a typo or a value outside the union/enum is a compile error.
-   */
   value: T;
-  /**
-   * The visible label. Defaults to the stringified `value` (handy for string
-   * enums); pass children for anything richer or for non-string values.
-   */
+
   children?: React.ReactNode;
-  /**
-   * Disable just this option (the group can also be disabled as a whole).
-   * Modelled with `aria-disabled` + `readOnly` so the box stays focusable.
-   */
+
   disabled?: boolean;
-  /** Extra className merged onto the item's `<label>`. */
+
   className?: string;
 }
 
-/** Best-effort default label so `<CheckboxGroupItem value="email" />` renders "email". */
 function defaultLabel(value: unknown): React.ReactNode {
   return typeof value === "string" || typeof value === "number" ? String(value) : null;
 }
 
-/**
- * One checkbox option — the same row as the standalone `Checkbox`, but with its
- * checked state and toggling driven by the group's selection array via context.
- */
 function CheckboxGroupItem<T>({
   value,
   children,
@@ -115,74 +90,37 @@ function CheckboxGroupItem<T>({
 }
 
 interface CheckboxGroupBaseProps<T> {
-  /** The currently selected values (controlled). Order is not significant. */
   value: T[];
-  /**
-   * Called whenever an option is ticked or unticked, with the next selection
-   * first and the raw DOM event that drove it second (base-ui's native `event`).
-   */
+
   onChange: (value: T[], event: Event) => void;
-  /**
-   * Render-prop children. Receives a `CheckboxGroupItem` already bound to this
-   * group's `T`, so every `<CheckboxGroupItem value={...} />` is type-checked
-   * against the same union/enum the group's `value` came from.
-   */
+
   children: (props: {
     CheckboxGroupItem: (props: CheckboxGroupItemProps<T>) => React.ReactNode;
   }) => React.ReactNode;
-  /** Validation state. `invalid` maps to negative, `valid` to positive. */
+
   state?: FormState;
-  /** Control size. Default `md`. */
+
   size?: Size;
-  /** Lay the options out in a column (default) or a row. */
+
   orientation?: CheckboxGroupOrientation;
-  /** Inline help under the options, wired to the group's `aria-describedby`. */
+
   helpText?: React.ReactNode;
-  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+
   labelPosition?: LabelPosition;
-  /** Per-slot overrides for the label / help-text pieces. */
+
   slotProps?: FieldSlotProps;
-  /**
-   * Mark the group required — shows the `Field`'s visual asterisk and announces
-   * "Required" via the group's description (`role="group"` can't take
-   * `aria-required`, and per-box would wrongly imply *every* box is required).
-   */
+
   required?: boolean;
-  /** Disable the whole group. */
+
   disabled?: boolean;
-  /** Points the group at extra descriptive text; combines with `helpText`. */
+
   "aria-describedby"?: string;
-  /** Extra className merged onto the group element. */
+
   className?: string;
 }
 
-/**
- * Named by exactly one of `label` / `aria-label` / `aria-labelledby` — they're
- * mutually exclusive (see `FieldLabellingProps`).
- */
 export type CheckboxGroupProps<T> = CheckboxGroupBaseProps<T> & FieldLabellingProps;
 
-/**
- * A "form control" element type for picking *any number* of values from a small
- * set — the multi-select sibling of `RadioGroup` (same `Field` layout and
- * type-safe compound API, but the selection is an array and each box is its own
- * tab stop). Generic over the value type `T` (inferred from `value`), handing the
- * render-prop a `CheckboxGroupItem` bound to that `T`. The group is a labelled
- * `role="group"`.
- *
- * @example
- * type Topic = "product" | "billing" | "security";
- * const [topics, setTopics] = React.useState<Topic[]>(["product"]);
- * <CheckboxGroup label="Email me about" value={topics} onChange={setTopics}>
- *   {({ CheckboxGroupItem }) => (
- *     <>
- *       <CheckboxGroupItem value="product">Product updates</CheckboxGroupItem>
- *       <CheckboxGroupItem value="billing">Billing</CheckboxGroupItem>
- *       <CheckboxGroupItem value="security">Security alerts</CheckboxGroupItem>
- *     </>
- *   )}
- * </CheckboxGroup>
- */
 export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
   const {
     value,

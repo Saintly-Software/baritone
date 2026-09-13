@@ -4,7 +4,6 @@ import { INTENTS, SALIENCIES, SIZES } from "../../theme/constants";
 import { Text } from "../Text";
 import { FileList, type FileInfo } from "./index";
 
-/** Storybook-only helper: a `FileInfo` with a real (empty) `File`. */
 const fileInfo = (id: string, name: string): FileInfo => ({ id, file: new File([], name) });
 
 const sample = (): FileInfo[] => [
@@ -35,7 +34,6 @@ export default meta;
 
 type Story = StoryObj<typeof FileList>;
 
-/** A captioned example, stacked label-over-content. */
 const Section = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
     <Text size="sm" saliency="low">
@@ -45,7 +43,6 @@ const Section = ({ label, children }: { label: string; children: React.ReactNode
   </div>
 );
 
-/** A list wired to local state: the × removes, and (when `downloadable`) the ↓ alerts. */
 const Interactive = ({
   initial,
   downloadable = false,
@@ -72,15 +69,6 @@ const Interactive = ({
   );
 };
 
-/**
- * Everything at once — each section reacts to the shared controls (orientation,
- * intent, saliency, size):
- * - **Interactive + downloadable**: mixed file-type icons, per-item `download`
- *   flags and an `intent` override; the × removes and flagged files get a ↓.
- * - **Read-only**: no `onRemove`, so no remove buttons.
- * - **Disabled**: chips dim and buttons go inert (but stay focusable).
- * - **Long file names**: ellipsize when the list is width-constrained.
- */
 export const KitchenSink: Story = {
   render: (args) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 440 }}>
@@ -135,18 +123,15 @@ export const Horizontal: Story = {
   render: (args) => <Interactive {...args} downloadable initial={sample()} />,
 };
 
-/** No `onRemove` → a read-only list, no remove buttons. */
 export const ReadOnly: Story = {
   args: { items: sample() },
 };
 
-/** The whole list disabled: chips dim, remove buttons stay focusable but inert. */
 export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => <Interactive {...args} initial={sample()} />,
 };
 
-/** One chip per file-type icon (image, audio, video, pdf, spreadsheet, archive, doc, generic). */
 export const FileTypes: Story = {
   args: {
     orientation: "horizontal",
@@ -163,11 +148,6 @@ export const FileTypes: Story = {
   },
 };
 
-/**
- * Per-item `download`: only files flagged `download` get a download button
- * (here the report and the export). `onRemove` stays keyed by `id`, so removing
- * one file leaves the rest — and their download buttons — intact.
- */
 export const Downloadable: Story = {
   render: (args) => {
     const [items, setItems] = React.useState((): FileInfo[] => [
@@ -189,11 +169,6 @@ export const Downloadable: Story = {
   },
 };
 
-/**
- * Element composition: instead of the `items` array, drop `FileList.Item`
- * children in directly — mix per-item overrides (`download`, `intent`) while the
- * list still supplies the shared handlers and defaults.
- */
 export const Composed: Story = {
   render: (args) => {
     const [rows, setRows] = React.useState(() => [
@@ -229,7 +204,6 @@ export const Composed: Story = {
   },
 };
 
-/** Long filenames ellipsize when the list is width-constrained. */
 export const LongFileNames: Story = {
   render: (args) => {
     const [items, setItems] = React.useState((): FileInfo[] => [

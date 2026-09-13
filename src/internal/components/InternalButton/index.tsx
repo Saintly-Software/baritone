@@ -28,20 +28,10 @@ import {
   textButtonRecipe,
 } from "./internalButton.css";
 
-/**
- * Raw HTML attributes merged onto the rendered `<button>` — the seam for base-ui's
- * `render` callback, so an overlay `Trigger`/`Close` hands its computed props
- * straight through with no extra wrapper. (`ref` rides along, per base-ui.)
- */
 export type InternalButtonHtmlAttrs = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   ref?: React.Ref<HTMLButtonElement>;
 };
 
-/**
- * The link seam: when any of these is set, `InternalGenericButtonAnchor` renders
- * the button chrome onto an `<a>`/router-link instead of a `<button>`. `Button`
- * never sets them; `Link`'s `appearance="button"` arm supplies them.
- */
 export interface InternalButtonAnchorSeam {
   render?: RenderProp;
   href?: string;
@@ -50,28 +40,11 @@ export interface InternalButtonAnchorSeam {
 }
 
 export interface InternalButtonProps {
-  /**
-   * The public `Button` API, exactly as a consumer set it — optionally widened
-   * with the {@link InternalButtonAnchorSeam} so a button-styled link (`Link`'s
-   * `appearance="button"`) can render the same chrome on an anchor.
-   */
   consumerProps: ButtonProps & InternalButtonAnchorSeam;
-  /**
-   * Host-supplied attributes merged onto the button — typically the props a
-   * base-ui `Trigger`/`Close` passes via its `render` callback. Merged the way
-   * base-ui itself merges: `className`/`style` are joined, refs composed, event
-   * handlers chained, and the consumer's own props win on conflict.
-   */
+
   htmlAttrs?: InternalButtonHtmlAttrs;
 }
 
-/**
- * The implementation behind the public `Button`, owning the button chrome (colour/
- * typography recipe, focus ring, loading spinner, disabled tooltip). The element
- * is rendered by `InternalGenericButtonAnchor`. The `htmlAttrs` seam lets overlay
- * components reuse a real button as their trigger/close via base-ui's `render`.
- * Internal — not exported.
- */
 export function InternalButton({ consumerProps, htmlAttrs }: InternalButtonProps) {
   const {
     appearance,

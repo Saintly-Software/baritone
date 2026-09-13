@@ -15,64 +15,43 @@ type RootProps = React.ComponentProps<typeof BasePopover.Root>;
 type PositionerProps = React.ComponentProps<typeof BasePopover.Positioner>;
 type PopupProps = React.ComponentProps<typeof BasePopover.Popup>;
 
-/** Internal padding from the spacing scale (mirrors `Card`'s `padding`). */
 export type PopoverPadding = "none" | "sm" | "md" | "lg";
 
 export interface PopoverProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  /**
-   * The element that opens the popover — typically a `<Popover.Trigger>`, which
-   * renders a `Button`. Rendered in place (anchored to the page), not inside the
-   * floating surface.
-   */
   trigger?: React.ReactNode;
-  /** Rendered above the content — typically a `<Popover.Header />`. */
+
   header?: React.ReactNode;
-  /** Rendered below the content — typically a `<Popover.Footer />`. */
+
   footer?: React.ReactNode;
-  /** Internal padding from the spacing scale. Default `md`. */
+
   padding?: PopoverPadding;
-  /** Controlled open state. */
+
   open?: RootProps["open"];
-  /** Uncontrolled initial open state. */
+
   defaultOpen?: RootProps["defaultOpen"];
-  /** Called when the open state changes (base-ui signature). */
+
   onOpenChange?: RootProps["onOpenChange"];
-  /**
-   * Imperative handle from `useOverlayHandle(Popover)`. Lets you close the
-   * popover from code — e.g. after an async action — without lifting `open`
-   * into component state. The declarative `.Close` part / controlled `open`
-   * keep working alongside it.
-   */
+
   handle?: RootProps["handle"];
-  /**
-   * Modal behaviour. Default `false`: the rest of the page stays interactive and
-   * clicking outside closes the popover. `true` locks scroll and traps focus.
-   */
+
   modal?: RootProps["modal"];
-  /** Which side of the trigger to place the popover (base-ui default `bottom`). */
+
   side?: PositionerProps["side"];
-  /** Alignment along the chosen side (base-ui default `center`). */
+
   align?: PositionerProps["align"];
-  /** Gap in px between the trigger and the popover. Default `8`. */
+
   sideOffset?: PositionerProps["sideOffset"];
-  /** Element to focus when the popover opens (base-ui default: first tabbable). */
+
   initialFocus?: PopupProps["initialFocus"];
-  /** Element to focus when the popover closes (base-ui default: the trigger). */
+
   finalFocus?: PopupProps["finalFocus"];
-  /** Extra className merged onto the popup surface. */
+
   className?: string;
-  /** Ref to the popup surface element. */
+
   ref?: React.Ref<HTMLDivElement>;
   children?: React.ReactNode;
 }
 
-/**
- * A "surface" element type shown in a floating layer, anchored to a trigger. Its
- * API mirrors `Card`: composes `header` / `footer` props (or subcomponent
- * children) with `padding` for internal spacing. Built on base-ui's `Popover`
- * (ARIA, focus, dismissal handled); opens from a `<Popover.Trigger>` via
- * `trigger`, and is non-modal — closes on outside click or Escape.
- */
 function PopoverRoot({
   trigger,
   header,
@@ -126,10 +105,6 @@ function PopoverRoot({
   );
 }
 
-/**
- * The trigger that opens the popover — a `Button`, wired by base-ui with
- * `aria-haspopup` / `aria-expanded`. Must be passed to `<Popover trigger={...} />`.
- */
 export type PopoverTriggerProps = ButtonProps;
 
 function PopoverTrigger(props: PopoverTriggerProps) {
@@ -140,11 +115,6 @@ function PopoverTrigger(props: PopoverTriggerProps) {
   );
 }
 
-/**
- * A control that closes the popover, for use inside a `<Popover.Footer>` (or the
- * content). Renders a `Button`; base-ui wires the dismissal. Defaults to a
- * neutral, low-saliency button — override via the usual `Button` props.
- */
 export type PopoverCloseProps = ButtonProps;
 
 function PopoverClose({ intent = "neutral", saliency = "low", ...rest }: PopoverCloseProps) {
@@ -158,18 +128,10 @@ function PopoverClose({ intent = "neutral", saliency = "low", ...rest }: Popover
 }
 
 export interface PopoverHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
-  /**
-   * Title text/content. Rendered as a `Heading` through base-ui's
-   * `Popover.Title`, so it also becomes the popover's accessible name.
-   */
   title?: React.ReactNode;
-  /**
-   * Supporting text. Rendered as a `Text` through base-ui's
-   * `Popover.Description`, so it also becomes the popover's accessible
-   * description.
-   */
+
   subtitle?: React.ReactNode;
-  /** Document-outline level for the rendered title heading. Default `3`. */
+
   level?: HeadingLevel;
   ref?: React.Ref<HTMLDivElement>;
 }
@@ -222,16 +184,11 @@ PopoverClose.displayName = "Popover.Close";
 PopoverHeader.displayName = "Popover.Header";
 PopoverFooter.displayName = "Popover.Footer";
 
-/** Popover with its compound parts attached. */
 export const Popover = Object.assign(PopoverRoot, {
   Trigger: PopoverTrigger,
   Close: PopoverClose,
   Header: PopoverHeader,
   Footer: PopoverFooter,
-  /**
-   * Creates a detached imperative handle (base-ui's `createHandle`). Prefer
-   * `useOverlayHandle(Popover)` inside components; reach for this only when the
-   * handle must live outside React (module scope, detached triggers).
-   */
+
   createHandle: BasePopover.createHandle,
 });

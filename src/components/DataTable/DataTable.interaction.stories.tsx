@@ -3,12 +3,6 @@ import * as React from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { createDataTableColumnHelper, DataTable } from "./index";
 
-/**
- * Interaction coverage for `DataTable`'s grouping and row selection. These run in
- * a real browser (unlike the jsdom unit tests), driving the toggles and checkboxes
- * the way a user would — including Shift-click range selection, which needs a real
- * pointer event carrying the modifier key.
- */
 interface Person {
   id: string;
   name: string;
@@ -44,7 +38,6 @@ export default meta;
 
 type Story = StoryObj<typeof DataTable<Person>>;
 
-/** Collapsing a group hides its rows (and flips the toggle); expanding brings them back. */
 export const CollapsesAndExpandsAGroup: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -78,7 +71,6 @@ export const CollapsesAndExpandsAGroup: Story = {
   },
 };
 
-/** Toggling one group leaves the others untouched. */
 export const GroupsToggleIndependently: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -104,11 +96,6 @@ export const GroupsToggleIndependently: Story = {
   },
 };
 
-/**
- * `groupDisplay="merge"`: the grouped column is dropped and its label shares the
- * host column with each leaf. Collapsing still hides exactly that group's leaves,
- * and the leaf value reads down the same column as the group value.
- */
 export const MergedCollapsesAndExpands: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -147,11 +134,6 @@ export const MergedCollapsesAndExpands: Story = {
   },
 };
 
-/**
- * A controlled, selectable table that mirrors the current selection into a
- * `data-testid` node, so the play functions can assert on the public
- * `onSelectionChange` output rather than reaching into the checkboxes.
- */
 function SelectableTable({
   grouping,
   enableRowSelection = true,
@@ -177,14 +159,12 @@ function SelectableTable({
   );
 }
 
-/** The checkbox inside the body row that renders the given name. */
 function checkboxForRow(canvasElement: HTMLElement, name: string): HTMLInputElement {
   const row = within(canvasElement).getByText(name).closest("tr");
   if (!row) throw new Error(`No row for ${name}`);
   return within(row as HTMLElement).getByRole("checkbox") as HTMLInputElement;
 }
 
-/** Clicking a row's box selects it; clicking again clears it. */
 export const SelectsAndClearsARow: Story = {
   render: () => <SelectableTable />,
   play: async ({ canvasElement }) => {
@@ -204,7 +184,6 @@ export const SelectsAndClearsARow: Story = {
   },
 };
 
-/** The header box selects every row, then clears every row. */
 export const SelectAllTogglesEveryRow: Story = {
   render: () => <SelectableTable />,
   play: async ({ canvasElement }) => {
@@ -221,7 +200,6 @@ export const SelectAllTogglesEveryRow: Story = {
   },
 };
 
-/** With only some rows selected, the header box shows the mixed (indeterminate) state. */
 export const HeaderGoesIndeterminateOnPartialSelection: Story = {
   render: () => <SelectableTable />,
   play: async ({ canvasElement }) => {
@@ -236,7 +214,6 @@ export const HeaderGoesIndeterminateOnPartialSelection: Story = {
   },
 };
 
-/** Shift-clicking a second box selects the inclusive range from the last one. */
 export const ShiftClickSelectsARange: Story = {
   render: () => <SelectableTable />,
   play: async ({ canvasElement }) => {
@@ -254,7 +231,6 @@ export const ShiftClickSelectsARange: Story = {
   },
 };
 
-/** A group header's box selects (then clears) every row in that group at once. */
 export const GroupHeaderSelectsItsRows: Story = {
   render: () => <SelectableTable grouping={["role"]} />,
   play: async ({ canvasElement }) => {
@@ -277,7 +253,6 @@ export const GroupHeaderSelectsItsRows: Story = {
   },
 };
 
-/** Clicking a row's expander reveals its detail panel; clicking again hides it. */
 export const ExpandsAndCollapsesADetailPanel: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -311,7 +286,6 @@ export const ExpandsAndCollapsesADetailPanel: Story = {
   },
 };
 
-/** Opening one row's panel leaves every other row's panel closed. */
 export const DetailPanelsToggleIndependently: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>

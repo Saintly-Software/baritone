@@ -5,11 +5,6 @@ export interface Oklch {
   alpha: number;
 }
 
-/**
- * Parse an `oklch(L C H [/ A])` string. Returns `null` for values we can't
- * statically evaluate (e.g. `transparent`, or expressions containing var()/calc
- * such as the runtime relative-colour hover states — those aren't checkable).
- */
 export function parseOklch(input: string): Oklch | null {
   const value = input.trim();
   if (value === "transparent") return { l: 0, c: 0, h: 0, alpha: 0 };
@@ -57,7 +52,6 @@ interface LinearRgb {
   b: number;
 }
 
-/** oklch -> oklab -> linear sRGB (Björn Ottosson's matrices). */
 export function oklchToLinearRgb({ l, c, h }: Oklch): LinearRgb {
   const hRad = (h * Math.PI) / 180;
   const a = c * Math.cos(hRad);
@@ -80,16 +74,10 @@ export function oklchToLinearRgb({ l, c, h }: Oklch): LinearRgb {
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
-/** WCAG relative luminance from linear sRGB. */
 export function relativeLuminance(rgb: LinearRgb): number {
   return 0.2126 * clamp01(rgb.r) + 0.7152 * clamp01(rgb.g) + 0.0722 * clamp01(rgb.b);
 }
 
-/**
- * Contrast ratio between two oklch colours. If the foreground is translucent it
- * is composited over the (assumed opaque) background first. Returns `null` when
- * either colour can't be parsed.
- */
 export function contrastRatio(fg: string, bg: string): number | null {
   const fgColor = parseOklch(fg);
   const bgColor = parseOklch(bg);

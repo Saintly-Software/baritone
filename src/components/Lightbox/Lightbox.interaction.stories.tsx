@@ -3,11 +3,6 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Icon } from "../Icon";
 import { Lightbox } from "./index";
 
-/**
- * Interaction coverage for `Lightbox`. These stories drive the overlay with a
- * `play` function and assert the result, so they double as Storybook interaction
- * tests and Chromatic snapshot drivers.
- */
 const ExpandGlyph = () => (
   <Icon>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -37,11 +32,6 @@ const withTrigger = () => (
   />
 );
 
-/**
- * Pressing the trigger opens the overlay and reveals the image at full size. The
- * overlay portals to the body, so the `play` queries the document, not the
- * canvas.
- */
 export const OpensFromTrigger: Story = {
   name: "Opens from the trigger",
   render: withTrigger,
@@ -54,9 +44,6 @@ export const OpensFromTrigger: Story = {
   },
 };
 
-/**
- * The built-in close button in the image's corner dismisses the overlay.
- */
 export const ClosesFromCloseButton: Story = {
   name: "Closes from the close button",
   render: withTrigger,

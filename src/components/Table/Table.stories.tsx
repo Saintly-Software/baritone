@@ -12,11 +12,6 @@ export default meta;
 
 type Story = StoryObj<typeof Table>;
 
-/**
- * The columns and rows you pass, rendered as a plain, semantic `<table>`. The
- * columns' `key`s are the contract: every row must have exactly those keys —
- * TypeScript rejects a row that omits one or carries a key no column maps.
- */
 export const Basic: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -37,11 +32,6 @@ export const Basic: Story = {
   ),
 };
 
-/**
- * A column's `cell` renderer receives the row's value at its `key` and the whole
- * row, so it can wrap the value in any element — here a real `Link` and a
- * currency-formatted number.
- */
 export const CustomCells: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -71,7 +61,6 @@ export const CustomCells: Story = {
   ),
 };
 
-/** Name the table without a visible caption via `aria-label`. */
 export const AriaLabelled: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>
@@ -90,7 +79,6 @@ export const AriaLabelled: Story = {
   ),
 };
 
-/** With no rows, the header shows and the body is empty. */
 export const Empty: Story = {
   render: () => (
     <div style={{ maxWidth: 640 }}>

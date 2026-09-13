@@ -8,7 +8,6 @@ import { Notice } from "../Notice";
 import { noticeRecipe } from "../Notice/notice.css";
 import { createToastManager, useToast, type AddToastOptions } from "./index";
 
-/** A button that fires one toast; auto-dismiss is off so assertions can't race the timer. */
 function Trigger({ options, label = "Show" }: { options: AddToastOptions; label?: string }) {
   const toast = useToast();
   return <Button onClick={() => toast.add({ timeout: 0, ...options })}>{label}</Button>;

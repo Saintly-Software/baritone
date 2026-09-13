@@ -4,12 +4,6 @@ import { Link } from "../Link";
 import { Text } from "../Text";
 import { LinkProvider, type LinkRenderProps } from "./index";
 
-/**
- * A tiny stand-in for a real router (Next.js / React Router / TanStack). It
- * intercepts clicks on internal links, prevents the full-page load, and records
- * the destination — so the demo can *show* client-side navigation happening
- * without leaving the Storybook frame. Swap this for your framework's `<Link>`.
- */
 function useMockRouter() {
   const [path, setPath] = React.useState("/");
   const render = React.useCallback(
@@ -76,11 +70,6 @@ export default meta;
 
 type Story = StoryObj<typeof LinkProvider>;
 
-/**
- * A mock router provider wrapping a mix of internal and external links. Click the
- * internal ones to see the client route (top) change without a full page load;
- * the external / new-tab links stay ordinary anchors.
- */
 export const WithMockRouter: Story = {
   render: () => <RouterDemo />,
 };

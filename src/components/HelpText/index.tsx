@@ -7,17 +7,14 @@ import { type IconSlot, renderIcon } from "../Icon/renderIcon";
 import { Text } from "../Text";
 import { helpTextRecipe } from "./helptext.css";
 
-/** The help-text state an `icon` render function can branch on. */
 export interface HelpTextIconState {
   intent: Intent;
   saliency: Saliency;
   size: Size;
 }
 
-/** HelpText's own size scale — a subset of the body type ramp. Default `sm`. */
 export type HelpTextVariant = "xs" | "sm" | "md" | "lg";
 
-/** `variant` -> the `Text` typography size it renders the message at. */
 const TEXT_SIZE: Record<HelpTextVariant, TextSize> = {
   xs: "xs",
   sm: "sm",
@@ -25,7 +22,6 @@ const TEXT_SIZE: Record<HelpTextVariant, TextSize> = {
   lg: "lg",
 };
 
-/** `variant` -> the `Icon` box size, so the glyph scales with the text. */
 const ICON_SIZE: Record<HelpTextVariant, Size> = {
   xs: "sm",
   sm: "sm",
@@ -33,11 +29,6 @@ const ICON_SIZE: Record<HelpTextVariant, Size> = {
   lg: "lg",
 };
 
-/**
- * A warning triangle — the auto glyph shown for the attention intents
- * (`warning`/`negative`, e.g. via `invalid`) when no explicit `icon` is passed.
- * `currentColor` so it inherits the line's resolved colour.
- */
 function WarningGlyph() {
   return (
     <svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" aria-hidden>
@@ -60,45 +51,26 @@ function WarningGlyph() {
 }
 
 export interface HelpTextProps extends Omit<React.HTMLAttributes<HTMLElement>, "color"> {
-  /** The help / validation message. */
   children: React.ReactNode;
-  /** Colour intent. Default `neutral`. Overridden by `invalid`/`disabled`. */
+
   intent?: Intent;
-  /** Colour saliency. Default `mid`. `disabled` forces the dimmed `low`. */
+
   saliency?: Saliency;
-  /** Type size (scales the message and the icon together). Default `sm`. */
+
   variant?: HelpTextVariant;
-  /**
-   * A leading glyph — a bare glyph (auto-wrapped in a colour-inheriting `<Icon>`
-   * sized to the `variant`), an explicit `<Icon>`, or a `(props, state)` render
-   * function. Omit to fall back to the auto warning glyph on the attention intents
-   * (`warning`/`negative`, incl. `invalid`); other intents show none.
-   */
+
   icon?: IconSlot<HelpTextIconState>;
-  /** Drop the icon entirely, including the auto glyph. */
+
   hideIcon?: boolean;
-  /** Convenience for a validation error: forces `negative` + the auto glyph. */
+
   invalid?: boolean;
-  /** Convenience for a disabled control's help: forces the dimmed `neutral`. */
+
   disabled?: boolean;
-  /** Render as a different element/component (base-ui `render` pattern). */
+
   render?: RenderProp;
   ref?: React.Ref<HTMLElement>;
 }
 
-/**
- * HelpText — a single inline help / validation line (icon + text), for use under
- * a form control or standalone. It composes the `Text` and `Icon` primitives:
- * `Text` owns the colour (publishing `--textColor`/`--iconColor`, so the glyph
- * matches) and typography, and the icon scales with the chosen `variant`.
- *
- * Colour comes from `intent` + `saliency` (default `neutral`/`mid`), with two
- * convenience flags that stand in for the common form states: `invalid` maps to
- * `negative` and `disabled` maps to a dimmed `neutral`. On the attention intents
- * (`warning`/`negative`) a warning glyph is shown automatically when no `icon` is
- * given; pass your own `icon`, or `hideIcon` to drop it. The icon is decorative
- * (`aria-hidden`) since the message carries the meaning.
- */
 export function HelpText({
   children,
   intent = "neutral",

@@ -23,39 +23,21 @@ import {
   accordionTrigger,
 } from "./accordion.css";
 
-/**
- * The state an `Accordion.ItemHeader` icon render function can branch on. The
- * header resolves no presentational icon state of its own, so this is empty — the
- * render-function form is still supported for callers that need `props`.
- */
 export type AccordionItemHeaderIconState = Record<string, never>;
 
 export interface AccordionItemHeaderProps {
-  /** The item's title — the prominent line in the trigger. */
   title: React.ReactNode;
-  /** Optional supporting line beneath the title. */
+
   subtitle?: React.ReactNode;
-  /** Leading glyph before the title — a bare glyph, an `<Icon>`, or a render function. */
+
   icon?: IconSlot<AccordionItemHeaderIconState>;
-  /**
-   * Trailing element after the title, before the chevron — typically a status
-   * `<Chip>`. It sits inside the trigger button, so keep it decorative.
-   */
+
   chip?: React.ReactNode;
-  /** Extra className merged onto the header content. */
+
   className?: string;
   ref?: React.Ref<HTMLSpanElement>;
 }
 
-/**
- * The header content for an `Accordion` item — a `title` with optional `subtitle`,
- * leading `icon`, and trailing `chip`. Passed to an item's `header`; the `<h3>`,
- * trigger `<button>`, and chevron are supplied by `Accordion`. The header lives
- * inside the trigger, so `icon` / `chip` should be decorative.
- *
- * @example
- * { header: <Accordion.ItemHeader title="Shipping" subtitle="2–4 business days" />, ... }
- */
 function AccordionItemHeader({
   title,
   subtitle,
@@ -84,47 +66,27 @@ function AccordionItemHeader({
 }
 
 export interface AccordionItemProps<T> {
-  /**
-   * The value that identifies this item. Constrained to the set the `items` array
-   * forms, so a typo or a value outside the union/enum is a compile error — and
-   * the same `T` flows into `value` / `onChange` / `initialValue`.
-   */
   value: T;
-  /** The trigger content — typically an `<Accordion.ItemHeader />`. */
+
   header: React.ReactNode;
-  /** The panel content, revealed when the item is open. */
+
   children: React.ReactNode;
-  /**
-   * Disable just this item. Modelled with `aria-disabled` (never the native
-   * attribute), so its trigger stays focusable while toggling is vetoed.
-   */
+
   disabled?: boolean;
 }
 
 interface AccordionBaseProps<T> {
-  /**
-   * The items to render, each an `AccordionItemProps` (`value` + `header` +
-   * `children`, plus optional `disabled`). The union of their `value`s is the `T`
-   * that the open-value props are type-checked against.
-   */
   items: ReadonlyArray<AccordionItemProps<T>>;
-  /**
-   * Disable every item. Each trigger stays keyboard-reachable (`aria-disabled`,
-   * never the native attribute); toggles are vetoed.
-   */
+
   disabled?: boolean;
-  /** Accessible name for the accordion group. */
+
   "aria-label"?: string;
-  /** Extra className merged onto the root element. */
+
   className?: string;
-  /** Ref to the root element. */
+
   ref?: React.Ref<HTMLDivElement>;
 }
 
-/**
- * Single-open, controlled: drive the one open item with `value` + `onChange`
- * (`null` = all closed). `NoInfer` keeps `T` coming from `items` alone.
- */
 interface AccordionSingleControlledProps<T> {
   multiple?: false;
   value: NoInfer<T> | null;
@@ -132,7 +94,6 @@ interface AccordionSingleControlledProps<T> {
   initialValue?: never;
 }
 
-/** Single-open, uncontrolled: seed the initially open item with `initialValue`. */
 interface AccordionSingleUncontrolledProps<T> {
   multiple?: false;
   value?: never;
@@ -140,7 +101,6 @@ interface AccordionSingleUncontrolledProps<T> {
   initialValue?: NoInfer<T> | null;
 }
 
-/** Multi-open, controlled: drive the open set with `value` + `onChange` arrays. */
 interface AccordionMultipleControlledProps<T> {
   multiple: true;
   value: NoInfer<T>[];
@@ -148,7 +108,6 @@ interface AccordionMultipleControlledProps<T> {
   initialValue?: never;
 }
 
-/** Multi-open, uncontrolled: seed the initially open set with `initialValue`. */
 interface AccordionMultipleUncontrolledProps<T> {
   multiple: true;
   value?: never;
@@ -164,34 +123,6 @@ export type AccordionProps<T> = AccordionBaseProps<T> &
     | AccordionMultipleUncontrolledProps<T>
   );
 
-/**
- * A vertical stack of collapsible items, built on base-ui's `Accordion` (heading
- * + disclosure button + `region` panel per item, ARIA handled). Each item is a
- * "surface" whose `header` is typically an `<Accordion.ItemHeader />`. Generic
- * over `T` (inferred from `items`), so item values and the open-value props share
- * one union/enum. Two discriminated unions shape the API: `multiple` (single
- * `T | null` vs `T[]`) and controlled (`value`/`onChange`) vs uncontrolled
- * (`initialValue`).
- *
- * @example
- * // Single-open, uncontrolled
- * <Accordion
- *   initialValue="shipping"
- *   items={[
- *     {
- *       value: "shipping",
- *       header: <Accordion.ItemHeader title="Shipping" subtitle="2–4 business days" />,
- *       children: <Text>We ship worldwide.</Text>,
- *     },
- *     { value: "returns", header: <Accordion.ItemHeader title="Returns" />, children: <Text>30-day returns.</Text> },
- *   ]}
- * />
- *
- * @example
- * // Multi-open, controlled
- * const [open, setOpen] = React.useState<string[]>([]);
- * <Accordion multiple value={open} onChange={setOpen} items={items} />
- */
 function AccordionRoot<const T>(props: AccordionProps<T>) {
   const { items, disabled = false, "aria-label": ariaLabel, className, ref } = props;
 
@@ -256,7 +187,6 @@ function AccordionRoot<const T>(props: AccordionProps<T>) {
   );
 }
 
-/** Decorative disclosure chevron; the trigger carries the a11y semantics. */
 function ChevronGlyph({ className }: { className?: string }) {
   return (
     <svg
@@ -280,7 +210,6 @@ function ChevronGlyph({ className }: { className?: string }) {
 AccordionRoot.displayName = "Accordion";
 AccordionItemHeader.displayName = "Accordion.ItemHeader";
 
-/** Accordion with its compound parts attached. */
 export const Accordion = Object.assign(AccordionRoot, {
   ItemHeader: AccordionItemHeader,
 });

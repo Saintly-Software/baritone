@@ -3,12 +3,6 @@ import * as React from "react";
 import { FORM_STATES, SIZES } from "../../../theme/constants";
 import { InternalCheckbox } from "./index";
 
-/**
- * `InternalCheckbox` is not part of the public API — it's a presentational "fake
- * checkbox" (no `<input>`) the system composes from. These stories document the
- * look across states and show the accessible composition pattern: slot a real,
- * visually-hidden control inside so `:focus-within` can light the ring.
- */
 const meta: Meta<typeof InternalCheckbox> = {
   title: "Internal/InternalCheckbox",
   component: InternalCheckbox,
@@ -39,7 +33,6 @@ type Story = StoryObj<typeof InternalCheckbox>;
 
 export const Playground: Story = {};
 
-/** All three value states, normal and disabled. */
 export const States: Story = {
   render: () => (
     <div
@@ -63,7 +56,6 @@ export const States: Story = {
   ),
 };
 
-/** `sm` / `md` / `lg`, each shown checked and indeterminate. */
 export const Sizes: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 32, alignItems: "center" }}>
@@ -78,7 +70,6 @@ export const Sizes: Story = {
   ),
 };
 
-/** The accent + focus colour follows the form `state`. */
 export const FormStates: Story = {
   render: () => (
     <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
@@ -105,11 +96,6 @@ const visuallyHidden: React.CSSProperties = {
   whiteSpace: "nowrap",
 };
 
-/**
- * The intended accessible composition: a `<label>` wraps a visually-hidden real
- * `<input>` (which owns the state, keyboard, and accessible name) plus the box.
- * Tab to it to see the `:focus-within` ring; click the label to toggle.
- */
 export const AccessibleComposition: Story = {
   render: () => {
     const [checked, setChecked] = React.useState(true);

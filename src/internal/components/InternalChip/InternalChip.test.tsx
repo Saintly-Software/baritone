@@ -5,13 +5,6 @@ import { describe, expect, it, vi } from "vitest";
 import { Chip } from "../../../components/Chip";
 import { chipBoxClassName, InternalChip } from "./index";
 
-/**
- * `InternalChip` is not part of the public API — it's the engine behind `Link`'s
- * `appearance="chip"`, and it shares `chipBoxClassName` (the chip look) with the
- * public `Chip`. These tests cover the chip-specific chrome it adds on top of
- * `InternalGenericButtonAnchor`; the router/disabled semantics of the element
- * itself are covered under `Link` / `InternalGenericButtonAnchor`.
- */
 describe("InternalChip", () => {
   it("renders an <a> whose accessible name is the label", () => {
     render(<InternalChip href="/tags/music">Music</InternalChip>);

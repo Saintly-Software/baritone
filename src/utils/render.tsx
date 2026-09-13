@@ -2,14 +2,6 @@ import * as React from "react";
 import { useRender as baseUseRender, type UseRenderRenderProp } from "@base-ui/react/use-render";
 import { cx } from "./cx";
 
-/**
- * Polymorphism following base-ui's `render` prop pattern (rather than an
- * `asChild` slot). `render` is either:
- *   - a React element to render *as* (its props are merged with ours), or
- *   - a function `(props) => element` for full control.
- * Otherwise the `defaultElement` is used. Refs are composed; className/style are
- * merged; event handlers are chained.
- */
 export type RenderProp<Props = Record<string, unknown>> =
   | React.ReactElement<Record<string, unknown>>
   | ((props: Props) => React.ReactNode);
@@ -63,21 +55,11 @@ function mergeProps(ours: AnyProps, theirs: AnyProps): AnyProps {
 
 export interface UseRenderParams {
   render: RenderProp | undefined;
-  /**
-   * The element rendered when `render` isn't supplied. An intrinsic tag name only
-   * (`"div"`, `"a"`, …) — base-ui renders it via `createElement` and supports only
-   * string tags. To render *as* a component, use `render` (`render={<Component />}`).
-   */
+
   defaultElement: keyof React.JSX.IntrinsicElements;
   props: AnyProps;
 }
 
-/**
- * Polymorphic render, delegating to base-ui's `useRender` for ref-merging,
- * handler chaining, and `preventBaseUIHandler` support. Refs pass inside `props`.
- * A hook, so call it unconditionally; for a conditional branch use
- * {@link RenderElement}.
- */
 export function useRender({ render, defaultElement, props }: UseRenderParams): React.ReactElement {
   return baseUseRender({
     render: render as UseRenderRenderProp | undefined,
@@ -86,11 +68,6 @@ export function useRender({ render, defaultElement, props }: UseRenderParams): R
   });
 }
 
-/**
- * Component form of {@link useRender}, for rendering polymorphically from a
- * conditional branch (after an early `return`), where calling `useRender` directly
- * would break the Rules of Hooks.
- */
 export function RenderElement(params: UseRenderParams): React.ReactElement {
   return useRender(params);
 }

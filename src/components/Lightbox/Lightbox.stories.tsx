@@ -34,10 +34,6 @@ export default meta;
 
 type Story = StoryObj<typeof Lightbox>;
 
-/**
- * The canonical use: an icon-only trigger opens the image full-size. Uses the
- * low-saliency small icon button from the raw example.
- */
 export const Default: Story = {
   render: () => (
     <Lightbox
@@ -55,10 +51,6 @@ export const Default: Story = {
   ),
 };
 
-/**
- * A labelled trigger instead of the icon-only one — any `Button` works, since
- * `Lightbox.Trigger` forwards all of Button's props.
- */
 export const LabelledTrigger: Story = {
   render: () => (
     <Lightbox
@@ -69,10 +61,6 @@ export const LabelledTrigger: Story = {
   ),
 };
 
-/**
- * Optional `children` render below the image as a caption. They sit on the
- * dimmed backdrop, so use a light text colour.
- */
 export const WithCaption: Story = {
   render: () => (
     <Lightbox
@@ -89,7 +77,6 @@ export const WithCaption: Story = {
   ),
 };
 
-/** Opened by default so the overlay is visible on load. */
 export const Open: Story = {
   render: () => (
     <Lightbox

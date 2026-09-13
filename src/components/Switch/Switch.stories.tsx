@@ -75,7 +75,6 @@ const stateRows: StateRow[] = [
   { label: "Disabled + on + invalid", disabled: true, value: true, state: "invalid" },
 ];
 
-/** Every state (rows) against the rendered control (right column). */
 export const States: Story = {
   render: () => (
     <table style={{ borderCollapse: "collapse" }}>
@@ -107,7 +106,6 @@ export const States: Story = {
   ),
 };
 
-/** `sm` / `md` / `lg`, each shown on. */
 export const Sizes: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 16 }}>
@@ -118,11 +116,6 @@ export const Sizes: Story = {
   ),
 };
 
-/**
- * `labelPosition` places the label `end` (default), `start`, or `top`. It's
- * flex-direction only — `start`/`end` are inline-logical, so they flip under RTL
- * without the DOM (or the accessible name) moving.
- */
 export const LabelPositions: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 24 }}>
@@ -137,7 +130,6 @@ export const LabelPositions: Story = {
   ),
 };
 
-/** The same three positions mirrored under `dir="rtl"`. */
 export const LabelPositionsRTL: Story = {
   render: () => (
     <div dir="rtl" style={{ display: "grid", gap: 24 }}>
@@ -152,7 +144,6 @@ export const LabelPositionsRTL: Story = {
   ),
 };
 
-/** Inline help under the row, wired to the control via `aria-describedby`. */
 export const WithDescription: Story = {
   args: {
     label: "Notifications",
@@ -161,7 +152,6 @@ export const WithDescription: Story = {
   },
 };
 
-/** An error message announced under the row when the field is `invalid`. */
 export const WithErrorMessage: Story = {
   args: {
     label: "Accept tracking",
@@ -171,10 +161,6 @@ export const WithErrorMessage: Story = {
   },
 };
 
-/**
- * With no visible `label`, name the control explicitly with `aria-label` — the
- * glyph stays decorative. Inspect the accessibility tree to confirm the name.
- */
 export const IconOnly: Story = {
   render: () => (
     <ControlledSwitch
@@ -201,12 +187,6 @@ function CrossGlyph() {
   );
 }
 
-/**
- * A glyph can ride inside the thumb. `icon` reuses one glyph for both states;
- * `activeIcon` + `inactiveIcon` show a different glyph per state (a check when
- * on, a cross when off here). The glyph is decorative — the `label` is still the
- * accessible name.
- */
 export const WithIcons: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 16 }}>

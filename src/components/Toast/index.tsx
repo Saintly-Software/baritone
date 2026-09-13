@@ -14,120 +14,68 @@ import type { IconSlot } from "../Icon/renderIcon";
 import { Notice, type NoticeIconState } from "../Notice";
 import { toastNotice, toastRoot, toastViewport } from "./toast.css";
 
-/**
- * The design-system fields carried on a toast, stashed in base-ui's per-toast
- * `data` bag. Consumers never touch this directly — {@link useToast}'s
- * `add`/`update` accept these at the top level and pack them in here.
- */
 export interface ToastData {
-  /** Colour intent for the underlying `Notice`. Default `neutral`. */
   intent?: Intent;
-  /** `high` (washed fill, default) or `low` (subtle) — the Notice's saliency. */
+
   saliency?: SurfaceSaliency;
-  /** A leading icon — a bare glyph, an `<Icon>`, a render function, or a `<Notice.Icon>`. */
+
   icon?: IconSlot<NoticeIconState>;
-  /** Trailing action controls — typically `<Notice.Action>`s. */
+
   actions?: React.ReactNode[];
 }
 
-/** A live toast object (base-ui's), typed with the system's {@link ToastData}. */
 export type BaritoneToast = ToastObject<ToastData>;
 
-/** How urgently a toast is announced by assistive tech. */
 export type ToastPriority = "low" | "high";
 
-/**
- * Options for {@link useToast}'s `add`. `title` is the required message; the
- * design-system fields are packed into `data` for you.
- */
 export interface AddToastOptions {
-  /** The toast's message — the required title line of the `Notice`. */
   title: React.ReactNode;
-  /** Optional supporting text beneath the title. */
+
   description?: React.ReactNode;
-  /** Colour intent. Default `neutral`. */
+
   intent?: Intent;
-  /** Notice saliency — `high` (default) or `low`. */
+
   saliency?: SurfaceSaliency;
-  /** A leading icon — a bare glyph, an `<Icon>`, a render function, or a `<Notice.Icon>`. */
+
   icon?: IconSlot<NoticeIconState>;
-  /** Trailing action controls — typically `<Notice.Action>`s. */
+
   actions?: React.ReactNode[];
-  /**
-   * Milliseconds before the toast auto-dismisses. `0` keeps it until dismissed.
-   * Defaults to the provider's `toastTimeout` (base-ui default `5000`).
-   */
+
   timeout?: number;
-  /**
-   * Announcement urgency. `high` uses an assertive live region (`alertdialog`);
-   * `low` (default) is polite (`dialog`).
-   */
+
   priority?: ToastPriority;
-  /**
-   * A stable id. Re-adding with an existing id updates that toast in place and
-   * resets its timer (a useful de-dupe / progress key).
-   */
+
   id?: string;
-  /** Called when the toast has closed. */
+
   onClose?: () => void;
 }
 
-/** {@link AddToastOptions} for a toast created without an explicit id (promise states). */
 export type ToastStateOptions = Omit<AddToastOptions, "id">;
 
-/** Per-state options for {@link UseToastReturn.promise}; a bare string is shorthand for `{ title }`. */
 export interface ToastPromiseOptions<Value> {
-  /** Shown while the promise is pending. */
   loading: string | ToastStateOptions;
-  /** Shown when it resolves — or a function of the resolved value. */
+
   success: string | ToastStateOptions | ((result: Value) => string | ToastStateOptions);
-  /** Shown when it rejects — or a function of the error. */
+
   error: string | ToastStateOptions | ((error: unknown) => string | ToastStateOptions);
 }
 
-/** The toast controller returned by {@link useToast}. */
 export interface UseToastReturn {
-  /** The current list of live toasts (newest first). */
   toasts: BaritoneToast[];
-  /** Show a toast; returns its id. */
+
   add: (options: AddToastOptions) => string;
-  /** Update a live toast in place by id. */
+
   update: (id: string, options: Partial<AddToastOptions>) => void;
-  /** Dismiss a toast by id, or the newest if omitted. */
+
   close: (id?: string) => void;
-  /** Drive a loading → success/error toast from a promise; resolves to its value. */
+
   promise: <Value>(promise: Promise<Value>, options: ToastPromiseOptions<Value>) => Promise<Value>;
 }
 
-/**
- * A toast controller for firing toasts from *outside* React — module scope, a
- * store, a fetch interceptor, a TanStack Query cache: anywhere there's no
- * component to call {@link useToast} from. Create one with
- * {@link createToastManager}, hand it to `<BaritoneProvider toastManager={…}>` to
- * wire it to the on-screen viewport, then call `add`/`update`/`close`/`promise`
- * from anywhere. Inside components, prefer {@link useToast}.
- *
- * Same surface as {@link useToast}, minus the reactive `toasts` list, with two
- * caveats:
- *
- * - `update` replaces the toast's visual `data` wholesale, so pass every visual
- *   field you want kept.
- * - Toasts only reach the viewport once `BaritoneProvider` has mounted; an
- *   `add`/`promise` before that is dropped silently. Fire in response to events.
- */
 export interface BaritoneToastManager extends Omit<UseToastReturn, "toasts"> {
-  /**
-   * base-ui's private subscription channel, read by `BaritoneProvider` to
-   * connect this manager to the viewport. Not called directly.
-   */
   " subscribe": ToastManager<ToastData>[" subscribe"];
 }
 
-/**
- * Split the design-system fields into base-ui's `data` bag, leaving timing/
- * identity fields flat. Only keys the caller set are emitted, so an explicit
- * `undefined` never clears a field on `update`.
- */
 function pack(options: Partial<AddToastOptions>): ToastManagerAddOptions<ToastData> {
   const { intent, saliency, icon, actions, title, description, timeout, priority, onClose } =
     options;
@@ -146,16 +94,10 @@ function pack(options: Partial<AddToastOptions>): ToastManagerAddOptions<ToastDa
   return packed;
 }
 
-/** A promise-state entry (`string | options`) → packed options. */
 function packState(state: string | ToastStateOptions): ToastManagerAddOptions<ToastData> {
   return pack(typeof state === "string" ? { title: state } : state);
 }
 
-/**
- * Pack a `promise()` call's per-state options (`loading`/`success`/`error`, each a
- * `string`, options object, or function of the settled value) into base-ui's
- * shape. Shared by {@link useToast} and {@link createToastManager}.
- */
 function packPromiseOptions<Value>(
   options: ToastPromiseOptions<Value>,
 ): ToastManagerPromiseOptions<Value, ToastData> {
@@ -168,16 +110,6 @@ function packPromiseOptions<Value>(
   };
 }
 
-/**
- * The toast controller — call it inside a `BaritoneProvider` (or any
- * `Toast.Provider`) to show, update, and dismiss toasts. It wraps base-ui's
- * `useToastManager`, letting you pass the design-system fields
- * (`intent`/`saliency`/`icon`/`actions`) at the top level.
- *
- * @example
- * const toast = useToast();
- * toast.add({ title: "Saved", description: "Your changes are live.", intent: "positive" });
- */
 export function useToast(): UseToastReturn {
   const { toasts, add, update, close, promise } = BaseToast.useToastManager<ToastData>();
 
@@ -205,23 +137,6 @@ export function useToast(): UseToastReturn {
   return { toasts, add: addToast, update: updateToast, close, promise: promiseToast };
 }
 
-/**
- * Create a {@link BaritoneToastManager} for firing toasts from *outside* React.
- * Wraps base-ui's `Toast.createToastManager`, pre-typed with {@link ToastData} and
- * accepting the design-system fields at the top level. Create it once at module
- * scope and hand it to `<BaritoneProvider>`; see {@link BaritoneToastManager} for
- * the mount and `update` caveats.
- *
- * @example
- * // toast.ts — module scope, no component needed
- * export const toasts = createToastManager();
- *
- * // App root
- * <BaritoneProvider toastManager={toasts}>{children}</BaritoneProvider>
- *
- * // In response to an event — an interceptor, a query cache's onError
- * toasts.add({ title: "Couldn't save", intent: "negative", priority: "high" });
- */
 export function createToastManager(): BaritoneToastManager {
   const manager = BaseToast.createToastManager<ToastData>();
   return {
@@ -233,13 +148,6 @@ export function createToastManager(): BaritoneToastManager {
   };
 }
 
-/**
- * A single rendered toast: base-ui's `Toast.Root` (the focusable `dialog` owning
- * swipe/hover/lifecycle) wrapping a `Notice` for the UI. The Notice is
- * `role="presentation"` so its live-region role doesn't double-announce what
- * base-ui already announces; Title/Description render as inline spans inside the
- * Notice's slots so the dialog's labelling resolves to the visible text.
- */
 function ToastItem({ toast, close }: { toast: BaritoneToast; close: (id?: string) => void }) {
   const { intent, saliency, icon, actions } = toast.data ?? {};
 
@@ -269,12 +177,6 @@ function ToastItem({ toast, close }: { toast: BaritoneToast; close: (id?: string
   );
 }
 
-/**
- * The rendered toast layer: base-ui's `Toast.Viewport` (portalled to `<body>`)
- * mapping every live toast to a {@link ToastItem}. `BaritoneProvider` renders
- * this for you; drop it in yourself only if you're wiring a bare
- * `Toast.Provider` by hand. Must live inside a toast provider.
- */
 export function ToastViewport() {
   const { toasts, close } = BaseToast.useToastManager<ToastData>();
 

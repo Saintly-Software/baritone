@@ -8,7 +8,6 @@ const PARAGRAPHS = [
   "More recently, vernacular architecture has been examined by designers and the building industry in an effort to be more energy conscious with contemporary design and construction — part of a broader interest in sustainable design.",
 ];
 
-/** Long body copy so the vertical area overflows and the fade + thumb show. */
 function Article() {
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -70,7 +69,6 @@ export default meta;
 
 type Story = StoryObj<typeof ScrollArea>;
 
-/** Drive `orientation` from the toolbar; the box swaps content to match. */
 export const Vertical: Story = {
   name: "Vertical (default)",
   render: (args) => (
@@ -90,7 +88,6 @@ export const Vertical: Story = {
   ),
 };
 
-/** Horizontal scroll, fading at the inline start/end edges. */
 export const Horizontal: Story = {
   render: () => (
     <ScrollArea
@@ -127,7 +124,6 @@ export const Horizontal: Story = {
   ),
 };
 
-/** Both axes: two scrollbars, the corner between them, and a fade on all four edges. */
 export const Both: Story = {
   render: () => (
     <ScrollArea

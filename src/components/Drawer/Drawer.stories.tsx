@@ -69,13 +69,6 @@ export default meta;
 
 type Story = StoryObj<typeof Drawer>;
 
-/**
- * Every region at once — a header carrying an overflow-actions `Menu`, a
- * scrolling body, and a footer whose primary actions render as a joined
- * `ButtonGroup` — all driven by the toolbar controls (`saliency`, `padding`,
- * `side`, `width`, `loading`, `disabled`). Opens by default so the panel is
- * visible on load.
- */
 export const KitchenSink: Story = {
   args: { defaultOpen: true },
   render: (args) => (
@@ -122,10 +115,6 @@ export const KitchenSink: Story = {
   ),
 };
 
-/**
- * A drawer docked to the left edge, opened by default so the panel is visible on
- * load. Toggle `side` in the toolbar to slide it in from the right instead.
- */
 export const Sides: Story = {
   name: "Opens from the left",
   args: { side: "left", defaultOpen: true },
@@ -145,10 +134,6 @@ export const Sides: Story = {
   ),
 };
 
-/**
- * Renders a single drawer at a given `width`, opened from a trigger. Shared by the
- * per-width stories below so each one only differs in its `width` arg.
- */
 function widthDrawer(width: DrawerWidth) {
   return (args: DrawerProps) => (
     <Drawer
@@ -166,45 +151,31 @@ function widthDrawer(width: DrawerWidth) {
   );
 }
 
-/** The `xs` (narrowest) width. Opens by default so the panel is visible on load. */
 export const ExtraSmall: Story = {
   args: { width: "xs", defaultOpen: true },
   render: widthDrawer("xs"),
 };
 
-/** The `sm` width. Opens by default so the panel is visible on load. */
 export const Small: Story = {
   args: { width: "sm", defaultOpen: true },
   render: widthDrawer("sm"),
 };
 
-/** The `md` (default) width. Opens by default so the panel is visible on load. */
 export const Medium: Story = {
   args: { width: "md", defaultOpen: true },
   render: widthDrawer("md"),
 };
 
-/** The `lg` width. Opens by default so the panel is visible on load. */
 export const Large: Story = {
   args: { width: "lg", defaultOpen: true },
   render: widthDrawer("lg"),
 };
 
-/**
- * The `xl` (widest) width. Like every step it stays capped to the viewport, so it
- * shrinks to fit on narrow screens. Opens by default so the panel is visible on
- * load.
- */
 export const ExtraLarge: Story = {
   args: { width: "xl", defaultOpen: true },
   render: widthDrawer("xl"),
 };
 
-/**
- * The body sits behind a spinner while `loading` is set; the header and footer
- * stay live so the drawer can still be closed. Opens by default so the spinner
- * is visible on load.
- */
 export const Loading: Story = {
   args: { loading: true, defaultOpen: true },
   render: (args) => (
@@ -267,11 +238,6 @@ export const ImperativeClose: Story = {
   },
 };
 
-/**
- * A drawer opened from inside a modal — each surface renders its own backdrop, so
- * the stack stays legible. Both surfaces open by default so the Chromatic snapshot
- * captures the layered backdrops.
- */
 export const Nested: Story = {
   render: (args) => (
     <Modal

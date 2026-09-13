@@ -58,11 +58,6 @@ const cellStyle: CSSProperties = {
   verticalAlign: "baseline",
 };
 
-/**
- * Every typography `size` (rows, the full shared scale) against every `weight`
- * (columns), each cell showing regular and italic. `Text` and `Heading` render
- * the same scale, so the larger rows read as display type.
- */
 export const Sizes: Story = {
   render: () => (
     <div style={{ overflowX: "auto" }}>
@@ -103,11 +98,6 @@ export const Sizes: Story = {
   ),
 };
 
-/**
- * The `font` vocabulary is consumer-defined: an app publishes families as
- * `--font-<name>` (via the theme's `fonts` option) and augments `FontRegistry`.
- * This story fakes that with `--font-*` vars on the wrapper.
- */
 export const CustomFonts: Story = {
   render: () => (
     <div
@@ -138,12 +128,6 @@ export const CustomFonts: Story = {
   ),
 };
 
-/**
- * The built-in `letterSpacing` (tracking) steps, `tighter`…`widest`. Values are
- * `em`-based, so a step tracks the font-size proportionally; the canonical use is
- * a small uppercase eyebrow with `widest`. For values outside the ramp, see
- * `CustomLetterSpacing`.
- */
 export const LetterSpacing: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 12 }}>
@@ -176,11 +160,6 @@ export const LetterSpacing: Story = {
   ),
 };
 
-/**
- * Like `font`, the `letterSpacing` vocabulary is consumer-defined: an app
- * publishes `--letterSpacing-<name>` (via the `letterSpacings` option) and augments
- * `LetterSpacingRegistry`. This story fakes that with `--letterSpacing-*` vars.
- */
 export const CustomLetterSpacing: Story = {
   render: () => (
     <div
@@ -207,11 +186,6 @@ export const CustomLetterSpacing: Story = {
   ),
 };
 
-/**
- * The built-in `lineHeight` (leading) steps, `none`…`loose` — unitless multipliers
- * that scale with the font-size, overriding the leading `size` supplies. For values
- * outside the ramp, see `CustomLineHeight`.
- */
 export const LineHeights: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 16, maxWidth: 360 }}>
@@ -230,14 +204,6 @@ export const LineHeights: Story = {
   ),
 };
 
-/**
- * The `whiteSpace` atom, against the same source string — which contains a hard
- * newline and a run of consecutive spaces. `normal` (the default) collapses both
- * and wraps; `nowrap` stays on one line; `pre` preserves both but never wraps;
- * `pre-wrap` preserves them while wrapping (for user-authored copy or model
- * output); `pre-line` keeps newlines but collapses spaces; `break-spaces` also
- * wraps trailing spaces.
- */
 export const WhiteSpace: Story = {
   render: () => (
     <div style={{ display: "grid", gap: 16, maxWidth: 360 }}>
@@ -259,12 +225,6 @@ export const WhiteSpace: Story = {
   ),
 };
 
-/**
- * Like `font`, the `size` vocabulary is consumer-defined: an app publishes
- * `--fontSize-<name>` (via the `sizes` option) and augments `FontSizeRegistry`. A
- * `{ fontSize, lineHeight }` entry also publishes a paired leading (Tailwind-style).
- * This story fakes that with `--fontSize-*` (and a paired `--sizeLineHeight-*`) vars.
- */
 export const CustomSizes: Story = {
   render: () => (
     <div
@@ -289,11 +249,6 @@ export const CustomSizes: Story = {
   ),
 };
 
-/**
- * Like `font`, the `weight` vocabulary is consumer-defined: an app publishes
- * `--fontWeight-<name>` (via the `weights` option) and augments `FontWeightRegistry`.
- * This story fakes that with `--fontWeight-*` vars.
- */
 export const CustomWeights: Story = {
   render: () => (
     <div
@@ -320,11 +275,6 @@ export const CustomWeights: Story = {
   ),
 };
 
-/**
- * Like `font`, the `lineHeight` vocabulary is consumer-defined: an app publishes
- * `--lineHeight-<name>` (via the `lineHeights` option) and augments
- * `LineHeightRegistry`. This story fakes that with a `--lineHeight-*` var.
- */
 export const CustomLineHeight: Story = {
   render: () => (
     <div
@@ -349,11 +299,6 @@ export const CustomLineHeight: Story = {
   ),
 };
 
-/**
- * Every `intent` (rows) against every `saliency` (columns). Each cell renders the
- * colour token for that combination, so you can read a full matrix of the text
- * palette at a glance.
- */
 export const IntentsAndSaliencies: Story = {
   render: () => (
     <IntentSaliencyMatrix intents={INTENTS} saliencies={SALIENCIES}>

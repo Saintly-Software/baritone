@@ -5,7 +5,6 @@ import { Icon } from "../Icon";
 import { Text } from "../Text";
 import { ConfirmationModal } from "./index";
 
-/** A warning-triangle glyph for the destructive/warning stories. */
 const warningIcon = (
   <Icon size="lg">
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden>

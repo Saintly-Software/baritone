@@ -22,22 +22,11 @@ import {
 import { useIsFieldDisabled } from "../Fieldset";
 import { toggleGroupDisabled, toggleGroupFillRow, toggleGroupRoot } from "./toggleGroup.css";
 
-/** Layout (and keyboard) direction of the segmented control. */
 export type ToggleGroupOrientation = "horizontal" | "vertical";
 
-/**
- * base-ui's composite reads this attribute to choose the initial roving tab stop.
- * Marking the *selected* toggle with it makes Tab land on the selected item
- * rather than the first. Empty string so `hasAttribute` is true; omitted otherwise.
- */
 const ACTIVE_COMPOSITE_ITEM_ATTR = "data-composite-item-active";
 
-/** Shared config the group hands every `ToggleGroupItem` via context. */
 interface ToggleGroupItemContextValue {
-  /**
-   * The group's selected value, or `null` when nothing is selected — `null` (not
-   * `""`) so an empty-string segment value stays a real, distinct value.
-   */
   selectedValue: string | null;
   intent: Intent | undefined;
   saliency: Saliency;
@@ -51,71 +40,44 @@ const ToggleGroupItemContext = React.createContext<ToggleGroupItemContextValue>(
   size: undefined,
 });
 
-/** Props shared by both `ToggleGroupItem` arms — labelled and icon-only. */
 interface ToggleGroupItemCommonProps<T extends string> {
-  /** The value this segment selects. Constrained to the group's `T`. */
   value: T;
-  /** Extra className merged onto the segment's `<button>`. */
+
   className?: string;
 }
 
-/** A labelled segment: a visible text label, optionally flanked by icons. */
 export interface ToggleGroupItemLabelledProps<
   T extends string,
 > extends ToggleGroupItemCommonProps<T> {
-  /** The visible label. Defaults to the `value` itself. */
   children?: React.ReactNode;
-  /**
-   * Icon before the label — a bare glyph, an explicit `<Icon>`, or a
-   * `(props, state)` render function. Inherits the segment's text colour.
-   */
+
   startIcon?: IconSlot<ButtonIconState>;
-  /** Icon after the label — same forms as `startIcon`. */
+
   endIcon?: IconSlot<ButtonIconState>;
-  /** Unsupported on a labelled segment — the discriminant of the icon-only arm. */
+
   icon?: never;
-  /**
-   * An authored accessible name, for when the flattened text of `children` would
-   * name the segment misleadingly (e.g. a label with a trailing count `Badge`).
-   * Must still contain the visible label text (WCAG 2.5.3 *Label in Name*).
-   */
+
   "aria-label"?: string;
 }
 
-/** An icon-only segment: a single centred glyph named by a required `aria-label`. */
 export interface ToggleGroupItemIconOnlyProps<
   T extends string,
 > extends ToggleGroupItemCommonProps<T> {
-  /**
-   * The single centred glyph — **required**, and the discriminant of this arm.
-   * A bare glyph, an explicit `<Icon>`, or a `(props, state)` render function.
-   * `NonNullable` so a nullish value can't slip through and render an unnamed segment.
-   */
   icon: NonNullable<IconSlot<ButtonIconState>>;
-  /** Accessible name — **required**, since the segment has no visible text. */
+
   "aria-label": string;
-  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+
   children?: never;
-  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+
   startIcon?: never;
-  /** Unsupported on the icon-only arm — the `icon` slot is the whole content. */
+
   endIcon?: never;
 }
 
-/**
- * One segment's props, discriminated on the presence of `icon`: a labelled
- * segment ({@link ToggleGroupItemLabelledProps}) or an icon-only one
- * ({@link ToggleGroupItemIconOnlyProps}).
- */
 export type ToggleGroupItemProps<T extends string> =
   | ToggleGroupItemLabelledProps<T>
   | ToggleGroupItemIconOnlyProps<T>;
 
-/**
- * One segment, rendered as the same `InternalButton` that powers `Button`. The
- * selected segment takes the group's `intent` × `saliency`; an unselected one
- * drops to neutral `low` (ghost). Inherits `Button`'s icon vocabulary.
- */
 function ToggleGroupItem<T extends string>(props: ToggleGroupItemProps<T>) {
   const { value, className } = props;
   const { selectedValue, intent, saliency, size } = React.useContext(ToggleGroupItemContext);
@@ -164,153 +126,67 @@ function ToggleGroupItem<T extends string>(props: ToggleGroupItemProps<T>) {
 }
 
 interface ToggleGroupSharedProps<T extends string> {
-  /**
-   * Render-prop children. Receives a `ToggleGroupItem` bound to this group's `T`,
-   * so every `<ToggleGroupItem value={...} />` is type-checked against the same
-   * union/enum the group's `value` came from.
-   */
   children: (props: {
     ToggleGroupItem: (props: ToggleGroupItemProps<T>) => React.ReactNode;
   }) => React.ReactNode;
-  /** Colour scheme of the selected segment. Shared with `Button` / `Chip`. Default `neutral`. */
+
   intent?: Intent;
-  /**
-   * Prominence of the selected segment: `high` (filled, default), `mid` (washed),
-   * `low` (transparent + border). Unselected segments always render neutral `low`.
-   */
+
   saliency?: Saliency;
-  /** Control size; matches `Button`. Default `md`. */
+
   size?: Size;
-  /**
-   * Lay the segments out in a row (`horizontal`, default) or a column
-   * (`vertical`). Drives both the paint and the arrow-key axis (Left/Right when
-   * horizontal, Up/Down when vertical). Default `horizontal`.
-   */
+
   orientation?: ToggleGroupOrientation;
-  /**
-   * Make the group span its container instead of shrink-wrapping. Omit (default)
-   * to hug its content; `"fill"` fills the available width and flips the wrapping
-   * `Field` to `fit: "fill"`. Wanted mainly by a vertical group in a fixed-width sidebar.
-   */
+
   width?: "fill";
-  /**
-   * Disable the whole group via `aria-disabled` + a veto in the change handler
-   * (never the native attribute), so every segment stays keyboard reachable but
-   * the value can't change.
-   */
+
   disabled?: boolean;
-  /** Inline help shown under the group and wired via `aria-describedby`. */
+
   helpText?: React.ReactNode;
-  /**
-   * Validation state. `invalid` flags the group `aria-invalid` and reddens the
-   * `helpText`; the toolbar `intent`/`saliency` still own the segment colours.
-   * Default `neutral`.
-   */
+
   state?: FormState;
-  /** Where the label sits. `top` (default) stacks it above; `start`/`end` inline it. */
+
   labelPosition?: LabelPosition;
-  /** Per-slot overrides for the label / help-text pieces. */
+
   slotProps?: FieldSlotProps;
-  /** Mark the group as required (sets `aria-required`). */
+
   required?: boolean;
-  /** Points the group at extra descriptive text; combines with `helpText`. */
+
   "aria-describedby"?: string;
-  /** Extra className merged onto the group container. */
+
   className?: string;
-  /** Ref to the group container element. */
+
   ref?: React.Ref<HTMLDivElement>;
 }
 
-/**
- * The strict, single-select arm (the default): exactly one value is always
- * selected, so `onChange` only ever emits a real `T`.
- */
 interface ToggleGroupStrictProps<T extends string> {
-  /** The currently selected value (controlled). Always exactly one. */
   value: T;
-  /**
-   * Called with the newly selected value first and the raw DOM event second. Not
-   * called when the group is disabled.
-   */
+
   onChange: (value: T, event: Event) => void;
-  /** Off (or omitted): the group is strictly single-select. */
+
   clearable?: false;
 }
 
-/**
- * The opt-in clearable arm: `value` also accepts `null`, and re-pressing the
- * active segment clears the selection — so `onChange` can emit `null` too.
- */
 interface ToggleGroupClearableProps<T extends string> {
-  /** The currently selected value (controlled), or `null` for nothing selected. */
   value: T | null;
-  /**
-   * Called with the newly selected value — or `null` when cleared — first, and
-   * the raw DOM event second. Not called when the group is disabled.
-   */
+
   onChange: (value: T | null, event: Event) => void;
-  /** Allow an empty (unselected) value and let re-pressing the active segment clear it. */
+
   clearable: true;
 }
 
-/** The full strict-mode props — one overload arm (see {@link ToggleGroup}). */
 type ToggleGroupStrictFullProps<T extends string> = ToggleGroupSharedProps<T> &
   ToggleGroupStrictProps<T> &
   FieldLabellingProps;
 
-/** The full clearable-mode props — the other overload arm (see {@link ToggleGroup}). */
 type ToggleGroupClearableFullProps<T extends string> = ToggleGroupSharedProps<T> &
   ToggleGroupClearableProps<T> &
   FieldLabellingProps;
 
-/**
- * Named by exactly one of `label` / `aria-label` / `aria-labelledby`. A visible
- * `label` also flips the control into form-control semantics. The `value` /
- * `onChange` pair is discriminated by `clearable`.
- */
 export type ToggleGroupProps<T extends string> =
   | ToggleGroupStrictFullProps<T>
   | ToggleGroupClearableFullProps<T>;
 
-/**
- * A single-select segmented control: a row of toggle buttons where exactly one is
- * selected, built on base-ui's `ToggleGroup` / `Toggle` and rendered with the
- * same `InternalButton` as `Button`. Generic over the value type `T` (a string
- * union/enum, inferred from `value`), handing the render-prop a `ToggleGroupItem`
- * bound to that `T`.
- *
- * Keyboard: Tab lands on the selected segment; arrows move focus (Left/Right when
- * horizontal, Up/Down when vertical) without selecting; Enter/Space selects.
- *
- * Pass `label` (with optional `helpText`, `state`, `required`) for form-control
- * semantics. `clearable` allows an empty (`null`) selection, cleared by
- * re-pressing the active segment.
- *
- * @example
- * type View = "list" | "board" | "calendar";
- * const [view, setView] = React.useState<View>("list");
- * <ToggleGroup aria-label="View" value={view} onChange={setView} intent="primary">
- *   {({ ToggleGroupItem }) => (
- *     <>
- *       <ToggleGroupItem value="list">List</ToggleGroupItem>
- *       <ToggleGroupItem value="board">Board</ToggleGroupItem>
- *       <ToggleGroupItem value="calendar">Calendar</ToggleGroupItem>
- *     </>
- *   )}
- * </ToggleGroup>
- *
- * @example
- * // Icons: `startIcon`/`endIcon` flank a label; `icon` + `aria-label` is icon-only.
- * <ToggleGroup aria-label="Analyse by" value={mode} onChange={setMode}>
- *   {({ ToggleGroupItem }) => (
- *     <>
- *       <ToggleGroupItem value="rhyme" startIcon={<Icon><Music /></Icon>}>Rhyme</ToggleGroupItem>
- *       <ToggleGroupItem value="meter" startIcon={<Icon><Ruler /></Icon>}>Meter</ToggleGroupItem>
- *       <ToggleGroupItem value="grid" aria-label="Grid" icon={<Icon><Grid /></Icon>} />
- *     </>
- *   )}
- * </ToggleGroup>
- */
 export function ToggleGroup<T extends string>(
   props: ToggleGroupStrictFullProps<T>,
 ): React.JSX.Element;

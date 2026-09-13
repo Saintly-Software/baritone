@@ -3,10 +3,6 @@ import type { CSSProperties } from "react";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Tooltip } from "./index";
 
-/**
- * Interaction coverage for `Tooltip`. The `play` functions open the hint by hover
- * and by keyboard focus, and assert the portaled popup and its resolved `side`.
- */
 const meta: Meta<typeof Tooltip> = {
   title: "Interaction Tests/Tooltip",
   component: Tooltip,
@@ -23,7 +19,6 @@ const centred: CSSProperties = {
   padding: 120,
 };
 
-/** The tooltip is keyboard-reachable: tabbing to the trigger opens it too. */
 export const OpensOnFocus: Story = {
   render: () => (
     <div style={centred}>
@@ -40,7 +35,6 @@ export const OpensOnFocus: Story = {
   },
 };
 
-/** Long content wraps to multiple lines at the popup's max width. */
 export const LongContent: Story = {
   render: () => (
     <div style={centred}>
@@ -60,7 +54,6 @@ export const LongContent: Story = {
   },
 };
 
-/** `side="top"`: a centred trigger whose tooltip resolves above it with no flip. */
 export const SideTop: Story = {
   render: () => (
     <div style={centred}>
@@ -78,7 +71,6 @@ export const SideTop: Story = {
   },
 };
 
-/** `side="right"`: a centred trigger whose tooltip resolves to its right with no flip. */
 export const SideRight: Story = {
   render: () => (
     <div style={centred}>
@@ -96,7 +88,6 @@ export const SideRight: Story = {
   },
 };
 
-/** `side="bottom"`: a centred trigger whose tooltip resolves below it with no flip. */
 export const SideBottom: Story = {
   render: () => (
     <div style={centred}>
@@ -114,7 +105,6 @@ export const SideBottom: Story = {
   },
 };
 
-/** `side="left"`: a centred trigger whose tooltip resolves to its left with no flip. */
 export const SideLeft: Story = {
   render: () => (
     <div style={centred}>
