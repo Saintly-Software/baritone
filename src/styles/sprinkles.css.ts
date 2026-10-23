@@ -74,6 +74,7 @@ const responsiveProperties = defineProperties({
     whiteSpace: ["normal", "nowrap", "pre", "pre-wrap", "pre-line", "break-spaces"],
     overflowWrap: ["normal", "break-word", "anywhere"],
     textTransform: ["none", "uppercase", "lowercase", "capitalize"],
+    textDecoration: ["none", "underline", "line-through", "overline"],
   },
   shorthands: {
     p: ["padding"],

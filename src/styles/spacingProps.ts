@@ -35,6 +35,8 @@ export interface TypographyAtomProps {
 
   textTransform?: Atoms["textTransform"];
 
+  textDecoration?: Atoms["textDecoration"];
+
   letterSpacing?: LetterSpacingName;
 
   lineHeight?: LineHeightName;
