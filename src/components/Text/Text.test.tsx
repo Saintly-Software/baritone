@@ -103,6 +103,11 @@ describe("Text", () => {
     expect(screen.getByText("Shout").className).toContain(atoms({ textTransform: "uppercase" }));
   });
 
+  it("applies the textDecoration atom", () => {
+    render(<Text textDecoration="underline">Marked</Text>);
+    expect(screen.getByText("Marked").className).toContain(atoms({ textDecoration: "underline" }));
+  });
+
   it("selects a built-in tracking step by name via the --textLetterSpacing var", () => {
     render(<Text letterSpacing="widest">Eyebrow</Text>);
     expect(screen.getByText("Eyebrow").getAttribute("style")).toContain(
