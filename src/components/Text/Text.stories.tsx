@@ -32,6 +32,10 @@ const meta: Meta<typeof Text> = {
       control: "select",
       options: ["none", "uppercase", "lowercase", "capitalize"],
     },
+    textDecoration: {
+      control: "select",
+      options: ["none", "underline", "line-through", "overline"],
+    },
     letterSpacing: { control: "select", options: LETTER_SPACING_KEYS },
     lineHeight: { control: "select", options: LINE_HEIGHT_KEYS },
   },

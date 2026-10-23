@@ -22,6 +22,10 @@ const meta: Meta<typeof Heading> = {
       control: "select",
       options: ["none", "uppercase", "lowercase", "capitalize"],
     },
+    textDecoration: {
+      control: "select",
+      options: ["none", "underline", "line-through", "overline"],
+    },
   },
 };
 export default meta;
