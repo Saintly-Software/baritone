@@ -1,5 +1,17 @@
 export { BaritoneTheme, type BaritoneThemeProps } from "./components/BaritoneTheme";
 export { BaritoneProvider, type BaritoneProviderProps } from "./components/BaritoneProvider";
+export {
+  useLayoutRegion,
+  useLayoutInsets,
+  type LayoutCorner,
+  type LayoutCornerRegionOptions,
+  type LayoutEdge,
+  type LayoutEdgeRegionOptions,
+  type LayoutFabReservation,
+  type LayoutInsets,
+  type LayoutRegionOptions,
+  type LayoutSize,
+} from "./components/Layout";
 export { Button, type ButtonProps } from "./components/Button";
 export {
   ButtonGroup,
