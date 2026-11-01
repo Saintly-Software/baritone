@@ -1,5 +1,14 @@
 # @saintly-software/baritone
 
+## 1.0.0-alpha.9
+
+### Minor Changes
+
+- 6890f08: Add a `textDecoration` prop to `Text` and `Heading` (`none` | `underline` |
+  `line-through` | `overline`). Like `textTransform`, it's a plain `text-decoration`
+  passthrough backed by the sprinkles atoms, so it's opt-in and additive —
+  omitting it leaves the rendered decoration untouched.
+
 ## 1.0.0-alpha.8
 
 ### Minor Changes
