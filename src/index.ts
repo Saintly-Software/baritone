@@ -91,6 +91,7 @@ export {
   type FlexItemAlign,
 } from "./components/Flex";
 export { InlineList, type InlineListProps } from "./components/InlineList";
+export { AppShell, type AppShellProps } from "./components/AppShell";
 export {
   Grid,
   type GridProps,
