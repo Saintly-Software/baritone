@@ -1,15 +1,16 @@
 import { style } from "@vanilla-extract/css";
 import { vars } from "../../theme/contract.css";
+import { layoutVars } from "../../theme/layout.css";
 
 const GAP = vars.space[3];
 
 export const toastViewport = style({
   position: "fixed",
-  bottom: vars.space[4],
-  right: vars.space[4],
+  bottom: `calc(max(${layoutVars.inset.bottom}, ${layoutVars.fab.bottomRight.height}) + ${vars.space[4]})`,
+  right: `calc(${layoutVars.inset.right} + ${vars.space[4]})`,
   left: "auto",
   top: "auto",
-  width: `min(24rem, calc(100vw - (${vars.space[4]} * 2)))`,
+  width: `min(24rem, calc(100vw - ${layoutVars.inset.left} - ${layoutVars.inset.right} - (${vars.space[4]} * 2)))`,
   zIndex: 1,
 });
 
