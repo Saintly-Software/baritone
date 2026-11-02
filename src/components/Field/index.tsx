@@ -119,6 +119,8 @@ interface FieldBaseProps {
 
   fit?: "fill" | "content";
 
+  groupLabel?: boolean;
+
   disabled?: boolean;
 
   slotProps?: FieldSlotProps;
@@ -139,6 +141,7 @@ export function Field(props: FieldProps) {
     state = "neutral",
     labelPosition = "top",
     fit = "fill",
+    groupLabel = false,
     disabled: disabledProp = false,
     slotProps,
     className,
@@ -160,6 +163,7 @@ export function Field(props: FieldProps) {
   const labelEl = label != null && (
     <BaseField.Label
       id={generatedLabelId}
+      {...(groupLabel && { render: <div />, nativeLabel: false })}
       className={mergeSlotClass(cx(labelClass, disabled && fieldLabelDisabled), labelSlotClass)}
       {...labelSlotProps}
     >

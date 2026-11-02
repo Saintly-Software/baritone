@@ -170,4 +170,13 @@ describe("RadioGroup", () => {
     await user.click(screen.getByRole("radio", { name: "Cozy" }));
     expect(onChange).toHaveBeenCalledWith(Density.Cozy, expect.any(Event));
   });
+
+  it("does not change the selection when the group label is clicked", async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(<ThemeSwitcher onChange={onChange} />);
+
+    await user.click(screen.getByText("Theme"));
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
