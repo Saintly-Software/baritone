@@ -149,6 +149,7 @@ export function RadioGroup<T>(props: RadioGroupProps<T>) {
       state={state}
       required={required}
       labelPosition={labelPosition}
+      groupLabel
       disabled={disabled}
       slotProps={slotProps}
     >

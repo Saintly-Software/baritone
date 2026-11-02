@@ -66,11 +66,13 @@ function CheckboxGroupItem<T>({
   const itemDisabled = groupDisabled || disabled;
   const checked = selected.includes(value);
   const labelId = React.useId();
+  const inputId = React.useId();
   const content = children ?? defaultLabel(value);
 
   return (
     <label className={cx(checkboxRow({ size }), itemDisabled && checkboxRowDisabled, className)}>
       <BaseCheckbox.Root
+        id={inputId}
         checked={checked}
         onCheckedChange={(next, details) => toggle(value, next, details.event)}
         readOnly={itemDisabled}
@@ -175,6 +177,7 @@ export function CheckboxGroup<T>(props: CheckboxGroupProps<T>) {
       state={state}
       required={required}
       labelPosition={labelPosition}
+      groupLabel
       disabled={disabled}
       slotProps={slotProps}
     >

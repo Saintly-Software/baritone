@@ -236,4 +236,25 @@ describe("CheckboxGroup", () => {
     await user.click(screen.getByRole("checkbox", { name: "Tuesday" }));
     expect(onChange).toHaveBeenCalledWith([Day.Mon, Day.Tue], expect.any(Event));
   });
+
+  it("does not toggle any option when the group label is clicked", async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(<Subscriptions onChange={onChange} />);
+
+    await user.click(screen.getByText("Email me about"));
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole("checkbox", { name: "product" })).not.toBeChecked();
+  });
+
+  it("gives every element in the group a unique id", () => {
+    const { container } = render(<Subscriptions />);
+    const ids = Array.from(container.querySelectorAll("[id]"), (el) => el.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("does not point the group label at any option input", () => {
+    const { container } = render(<Subscriptions />);
+    expect(container.querySelector("label[for]:not(:has(input))")).toBeNull();
+  });
 });
