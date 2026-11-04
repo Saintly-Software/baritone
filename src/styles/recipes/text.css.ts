@@ -50,7 +50,9 @@ export const textSizeRecipe = recipe({
     fontSize: fallbackVar(textSizeVar, vars.text.size.md.fontSize),
     lineHeight: fallbackVar(textLineHeightVar, vars.text.size.md.lineHeight),
     fontWeight: fallbackVar(textWeightVar, vars.text.weight.default),
-    margin: 0,
+    selectors: {
+      ":where(&)": { margin: 0 },
+    },
   },
   variants: {
     size: Object.fromEntries(
