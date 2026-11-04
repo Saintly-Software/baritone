@@ -1,5 +1,12 @@
 # @saintly-software/baritone
 
+## 1.0.0-alpha.10
+
+### Patch Changes
+
+- 594601f: Fix `CheckboxGroup` and `RadioGroup` group labels activating the first option when clicked. The group label now renders as a non-`<label>` element, since it already names the group through `aria-labelledby`. `CheckboxGroup` options also get unique input ids instead of sharing the field's id.
+- 870839b: Margin props (`m`, `mx`, `my`, `mt`, `mr`, `mb`, `ml`) now take effect on `Text` and `Heading`. The typography recipe's `margin: 0` reset is now zero-specificity (`:where()`), so it still strips the browser's default `<p>`/`<h*>` margins but no longer overrides the margin atoms. The same applies to other surfaces built on `textSizeRecipe`.
+
 ## 1.0.0-alpha.9
 
 ### Minor Changes
