@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, within } from "storybook/test";
+import { Box } from "../Box";
+import { Heading } from "../Heading";
 import { Text } from "./index";
 
 const meta: Meta<typeof Text> = {
@@ -43,5 +45,35 @@ export const IntentColorResolves: Story = {
 
     expect(neutral).not.toBe("");
     expect(negative).not.toBe(neutral);
+  },
+};
+
+export const MarginPropsApply: Story = {
+  render: () => (
+    <div>
+      <Box as="span" ml="2">
+        Box reference
+      </Box>
+      <Text as="span" ml="2">
+        Text with margin
+      </Text>
+      <Heading level={2} mt="4" mb="2">
+        Heading with margin
+      </Heading>
+      <Text as="p">Bare paragraph</Text>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const spaceTwo = getComputedStyle(canvas.getByText("Box reference")).marginLeft;
+    const text = getComputedStyle(canvas.getByText("Text with margin"));
+    const heading = getComputedStyle(canvas.getByText("Heading with margin"));
+    const paragraph = getComputedStyle(canvas.getByText("Bare paragraph"));
+
+    expect(spaceTwo).not.toBe("0px");
+    expect(text.marginLeft).toBe(spaceTwo);
+    expect(heading.marginBottom).toBe(spaceTwo);
+    expect(heading.marginTop).not.toBe("0px");
+    expect(paragraph.margin).toBe("0px");
   },
 };
