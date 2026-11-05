@@ -12,6 +12,10 @@
   ],
   "license": "ISC",
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saintly-Software/baritone.git"
+  },
   "files": [
     "dist"
   ],
