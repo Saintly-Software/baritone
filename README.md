@@ -191,6 +191,87 @@ label="Email" />`.
 Light/dark is **the consumer's call** — the package never auto-switches on
 `prefers-color-scheme`; it just produces both classes.
 
+## Layout awareness
+
+Components can keep clear of the app's navbar, sidebar, footer and floating
+action buttons (FABs). The system tracks **how much of each viewport edge is
+covered by pinned content**, and publishes it as document-wide CSS variables
+with stable names:
+
+| Variable                                             | Meaning                                                             |
+| ---------------------------------------------------- | ------------------------------------------------------------------- |
+| `--bt-layout-inset-{top,right,bottom,left}`          | Total size of the pinned regions on that edge                       |
+| `--bt-layout-fab-bottom-{right,left}-{width,height}` | Box reserved for FABs, measured from that viewport corner           |
+| `--bt-layout-offset`                                 | Set on each registered region: the pinned regions stacked before it |
+
+Use them from vanilla-extract through `layoutVars` (every value falls back to
+`0px`), or by name from any CSS. `Toast` already keeps clear of them, and
+`html` gets `scroll-padding-top: var(--bt-layout-inset-top)` so anchor links
+and `scrollIntoView` land below a pinned navbar.
+
+### Registering regions
+
+Regions register with `useLayoutRegion` (inside `BaritoneProvider`); sizes are
+measured live with `ResizeObserver`:
+
+```tsx
+const ref = useLayoutRegion({ edge: "top" }); // pinned: true by default
+return (
+  <header ref={ref} className={navbar}>
+    …
+  </header>
+);
+
+// navbar.css.ts
+export const navbar = style({ position: "sticky", top: layoutVars.offset });
+```
+
+- Only **pinned** regions count. Pass `pinned: false` for one that scrolls away.
+- Several regions on one edge form a **stack** in DOM order (outward-first for
+  top/left, from the end for bottom/right; `order` overrides). Each gets its own
+  `--bt-layout-offset`, so a navbar under a dismissible banner moves up when the
+  banner goes. If the bars render together, wrapping them in one sticky element
+  and registering that is simpler.
+- Your own FABs register by corner: `useLayoutRegion({ corner: "bottom-right" })`.
+- `useLayoutInsets()` returns the current values in pixels, for JS that needs them.
+
+### Third-party FABs
+
+Help widgets injected by a script can't be measured. Reserve their box instead —
+including the widget's own offset from the edge:
+
+```tsx
+<BaritoneProvider fab={{ corner: "bottom-right", width: 80, height: 80 }}>
+```
+
+### First paint and SSR
+
+Measurement only runs after hydration. To avoid a shift, declare the expected
+values in your own CSS; measured values (set inline on `<html>`) override them,
+and when a region unregisters its declared value applies again:
+
+```css
+:root {
+  --bt-layout-inset-top: 56px;
+}
+@media (min-width: 768px) {
+  :root {
+    --bt-layout-inset-top: 64px;
+  }
+}
+:root:has([data-site-banner]) {
+  --bt-layout-inset-top: 101px;
+}
+```
+
+### `AppShell`
+
+An optional grid that renders `header` / `sidebar` / `main` / `footer` / `fab`
+slots as landmarks, adds a skip link, and registers every slot. `pinHeader`
+(default `true`), `pinSidebar` (default `true`) and `pinFooter` (default
+`false`) choose what sticks; `hideSidebarBelow` hides the sidebar under a
+breakpoint. Mobile navigation is left to the app.
+
 ---
 
 ## Accessibility

@@ -80,6 +80,7 @@ export {
 } from "./color-math";
 
 export { breakpoints, type Breakpoint } from "./breakpoints";
+export { layoutVars } from "./layout.css";
 
 export {
   INTENTS,
