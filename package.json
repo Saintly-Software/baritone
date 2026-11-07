@@ -59,11 +59,11 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "oxlint -c .config/.oxlintrc.json --fix",
-      "oxfmt -c .config/.oxfmtrc.json"
+      "oxlint -c .config/.oxlintrc.json --fix --no-error-on-unmatched-pattern",
+      "oxfmt -c .config/.oxfmtrc.json --no-error-on-unmatched-pattern"
     ],
     "*.{json,md,css}": [
-      "oxfmt -c .config/.oxfmtrc.json"
+      "oxfmt -c .config/.oxfmtrc.json --no-error-on-unmatched-pattern"
     ]
   },
   "packageManager": "pnpm@11.8.0"
