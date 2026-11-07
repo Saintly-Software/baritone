@@ -74,6 +74,8 @@ export interface UseToastReturn {
 
 export interface BaritoneToastManager extends Omit<UseToastReturn, "toasts"> {
   " subscribe": ToastManager<ToastData>[" subscribe"];
+
+  readonly " baritone": true;
 }
 
 function pack(options: Partial<AddToastOptions>): ToastManagerAddOptions<ToastData> {
@@ -140,6 +142,7 @@ export function useToast(): UseToastReturn {
 export function createToastManager(): BaritoneToastManager {
   const manager = BaseToast.createToastManager<ToastData>();
   return {
+    " baritone": true,
     " subscribe": manager[" subscribe"],
     add: (options) => manager.add({ ...pack(options), id: options.id }),
     update: (id, options) => manager.update(id, pack(options)),

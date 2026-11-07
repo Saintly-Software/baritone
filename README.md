@@ -80,7 +80,7 @@ hover to the intent's `mid` shade instead.
 ```sh
 pnpm add @saintly-software/baritone
 # peers:
-pnpm add react react-dom @base-ui/react
+pnpm add react react-dom
 ```
 
 Import the pre-compiled stylesheet **once** at your app root, then apply a theme

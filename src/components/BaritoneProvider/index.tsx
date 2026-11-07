@@ -12,7 +12,7 @@ export interface BaritoneProviderProps {
 
   toastLimit?: number;
 
-  toastManager?: BaritoneToastManager | ToastManager;
+  toastManager?: BaritoneToastManager;
 }
 
 export function BaritoneProvider({
