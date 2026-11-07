@@ -126,3 +126,36 @@ export const MultiSelectHoverSelectedOption: Story = {
     expect(apple).toHaveAttribute("aria-selected", "true");
   },
 };
+
+export const DisabledStaysFocusableAndNeverOpens: Story = {
+  render: () => (
+    <Select
+      label="Difficulty"
+      disabled
+      value="1"
+      onChange={() => {}}
+      options={[
+        { value: "0", label: "Easy" },
+        { value: "1", label: "Medium" },
+      ]}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole("combobox", { name: "Difficulty" });
+
+    await userEvent.tab();
+    await expect(trigger).toHaveFocus();
+    await expect(trigger).toHaveAttribute("aria-disabled", "true");
+
+    await userEvent.click(trigger);
+    await userEvent.keyboard("{Enter}");
+    await userEvent.keyboard(" ");
+    await userEvent.keyboard("{ArrowDown}");
+    await userEvent.keyboard("{ArrowUp}");
+
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(within(document.body).queryByRole("listbox")).toBeNull();
+    await expect(trigger).toHaveFocus();
+  },
+};
