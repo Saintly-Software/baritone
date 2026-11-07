@@ -1,5 +1,24 @@
 # @saintly-software/baritone
 
+## 1.0.0-alpha.11
+
+### Major Changes
+
+- 30af58d: `@base-ui/react` is now a regular dependency instead of a peer, so installing Baritone no longer requires installing base-ui alongside it. You can drop `@base-ui/react` from your app's dependencies unless you import it directly.
+
+  **Breaking:** `BaritoneProvider`'s `toastManager` prop now accepts only a `BaritoneToastManager` (from Baritone's `createToastManager()`), not a raw base-ui `ToastManager`. Create the manager with Baritone's `createToastManager()` instead of base-ui's `Toast.createToastManager()`, and pass `intent`, `saliency`, `icon`, and `actions` as top-level options to its `add` / `update` / `promise`. base-ui's `data` option is not accepted.
+
+- f84fd3d: The TanStack integrations moved out of the core into their own packages, so the `@saintly-software/baritone/datatable` and `@saintly-software/baritone/form` subpaths are gone.
+
+  **Breaking:** install the package for the integration you use and update its imports. The packages version in lockstep with the core.
+
+  - `@saintly-software/baritone/datatable` → `@saintly-software/baritone-datatable`. Also import `@saintly-software/baritone-datatable/styles.css` next to the core stylesheet; DataTable's styles are no longer in `@saintly-software/baritone/styles.css`.
+  - `@saintly-software/baritone/form` → `@saintly-software/baritone-form`.
+
+### Patch Changes
+
+- d690e14: A disabled `Menu.Trigger` no longer opens the menu on ArrowDown / ArrowUp. It stays focusable and keeps `aria-disabled`.
+
 ## 1.0.0-alpha.10
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@saintly-software/baritone-form",
-  "version": "1.0.0-alpha.10",
+  "version": "1.0.0-alpha.11",
   "description": "TanStack Form bindings for the Baritone design system form controls.",
   "keywords": [
     "baritone",
