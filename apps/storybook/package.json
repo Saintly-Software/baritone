@@ -1,0 +1,19 @@
+{
+  "name": "@saintly-software/baritone-storybook",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@saintly-software/baritone": "workspace:*",
+    "@saintly-software/baritone-datatable": "workspace:*",
+    "@saintly-software/baritone-form": "workspace:*",
+    "@tanstack/react-form": "1.33.5",
+    "@tanstack/react-table": "9.0.0-beta.53"
+  }
+}

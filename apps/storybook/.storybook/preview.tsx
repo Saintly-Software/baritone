@@ -1,6 +1,6 @@
 import type { Decorator, Preview } from "@storybook/react-vite";
 import * as React from "react";
-import { darkTheme, lightTheme, vars } from "../src/theme";
+import { darkTheme, lightTheme, vars } from "@saintly-software/baritone";
 
 const withTheme: Decorator = (Story, context) => {
   const scheme = context.globals.scheme === "dark" ? "dark" : "light";
