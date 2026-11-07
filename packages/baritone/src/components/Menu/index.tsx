@@ -13,6 +13,7 @@ import { cx } from "../../utils/cx";
 import { keyedElements } from "../../utils/keyedElements";
 import { mergeProps, type RenderProp } from "../../utils/render";
 import type { ButtonProps } from "../Button";
+import { useIsFieldDisabled } from "../Fieldset";
 import {
   MENU_ITEM_INTENTS,
   menuItemIcon,
@@ -196,8 +197,13 @@ export type MenuTriggerProps =
   | (ButtonProps & MenuTriggerOwnProps & { render?: never })
   | (MenuTriggerOwnProps & { render: BaseMenuTriggerRender });
 
+function withoutEventHandlers<T extends object>(attrs: T): T {
+  return Object.fromEntries(Object.entries(attrs).filter(([key]) => !/^on[A-Z]/.test(key))) as T;
+}
+
 function MenuTrigger(props: MenuTriggerProps) {
   const { openOnHover, delay, closeDelay } = props;
+  const inheritedDisabled = useIsFieldDisabled();
 
   if (props.render != null) {
     return (
@@ -211,13 +217,17 @@ function MenuTrigger(props: MenuTriggerProps) {
   }
 
   const { openOnHover: _oh, delay: _d, closeDelay: _cd, render: _r, ...buttonProps } = props;
+  const disabled = buttonProps.disabled === true || inheritedDisabled;
   return (
     <BaseMenu.Trigger
       openOnHover={openOnHover}
       delay={delay}
       closeDelay={closeDelay}
       render={(htmlAttrs) => (
-        <InternalButton consumerProps={buttonProps as ButtonProps} htmlAttrs={htmlAttrs} />
+        <InternalButton
+          consumerProps={buttonProps as ButtonProps}
+          htmlAttrs={disabled ? withoutEventHandlers(htmlAttrs) : htmlAttrs}
+        />
       )}
     />
   );
