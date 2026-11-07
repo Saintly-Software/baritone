@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { FormState } from "../../theme/constants";
+import type { FormState } from "@saintly-software/baritone";
 
 export interface FieldLike<TValue> {
   readonly name: string;

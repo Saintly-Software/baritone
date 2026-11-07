@@ -1,6 +1,6 @@
 "use client";
 import type * as React from "react";
-import { Flex, type FlexProps } from "../Flex";
+import { Flex, type FlexProps } from "@saintly-software/baritone";
 
 export interface FormApiLike {
   handleSubmit: () => void | Promise<void>;

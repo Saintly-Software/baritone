@@ -1,0 +1,53 @@
+{
+  "name": "@saintly-software/baritone-form",
+  "version": "1.0.0-alpha.10",
+  "description": "TanStack Form bindings for the Baritone design system form controls.",
+  "keywords": [
+    "baritone",
+    "design-system",
+    "form",
+    "react",
+    "tanstack-form"
+  ],
+  "license": "ISC",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saintly-Software/baritone.git",
+    "directory": "packages/form"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "@saintly-software/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@saintly-software/baritone": "workspace:*",
+    "@tanstack/react-form": "1.33.5"
+  },
+  "peerDependencies": {
+    "@saintly-software/baritone": "workspace:^",
+    "@tanstack/react-form": "^1.33.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
