@@ -4,7 +4,11 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
-const SRC_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
+const PACKAGES_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "packages");
+
+const SOURCE_DIRS = readdirSync(PACKAGES_DIR, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => join(PACKAGES_DIR, entry.name, "src"));
 
 function mayReceiveDisabled(tag: string): boolean {
   return (
@@ -55,7 +59,7 @@ function findNativeDisabled(file: string): string[] {
         );
         if (disabledAttr) {
           const line = source.getLineAndCharacterOfPosition(disabledAttr.getStart(source)).line + 1;
-          hits.push(`${relative(SRC_DIR, file)}:${line}: <${tag} disabled={…}>`);
+          hits.push(`${relative(PACKAGES_DIR, file)}:${line}: <${tag} disabled={…}>`);
         }
       }
     }
@@ -68,7 +72,7 @@ function findNativeDisabled(file: string): string[] {
 
 describe("aria-disabled convention", () => {
   it("no interactive control uses the native `disabled` attribute (it must stay tabbable)", () => {
-    const violations = tsxSourceFiles(SRC_DIR).flatMap(findNativeDisabled);
+    const violations = SOURCE_DIRS.flatMap(tsxSourceFiles).flatMap(findNativeDisabled);
 
     expect(
       violations,

@@ -1,0 +1,64 @@
+{
+  "name": "@saintly-software/baritone",
+  "version": "1.0.0-alpha.10",
+  "description": "A whitelabel-first React design system built on vanilla-extract + base-ui, using an Intent/Saliency colour model with oklch relative-colour interaction states.",
+  "keywords": [
+    "base-ui",
+    "design-system",
+    "oklch",
+    "react",
+    "vanilla-extract",
+    "whitelabel"
+  ],
+  "license": "ISC",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saintly-Software/baritone.git",
+    "directory": "packages/baritone"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "@saintly-software/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./internal": {
+      "@saintly-software/source": "./src/internal/index.ts",
+      "types": "./dist/internal/index.d.ts",
+      "import": "./dist/internal.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.6.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vanilla-extract/css": {
+      "optional": true
+    }
+  }
+}

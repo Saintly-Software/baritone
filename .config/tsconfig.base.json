@@ -8,7 +8,7 @@
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "resolveJsonModule": true,
-    "allowImportingTsExtensions": false,
+    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "skipLibCheck": true,
@@ -21,9 +21,7 @@
     "noUncheckedIndexedAccess": true,
     "declaration": true,
     "emitDeclarationOnly": true,
-    "rootDir": "../src",
-    "outDir": "../dist",
-    "types": ["node", "vitest/globals", "@testing-library/jest-dom"]
-  },
-  "include": ["../src"]
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
+    "customConditions": ["@saintly-software/source"]
+  }
 }
