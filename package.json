@@ -63,8 +63,10 @@
     "pub:version": "pnpm exec changeset version",
     "pub:release": "pnpm build && pnpm exec changeset publish"
   },
+  "dependencies": {
+    "@base-ui/react": "^1.6.0"
+  },
   "devDependencies": {
-    "@base-ui/react": "1.6.0",
     "@changesets/cli": "3.0.3",
     "@storybook/addon-vitest": "10.4.6",
     "@storybook/react-vite": "10.4.6",
@@ -99,7 +101,6 @@
     "vitest": "4.1.9"
   },
   "peerDependencies": {
-    "@base-ui/react": "^1.6.0",
     "@tanstack/react-form": "^1.33.5",
     "@tanstack/react-table": "^9.0.0-beta.53",
     "react": "^19.0.0",
