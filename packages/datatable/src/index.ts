@@ -8,4 +8,4 @@ export {
   type DataTableColumn,
   type DataTableColumnMeta,
   type DataTableFeatures,
-} from "./components/DataTable";
+} from "./DataTable";

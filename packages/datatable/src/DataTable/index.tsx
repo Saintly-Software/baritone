@@ -20,9 +20,8 @@ import {
 } from "@tanstack/react-table";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import * as React from "react";
-import { InternalCheckbox } from "../../internal/components/InternalCheckbox";
-import { focusRingRecipe } from "../../styles/recipes/focusRing.css";
-import { cx } from "../../utils/cx";
+import { cx, focusRingRecipe } from "@saintly-software/baritone";
+import { InternalCheckbox } from "@saintly-software/baritone/internal";
 import {
   cell as cellRecipe,
   dataTableCaption,

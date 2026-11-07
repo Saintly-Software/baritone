@@ -1,6 +1,6 @@
 import { createVar, style } from "@vanilla-extract/css";
 import { recipe, type RecipeVariants } from "@vanilla-extract/recipes";
-import { vars } from "../../theme/contract.css";
+import { vars } from "@saintly-software/baritone";
 
 export const dataTableRoot = style({
   width: "100%",

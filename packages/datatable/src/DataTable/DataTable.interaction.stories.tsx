@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
+import { vars } from "@saintly-software/baritone";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { createDataTableColumnHelper, DataTable } from "./index";
 
@@ -311,5 +312,22 @@ export const DetailPanelsToggleIndependently: Story = {
       "aria-expanded",
       "false",
     );
+  },
+};
+
+export const ResolvesCoreThemeTokens: Story = {
+  render: () => (
+    <>
+      <span data-testid="probe" style={{ fontFamily: vars.font.sans }} />
+      <DataTable caption="Team members" data={people} columns={columns} />
+    </>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const themed = getComputedStyle(canvas.getByTestId("probe")).fontFamily;
+    const cell = canvas.getByRole("cell", { name: "Ada Lovelace" });
+
+    expect(themed).not.toBe(getComputedStyle(document.documentElement).fontFamily);
+    expect(getComputedStyle(cell).fontFamily).toBe(themed);
   },
 };

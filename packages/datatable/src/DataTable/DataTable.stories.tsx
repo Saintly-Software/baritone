@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
-import { Link } from "../Link";
+import { Link } from "@saintly-software/baritone";
 import { createDataTableColumnHelper, DataTable } from "./index";
 
 interface Person {
