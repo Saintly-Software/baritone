@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { useOverlayHandle } from "../../utils/overlayHandle";
 import { Popover } from "./index";
 
+type U = ReturnType<typeof userEvent.setup>;
+
 describe("Popover", () => {
   it("keeps the content hidden until the trigger is pressed", async () => {
     const user = userEvent.setup();
@@ -13,6 +15,29 @@ describe("Popover", () => {
 
     await user.click(screen.getByRole("button", { name: "Open" }));
     expect(await screen.findByText("Popover body")).toBeInTheDocument();
+  });
+
+  describe("disabled trigger never opens", () => {
+    it.each([
+      ["a click", (u: U) => u.click(screen.getByRole("button", { name: "Open" }))],
+      ["Enter", (u: U) => u.keyboard("{Enter}")],
+      ["Space", (u: U) => u.keyboard(" ")],
+      ["ArrowDown", (u: U) => u.keyboard("{ArrowDown}")],
+      ["ArrowUp", (u: U) => u.keyboard("{ArrowUp}")],
+    ])("on %s", async (_name, act) => {
+      const user = userEvent.setup();
+      render(
+        <Popover trigger={<Popover.Trigger disabled>Open</Popover.Trigger>}>Popover body</Popover>,
+      );
+      const trigger = screen.getByRole("button", { name: "Open" });
+
+      await user.tab();
+      expect(trigger).toHaveFocus();
+      await act(user);
+
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+      expect(screen.queryByText("Popover body")).not.toBeInTheDocument();
+    });
   });
 
   it("renders the trigger as a Button with the right popup wiring", () => {

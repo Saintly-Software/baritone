@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import { Menu } from "./index";
 import { MENU_ITEM_INTENTS } from "./menu.css";
 
+type U = ReturnType<typeof userEvent.setup>;
+
 describe("Menu", () => {
   it("keeps the items hidden until the trigger is pressed", async () => {
     const user = userEvent.setup();
@@ -19,6 +21,32 @@ describe("Menu", () => {
     await user.click(screen.getByRole("button", { name: "Open" }));
     expect(await screen.findByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Delete" })).toBeInTheDocument();
+  });
+
+  describe("disabled trigger never opens", () => {
+    it.each([
+      ["a click", (u: U) => u.click(screen.getByRole("button", { name: "Open" }))],
+      ["Enter", (u: U) => u.keyboard("{Enter}")],
+      ["Space", (u: U) => u.keyboard(" ")],
+      ["ArrowDown", (u: U) => u.keyboard("{ArrowDown}")],
+      ["ArrowUp", (u: U) => u.keyboard("{ArrowUp}")],
+    ])("on %s", async (_name, act) => {
+      const user = userEvent.setup();
+      render(
+        <Menu
+          trigger={<Menu.Trigger disabled>Open</Menu.Trigger>}
+          items={[<Menu.Item key="edit">Edit</Menu.Item>]}
+        />,
+      );
+      const trigger = screen.getByRole("button", { name: "Open" });
+
+      await user.tab();
+      expect(trigger).toHaveFocus();
+      await act(user);
+
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+      expect(screen.queryByRole("menuitem")).not.toBeInTheDocument();
+    });
   });
 
   it("renders the trigger as a Button with the right popup wiring", () => {
