@@ -3,6 +3,28 @@
 Conventions for anyone (human or AI) changing this package. These are rules, not
 suggestions — CI enforces the ones marked **enforced**.
 
+## Workspace layout
+
+This is a pnpm workspace. Each published package lives in `packages/<name>`;
+Storybook lives in `apps/storybook`; repo-wide convention tests live in `tests/`.
+
+- **Import siblings by package name, never by relative path.**
+  `packages/datatable` imports `@saintly-software/baritone`, not
+  `../../baritone/src/...`. A relative path bundles a second copy of the core
+  into the sibling's `dist/`.
+- **Only the public API, or `@saintly-software/baritone/internal`.** If a sibling
+  needs something the core doesn't export, add it to `src/internal/index.ts`
+  rather than to the public barrel. `internal` has no semver guarantee, which is
+  safe only because the packages version in lockstep (Changesets `fixed`).
+- **The `@saintly-software/source` export condition** points a package name at
+  its `src/`. Dev, tests, typecheck and Storybook resolve it; library builds
+  deliberately do not, so `pnpm build` builds the core before its dependents.
+  Every new export entry needs the condition alongside `types` / `import`.
+- **A new package** needs `package.json` (with the source condition),
+  `tsconfig.json`, `vite.config.ts` and `vitest.config.ts` built from the helpers
+  in `.config/workspace.ts`, plus an entry in `.changeset/config.json`'s `fixed`
+  group. Storybook and the convention tests pick it up from `packages/*`.
+
 ## Disabled controls must stay focusable (enforced)
 
 **Never put the native `disabled` attribute on an interactive control.** The
@@ -35,7 +57,7 @@ Notes for the form controls specifically:
 
 ### Enforcement
 
-- `src/test/aria-disabled-convention.test.ts` parses every component and fails if
+- `tests/aria-disabled-convention.test.ts` parses every component in every package and fails if
   a `disabled` attribute lands on a native element or a base-ui form primitive.
   Our own `Internal*` wrappers and base-ui's `Tooltip.Root` are allowlisted (see
   the comment there); add to the allowlist only with a clear reason.
@@ -47,7 +69,7 @@ Notes for the form controls specifically:
 ## Form controls compose `Field` (enforced)
 
 **Never re-derive label / help / error layout or ARIA wiring in a control.**
-`src/components/Field` owns it, and every form control composes it. A new control
+`packages/baritone/src/components/Field` owns it, and every form control composes it. A new control
 gets the shared contract for free:
 
 ```tsx
@@ -90,13 +112,13 @@ about which of two messages wins.
   _outside_ the `<label>` — an `aria-hidden` asterisk inside it would still break
   `getByLabelText("Email")`, which matches raw `textContent`, not the accname.
 - **Re-typing a control's props** needs `DistributiveOmit` / `DistributivePartial`
-  (`src/utils/types.ts`). The built-in `Omit`/`Partial` collapse a union into one
+  (`packages/baritone/src/utils/types.ts`, exported from the core). The built-in `Omit`/`Partial` collapse a union into one
   object carrying every arm's keys, quietly destroying the exclusivity.
 
 ### Enforcement
 
-- `src/test/field-composition.test.ts` fails if anything other than
-  `src/components/Field` imports base-ui's `Field` directly.
+- `tests/field-composition.test.ts` fails if anything other than
+  `packages/baritone/src/components/Field` imports base-ui's `Field` directly.
 - The labelling exclusivity is enforced by `pnpm typecheck` (the union makes a
   conflicting pair a compile error). `Field` also calls `assertExclusiveNames`,
   which **throws** in dev/test for the JS callers the types can't reach — a
@@ -107,7 +129,7 @@ about which of two messages wins.
 
 ## Other conventions
 
-- **Class names:** join with the local `cx` helper (`src/utils/cx.ts`); there is
+- **Class names:** join with the `cx` helper (`packages/baritone/src/utils/cx.ts`, exported from the core); there is
   no `clsx`/`classnames` dependency.
 - **Variants are the source of truth:** every variant prop is backed by a
   vanilla-extract recipe variant. Add styles as recipe variants, not ad-hoc

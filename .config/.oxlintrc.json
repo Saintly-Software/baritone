@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/oxlint/configuration_schema.json",
-  "ignorePatterns": [".design-sync/**", ".dummy/**", "dist/**"],
+  "ignorePatterns": [".design-sync/**", ".dummy/**", "**/dist/**"],
   "plugins": ["typescript", "unicorn", "oxc", "react", "jsx-a11y", "import", "promise", "vitest"],
   "categories": {
     "correctness": "error",
@@ -54,7 +54,8 @@
         "**/*.test.ts",
         "**/*.test.tsx",
         "**/_stories/**",
-        "**/test/**"
+        "**/test/**",
+        "**/vitest.setup.ts"
       ],
       "rules": {
         "react/jsx-key": "off",

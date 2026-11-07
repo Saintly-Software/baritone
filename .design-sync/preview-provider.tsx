@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BaritoneTheme, buildDefaultTokens, createInlineTheme, vars } from "../dist/index.js";
+import { BaritoneTheme, buildDefaultTokens, createInlineTheme, vars } from "../packages/baritone/dist/index.js";
 
 const previewTokens = buildDefaultTokens("light");
 const bodyVars = createInlineTheme(previewTokens, { scheme: "light" });

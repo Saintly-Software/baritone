@@ -1,0 +1,56 @@
+{
+  "name": "@saintly-software/baritone-datatable",
+  "version": "1.0.0-alpha.10",
+  "description": "DataTable for the Baritone design system, built on TanStack Table.",
+  "keywords": [
+    "baritone",
+    "data-table",
+    "design-system",
+    "react",
+    "tanstack-table"
+  ],
+  "license": "ISC",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saintly-Software/baritone.git",
+    "directory": "packages/datatable"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "@saintly-software/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@saintly-software/baritone": "workspace:*",
+    "@tanstack/react-table": "9.0.0-beta.53"
+  },
+  "peerDependencies": {
+    "@saintly-software/baritone": "workspace:^",
+    "@tanstack/react-table": "^9.0.0-beta.53",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

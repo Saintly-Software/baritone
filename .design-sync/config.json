@@ -2,7 +2,7 @@
   "projectId": "0fb986d9-b914-47ef-86e0-630c5908b230",
   "shape": "storybook",
   "pkg": "@saintly-software/baritone",
-  "storybookConfigDir": ".storybook",
+  "storybookConfigDir": "apps/storybook/.storybook",
   "storybookStatic": ".design-sync/sb-reference",
   "buildCmd": "pnpm build",
   "readmeHeader": ".design-sync/conventions.md",
@@ -11,7 +11,7 @@
   },
   "extraEntries": ["./.design-sync/preview-provider.tsx"],
   "storyImports": {
-    "shim": ["src/theme/index"]
+    "shim": ["packages/baritone/src/theme/index"]
   },
   "titleMap": {
     "InternalButton": null,
