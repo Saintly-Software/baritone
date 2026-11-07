@@ -1,3 +1,4 @@
+import { Toast as BaseToast } from "@base-ui/react/toast";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
@@ -6,7 +7,12 @@ import { BaritoneProvider } from "../BaritoneProvider";
 import { Button } from "../Button";
 import { Notice } from "../Notice";
 import { noticeRecipe } from "../Notice/notice.css";
-import { createToastManager, useToast, type AddToastOptions } from "./index";
+import {
+  createToastManager,
+  useToast,
+  type AddToastOptions,
+  type BaritoneToastManager,
+} from "./index";
 
 function Trigger({ options, label = "Show" }: { options: AddToastOptions; label?: string }) {
   const toast = useToast();
@@ -213,6 +219,14 @@ describe("Toast", () => {
     const toast = await screen.findByRole("dialog", { name: "Couldn't save" });
     const noticeEl = toast.querySelector<HTMLElement>('[role="presentation"]');
     expect(noticeEl?.className).toContain(noticeRecipe({ intent: "negative", saliency: "high" }));
+  });
+
+  it("brands its managers so a raw base-ui manager can't stand in for one", () => {
+    const raw = BaseToast.createToastManager();
+    // @ts-expect-error
+    const asBaritone: BaritoneToastManager = raw;
+    expect(asBaritone).not.toHaveProperty(" baritone");
+    expect(createToastManager()).toHaveProperty(" baritone", true);
   });
 
   it("replaces the visual data wholesale on a module-scope manager's update", async () => {
