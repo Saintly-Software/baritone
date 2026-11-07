@@ -72,6 +72,38 @@ describe("Combobox", () => {
     expect(input).toHaveFocus();
   });
 
+  describe("disabled never opens the popup", () => {
+    it.each([
+      [
+        "a click",
+        async (user: ReturnType<typeof userEvent.setup>) =>
+          user.click(screen.getByRole("combobox", { name: "Fruit" })),
+      ],
+      [
+        "ArrowDown",
+        async (user: ReturnType<typeof userEvent.setup>) => user.keyboard("{ArrowDown}"),
+      ],
+      ["ArrowUp", async (user: ReturnType<typeof userEvent.setup>) => user.keyboard("{ArrowUp}")],
+      ["Enter", async (user: ReturnType<typeof userEvent.setup>) => user.keyboard("{Enter}")],
+      [
+        "the trigger button",
+        async (user: ReturnType<typeof userEvent.setup>) =>
+          user.click(screen.getByLabelText("Show options")),
+      ],
+    ])("on %s", async (_name, act) => {
+      const user = userEvent.setup();
+      render(<Combobox label="Fruit" options={FRUITS} disabled />);
+      const input = screen.getByRole("combobox", { name: "Fruit" });
+
+      await user.tab();
+      expect(input).toHaveFocus();
+      await act(user);
+
+      expect(input).toHaveAttribute("aria-expanded", "false");
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    });
+  });
+
   it("opens the popup and renders the options, queryable in jsdom", async () => {
     const user = userEvent.setup();
     render(<Combobox label="Fruit" options={FRUITS} />);

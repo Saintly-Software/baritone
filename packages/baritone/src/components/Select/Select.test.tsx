@@ -194,6 +194,43 @@ describe("Select", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  describe("disabled never opens the popup", () => {
+    it.each([
+      [
+        "a click",
+        async (user: ReturnType<typeof userEvent.setup>) =>
+          user.click(screen.getByRole("combobox", { name: "Fruit" })),
+      ],
+      ["Enter", async (user: ReturnType<typeof userEvent.setup>) => user.keyboard("{Enter}")],
+      ["Space", async (user: ReturnType<typeof userEvent.setup>) => user.keyboard(" ")],
+      [
+        "ArrowDown",
+        async (user: ReturnType<typeof userEvent.setup>) => user.keyboard("{ArrowDown}"),
+      ],
+      ["ArrowUp", async (user: ReturnType<typeof userEvent.setup>) => user.keyboard("{ArrowUp}")],
+    ])("on %s", async (_name, act) => {
+      const user = userEvent.setup();
+      render(<SingleHost value="apple" disabled />);
+      const trigger = screen.getByRole("combobox", { name: "Fruit" });
+
+      await user.tab();
+      expect(trigger).toHaveFocus();
+      await act(user);
+
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+      expect(trigger).toHaveFocus();
+      expect(trigger).toHaveAttribute("aria-disabled", "true");
+    });
+
+    it("still opens when enabled", async () => {
+      const user = userEvent.setup();
+      render(<SingleHost value="apple" />);
+      await user.click(screen.getByRole("combobox", { name: "Fruit" }));
+      expect(await screen.findByRole("listbox")).toBeInTheDocument();
+    });
+  });
+
   it("marks the trigger busy while loading", () => {
     render(<SingleHost loading />);
     expect(screen.getByRole("combobox", { name: "Fruit" })).toHaveAttribute("aria-busy", "true");
