@@ -217,7 +217,7 @@ function MenuTrigger(props: MenuTriggerProps) {
   }
 
   const { openOnHover: _oh, delay: _d, closeDelay: _cd, render: _r, ...buttonProps } = props;
-  const disabled = buttonProps.disabled === true || inheritedDisabled;
+  const disabled = (buttonProps as ButtonProps).disabled === true || inheritedDisabled;
   return (
     <BaseMenu.Trigger
       openOnHover={openOnHover}
