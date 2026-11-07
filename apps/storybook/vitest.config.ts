@@ -1,0 +1,19 @@
+import { resolve } from "node:path";
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+import { playwright } from "@vitest/browser-playwright";
+import { defineConfig } from "vitest/config";
+import { resolveFromSource } from "../../.config/workspace.ts";
+
+export default defineConfig({
+  ...resolveFromSource,
+  plugins: [storybookTest({ configDir: resolve(import.meta.dirname, ".storybook") })],
+  test: {
+    name: "storybook",
+    browser: {
+      enabled: true,
+      headless: true,
+      provider: playwright(),
+      instances: [{ browser: "chromium" }],
+    },
+  },
+});
