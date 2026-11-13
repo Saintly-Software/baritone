@@ -1,8 +1,14 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import * as React from "react";
 import { describe, expect, it, vi } from "vitest";
-import { createDataTableColumnHelper, DataTable, type DataTableProps } from "./index";
+import {
+  createDataTableColumnHelper,
+  DataTable,
+  type DataTableBaseProps,
+  type DataTableProps,
+} from "./index";
+import type { ExpandedState } from "@tanstack/react-table";
 
 interface Person {
   id: string;
@@ -533,6 +539,219 @@ describe("DataTable grouping — groupDisplay='merge'", () => {
     const housingRow = housing.closest("tr")!;
     expect(within(housingRow).getAllByRole("cell").length).toBeGreaterThan(0);
     expect(within(housingRow).getByText("(2)")).toBeInTheDocument();
+  });
+});
+
+const regions: Employee[] = [
+  ...employees,
+  { id: "4", region: "EMEA", role: "Sales", name: "Karl Marx" },
+];
+
+async function settled(): Promise<void> {
+  await act(async () => {});
+}
+
+function NestedTable(props: Partial<DataTableBaseProps<Employee>> = {}) {
+  return (
+    <DataTable
+      aria-label="Employees"
+      data={regions}
+      columns={employeeColumns}
+      grouping={["region", "role"]}
+      getRowId={(e) => e.id}
+      {...props}
+    />
+  );
+}
+
+const AMERICAS = "region:Americas";
+const AMERICAS_ENG = "region:Americas>role:Engineering";
+const AMERICAS_SALES = "region:Americas>role:Sales";
+const EMEA = "region:EMEA";
+const EMEA_SALES = "region:EMEA>role:Sales";
+
+describe("DataTable group expansion", () => {
+  it("expands a group and every nested group on Alt+click", async () => {
+    render(<NestedTable defaultExpanded={false} />);
+    await settled();
+    expect(screen.queryByRole("button", { name: /Engineering/ })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Expand Americas/ }), { altKey: true });
+
+    expect(screen.getByRole("button", { name: /Collapse Americas/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Collapse Engineering/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Collapse Sales/ })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Tom Watson" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Expand EMEA/ })).toBeInTheDocument();
+  });
+
+  it("expands only one level on a plain click", async () => {
+    const user = userEvent.setup();
+    render(<NestedTable defaultExpanded={false} />);
+    await settled();
+
+    await user.click(screen.getByRole("button", { name: /Expand Americas/ }));
+
+    expect(screen.getByRole("button", { name: /Expand Engineering/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Expand Sales/ })).toBeInTheDocument();
+    expect(screen.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
+  });
+
+  it("collapses a group and its nested groups on Alt+click", async () => {
+    const user = userEvent.setup();
+    render(<NestedTable />);
+    await settled();
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Collapse Americas/ }), { altKey: true });
+    expect(screen.queryByRole("button", { name: /Engineering/ })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Expand Americas/ }));
+    expect(screen.getByRole("button", { name: /Expand Engineering/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Expand Sales/ })).toBeInTheDocument();
+    expect(screen.queryByRole("cell", { name: "Ada Lovelace" })).not.toBeInTheDocument();
+  });
+
+  it("leaves sibling groups alone when Alt+collapsing from the expanded-all state", async () => {
+    render(<NestedTable />);
+    await settled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Collapse Americas/ }), { altKey: true });
+
+    expect(screen.getByRole("button", { name: /Collapse EMEA/ })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Karl Marx" })).toBeInTheDocument();
+  });
+
+  it("treats Alt+click on a group without subgroups as a plain click", async () => {
+    render(<NestedTable grouping={["region"]} />);
+    await settled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Collapse Americas/ }), { altKey: true });
+
+    expect(screen.getByRole("button", { name: /Expand Americas/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Collapse EMEA/ })).toBeInTheDocument();
+  });
+
+  it("supports Alt+Enter on the focused toggle", async () => {
+    const user = userEvent.setup();
+    render(<NestedTable defaultExpanded={false} />);
+    await settled();
+
+    screen.getByRole("button", { name: /Expand Americas/ }).focus();
+    await user.keyboard("{Alt>}{Enter}{/Alt}");
+
+    expect(screen.getByRole("button", { name: /Collapse Engineering/ })).toBeInTheDocument();
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+  });
+
+  it("supports Alt+Space on the focused toggle without a second toggle on release", async () => {
+    const user = userEvent.setup();
+    render(<NestedTable defaultExpanded={false} />);
+    await settled();
+
+    screen.getByRole("button", { name: /Expand Americas/ }).focus();
+    await user.keyboard("{Alt>}[Space]{/Alt}");
+
+    expect(screen.getByRole("button", { name: /Collapse Americas/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Collapse Engineering/ })).toBeInTheDocument();
+  });
+
+  it("keeps plain Enter and Space to a single level", async () => {
+    const user = userEvent.setup();
+    render(<NestedTable defaultExpanded={false} />);
+    await settled();
+
+    screen.getByRole("button", { name: /Expand Americas/ }).focus();
+    await user.keyboard("{Enter}");
+
+    expect(screen.getByRole("button", { name: /Expand Engineering/ })).toBeInTheDocument();
+  });
+
+  it("keeps the Expand/Collapse names and hints at Alt on groups that have subgroups", async () => {
+    render(<NestedTable />);
+    await settled();
+    const americas = screen.getByRole("button", { name: "Collapse Americas" });
+    expect(americas).toHaveAccessibleDescription(/Alt\/Option/);
+    const leafGroup = screen.getByRole("button", { name: "Collapse Engineering" });
+    expect(leafGroup).not.toHaveAttribute("title");
+  });
+
+  it("reports the next state from uncontrolled tables through onExpandedChange", async () => {
+    const onExpandedChange = vi.fn();
+    render(<NestedTable defaultExpanded={false} onExpandedChange={onExpandedChange} />);
+    await settled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Expand Americas/ }), { altKey: true });
+
+    expect(onExpandedChange).toHaveBeenCalledTimes(1);
+    expect(onExpandedChange).toHaveBeenCalledWith({
+      [AMERICAS]: true,
+      [AMERICAS_ENG]: true,
+      [AMERICAS_SALES]: true,
+    });
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+  });
+
+  it("calls onExpandedChange with the whole branch in controlled mode, without changing itself", async () => {
+    const onExpandedChange = vi.fn();
+    render(<NestedTable expanded={{}} onExpandedChange={onExpandedChange} />);
+    await settled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Expand Americas/ }), { altKey: true });
+
+    expect(onExpandedChange).toHaveBeenCalledWith({
+      [AMERICAS]: true,
+      [AMERICAS_ENG]: true,
+      [AMERICAS_SALES]: true,
+    });
+    expect(screen.getByRole("button", { name: /Expand Americas/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Engineering/ })).not.toBeInTheDocument();
+  });
+
+  it("calls onExpandedChange with a single id on a plain click in controlled mode", async () => {
+    const user = userEvent.setup();
+    const onExpandedChange = vi.fn();
+    render(<NestedTable expanded={{}} onExpandedChange={onExpandedChange} />);
+    await settled();
+
+    await user.click(screen.getByRole("button", { name: /Expand Americas/ }));
+
+    expect(onExpandedChange).toHaveBeenCalledWith({ [AMERICAS]: true });
+  });
+
+  it("expands every group when expanded is true and collapses one branch from it", async () => {
+    const onExpandedChange = vi.fn();
+    render(<NestedTable expanded={true} onExpandedChange={onExpandedChange} />);
+    await settled();
+    expect(screen.getByRole("cell", { name: "Karl Marx" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Collapse Americas/ }), { altKey: true });
+
+    expect(onExpandedChange).toHaveBeenCalledWith({ [EMEA]: true, [EMEA_SALES]: true });
+  });
+
+  it("follows a parent that feeds expanded back in", async () => {
+    function Controlled() {
+      const [expanded, setExpanded] = React.useState<ExpandedState>({});
+      return (
+        <>
+          <NestedTable expanded={expanded} onExpandedChange={setExpanded} />
+          <button type="button" onClick={() => setExpanded(true)}>
+            Open all
+          </button>
+        </>
+      );
+    }
+    render(<Controlled />);
+    await settled();
+
+    fireEvent.click(screen.getByRole("button", { name: /Expand Americas/ }), { altKey: true });
+    expect(screen.getByRole("cell", { name: "Ada Lovelace" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Expand EMEA/ })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open all" }));
+    expect(screen.getByRole("cell", { name: "Karl Marx" })).toBeInTheDocument();
   });
 });
 
