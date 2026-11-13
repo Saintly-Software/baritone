@@ -1,4 +1,4 @@
-import * as S from "@ds-stories/src/components/Tooltip/Tooltip.stories";
+import * as S from "@ds-stories/packages/baritone/src/components/Tooltip/Tooltip.stories";
 
 export const Basic = () => {
   const meta: any = (S as any).default ?? {};

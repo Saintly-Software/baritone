@@ -6,6 +6,7 @@ import {
   createColumnHelper,
   createExpandedRowModel,
   createGroupedRowModel,
+  type ExpandedState,
   flexRender,
   functionalUpdate,
   type OnChangeFn,
@@ -81,7 +82,25 @@ export interface DataTableBaseProps<TData extends RowData> extends Omit<
 
   grouping?: ReadonlyArray<string>;
 
+  /**
+   * Starts every group expanded (`true`, the default) or collapsed (`false`).
+   * Ignored when `expanded` is set.
+   */
   defaultExpanded?: boolean;
+
+  /**
+   * The expansion state of the group rows.
+   * `true` means every group is expanded.
+   * A record maps group row ids to `true` for each expanded group.
+   * Setting it makes expansion controlled. The table MUST then be updated through `onExpandedChange`.
+   */
+  expanded?: ExpandedState;
+
+  /**
+   * Called with the next expansion state whenever a group is expanded or collapsed.
+   * Option/Alt+click on a group toggle changes the group and every group beneath it at once.
+   */
+  onExpandedChange?: (next: ExpandedState) => void;
 
   groupDisplay?: "columns" | "merge";
 
@@ -117,6 +136,8 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     getRowId,
     grouping,
     defaultExpanded,
+    expanded: expandedProp,
+    onExpandedChange,
     groupDisplay = "columns",
     enableRowSelection,
     selectedRowIds,
@@ -192,6 +213,22 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     [rowSelection, isSelectionControlled, dataById, onSelectionChange],
   );
 
+  const isExpansionControlled = expandedProp !== undefined;
+  const [internalExpanded, setInternalExpanded] = React.useState<ExpandedState>(() =>
+    initialExpandedState(defaultExpanded),
+  );
+  const expandedState = isExpansionControlled ? expandedProp : internalExpanded;
+
+  const handleExpandedChange = React.useCallback<OnChangeFn<ExpandedState>>(
+    (updater) => {
+      const next = functionalUpdate(updater, expandedState);
+      if (isSameExpandedState(next, expandedState)) return;
+      if (!isExpansionControlled) setInternalExpanded(next);
+      onExpandedChange?.(next);
+    },
+    [expandedState, isExpansionControlled, onExpandedChange],
+  );
+
   const detailEnabled = renderDetailPanel != null && enableRowExpansion !== false;
   const rowCanExpand = (row: TData): boolean =>
     typeof enableRowExpansion === "function" ? enableRowExpansion(row) : true;
@@ -212,12 +249,37 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
     data,
     columns,
     getRowId,
-    state: { grouping: groupingState, rowSelection },
-    initialState: { expanded: defaultExpanded === false ? {} : true },
+    state: { grouping: groupingState, rowSelection, expanded: expandedState },
+    initialState: { expanded: initialExpandedState(defaultExpanded) },
+    autoResetExpanded: !isExpansionControlled,
+    onExpandedChange: handleExpandedChange,
     groupedColumnMode: false,
     enableRowSelection: selectionEnabled ? rowCanSelect : false,
     onRowSelectionChange: handleRowSelectionChange,
   });
+
+  const toggleGroupBranch = (row: Row<DataTableFeatures, TData>): void => {
+    const branchIds = [
+      row.id,
+      ...row
+        .getLeafRows()
+        .filter((r) => r.getIsGrouped())
+        .map((r) => r.id),
+    ];
+    const expand = !row.getIsExpanded();
+    table.setExpanded((old) => {
+      if (expand) {
+        if (old === true) return old;
+        const next = { ...old };
+        for (const id of branchIds) next[id] = true;
+        return next;
+      }
+      const next: Record<string, boolean> =
+        old === true ? allGroupIds(table.getPreExpandedRowModel().flatRows) : { ...old };
+      for (const id of branchIds) delete next[id];
+      return next;
+    });
+  };
 
   const rows = table.getRowModel().rows;
 
@@ -248,12 +310,16 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
   const renderGroupLabel = (row: (typeof rows)[number], valueNode: React.ReactNode) => {
     const expanded = row.getIsExpanded();
     const dataRowCount = row.getLeafRows().filter((r) => !r.getIsGrouped()).length;
+    const hasSubgroups = row.getLeafRows().some((r) => r.getIsGrouped());
+    const label = `${expanded ? "Collapse" : "Expand"} ${groupRowLabel(row)}`;
     return (
       <span className={groupLabel} style={assignInlineVars({ [groupDepthVar]: String(row.depth) })}>
         <DisclosureToggle
           expanded={expanded}
-          onClick={row.getToggleExpandedHandler()}
-          aria-label={`${expanded ? "Collapse" : "Expand"} ${groupRowLabel(row)}`}
+          onClick={() => row.toggleExpanded()}
+          onBranchToggle={hasSubgroups ? () => toggleGroupBranch(row) : undefined}
+          aria-label={label}
+          title={hasSubgroups ? `${label} (hold Alt/Option to include nested groups)` : undefined}
         />
         <span>{valueNode}</span>
         <span className={groupCount}>({dataRowCount})</span>
@@ -423,6 +489,25 @@ export function DataTable<TData extends RowData>(props: DataTableProps<TData>) {
 
 DataTable.displayName = "DataTable";
 
+function initialExpandedState(defaultExpanded: boolean | undefined): ExpandedState {
+  return defaultExpanded === false ? {} : true;
+}
+
+function isSameExpandedState(a: ExpandedState, b: ExpandedState): boolean {
+  if (a === true || b === true) return a === b;
+  const aIds = Object.keys(a).filter((id) => a[id]);
+  const bIds = Object.keys(b).filter((id) => b[id]);
+  return aIds.length === bIds.length && aIds.every((id) => b[id]);
+}
+
+function allGroupIds<TData extends RowData>(
+  flatRows: ReadonlyArray<Row<DataTableFeatures, TData>>,
+): Record<string, boolean> {
+  const ids: Record<string, boolean> = {};
+  for (const row of flatRows) if (row.getIsGrouped()) ids[row.id] = true;
+  return ids;
+}
+
 function idsToRowSelection(ids: ReadonlyArray<string> | undefined): RowSelectionState {
   const selection: RowSelectionState = {};
   if (ids) for (const id of ids) selection[id] = true;
@@ -549,26 +634,56 @@ function ChevronGlyph({ expanded }: { expanded: boolean }) {
 interface DisclosureToggleProps {
   expanded: boolean;
 
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  onClick: () => void;
+
+  onBranchToggle?: () => void;
 
   "aria-label": string;
 
   "aria-controls"?: string;
+
+  title?: string;
+}
+
+function isActivationKey(event: React.KeyboardEvent): "enter" | "space" | undefined {
+  if (event.key === "Enter") return "enter";
+  if (event.key === " " || event.code === "Space") return "space";
+  return undefined;
 }
 
 function DisclosureToggle({
   expanded,
   onClick,
+  onBranchToggle,
   "aria-label": ariaLabel,
   "aria-controls": ariaControls,
+  title,
 }: DisclosureToggleProps) {
+  const swallowSpaceRelease = React.useRef(false);
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={(event) => {
+        if (event.altKey && onBranchToggle) onBranchToggle();
+        else onClick();
+      }}
+      onKeyDown={(event) => {
+        const key = isActivationKey(event);
+        if (!event.altKey || !key || !onBranchToggle) return;
+        event.preventDefault();
+        if (event.repeat) return;
+        if (key === "space") swallowSpaceRelease.current = true;
+        onBranchToggle();
+      }}
+      onKeyUp={(event) => {
+        if (isActivationKey(event) !== "space" || !swallowSpaceRelease.current) return;
+        swallowSpaceRelease.current = false;
+        event.preventDefault();
+      }}
       aria-expanded={expanded}
       aria-controls={ariaControls}
       aria-label={ariaLabel}
+      title={title}
       className={cx(disclosureToggle, focusRingRecipe({ type: "visible", offset: "sm" }))}
     >
       <ChevronGlyph expanded={expanded} />

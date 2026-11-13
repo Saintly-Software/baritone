@@ -9,9 +9,16 @@
   "provider": {
     "component": "PreviewRoot"
   },
-  "extraEntries": ["./.design-sync/preview-provider.tsx"],
+  "extraEntries": [
+    "../../.design-sync/preview-provider.tsx"
+  ],
   "storyImports": {
-    "shim": ["packages/baritone/src/theme/index"]
+    "shim": [
+      "packages/baritone/src/theme/index"
+    ],
+    "bundle": [
+      "/components/_stories/"
+    ]
   },
   "titleMap": {
     "InternalButton": null,
@@ -25,11 +32,21 @@
     "Toast": null
   },
   "overrides": {
-    "BaritoneTheme": { "cardMode": "column" },
-    "Badge": { "cardMode": "column" },
-    "Button": { "cardMode": "column" },
-    "Text": { "cardMode": "column" },
-    "Table": { "cardMode": "column" },
+    "BaritoneTheme": {
+      "cardMode": "column"
+    },
+    "Badge": {
+      "cardMode": "column"
+    },
+    "Button": {
+      "cardMode": "column"
+    },
+    "Text": {
+      "cardMode": "column"
+    },
+    "Table": {
+      "cardMode": "column"
+    },
     "Lightbox": {
       "cardMode": "single",
       "primaryStory": "Open",
@@ -46,12 +63,22 @@
       ]
     },
     "LinkProvider": {
-      "skip": ["interaction-tests-linkprovider--routes-internal-links"]
+      "skip": [
+        "interaction-tests-linkprovider--routes-internal-links"
+      ]
     },
-    "Link": { "cardMode": "column" },
-    "ToggleGroup": { "cardMode": "column" },
-    "Box": { "cardMode": "column" },
-    "Flex": { "cardMode": "column" },
+    "Link": {
+      "cardMode": "column"
+    },
+    "ToggleGroup": {
+      "cardMode": "column"
+    },
+    "Box": {
+      "cardMode": "column"
+    },
+    "Flex": {
+      "cardMode": "column"
+    },
     "ScrollArea": {
       "cardMode": "column",
       "skip": [
@@ -66,19 +93,32 @@
         "interaction-tests-card--collapsible-toggles"
       ]
     },
-    "Meter": { "cardMode": "single", "primaryStory": "Basic" },
-    "Combobox": { "cardMode": "single", "primaryStory": "Playground" },
+    "Meter": {
+      "cardMode": "single",
+      "primaryStory": "Basic"
+    },
+    "Combobox": {
+      "cardMode": "single",
+      "primaryStory": "Playground"
+    },
     "Select": {
       "cardMode": "single",
       "primaryStory": "Single",
       "skip": [
         "interaction-tests-select--single-select-picks-option",
         "interaction-tests-select--multi-select-hover-selected-option",
-        "interaction-tests-select--grouped-selection"
+        "interaction-tests-select--grouped-selection",
+        "interaction-tests-select--disabled-stays-focusable-and-never-opens"
       ]
     },
-    "ConfirmationModal": { "cardMode": "single", "primaryStory": "Controlled" },
-    "Drawer": { "cardMode": "single", "primaryStory": "KitchenSink" },
+    "ConfirmationModal": {
+      "cardMode": "single",
+      "primaryStory": "Negative"
+    },
+    "Drawer": {
+      "cardMode": "single",
+      "primaryStory": "KitchenSink"
+    },
     "Menu": {
       "cardMode": "single",
       "primaryStory": "KitchenSink",
@@ -91,7 +131,10 @@
         "surfaces-menu--side-right"
       ]
     },
-    "Modal": { "cardMode": "single", "primaryStory": "Medium" },
+    "Modal": {
+      "cardMode": "single",
+      "primaryStory": "Medium"
+    },
     "Popover": {
       "cardMode": "single",
       "primaryStory": "KitchenSink",
@@ -113,6 +156,11 @@
         "interaction-tests-tooltip--side-right",
         "interaction-tests-tooltip--side-bottom",
         "interaction-tests-tooltip--side-left"
+      ]
+    },
+    "InaccessibleTooltip": {
+      "skip": [
+        "interaction-tests-inaccessibletooltip--opens-on-hover"
       ]
     }
   }

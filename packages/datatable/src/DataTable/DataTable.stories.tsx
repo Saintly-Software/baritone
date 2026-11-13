@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import type { ExpandedState } from "@tanstack/react-table";
 import * as React from "react";
 import { Link } from "@saintly-software/baritone";
 import { createDataTableColumnHelper, DataTable } from "./index";
@@ -298,6 +299,63 @@ export const GroupedSelectable: Story = {
           selectedRowIds={selected}
           onSelectionChange={setSelected}
         />
+      </div>
+    );
+  },
+};
+
+const nestedExpenseColumns = expenseCol.columns([
+  expenseCol.accessor("category", { header: "Category" }),
+  expenseCol.accessor("subcategory", { header: "Subcategory" }),
+  expenseCol.accessor("amount", {
+    header: "Amount",
+    meta: { align: "end" },
+    cell: (info) => usd.format(info.getValue()),
+    aggregationFn: "sum",
+    aggregatedCell: (info) => usd.format(info.getValue()),
+  }),
+]);
+
+export const GroupedNested: Story = {
+  render: () => (
+    <div style={{ maxWidth: 640 }}>
+      <DataTable
+        caption="Spending by category and subcategory. Hold Alt/Option while clicking a group toggle to expand or collapse every group beneath it."
+        data={expenses}
+        columns={nestedExpenseColumns}
+        grouping={["category", "subcategory"]}
+        defaultExpanded={false}
+        getRowId={(e) => e.id}
+      />
+    </div>
+  ),
+};
+
+export const GroupedControlledExpansion: Story = {
+  render: () => {
+    const [expanded, setExpanded] = React.useState<ExpandedState>({});
+    return (
+      <div style={{ maxWidth: 640, display: "grid", gap: 12 }}>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button type="button" onClick={() => setExpanded(true)}>
+            Expand all
+          </button>
+          <button type="button" onClick={() => setExpanded({})}>
+            Collapse all
+          </button>
+        </div>
+        <DataTable
+          caption="Spending by category and subcategory"
+          data={expenses}
+          columns={nestedExpenseColumns}
+          grouping={["category", "subcategory"]}
+          getRowId={(e) => e.id}
+          expanded={expanded}
+          onExpandedChange={setExpanded}
+        />
+        <output>
+          {expanded === true ? "all" : Object.keys(expanded).sort().join(", ") || "none"}
+        </output>
       </div>
     );
   },

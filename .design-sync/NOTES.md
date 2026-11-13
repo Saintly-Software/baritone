@@ -59,3 +59,24 @@ Diff vs prior anchor: 20 unchanged, 25 changed, 8 added (Divider, Field, Lightbo
 - **Toast + DataTable** remain unsynced by user choice this run — revisit if they should join the design surface (recipes above).
 - primaryStory picks for single-mode overlays chosen for representativeness, not verified per-pixel as the card's sole story.
 - Story caps (Button 14 / Chip 18 / Combobox 20 / Badge 9 / Text graded 12 via `--max-stories`, etc.) leave the tail beyond 6 verified-by-upload, not individually graded.
+
+## Re-sync 2026-11-08 (v1.0.0-alpha.10) — monorepo restructure fallout
+
+Diff vs prior anchor: 0 unchanged, 53 changed, 1 added (**InlineList**), 0 removed — the monorepo split + bundle churn moved every source key, so the whole roster re-verified.
+
+- **[GENERAL] `extraEntries` resolves against PKG_DIR, not the repo root.** The pnpm-monorepo split (#147) moved the package from the repo root to `packages/baritone/`, so `"./.design-sync/preview-provider.tsx"` logged `! extraEntries: ... not found — skipped`, `PreviewRoot` never entered the bundle, and **53 of 54** previews failed `✗[RENDER] root empty` with React's "Element type is invalid … got: undefined" (the provider wrapper itself was undefined). Fix: `extraEntries: ["../../.design-sync/preview-provider.tsx"]`. Keep the `../../` prefix as long as the DS lives in `packages/baritone/`.
+- **`@ds-stories` DOES resolve against the repo root** (unlike `extraEntries`) — the owned `previews/Tooltip.tsx` import became `@ds-stories/packages/baritone/src/components/Tooltip/Tooltip.stories`. Two different bases; don't assume one from the other.
+- **New shared story helper `src/components/_stories/IntentSaliencyMatrix.tsx`** (used by 13 stories: Badge, Button, Card, Chip, Divider, HelpText, Icon, LoadingIndicator, Meter, Notice, Tabs, Text, ToggleGroup). It is a *relative component* import, so story-imports redirected it to `window.SaintlySoftwareBaritone.IntentSaliencyMatrix` → undefined. Fix: `storyImports.bundle: ["/components/_stories/"]` — it's pure (react types + inline CSSProperties only), safe to bundle from source. Any future `_stories/` helper is covered by the same pattern.
+- **[TOKENS_MISSING] triaged, expected** — `--toast-swipe-movement-{x,y}`, `--collapsible-panel-height`, `--accordion-panel-height`, `--_1sxqmje17`, `--_8giw3gb` are set at runtime by base-ui (Accordion/Collapsible panel measuring, Toast swipe) and by VE inline-theme assignment, not declared in a shipped stylesheet. Not drift — ignore this warn unless a panel/accordion preview actually renders collapsed.
+
+### Grading (all 54 re-verified this run)
+
+Every component graded `match` — no `close`, no `mismatch`, no owned-preview rewrites. Canaries re-confirmed: custom fonts (Text `Custom Fonts` serif/slab/cursive render distinctly on BOTH panels → no `[FONT_MISSING]` blindness), remote images (Lightbox `Open` loads the picsum photo on both → no `[ASSETS_BLOCKED]`), portaled overlays (Menu/Modal/Drawer/Popover themed via `PreviewRoot` body mirroring), theming (BaritoneTheme all 5 incl. dark + nested scopes), and Field's owned preview (still renders the styled control — the standing re-sync risk is clear).
+
+- **New play-driven skips this run** (same policy as the existing ones — storybook captures post-play state, the static preview cannot):
+  - `interaction-tests-select--disabled-stays-focusable-and-never-opens` (storybook shows the focus ring; preview unfocused).
+  - `interaction-tests-inaccessibletooltip--opens-on-hover` (storybook shows the hint open; preview closed). NOTE: the earlier note claiming both InaccessibleTooltip stories render statically is now stale — this one is play-driven.
+- **Tooltip `Basic`** graded `match` on the component render: the owned preview forces `defaultOpen` (by design) while the storybook reference settled *closed* this run. Preview renders more than the gated reference — per the rubric that is not `close`.
+- **ConfirmationModal `primaryStory`** changed `Controlled` → `Negative`: `Controlled` renders only a closed trigger button, so the single-mode card was showing a bare button instead of the dialog.
+- **InlineList (NEW, #105)** — separated inline-list primitive, all 6 stories match. No config needed.
+- **conventions.md re-validated** against this build: every enumerated export, prop and vocabulary still resolves (`SIZES` is still `sm|md|lg`; `TEXT_SIZES` is the wide ramp; Button `appearance` still `solid|text`). No drift. *Optional enhancement (not drift):* it does not yet mention `InlineList` among the layout components.
