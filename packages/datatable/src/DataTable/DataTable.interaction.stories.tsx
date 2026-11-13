@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import * as React from "react";
 import { vars } from "@saintly-software/baritone";
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, fireEvent, userEvent, waitFor, within } from "storybook/test";
 import { createDataTableColumnHelper, DataTable } from "./index";
 
 interface Person {
@@ -329,5 +329,83 @@ export const ResolvesCoreThemeTokens: Story = {
 
     expect(themed).not.toBe(getComputedStyle(document.documentElement).fontFamily);
     expect(getComputedStyle(cell).fontFamily).toBe(themed);
+  },
+};
+
+interface Expense {
+  id: string;
+  category: string;
+  subcategory: string;
+  note: string;
+}
+
+const expenses: Expense[] = [
+  { id: "1", category: "Housing", subcategory: "Rent", note: "Monthly rent" },
+  { id: "2", category: "Housing", subcategory: "Utilities", note: "Power and water" },
+  { id: "3", category: "Food", subcategory: "Groceries", note: "Weekly shop" },
+];
+
+const expenseCol = createDataTableColumnHelper<Expense>();
+const expenseColumns = expenseCol.columns([
+  expenseCol.accessor("category", { header: "Category" }),
+  expenseCol.accessor("subcategory", { header: "Subcategory" }),
+  expenseCol.accessor("note", { header: "Note" }),
+]);
+
+const nestedExpenses = (
+  <div style={{ maxWidth: 640 }}>
+    <DataTable
+      caption="Spending by category and subcategory"
+      data={expenses}
+      columns={expenseColumns}
+      grouping={["category", "subcategory"]}
+      defaultExpanded={false}
+      getRowId={(e) => e.id}
+    />
+  </div>
+);
+
+export const PlainClickExpandsOneLevel: Story = {
+  render: () => nestedExpenses,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    await userEvent.click(canvas.getByRole("button", { name: "Expand Housing" }));
+
+    await waitFor(() => {
+      expect(canvas.getByRole("button", { name: "Expand Rent" })).toBeInTheDocument();
+    });
+    expect(canvas.queryByRole("cell", { name: "Monthly rent" })).not.toBeInTheDocument();
+  },
+};
+
+export const AltClickExpandsEveryLevel: Story = {
+  render: () => nestedExpenses,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    fireEvent.click(canvas.getByRole("button", { name: "Expand Housing" }), { altKey: true });
+
+    await waitFor(() => {
+      expect(canvas.getByRole("cell", { name: "Monthly rent" })).toBeInTheDocument();
+    });
+    expect(canvas.getByRole("button", { name: "Collapse Rent" })).toBeInTheDocument();
+    expect(canvas.getByRole("button", { name: "Collapse Utilities" })).toBeInTheDocument();
+    expect(canvas.getByRole("button", { name: "Expand Food" })).toBeInTheDocument();
+  },
+};
+
+export const AltEnterExpandsEveryLevel: Story = {
+  render: () => nestedExpenses,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    canvas.getByRole("button", { name: "Expand Housing" }).focus();
+    await userEvent.keyboard("{Alt>}{Enter}{/Alt}");
+
+    await waitFor(() => {
+      expect(canvas.getByRole("cell", { name: "Monthly rent" })).toBeInTheDocument();
+    });
+    expect(canvas.getByRole("button", { name: "Collapse Rent" })).toBeInTheDocument();
   },
 };
